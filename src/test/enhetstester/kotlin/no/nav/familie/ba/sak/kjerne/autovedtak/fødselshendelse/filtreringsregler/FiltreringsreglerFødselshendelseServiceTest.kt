@@ -4,8 +4,8 @@ import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.MånedPeriode
@@ -24,6 +24,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.REGELSETT_FØDSELSHENDELSE
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.RegelsettEvaluator
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -54,6 +56,8 @@ class FiltreringsreglerFødselshendelseServiceTest {
 
     private var clockProvider = TestClockProvider()
 
+    private val regelsettEvaluator = spyk(RegelsettEvaluator())
+
     private val filtreringsreglerFødselshendelseService =
         FiltreringsreglerFødselshendelseService(
             personopplysningerService = personopplysningerService,
@@ -66,6 +70,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            regelsettEvaluator = regelsettEvaluator,
         )
 
     @Test
@@ -101,14 +106,13 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -154,14 +158,13 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -212,14 +215,13 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -270,14 +272,13 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -331,14 +332,13 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -392,14 +392,13 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -432,14 +431,13 @@ class FiltreringsreglerFødselshendelseServiceTest {
                 lagAndelTilkjentYtelse(it.fom, it.tom)
             }
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -467,14 +465,13 @@ class FiltreringsreglerFødselshendelseServiceTest {
         clearMocks(andelTilkjentYtelseRepository)
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns emptyList()
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured

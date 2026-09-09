@@ -8,6 +8,3 @@ class Regelsett<T : FiltreringsreglerFakta>(
     val regel: Filtreringsregel,
     val evaluer: (T) -> Evaluering,
 )
-
-
-

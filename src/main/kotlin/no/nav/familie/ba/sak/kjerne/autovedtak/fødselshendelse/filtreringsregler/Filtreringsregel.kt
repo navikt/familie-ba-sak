@@ -1,19 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt
 import java.time.temporal.ChronoUnit
 import kotlin.math.abs
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.Regelsett
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.REGELSETT_FØDSELSHENDELSE
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.REGELSETT_SØKNAD
 
 /**
  * Ren identifikator for en filtreringsregel, brukt til lagring/rapportering (bl.a. persistert i
  * [no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat]
- * og metrikker). Selve regelevalueringen ligger i de fakta-spesifikke regelsettene i Regelsett.kt.
+ * og metrikker). Selve regelevalueringen ligger i de fakta-spesifikke regelsettene i `regelsett`-pakken,
+ * og selve kjøringen av regelsettene ligger i [no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.RegelsettEvaluator].
  */
 enum class Filtreringsregel {
     MOR_GYLDIG_FNR,
@@ -32,33 +29,6 @@ enum class Filtreringsregel {
 }
 
 object FiltreringsregelEvaluering {
-    private fun <T : FiltreringsreglerFakta> evaluerRegler(
-        regler: List<Regelsett<T>>,
-        fakta: T,
-    ): List<Evaluering> =
-        regler.fold(mutableListOf()) { acc, regel ->
-            if (acc.any { it.resultat == Resultat.IKKE_OPPFYLT }) {
-                acc.add(
-                    Evaluering(
-                        resultat = Resultat.IKKE_VURDERT,
-                        identifikator = regel.regel.name,
-                        begrunnelse = "Ikke vurdert",
-                        evalueringÅrsaker = emptyList(),
-                    ),
-                )
-            } else {
-                acc.add(regel.evaluer(fakta).copy(identifikator = regel.regel.name))
-            }
-
-            acc
-        }
-
-    fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta): List<Evaluering> =
-        when (fakta) {
-            is FiltreringsreglerFaktaFødselshendelse -> evaluerRegler(REGELSETT_FØDSELSHENDELSE, fakta)
-            is FiltreringsreglerFaktaSøknad -> evaluerRegler(REGELSETT_SØKNAD, fakta)
-        }
-
     fun harSøkerGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
         val harSøkerGyldigFnr =
             (!erBostNummer(fakta.søker.aktør.aktivFødselsnummer()) && !erFDatnummer(fakta.søker.aktør.aktivFødselsnummer()))

@@ -21,6 +21,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.REGELSETT_FØDSELSHENDELSE
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.RegelsettEvaluator
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -64,6 +66,7 @@ class FiltreringsregelForFlereBarnTest {
     val tilkjentYtelseValideringServiceMock = mockk<TilkjentYtelseValideringService>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     var clockProvider = TestClockProvider()
+    val regelsettEvaluator = RegelsettEvaluator()
     val filtreringsreglerFødselshendelseService =
         FiltreringsreglerFødselshendelseService(
             personopplysningerService = personopplysningerServiceMock,
@@ -76,6 +79,7 @@ class FiltreringsregelForFlereBarnTest {
             tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            regelsettEvaluator = regelsettEvaluator,
         )
 
     init {
@@ -89,7 +93,8 @@ class FiltreringsregelForFlereBarnTest {
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
+            regelsettEvaluator.evaluerRegelsett(
+                REGELSETT_FØDSELSHENDELSE,
                 genererFaktaMedTidligereBarn(1, 3, 7, 0),
             )
 
@@ -105,7 +110,8 @@ class FiltreringsregelForFlereBarnTest {
     @Test
     fun `Regelevaluering skal resultere i JA når det har ikke gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
+            regelsettEvaluator.evaluerRegelsett(
+                REGELSETT_FØDSELSHENDELSE,
                 genererFaktaMedTidligereBarn(0, 0, 0, 5),
             )
 
@@ -382,7 +388,7 @@ class FiltreringsregelForFlereBarnTest {
         manaderFodselTo: Long,
         manaderFodselForrigeFodsel: Long,
         dagerFodselForrigeFodsel: Long,
-    ): FiltreringsreglerFakta {
+    ): FiltreringsreglerFaktaFødselshendelse {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktør)
         val barn =
             listOf(

@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.REGELSETT_FØDSELSHENDELSE
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.RegelsettEvaluator
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -45,6 +47,7 @@ class FiltreringsreglerFødselshendelseService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val regelsettEvaluator: RegelsettEvaluator,
 ) {
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
     val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
@@ -143,7 +146,7 @@ class FiltreringsreglerFødselshendelseService(
                     ),
                 morHarIkkeOpphørtBarnetrygd = andelerPåSisteBehandling.isEmpty() || harAndelerFremoverITid,
             )
-        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(fakta)
+        val evalueringer = regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, fakta)
         oppdaterMetrikker(evalueringer)
 
         logger.info("Resultater fra filtreringsregler på behandling $behandling: ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")
