@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -40,7 +40,7 @@ class FiltreringsreglerFødselshendelseService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val clockProvider: ClockProvider,
-    private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
+    private val filtreringResultatRepository: FiltreringResultatRepository,
     private val behandlingService: BehandlingService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
@@ -76,10 +76,10 @@ class FiltreringsreglerFødselshendelseService(
         evalueringer: List<Evaluering>,
         behandlingId: Long,
         fakta: FiltreringsreglerFakta,
-    ): List<FødselshendelsefiltreringResultat> =
-        fødselshendelsefiltreringResultatRepository.saveAll(
+    ): List<FiltreringResultat> =
+        filtreringResultatRepository.saveAll(
             evalueringer.map {
-                FødselshendelsefiltreringResultat(
+                FiltreringResultat(
                     behandlingId = behandlingId,
                     filtreringsregel = Filtreringsregel.Identifikator.valueOf(it.identifikator),
                     resultat = it.resultat,
@@ -90,12 +90,12 @@ class FiltreringsreglerFødselshendelseService(
             },
         )
 
-    fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FødselshendelsefiltreringResultat> = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(behandlingId = behandlingId)
+    fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FiltreringResultat> = filtreringResultatRepository.finnFiltreringResultater(behandlingId = behandlingId)
 
     fun kjørFiltreringsregler(
         nyBehandlingHendelse: NyBehandlingHendelse,
         behandling: Behandling,
-    ): List<FødselshendelsefiltreringResultat> {
+    ): List<FiltreringResultat> {
         val morsAktørId = personidentService.hentAktør(nyBehandlingHendelse.morsIdent)
         val barnasAktørId = personidentService.hentAktørIder(nyBehandlingHendelse.barnasIdenter)
 

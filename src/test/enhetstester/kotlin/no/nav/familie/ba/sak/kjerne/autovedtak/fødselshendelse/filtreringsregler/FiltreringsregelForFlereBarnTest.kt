@@ -18,8 +18,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForD�
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -57,7 +57,7 @@ class FiltreringsregelForFlereBarnTest {
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val personidentService = mockk<PersonidentService>()
-    val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>(relaxed = true)
+    val filtreringResultatRepository = mockk<FiltreringResultatRepository>(relaxed = true)
     val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
@@ -71,7 +71,7 @@ class FiltreringsregelForFlereBarnTest {
             personidentService = personidentService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepositoryMock,
             clockProvider = clockProvider,
-            fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
+            filtreringResultatRepository = filtreringResultatRepository,
             behandlingService = behandlingServiceMock,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
@@ -81,9 +81,9 @@ class FiltreringsregelForFlereBarnTest {
         )
 
     init {
-        val fødselshendelsefiltreringResultatSlot = slot<List<FødselshendelsefiltreringResultat>>()
-        every { fødselshendelsefiltreringResultatRepository.saveAll(capture(fødselshendelsefiltreringResultatSlot)) } answers {
-            fødselshendelsefiltreringResultatSlot.captured
+        val filtreringResultatSlot = slot<List<FiltreringResultat>>()
+        every { filtreringResultatRepository.saveAll(capture(filtreringResultatSlot)) } answers {
+            filtreringResultatSlot.captured
         }
     }
 
