@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene
+package no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene
 
 import jakarta.persistence.Column
 import jakarta.persistence.Convert
@@ -13,8 +13,8 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.StringListConverter
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
 @EntityListeners(RollestyringMotDatabase::class)

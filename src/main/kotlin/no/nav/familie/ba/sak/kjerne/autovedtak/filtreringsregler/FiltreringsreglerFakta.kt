@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
+package no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo

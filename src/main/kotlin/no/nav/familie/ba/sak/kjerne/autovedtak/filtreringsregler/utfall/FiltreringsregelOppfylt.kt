@@ -1,7 +1,7 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.utfall
+package no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.utfall
 
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.EvalueringÅrsak
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.Filtreringsregel
 
 enum class FiltreringsregelOppfylt(
     val beskrivelse: String,
