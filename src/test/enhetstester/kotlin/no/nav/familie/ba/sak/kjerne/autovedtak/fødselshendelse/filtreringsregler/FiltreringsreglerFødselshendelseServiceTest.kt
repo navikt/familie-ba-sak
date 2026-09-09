@@ -21,8 +21,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -46,7 +46,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
     private val personidentService = mockk<PersonidentService>()
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
-    private val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>()
+    private val filtreringResultatRepository = mockk<FiltreringResultatRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService>()
@@ -63,7 +63,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             clockProvider = clockProvider,
-            fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
+            filtreringResultatRepository = filtreringResultatRepository,
             behandlingService = behandlingService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
@@ -487,7 +487,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         barna: List<Person>,
         behandling: Behandling,
         sisteVedtatteBehandling: Behandling,
-    ): CapturingSlot<List<FødselshendelsefiltreringResultat>> {
+    ): CapturingSlot<List<FiltreringResultat>> {
         every { personidentService.hentAktør(mor.aktør.aktørId) } returns mor.aktør
         every { personidentService.hentAktørIder(barna.map { it.aktør.aktørId }) } returns barna.map { it.aktør }
 
@@ -549,15 +549,15 @@ class FiltreringsreglerFødselshendelseServiceTest {
             }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
-        val fødselshendelsefiltreringResultatSlot = slot<List<FødselshendelsefiltreringResultat>>()
+        val filtreringResultatSlot = slot<List<FiltreringResultat>>()
 
         every {
-            fødselshendelsefiltreringResultatRepository.saveAll<FødselshendelsefiltreringResultat>(
+            filtreringResultatRepository.saveAll<FiltreringResultat>(
                 capture(
-                    fødselshendelsefiltreringResultatSlot,
+                    filtreringResultatSlot,
                 ),
             )
         } returns mockk()
-        return fødselshendelsefiltreringResultatSlot
+        return filtreringResultatSlot
     }
 }
