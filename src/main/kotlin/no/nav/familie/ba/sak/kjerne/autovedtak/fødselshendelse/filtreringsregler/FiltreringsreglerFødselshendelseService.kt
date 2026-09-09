@@ -13,8 +13,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.REGELSETT_FØDSELSHENDELSE
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.RegelsettEvaluator
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -47,28 +45,28 @@ class FiltreringsreglerFødselshendelseService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val regelsettEvaluator: RegelsettEvaluator,
+    private val filtreringsregelEvaluator: FiltreringsregelEvaluator,
 ) {
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
     val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
 
     init {
-        Filtreringsregel.entries.map {
+        FILTRERINGSREGLER_FØDSELSHENDELSE.map { regel ->
             Resultat.entries.forEach { resultat ->
-                filtreringsreglerMetrics["${it.name}_${resultat.name}"] =
+                filtreringsreglerMetrics["${regel.identifikator.name}_${resultat.name}"] =
                     Metrics.counter(
                         "familie.ba.sak.filtreringsregler.utfall",
                         "beskrivelse",
-                        it.name,
+                        regel.identifikator.name,
                         "resultat",
                         resultat.name,
                     )
 
-                filtreringsreglerFørsteUtfallMetrics[it.name] =
+                filtreringsreglerFørsteUtfallMetrics[regel.identifikator.name] =
                     Metrics.counter(
                         "familie.ba.sak.filtreringsregler.foersteutfall",
                         "beskrivelse",
-                        it.name,
+                        regel.identifikator.name,
                     )
             }
         }
@@ -83,7 +81,7 @@ class FiltreringsreglerFødselshendelseService(
             evalueringer.map {
                 FødselshendelsefiltreringResultat(
                     behandlingId = behandlingId,
-                    filtreringsregel = Filtreringsregel.valueOf(it.identifikator),
+                    filtreringsregel = Filtreringsregel.Identifikator.valueOf(it.identifikator),
                     resultat = it.resultat,
                     begrunnelse = it.begrunnelse,
                     evalueringsårsaker = it.evalueringÅrsaker.map { evalueringÅrsak -> evalueringÅrsak.toString() },
@@ -146,7 +144,7 @@ class FiltreringsreglerFødselshendelseService(
                     ),
                 morHarIkkeOpphørtBarnetrygd = andelerPåSisteBehandling.isEmpty() || harAndelerFremoverITid,
             )
-        val evalueringer = regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, fakta)
+        val evalueringer = filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, fakta)
         oppdaterMetrikker(evalueringer)
 
         logger.info("Resultater fra filtreringsregler på behandling $behandling: ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")

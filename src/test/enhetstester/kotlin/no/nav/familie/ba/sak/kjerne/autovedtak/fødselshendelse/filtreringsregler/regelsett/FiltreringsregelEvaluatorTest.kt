@@ -14,10 +14,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsregelEvaluator
 
-internal class RegelsettEvaluatorTest {
+internal class FiltreringsregelEvaluatorTest {
     private val gyldigAktørId = randomAktør()
-    private val regelsettEvaluator = RegelsettEvaluator()
+    private val filtreringsregelEvaluator = FiltreringsregelEvaluator()
 
     @Test
     fun `Regelevaluering skal resultere i Ja`() {
@@ -28,7 +29,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
@@ -57,7 +58,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
@@ -88,7 +89,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
@@ -120,7 +121,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
@@ -150,7 +151,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
@@ -180,7 +181,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
@@ -210,7 +211,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
@@ -242,7 +243,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -272,7 +273,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -303,7 +304,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -334,7 +335,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -364,7 +365,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -395,7 +396,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -429,7 +430,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -460,7 +461,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -492,7 +493,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -522,7 +523,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -558,7 +559,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -588,7 +589,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -618,7 +619,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -647,7 +648,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
@@ -677,7 +678,7 @@ internal class RegelsettEvaluatorTest {
 
         // Act
         val evalueringer =
-            regelsettEvaluator.evaluerRegelsett(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
                 REGELSETT_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,

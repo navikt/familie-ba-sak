@@ -24,8 +24,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.REGELSETT_FØDSELSHENDELSE
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.regelsett.RegelsettEvaluator
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -56,7 +54,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
 
     private var clockProvider = TestClockProvider()
 
-    private val regelsettEvaluator = spyk(RegelsettEvaluator())
+    private val filtreringsregelEvaluator = spyk(FiltreringsregelEvaluator())
 
     private val filtreringsreglerFødselshendelseService =
         FiltreringsreglerFødselshendelseService(
@@ -70,7 +68,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            regelsettEvaluator = regelsettEvaluator,
+            filtreringsregelEvaluator = filtreringsregelEvaluator,
         )
 
     @Test
@@ -112,7 +110,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -164,7 +162,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -221,7 +219,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -278,7 +276,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -338,7 +336,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -398,7 +396,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -437,7 +435,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -471,7 +469,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { regelsettEvaluator.evaluerRegelsett(REGELSETT_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
