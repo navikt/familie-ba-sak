@@ -115,25 +115,25 @@ internal class FiltreringsregelTest {
         // Arrange
         val fagbestemtFiltreringsregelrekkefølge =
             listOf(
-                Filtreringsregel.MOR_GYLDIG_FNR,
-                Filtreringsregel.BARN_GYLDIG_FNR,
-                Filtreringsregel.MOR_LEVER,
-                Filtreringsregel.BARN_LEVER,
-                Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
-                Filtreringsregel.MOR_ER_OVER_18_ÅR,
-                Filtreringsregel.MOR_HAR_IKKE_VERGE,
-                Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET,
-                Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
-                Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
-                Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET,
-                Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
-                Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
+                Filtreringsregel.Identifikator.MOR_GYLDIG_FNR,
+                Filtreringsregel.Identifikator.BARN_GYLDIG_FNR,
+                Filtreringsregel.Identifikator.MOR_LEVER,
+                Filtreringsregel.Identifikator.BARN_LEVER,
+                Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
+                Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR,
+                Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE,
+                Filtreringsregel.Identifikator.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET,
+                Filtreringsregel.Identifikator.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
+                Filtreringsregel.Identifikator.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
+                Filtreringsregel.Identifikator.LØPER_IKKE_BARNETRYGD_FOR_BARNET,
+                Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+                Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
             )
 
         // Assert
-        assertThat(Filtreringsregel.entries.size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
+        assertThat(Filtreringsregel.Identifikator.entries.size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
         assertThat(
-            Filtreringsregel
+            Filtreringsregel.Identifikator
                 .entries
                 .zip(fagbestemtFiltreringsregelrekkefølge)
                 .all { (x, y) -> x == y },

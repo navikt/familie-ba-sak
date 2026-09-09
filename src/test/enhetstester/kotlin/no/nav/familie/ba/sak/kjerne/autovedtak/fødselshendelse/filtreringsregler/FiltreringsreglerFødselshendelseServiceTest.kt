@@ -118,7 +118,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -169,7 +169,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
 
         assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isFalse
 
-        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
+        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
             Resultat.OPPFYLT,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isTrue
@@ -227,7 +227,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -284,7 +284,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -343,7 +343,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
 
         assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isFalse
 
-        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
+        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
             Resultat.OPPFYLT,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isTrue
@@ -404,7 +404,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -443,7 +443,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         assertThat(filtreringsreglerFakta.morHarIkkeOpphørtBarnetrygd).isFalse
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -476,7 +476,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
 
         assertThat(filtreringsreglerFakta.morHarIkkeOpphørtBarnetrygd).isTrue
 
-        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD }.resultat).isEqualTo(
+        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD }.resultat).isEqualTo(
             Resultat.OPPFYLT,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isTrue

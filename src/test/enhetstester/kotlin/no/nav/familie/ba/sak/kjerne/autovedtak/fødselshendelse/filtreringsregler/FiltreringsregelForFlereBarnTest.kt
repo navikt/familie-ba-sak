@@ -101,7 +101,7 @@ class FiltreringsregelForFlereBarnTest {
         Assertions.assertThat(
             evalueringer
                 .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                .any { it.identifikator == Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name },
+                .any { it.identifikator == Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name },
         )
     }
 
@@ -218,7 +218,7 @@ class FiltreringsregelForFlereBarnTest {
         Assertions.assertThat(
             fødselshendelsefiltreringResultater
                 .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                .any { it.filtreringsregel == Filtreringsregel.BARN_LEVER },
+                .any { it.filtreringsregel == Filtreringsregel.Identifikator.BARN_LEVER },
         )
     }
 

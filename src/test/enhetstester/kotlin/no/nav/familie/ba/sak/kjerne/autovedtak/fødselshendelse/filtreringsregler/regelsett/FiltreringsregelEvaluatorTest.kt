@@ -14,6 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FILTRERINGSREGLER_FØDSELSHENDELSE
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsregelEvaluator
 
 internal class FiltreringsregelEvaluatorTest {
@@ -30,7 +31,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet),
@@ -59,7 +60,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     søkerMottarLøpendeUtvidet = true,
@@ -77,7 +78,7 @@ internal class FiltreringsregelEvaluatorTest {
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET)
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.Identifikator.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET)
     }
 
     @Test
@@ -90,7 +91,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     søkerMottarLøpendeUtvidet = false,
@@ -109,7 +110,7 @@ internal class FiltreringsregelEvaluatorTest {
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD)
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD)
     }
 
     @Test
@@ -122,7 +123,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet),
@@ -139,7 +140,7 @@ internal class FiltreringsregelEvaluatorTest {
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_ER_OVER_18_ÅR)
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR)
     }
 
     @Test
@@ -152,7 +153,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet),
@@ -169,7 +170,7 @@ internal class FiltreringsregelEvaluatorTest {
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_LEVER)
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.Identifikator.MOR_LEVER)
     }
 
     @Test
@@ -182,7 +183,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet),
@@ -199,7 +200,7 @@ internal class FiltreringsregelEvaluatorTest {
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.BARN_LEVER)
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.Identifikator.BARN_LEVER)
     }
 
     @Test
@@ -212,7 +213,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet),
@@ -229,7 +230,7 @@ internal class FiltreringsregelEvaluatorTest {
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_HAR_IKKE_VERGE)
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE)
     }
 
     @Test
@@ -244,7 +245,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -259,7 +260,7 @@ internal class FiltreringsregelEvaluatorTest {
                 ),
             )
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_ER_OVER_18_ÅR)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR)
     }
 
     @Test
@@ -274,7 +275,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -290,7 +291,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
     }
 
     @Test
@@ -305,7 +306,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -321,7 +322,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.MOR_LEVER)
     }
 
     @Test
@@ -336,7 +337,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -351,7 +352,7 @@ internal class FiltreringsregelEvaluatorTest {
                 ),
             )
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_LEVER)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.BARN_LEVER)
     }
 
     @Test
@@ -366,7 +367,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -382,7 +383,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_HAR_IKKE_VERGE)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE)
     }
 
     @Test
@@ -397,7 +398,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -413,7 +414,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.MOR_LEVER)
     }
 
     @Test
@@ -431,7 +432,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person, barn2Person),
@@ -462,7 +463,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -478,7 +479,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_GYLDIG_FNR)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.MOR_GYLDIG_FNR)
     }
 
     @Test
@@ -494,7 +495,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person, barn2Person),
@@ -510,7 +511,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_GYLDIG_FNR)
+        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.BARN_GYLDIG_FNR)
     }
 
     @Test
@@ -524,7 +525,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -543,7 +544,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Assert
         assertIkkeOppfyltFiltreringsregel(
             evalueringer,
-            Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
+            Filtreringsregel.Identifikator.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
         )
     }
 
@@ -560,7 +561,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -590,7 +591,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -620,7 +621,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -649,7 +650,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -679,7 +680,7 @@ internal class FiltreringsregelEvaluatorTest {
         // Act
         val evalueringer =
             filtreringsregelEvaluator.evaluerFiltreringsregler(
-                REGELSETT_FØDSELSHENDELSE,
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = søkerPerson,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -700,7 +701,7 @@ internal class FiltreringsregelEvaluatorTest {
 
     private fun assertEnesteRegelMedResultatNei(
         evalueringer: List<Evaluering>,
-        filtreringsRegel: Filtreringsregel,
+        filtreringsRegel: Filtreringsregel.Identifikator,
     ) {
         assertThat(1).isEqualTo(evalueringer.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
         assertThat(filtreringsRegel.name)
@@ -709,7 +710,7 @@ internal class FiltreringsregelEvaluatorTest {
 
     fun assertIkkeOppfyltFiltreringsregel(
         evalueringer: List<Evaluering>,
-        filtreringsregel: Filtreringsregel,
+        filtreringsregel: Filtreringsregel.Identifikator,
     ) {
         evalueringer.forEach {
             if (it.evalueringÅrsaker.first().hentIdentifikator() == filtreringsregel.name) {
