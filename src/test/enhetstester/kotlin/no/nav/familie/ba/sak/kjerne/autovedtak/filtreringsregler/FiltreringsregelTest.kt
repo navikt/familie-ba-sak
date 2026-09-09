@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
+package no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler
 
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -6,6 +6,9 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigSøker
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsregelEvaluering
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsreglerFaktaFødselshendelse
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

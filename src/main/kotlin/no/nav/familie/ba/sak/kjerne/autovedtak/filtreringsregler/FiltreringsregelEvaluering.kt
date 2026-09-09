@@ -1,8 +1,8 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
+package no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler
 
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.utfall.FiltreringsregelOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt
 import java.time.temporal.ChronoUnit
 import kotlin.math.abs
 
