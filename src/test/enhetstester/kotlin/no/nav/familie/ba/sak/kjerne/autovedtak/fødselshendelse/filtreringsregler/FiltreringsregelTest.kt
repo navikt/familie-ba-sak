@@ -149,7 +149,7 @@ internal class FiltreringsregelTest {
 
         // Act
         val evaluering =
-            FiltreringsregelFødselshendelse.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
+            FiltreringsregelEvaluering.merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet1, barnet2),
@@ -182,7 +182,7 @@ internal class FiltreringsregelTest {
 
         // Act
         val evaluering =
-            FiltreringsregelFødselshendelse.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
+            FiltreringsregelEvaluering.merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet1, barnet2),
@@ -372,7 +372,7 @@ internal class FiltreringsregelTest {
 
         // Act
         val evaluering =
-            FiltreringsregelFødselshendelse.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
+            FiltreringsregelEvaluering.merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barn1Person),

@@ -43,5 +43,5 @@ data class FiltreringsreglerFaktaSøknad(
     override val barnaLever: Boolean,
     override val søkerHarVerge: Boolean,
     override val løperBarnetrygdForBarnetPåAnnenForelder: Boolean,
-    val søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling: Boolean // TODO : Skal vi gjøre denne sjekken i baks-mottak? Sjekk med Anna
+    val søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling: Boolean, // TODO : Skal vi gjøre denne sjekken i baks-mottak? Sjekk med Anna
 ) : FiltreringsreglerFakta()
