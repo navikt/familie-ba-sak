@@ -45,27 +45,28 @@ class FiltreringsreglerFødselshendelseService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val filtreringsregelEvaluator: FiltreringsregelEvaluator,
 ) {
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
     val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
 
     init {
-        Filtreringsregel.entries.map {
+        FILTRERINGSREGLER_FØDSELSHENDELSE.map { regel ->
             Resultat.entries.forEach { resultat ->
-                filtreringsreglerMetrics["${it.name}_${resultat.name}"] =
+                filtreringsreglerMetrics["${regel.identifikator.name}_${resultat.name}"] =
                     Metrics.counter(
                         "familie.ba.sak.filtreringsregler.utfall",
                         "beskrivelse",
-                        it.name,
+                        regel.identifikator.name,
                         "resultat",
                         resultat.name,
                     )
 
-                filtreringsreglerFørsteUtfallMetrics[it.name] =
+                filtreringsreglerFørsteUtfallMetrics[regel.identifikator.name] =
                     Metrics.counter(
                         "familie.ba.sak.filtreringsregler.foersteutfall",
                         "beskrivelse",
-                        it.name,
+                        regel.identifikator.name,
                     )
             }
         }
@@ -80,7 +81,7 @@ class FiltreringsreglerFødselshendelseService(
             evalueringer.map {
                 FødselshendelsefiltreringResultat(
                     behandlingId = behandlingId,
-                    filtreringsregel = Filtreringsregel.valueOf(it.identifikator),
+                    filtreringsregel = Filtreringsregel.Identifikator.valueOf(it.identifikator),
                     resultat = it.resultat,
                     begrunnelse = it.begrunnelse,
                     evalueringsårsaker = it.evalueringÅrsaker.map { evalueringÅrsak -> evalueringÅrsak.toString() },
@@ -116,20 +117,20 @@ class FiltreringsreglerFødselshendelseService(
         val harAndelerFremoverITid = sisteMånedMedBarnetrygd != null && sisteMånedMedBarnetrygd > YearMonth.now()
 
         val fakta =
-            FiltreringsreglerFakta(
-                mor = personopplysningGrunnlag.søker,
-                morMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
-                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato =
+            FiltreringsreglerFaktaFødselshendelse(
+                søker = personopplysningGrunnlag.søker,
+                søkerMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
+                søkerOppfyllerVilkårForUtvidetBarnetrygd =
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
                         behandling,
                         barnaFraHendelse,
                     ),
-                morMottarEøsBarnetrygd = behandling.kategori == BehandlingKategori.EØS,
-                barnaFraHendelse = barnaFraHendelse,
+                søkerMottarEøsBarnetrygd = behandling.kategori == BehandlingKategori.EØS,
+                barnaSomSkalVurderes = barnaFraHendelse,
                 restenAvBarna = finnRestenAvBarnasPersonInfo(morsAktørId, barnaFraHendelse),
-                morLever = !personopplysningGrunnlag.søker.erDød(),
+                søkerLever = !personopplysningGrunnlag.søker.erDød(),
                 barnaLever = barnaFraHendelse.none { it.erDød() },
-                morHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
+                søkerHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
                 dagensDato = LocalDate.now(clockProvider.get()),
                 erFagsakenMigrertEtterBarnFødt =
                     erSakenMigrertEtterBarnFødt(
@@ -143,7 +144,7 @@ class FiltreringsreglerFødselshendelseService(
                     ),
                 morHarIkkeOpphørtBarnetrygd = andelerPåSisteBehandling.isEmpty() || harAndelerFremoverITid,
             )
-        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(fakta)
+        val evalueringer = filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, fakta)
         oppdaterMetrikker(evalueringer)
 
         logger.info("Resultater fra filtreringsregler på behandling $behandling: ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")

@@ -64,6 +64,7 @@ class FiltreringsregelForFlereBarnTest {
     val tilkjentYtelseValideringServiceMock = mockk<TilkjentYtelseValideringService>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     var clockProvider = TestClockProvider()
+    val filtreringsregelEvaluator = FiltreringsregelEvaluator()
     val filtreringsreglerFødselshendelseService =
         FiltreringsreglerFødselshendelseService(
             personopplysningerService = personopplysningerServiceMock,
@@ -76,6 +77,7 @@ class FiltreringsregelForFlereBarnTest {
             tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            filtreringsregelEvaluator = filtreringsregelEvaluator,
         )
 
     init {
@@ -89,7 +91,8 @@ class FiltreringsregelForFlereBarnTest {
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 genererFaktaMedTidligereBarn(1, 3, 7, 0),
             )
 
@@ -98,14 +101,15 @@ class FiltreringsregelForFlereBarnTest {
         Assertions.assertThat(
             evalueringer
                 .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                .any { it.identifikator == Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name },
+                .any { it.identifikator == Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name },
         )
     }
 
     @Test
     fun `Regelevaluering skal resultere i JA når det har ikke gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 genererFaktaMedTidligereBarn(0, 0, 0, 5),
             )
 
@@ -214,7 +218,7 @@ class FiltreringsregelForFlereBarnTest {
         Assertions.assertThat(
             fødselshendelsefiltreringResultater
                 .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                .any { it.filtreringsregel == Filtreringsregel.BARN_LEVER },
+                .any { it.filtreringsregel == Filtreringsregel.Identifikator.BARN_LEVER },
         )
     }
 
@@ -382,7 +386,7 @@ class FiltreringsregelForFlereBarnTest {
         manaderFodselTo: Long,
         manaderFodselForrigeFodsel: Long,
         dagerFodselForrigeFodsel: Long,
-    ): FiltreringsreglerFakta {
+    ): FiltreringsreglerFaktaFødselshendelse {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktør)
         val barn =
             listOf(
@@ -395,17 +399,17 @@ class FiltreringsregelForFlereBarnTest {
                 PersonInfo(LocalDate.now().minusMonths(manaderFodselForrigeFodsel).minusDays(dagerFodselForrigeFodsel)),
             )
 
-        return FiltreringsreglerFakta(
-            mor = mor,
-            barnaFraHendelse = barn,
+        return FiltreringsreglerFaktaFødselshendelse(
+            søker = mor,
+            barnaSomSkalVurderes = barn,
             restenAvBarna = restenAvBarna,
-            morLever = true,
+            søkerLever = true,
             barnaLever = true,
-            morHarVerge = false,
+            søkerHarVerge = false,
             dagensDato = LocalDate.now(),
             erFagsakenMigrertEtterBarnFødt = false,
             løperBarnetrygdForBarnetPåAnnenForelder = false,
-            morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+            søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
             morHarIkkeOpphørtBarnetrygd = true,
         )
     }

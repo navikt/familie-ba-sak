@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 
 data class FødselshendelsefiltreringResultatDto(
-    val filtreringsregel: Filtreringsregel,
+    val filtreringsregel: Filtreringsregel.Identifikator,
     val resultat: Resultat,
     val begrunnelse: String,
 )

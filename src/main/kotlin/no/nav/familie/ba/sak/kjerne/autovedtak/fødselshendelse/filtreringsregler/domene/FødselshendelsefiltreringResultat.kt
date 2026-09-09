@@ -33,7 +33,7 @@ class FødselshendelsefiltreringResultat(
     val behandlingId: Long,
     @Enumerated(EnumType.STRING)
     @Column(name = "filtreringsregel")
-    val filtreringsregel: Filtreringsregel,
+    val filtreringsregel: Filtreringsregel.Identifikator,
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat")
     val resultat: Resultat,

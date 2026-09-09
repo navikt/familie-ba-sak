@@ -4,8 +4,8 @@ import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.MånedPeriode
@@ -54,6 +54,8 @@ class FiltreringsreglerFødselshendelseServiceTest {
 
     private var clockProvider = TestClockProvider()
 
+    private val filtreringsregelEvaluator = spyk(FiltreringsregelEvaluator())
+
     private val filtreringsreglerFødselshendelseService =
         FiltreringsreglerFødselshendelseService(
             personopplysningerService = personopplysningerService,
@@ -66,6 +68,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            filtreringsregelEvaluator = filtreringsregelEvaluator,
         )
 
     @Test
@@ -101,22 +104,21 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isTrue
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -154,21 +156,20 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isFalse
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isFalse
 
-        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
+        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
             Resultat.OPPFYLT,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isTrue
@@ -212,22 +213,21 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isTrue
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -270,22 +270,21 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isTrue
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -331,21 +330,20 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isFalse
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isFalse
 
-        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
+        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
             Resultat.OPPFYLT,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isTrue
@@ -392,22 +390,21 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isTrue
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -432,14 +429,13 @@ class FiltreringsreglerFødselshendelseServiceTest {
                 lagAndelTilkjentYtelse(it.fom, it.tom)
             }
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -447,7 +443,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         assertThat(filtreringsreglerFakta.morHarIkkeOpphørtBarnetrygd).isFalse
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -467,21 +463,20 @@ class FiltreringsreglerFødselshendelseServiceTest {
         clearMocks(andelTilkjentYtelseRepository)
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns emptyList()
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
         filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
         assertThat(filtreringsreglerFakta.morHarIkkeOpphørtBarnetrygd).isTrue
 
-        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD }.resultat).isEqualTo(
+        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD }.resultat).isEqualTo(
             Resultat.OPPFYLT,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isTrue
