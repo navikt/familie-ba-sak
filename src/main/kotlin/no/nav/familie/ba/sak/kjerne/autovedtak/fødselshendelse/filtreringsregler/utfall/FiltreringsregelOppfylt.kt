@@ -9,19 +9,19 @@ enum class FiltreringsregelOppfylt(
 ) : EvalueringÅrsak {
     MOR_HAR_GYLDIG_FNR(
         "Mor har gyldig fødselsnummer",
-        Filtreringsregel.Identifikator.MOR_GYLDIG_FNR
+        Filtreringsregel.Identifikator.MOR_GYLDIG_FNR,
     ),
     BARN_HAR_GYLDIG_FNR(
         "Barn har gyldig fødselsnummer",
-        Filtreringsregel.Identifikator.BARN_GYLDIG_FNR
+        Filtreringsregel.Identifikator.BARN_GYLDIG_FNR,
     ),
     MOR_ER_OVER_18_ÅR(
         "Mor er over 18 år.",
-        Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR
+        Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR,
     ),
     MOR_ER_MYNDIG(
         "Mor er myndig.",
-        Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE
+        Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE,
     ),
     MOR_MOTTAR_IKKE_LØPENDE_UTVIDET(
         "Mor mottar ikke utvidet barnetrygd.",
@@ -29,11 +29,11 @@ enum class FiltreringsregelOppfylt(
     ),
     MOR_LEVER(
         "Det er ikke registrert dødsdato på mor.",
-        Filtreringsregel.Identifikator.MOR_LEVER
+        Filtreringsregel.Identifikator.MOR_LEVER,
     ),
     BARNET_LEVER(
         "Det er ikke registrert dødsdato på barnet.",
-        Filtreringsregel.Identifikator.BARN_LEVER
+        Filtreringsregel.Identifikator.BARN_LEVER,
     ),
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL(
         "Det har gått mer enn fem måneder siden forrige barn ble født.",

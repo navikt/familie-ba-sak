@@ -57,7 +57,6 @@ val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøkn
         },
     )
 
-
 val FILTRERINGSREGLER_FØDSELSHENDELSE: List<Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>> =
     listOf(
         Filtreringsregel(Filtreringsregel.Identifikator.MOR_GYLDIG_FNR) {

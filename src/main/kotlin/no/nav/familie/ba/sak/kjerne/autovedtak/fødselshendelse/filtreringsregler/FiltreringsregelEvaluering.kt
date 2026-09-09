@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 import java.time.temporal.ChronoUnit
 import kotlin.math.abs
 
-
 object FiltreringsregelEvaluering {
     fun harSøkerGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
         val harSøkerGyldigFnr =
@@ -135,7 +134,7 @@ object FiltreringsregelEvaluering {
             fakta.barnaSomSkalVurderes.all { barnFraHendelse ->
                 fakta.restenAvBarna.all {
                     abs(ChronoUnit.MONTHS.between(barnFraHendelse.fødselsdato, it.fødselsdato)) > 5 ||
-                            abs(ChronoUnit.DAYS.between(barnFraHendelse.fødselsdato, it.fødselsdato)) <= 6
+                        abs(ChronoUnit.DAYS.between(barnFraHendelse.fødselsdato, it.fødselsdato)) <= 6
                 }
             }
         ) {
