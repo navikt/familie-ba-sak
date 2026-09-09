@@ -2006,7 +2006,7 @@ class BehandlingsresultatStegValideringServiceTest {
         }
 
         @Test
-        fun `kaster AutovedtakMåBehandlesManueltFeil når det ikke finnes forrige behandling og barn det ikke er søkt for har fått andel med 0 i beløp`() {
+        fun `kaster AutovedtakMåBehandlesManueltFeil når barn det ikke er søkt for har fått andel med 0 i beløp uten forrige behandling`() {
             // Arrange
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns null
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
