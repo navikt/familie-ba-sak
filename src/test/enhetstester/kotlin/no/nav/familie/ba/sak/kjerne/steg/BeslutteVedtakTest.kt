@@ -34,8 +34,6 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.task.FerdigstillOppgaver
 import no.nav.familie.ba.sak.task.JournalførTilbakekrevingsvedtakMotregningBrevTask
@@ -60,7 +58,6 @@ class BeslutteVedtakTest {
     private val behandlingService: BehandlingService = mockk()
     private val beregningService: BeregningService = mockk()
     private val taskRepository: TaskRepositoryWrapper = mockk()
-    private val vilkårsvurderingService: VilkårsvurderingService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService = mockk()
     private val automatiskBeslutningService: AutomatiskBeslutningService = mockk()
@@ -81,7 +78,6 @@ class BeslutteVedtakTest {
             beregningService = beregningService,
             taskRepository = taskRepository,
             loggService = loggService,
-            vilkårsvurderingService = vilkårsvurderingService,
             featureToggleService = featureToggleService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             saksbehandlerContext = saksbehandlerContext,
@@ -92,8 +88,6 @@ class BeslutteVedtakTest {
             tilbakekrevingsvedtakMotregningService = tilbakekrevingsvedtakMotregningService,
             tilbakekrevingsvedtakMotregningBrevService = tilbakekrevingsvedtakMotregningBrevService,
         )
-
-    private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
     @BeforeEach
     fun setUp() {
@@ -115,8 +109,6 @@ class BeslutteVedtakTest {
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
         every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any()) } just runs
-        every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering
-        every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
         every { automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(any<BehandlingId>()) } just runs
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns false
