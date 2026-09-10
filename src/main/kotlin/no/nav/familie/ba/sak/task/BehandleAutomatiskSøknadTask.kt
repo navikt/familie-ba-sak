@@ -70,18 +70,21 @@ class BehandleAutomatiskSøknadTask(
     }
 
     companion object {
-        const val TASK_STEP_TYPE = "behandleAuomatiskSøknadTask"
+        const val TASK_STEP_TYPE = "behandleAutomatiskSøknadTask"
         private val logger = LoggerFactory.getLogger(BehandleAutomatiskSøknadTask::class.java)
 
         fun opprettTask(dto: BehandleAutomatiskSøknadTaskDTO): Task {
             val triggerTid = if (erKlokkenMellom21Og06()) utledKl06IdagEllerNesteDag() else LocalDateTime.now()
+            if (dto.nyBehandling.søkersIdent == null) {
+                throw Feil("Søkers ident kan ikke være null i en ${BehandleAutomatiskSøknadTask::class.simpleName} task.")
+            }
+            val properties = Properties().apply {
+                this["søkersIdent"] = dto.nyBehandling.søkersIdent
+            }
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = jsonMapper.writeValueAsString(dto),
-                properties =
-                    Properties().apply {
-                        this["søkersIdent"] = dto.nyBehandling.søkersIdent
-                    },
+                properties = properties,
             ).copy(
                 triggerTid = triggerTid.plusDays(7),
             )

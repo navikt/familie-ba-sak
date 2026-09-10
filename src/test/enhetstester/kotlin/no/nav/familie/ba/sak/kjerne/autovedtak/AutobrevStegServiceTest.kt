@@ -75,7 +75,7 @@ class AutobrevStegServiceTest {
             every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(SmåbarnstilleggData(aktør)) } returns true
             every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
-            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
+            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) } returns ""
             every { snikeIKøenService.kanSnikeForbi(any()) } returns false
 
             autovedtakStegService.kjørBehandlingSmåbarnstillegg(
@@ -83,7 +83,7 @@ class AutobrevStegServiceTest {
                 aktør = aktør,
             )
 
-            verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) }
+            verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) }
         }
 
         @Test
@@ -98,7 +98,7 @@ class AutobrevStegServiceTest {
             every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(SmåbarnstilleggData(aktør)) } returns true
             every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
-            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
+            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(),any()) } returns ""
 
             assertThrows<RekjørSenereException> {
                 autovedtakStegService.kjørBehandlingSmåbarnstillegg(
@@ -114,7 +114,7 @@ class AutobrevStegServiceTest {
                 førstegangKjørt = LocalDateTime.now().minusDays(7),
             )
 
-            verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) }
+            verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(),any()) }
         }
 
         @Test
@@ -129,7 +129,7 @@ class AutobrevStegServiceTest {
             every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(SmåbarnstilleggData(aktør)) } returns true
             every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
-            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
+            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(),any()) } returns ""
 
             assertThrows<RekjørSenereException> {
                 autovedtakStegService.kjørBehandlingSmåbarnstillegg(

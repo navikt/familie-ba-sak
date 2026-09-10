@@ -47,6 +47,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
 import java.time.LocalDate
 import java.time.Month
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 
 class FødselshendelseServiceTest {
     val filtreringsreglerFødselshendelseService = mockk<FiltreringsreglerFødselshendelseService>()
@@ -143,7 +144,7 @@ class FødselshendelseServiceTest {
                 .copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
                 .leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)
         every { stegService.håndterHenleggBehandling(any(), any()) } returns nyBehandling
-        every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
+        every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) } returns ""
         every { persongrunnlagService.hentSøker(nyBehandling.id) } returns søkerPerson
         every { persongrunnlagService.hentBarna(nyBehandling) } returns listOf(barn1Person, barn2Person)
 
@@ -204,6 +205,7 @@ class FødselshendelseServiceTest {
                 behandlingId = any(),
                 beskrivelse = "Fødselshendelse: Barnet (fødselsdato: ${barn1Person.fødselsdato.tilKortString()}) er ikke bosatt med mor.",
                 manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
             )
         }
     }
