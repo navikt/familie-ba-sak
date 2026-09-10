@@ -348,7 +348,7 @@ class BehandlingIntegrationTest(
                 søkerAktør = behandling.fagsak.aktør,
                 barnAktør = barnAktør,
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
@@ -485,7 +485,7 @@ class BehandlingIntegrationTest(
                 søkerAktør = behandling.fagsak.aktør,
                 barnAktør = barnAktør,
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         assertNotNull(personopplysningGrunnlag)
 

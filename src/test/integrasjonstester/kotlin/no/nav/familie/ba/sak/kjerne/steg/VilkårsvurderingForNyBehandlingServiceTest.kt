@@ -96,7 +96,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(forrigePersonopplysningGrunnlag)
 
         var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
         val søkerPersonResultat =
@@ -155,7 +155,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.now().minusMonths(5)
 
@@ -229,7 +229,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(forrigePersonopplysningGrunnlag)
 
         var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
         val søkerPersonResultat =
@@ -330,7 +330,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
 
@@ -411,7 +411,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(forrigePersonopplysningGrunnlag)
 
         var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
         val søkerPersonResultat =
@@ -513,7 +513,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         // Act
         val vilkårsvurdering =
@@ -600,7 +600,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(forrigePersonopplysningGrunnlag)
 
         var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
         val søkerPersonResultat =
@@ -670,7 +670,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         // Act
         val vilkårsvurdering =
@@ -725,7 +725,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søkerAktør = søkerAktør,
                 barnAktør = barnAktør,
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(forrigePersonopplysningGrunnlag)
 
         var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
         val søkerPersonResultat =
@@ -797,7 +797,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søkerAktør = søkerAktør,
                 barnAktør = barnAktør,
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         // Act
         val vilkårsvurdering =
@@ -849,7 +849,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
 
@@ -923,7 +923,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
             )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
 
@@ -991,7 +991,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             )
 
         val personopplysningGrunnlag =
-            persongrunnlagService.lagreOgDeaktiverGammel(
+            persongrunnlagService.lagreOgSlettGammelt(
                 PersonopplysningGrunnlag(
                     behandlingId = behandling.id,
                 ),
@@ -1060,7 +1060,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             )
 
         val personopplysningGrunnlagB2 =
-            persongrunnlagService.lagreOgDeaktiverGammel(
+            persongrunnlagService.lagreOgSlettGammelt(
                 PersonopplysningGrunnlag(
                     behandlingId = behandling2.id,
                 ),
