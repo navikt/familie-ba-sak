@@ -321,12 +321,12 @@ class StegService(
     @Transactional
     fun håndterFiltreringsreglerForAutomatiskeBehandlinger(
         behandling: Behandling,
-        nyBehandling: NyBehandlingHendelse,
+        filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,
     ): Behandling {
         val behandlingSteg: FiltreringAutomatiskBehandlingSteg = hentBehandlingSteg(StegType.FILTRERING_AUTOMATISK_BEHANDLING) as FiltreringAutomatiskBehandlingSteg
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, nyBehandling)
+            behandlingSteg.utførStegOgAngiNeste(behandling, filtrerAutomatiskBehandlingData)
         }
     }
 

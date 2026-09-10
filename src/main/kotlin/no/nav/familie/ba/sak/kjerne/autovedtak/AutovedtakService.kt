@@ -3,11 +3,13 @@ package no.nav.familie.ba.sak.kjerne.autovedtak
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
@@ -50,6 +52,33 @@ class AutovedtakService(
             )
 
         kjørFørVilkårsvurdering(nyBehandling)
+
+        val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(nyBehandling)
+        return behandlingEtterBehandlingsresultat
+    }
+
+    /**
+     * Oppretter en ny, automatisk behandling med gitt type og årsak, og kjører den til behandlingsresultat med filtreringsregler.
+     */
+    fun opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
+        behandlingType: BehandlingType,
+        behandlingÅrsak: BehandlingÅrsak,
+        fagsakId: Long,
+        filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,
+    ): Behandling {
+        val nyBehandling =
+            stegService.håndterNyBehandling(
+                NyBehandling(
+                    behandlingType = behandlingType,
+                    behandlingÅrsak = behandlingÅrsak,
+                    skalBehandlesAutomatisk = true,
+                    fagsakId = fagsakId,
+                ),
+            )
+
+        if (behandlingÅrsak === BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD) {
+            stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(nyBehandling, filtrerAutomatiskBehandlingData)
+        }
 
         val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(nyBehandling)
         return behandlingEtterBehandlingsresultat
