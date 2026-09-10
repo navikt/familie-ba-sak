@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsKj
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.andelerMedYtelseTypeErInnvilgetInneværendeMånedOgToMånederFramITid
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.erEndringIUtbetalingUtenomYtelseType
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.rekjørNesteMånedHvisYtelseTypeErInnvilgetToMånederFramITid
@@ -42,7 +44,9 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil.finnAktørerMedEndringIAndeler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -73,6 +77,7 @@ class BehandlingsresultatStegValideringService(
     private val persongrunnlagService: PersongrunnlagService,
     private val clockProvider: ClockProvider,
     private val satsendringEøsKjøringService: SatsendringEøsKjøringService,
+    private val søknadGrunnlagService: SøknadGrunnlagService,
 ) {
     fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
         if (behandling.status == BehandlingStatus.AVSLUTTET) return
@@ -433,6 +438,51 @@ class BehandlingsresultatStegValideringService(
                 frontendFeilmelding =
                     "Det finnes barn med løpende barnetrygd som ikke er med i behandlingen. " +
                         "Du må legge til alle brukers barn i behandlingen.",
+            )
+        }
+    }
+
+    fun validerAutomatiskBehandlingAvSøknad(behandling: Behandling) {
+        validerAtKunBarnSøktForHarEndringIAndel(behandling)
+        validerBehandlingresultat(behandling)
+    }
+
+    internal fun validerBehandlingresultat(behandling: Behandling) {
+        val gyldigeBehandlingresultat = setOf(INNVILGET, DELVIS_INNVILGET)
+        if (behandling.resultat !in gyldigeBehandlingresultat) {
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad kan ikke gjennomføres. Behandlingsresultatet er ${behandling.resultat}.")
+        }
+    }
+
+    internal fun validerAtKunBarnSøktForHarEndringIAndel(behandling: Behandling) {
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+
+        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        val forrigeAndeler =
+            forrigeBehandling
+                ?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = it.id) }
+                ?: emptyList()
+
+        val aktørerDetErSøktFor =
+            søknadGrunnlagService
+                .finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = forrigeBehandling)
+                .toSet()
+
+        val aktørerMedEndringIAndelUtenAtDetErSøktFor =
+            finnAktørerMedEndringIAndeler(
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+            ) - aktørerDetErSøktFor
+
+        if (aktørerMedEndringIAndelUtenAtDetErSøktFor.isNotEmpty()) {
+            secureLogger.warn(
+                "Automatisk behandling av søknad i behandling ${behandling.id} har endring i andel for " +
+                    "${aktørerMedEndringIAndelUtenAtDetErSøktFor.size} person(er) det ikke er søkt for med aktørId " +
+                    "${aktørerMedEndringIAndelUtenAtDetErSøktFor.map { it.aktørId }}.",
+            )
+            throw AutovedtakMåBehandlesManueltFeil(
+                "Automatisk behandling av søknad kan ikke gjennomføres. Det er endring i andel for " +
+                    "${aktørerMedEndringIAndelUtenAtDetErSøktFor.size} person(er) det ikke er søkt for.",
             )
         }
     }

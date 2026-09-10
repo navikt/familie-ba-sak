@@ -35,7 +35,7 @@ class BehandlingsresultatSteg(
         behandling: Behandling,
         stegService: StegService?,
     ) {
-        if (!behandling.erSatsendringMånedligValutajusteringEllerRegionstillegg() && behandling.skalBehandlesAutomatisk) {
+        if (behandling.skalHoppeOverValideringIBehandlingsresultat()) {
             return
         }
 
@@ -80,8 +80,11 @@ class BehandlingsresultatSteg(
         }
 
         if (behandling.erEndreMigreringsdato()) {
-            behandlingsresultatstegValideringService
-                .validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)
+            behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)
+        }
+
+        if (behandling.erAutomatiskSøknad()) {
+            behandlingsresultatstegValideringService.validerAutomatiskBehandlingAvSøknad(behandling)
         }
     }
 

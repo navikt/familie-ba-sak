@@ -446,6 +446,7 @@ class CucumberMock(
             strengtFortroligService = mockk(relaxed = true),
             persongrunnlagService = persongrunnlagService,
             satsendringEøsKjøringService = mockk(relaxed = true),
+            søknadGrunnlagService = søknadGrunnlagService,
         )
 
     val behandlingsresultatSteg =
