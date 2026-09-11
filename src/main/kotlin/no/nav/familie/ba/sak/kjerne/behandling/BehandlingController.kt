@@ -184,6 +184,12 @@ data class NyBehandling(
     }
 }
 
+data class Søknad(
+    val fagsakId: Long,
+    val morsIdent: String,
+    val barnasIdenter: List<String>,
+)
+
 data class NyBehandlingHendelse(
     val morsIdent: String,
     val barnasIdenter: List<String>,

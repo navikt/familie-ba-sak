@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.AutovedtakSatsendringEøsService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggService
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
@@ -42,6 +43,7 @@ class AutobrevStegServiceTest {
     private val autovedtakSatsendringEøsService = mockk<AutovedtakSatsendringEøsService>()
     private val snikeIKøenService = mockk<SnikeIKøenService>()
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val autovedtakSøknadService = mockk<AutovedtakSøknadService>()
 
     val autovedtakStegService =
         AutovedtakStegService(
@@ -56,6 +58,7 @@ class AutobrevStegServiceTest {
             autovedtakSvalbardtilleggService = autovedtakSvalbardtilleggService,
             autovedtakSatsendringEøsService = autovedtakSatsendringEøsService,
             featureToggleService = featureToggleService,
+            autovedtakSøknadService = autovedtakSøknadService,
         )
 
     @Nested
