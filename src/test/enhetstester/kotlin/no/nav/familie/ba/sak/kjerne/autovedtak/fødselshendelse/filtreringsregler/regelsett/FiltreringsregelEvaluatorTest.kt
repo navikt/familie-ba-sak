@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsregelEvaluator
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerFaktaFødselshendelse
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -78,7 +77,7 @@ internal class FiltreringsregelEvaluatorTest {
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.Identifikator.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET)
     }
 
     @Test
@@ -110,7 +109,7 @@ internal class FiltreringsregelEvaluatorTest {
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD)
     }
 
     @Test
@@ -140,7 +139,7 @@ internal class FiltreringsregelEvaluatorTest {
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR)
     }
 
     @Test
@@ -170,7 +169,7 @@ internal class FiltreringsregelEvaluatorTest {
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.Identifikator.MOR_LEVER)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_LEVER)
     }
 
     @Test
@@ -200,7 +199,7 @@ internal class FiltreringsregelEvaluatorTest {
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.Identifikator.BARN_LEVER)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.BARN_LEVER)
     }
 
     @Test
@@ -230,7 +229,7 @@ internal class FiltreringsregelEvaluatorTest {
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE)
     }
 
     @Test
@@ -260,7 +259,7 @@ internal class FiltreringsregelEvaluatorTest {
                 ),
             )
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR)
     }
 
     @Test
@@ -291,7 +290,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
     }
 
     @Test
@@ -322,7 +321,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.MOR_LEVER)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_LEVER)
     }
 
     @Test
@@ -352,7 +351,7 @@ internal class FiltreringsregelEvaluatorTest {
                 ),
             )
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.BARN_LEVER)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.BARN_LEVER)
     }
 
     @Test
@@ -383,7 +382,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE)
     }
 
     @Test
@@ -414,7 +413,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.MOR_LEVER)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_LEVER)
     }
 
     @Test
@@ -448,7 +447,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        Assertions.assertTrue(evalueringer.erOppfylt())
+        assertThat(evalueringer.erOppfylt()).isTrue
     }
 
     @Test
@@ -479,7 +478,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.MOR_GYLDIG_FNR)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_GYLDIG_FNR)
     }
 
     @Test
@@ -511,7 +510,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.Identifikator.BARN_GYLDIG_FNR)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.BARN_GYLDIG_FNR)
     }
 
     @Test
@@ -542,7 +541,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(
+        assertFørsteIkkeOppfylteRegel(
             evalueringer,
             Filtreringsregel.Identifikator.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
         )
@@ -577,7 +576,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        Assertions.assertTrue(evalueringer.erOppfylt())
+        assertThat(evalueringer.erOppfylt()).isTrue
     }
 
     @Test
@@ -607,7 +606,7 @@ internal class FiltreringsregelEvaluatorTest {
             )
 
         // Assert
-        Assertions.assertTrue(!evalueringer.erOppfylt())
+        assertThat(evalueringer.erOppfylt()).isFalse
     }
 
     @Test
@@ -699,26 +698,18 @@ internal class FiltreringsregelEvaluatorTest {
         assertThat(evalueringer.erOppfylt()).isFalse
     }
 
-    private fun assertEnesteRegelMedResultatNei(
-        evalueringer: List<Evaluering>,
-        filtreringsRegel: Filtreringsregel.Identifikator,
-    ) {
-        assertThat(1).isEqualTo(evalueringer.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
-        assertThat(filtreringsRegel.name)
-            .isEqualTo(evalueringer.filter { it.resultat == Resultat.IKKE_OPPFYLT }[0].identifikator)
-    }
-
-    fun assertIkkeOppfyltFiltreringsregel(
+    private fun assertFørsteIkkeOppfylteRegel(
         evalueringer: List<Evaluering>,
         filtreringsregel: Filtreringsregel.Identifikator,
     ) {
-        evalueringer.forEach {
-            if (it.evalueringÅrsaker.first().hentIdentifikator() == filtreringsregel.name) {
-                Assertions.assertEquals(Resultat.IKKE_OPPFYLT, it.resultat)
-                return
-            } else {
-                Assertions.assertEquals(Resultat.OPPFYLT, it.resultat)
-            }
+        val indeks = evalueringer.indexOfFirst { it.identifikator == filtreringsregel.name }
+        assertThat(indeks).isNotNegative()
+        assertThat(evalueringer.take(indeks)).allSatisfy { assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT) }
+        assertThat(evalueringer[indeks].resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+        assertThat(evalueringer.drop(indeks + 1)).allSatisfy {
+            assertThat(it.resultat).isEqualTo(Resultat.IKKE_VURDERT)
+            assertThat(it.evalueringÅrsaker).isEmpty()
+            assertThat(it.identifikator).isNotEmpty()
         }
     }
 }
