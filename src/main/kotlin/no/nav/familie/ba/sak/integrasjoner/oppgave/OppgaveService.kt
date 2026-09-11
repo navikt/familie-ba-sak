@@ -284,6 +284,20 @@ class OppgaveService(
             }
     }
 
+    /**
+     * Ment for forvaltningstilfeller
+     * Ferdigstiller en oppgave uten å søke opp via integrasjoner
+     */
+    fun tvingFerdigstillOppgave(oppgaveId: Long) {
+        integrasjonKlient.ferdigstillOppgave(oppgaveId)
+        oppgaveRepository.findByGsakId(oppgaveId.toString()).also {
+            if (it != null && !it.erFerdigstilt) {
+                it.erFerdigstilt = true
+                oppgaveRepository.saveAndFlush(it)
+            }
+        }
+    }
+
     private fun DbOppgave.ferdigstill() {
         val oppgave = hentOppgave(gsakId.toLong())
 
@@ -417,7 +431,7 @@ class OppgaveService(
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = integrasjonKlient.hentOppgaver(finnOppgaveRequest)
 
-    fun ferdigstillOppgave(oppgave: Oppgave) {
+    fun tvingFerdigstillOppgave(oppgave: Oppgave) {
         require(oppgave.id != null) { "Oppgaven må ha en id for å kunne ferdigstilles" }
         integrasjonKlient.ferdigstillOppgave(oppgaveId = oppgave.id!!)
     }
