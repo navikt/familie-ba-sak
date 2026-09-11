@@ -34,6 +34,7 @@ spring:
 prosessering.rolle: "928636f4-fd0d-4149-978e-a6fb68bb19de" # 0000-GA-STDAPPS
 
 FAMILIE_INTEGRASJONER_SCOPE: "dummy"
+TILGANGSMASKIN_SCOPE: "dummy"
 
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://localhost:8092/api

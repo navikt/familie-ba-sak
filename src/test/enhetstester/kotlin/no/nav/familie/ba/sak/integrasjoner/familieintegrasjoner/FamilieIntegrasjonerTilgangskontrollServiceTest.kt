@@ -10,14 +10,19 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
-import org.springframework.web.client.RestTemplate
 
 class FamilieIntegrasjonerTilgangskontrollServiceTest {
     private val fakeFamilieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient()
 
     private val cacheManager = ConcurrentMapCacheManager()
 
-    private val service = FamilieIntegrasjonerTilgangskontrollService(fakeFamilieIntegrasjonerTilgangskontrollKlient, cacheManager, mockk())
+    private val service =
+        FamilieIntegrasjonerTilgangskontrollService(
+            fakeFamilieIntegrasjonerTilgangskontrollKlient,
+            cacheManager,
+            mockk(),
+            mockk(relaxed = true),
+        )
 
     @BeforeEach
     fun setUp() {

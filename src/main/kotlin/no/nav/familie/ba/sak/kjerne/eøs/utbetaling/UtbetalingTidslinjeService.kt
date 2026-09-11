@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinjeForSøkersYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.skalUtbetales
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
@@ -59,13 +58,15 @@ class UtbetalingTidslinjeService(
         behandlingId: BehandlingId,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ): Map<Aktør, Tidslinje<Boolean>> {
+        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId.id)
+        val barnasAktører = andelerTilkjentYtelse.filter { !it.erSøkersAndel() }.map { it.aktør }.toSet()
+
         val endretUtbetalingSkalIkkeUtbetalesTidslinjePerBarn =
             endretUtbetalingAndeler
-                .tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer()
+                .tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer(barnasAktører)
 
         val utvidetBarnetrygdTidslinje =
-            beregningService
-                .hentAndelerTilkjentYtelseForBehandling(behandlingId.id)
+            andelerTilkjentYtelse
                 .tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
 
         return endretUtbetalingSkalIkkeUtbetalesTidslinjePerBarn
@@ -83,13 +84,15 @@ class UtbetalingTidslinjeService(
         behandlingId: BehandlingId,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ): Map<Aktør, Tidslinje<Boolean>> {
+        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId.id)
+        val barnasAktører = andelerTilkjentYtelse.filter { !it.erSøkersAndel() }.map { it.aktør }.toSet()
+
         val barnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer =
             endretUtbetalingAndeler
-                .tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer()
+                .tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer(barnasAktører)
 
         val utvidetTidslinje =
-            beregningService
-                .hentAndelerTilkjentYtelseForBehandling(behandlingId.id)
+            andelerTilkjentYtelse
                 .tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
 
         return barnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer
@@ -104,13 +107,13 @@ class UtbetalingTidslinjeService(
     }
 }
 
-internal fun Iterable<EndretUtbetalingAndel>.tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer(): Map<Aktør, Tidslinje<EndretUtbetalingAndel>> =
+internal fun Iterable<EndretUtbetalingAndel>.tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer(barnasAktører: Set<Aktør>): Map<Aktør, Tidslinje<EndretUtbetalingAndel>> =
     this
         .filter { !it.skalUtbetales() }
         .flatMap { andel ->
-            andel.personer
-                .filter { it.type == PersonType.BARN }
-                .map { it.aktør to andel }
+            andel.aktører
+                .intersect(barnasAktører)
+                .map { it to andel }
         }.groupBy({ it.first }, { it.second })
         .mapValues { (_, endringer) ->
             endringer

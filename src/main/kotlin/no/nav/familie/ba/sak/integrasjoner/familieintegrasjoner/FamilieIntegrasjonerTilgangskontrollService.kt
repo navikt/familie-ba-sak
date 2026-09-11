@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.config.hentCacheForSaksbehandler
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.tilAdressebeskyttelse
+import no.nav.familie.ba.sak.integrasjoner.tilgangsmaskin.TilgangsmaskinSkyggeService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
@@ -15,6 +16,7 @@ class FamilieIntegrasjonerTilgangskontrollService(
     private val familieIntegrasjonerTilgangskontrollKlient: FamilieIntegrasjonerTilgangskontrollKlient,
     private val cacheManager: CacheManager,
     private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
+    private val tilgangsmaskinSkyggeService: TilgangsmaskinSkyggeService,
 ) {
     fun hentMaskertPersonInfoVedManglendeTilgang(aktør: Aktør): PersonInfoDto? {
         val harTilgang = sjekkTilgangTilPerson(personIdent = aktør.aktivFødselsnummer()).harTilgang
@@ -33,8 +35,11 @@ class FamilieIntegrasjonerTilgangskontrollService(
     fun sjekkTilgangTilPerson(personIdent: String): Tilgang = sjekkTilgangTilPersoner(listOf(personIdent)).values.single()
 
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): Map<String, Tilgang> =
-        cacheManager.hentCacheForSaksbehandler("sjekkTilgangTilPersoner", personIdenter) {
-            familieIntegrasjonerTilgangskontrollKlient.sjekkTilgangTilPersoner(it).associateBy { it.personIdent }
+        cacheManager.hentCacheForSaksbehandler("sjekkTilgangTilPersoner", personIdenter) { identerUtenCache ->
+            familieIntegrasjonerTilgangskontrollKlient
+                .sjekkTilgangTilPersoner(identerUtenCache)
+                .associateBy { it.personIdent }
+                .also { tilganger -> tilgangsmaskinSkyggeService.skyggeSjekkTilgangTilPersoner(identerUtenCache, tilganger) }
         }
 
     fun hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter: List<String>): List<String> {

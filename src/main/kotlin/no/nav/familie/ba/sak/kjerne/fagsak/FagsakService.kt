@@ -355,8 +355,6 @@ class FagsakService(
 
     fun finnOrgnummerForLøpendeFagsaker(): List<String> = fagsakRepository.finnOrgnummerForLøpendeFagsaker()
 
-    fun finnIdenterForLøpendeFagsaker(): List<String> = fagsakRepository.finnIdenterForLøpendeFagsaker()
-
     fun låsOppFagsak(
         fagsakId: Long,
         begrunnelse: String,

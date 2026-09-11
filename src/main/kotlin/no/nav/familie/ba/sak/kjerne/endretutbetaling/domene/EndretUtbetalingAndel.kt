@@ -24,7 +24,7 @@ import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
@@ -48,11 +48,11 @@ data class EndretUtbetalingAndel(
     val behandlingId: Long,
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "PERSON_TIL_ENDRET_UTBETALING_ANDEL",
+        name = "AKTOER_TIL_ENDRET_UTBETALING_ANDEL",
         joinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")],
-        inverseJoinColumns = [JoinColumn(name = "fk_person_id")],
+        inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")],
     )
-    var personer: MutableSet<Person> = mutableSetOf(),
+    var aktører: MutableSet<Aktør> = mutableSetOf(),
     @Column(name = "prosent")
     var prosent: BigDecimal? = null,
     @Column(name = "fom", columnDefinition = "DATE")
@@ -103,7 +103,7 @@ data class EndretUtbetalingAndel(
     }
 
     fun manglerObligatoriskFelt() =
-        personer.isEmpty() ||
+        aktører.isEmpty() ||
             prosent == null ||
             fom == null ||
             tom == null ||
@@ -159,7 +159,7 @@ fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilEndretUtbetalingAndelDto() 
 
 fun EndretUtbetalingAndel.fraEndretUtbetalingAndelDto(
     endretUtbetalingAndelDto: EndretUtbetalingAndelDto,
-    personer: Set<Person>,
+    aktører: List<Aktør>,
 ): EndretUtbetalingAndel {
     this.fom = endretUtbetalingAndelDto.fom
     this.tom = endretUtbetalingAndelDto.tom
@@ -168,7 +168,7 @@ fun EndretUtbetalingAndel.fraEndretUtbetalingAndelDto(
     this.avtaletidspunktDeltBosted = endretUtbetalingAndelDto.avtaletidspunktDeltBosted
     this.søknadstidspunkt = endretUtbetalingAndelDto.søknadstidspunkt
     this.begrunnelse = endretUtbetalingAndelDto.begrunnelse
-    this.personer = personer.toMutableSet()
+    this.aktører = aktører.toMutableSet()
     return this
 }
 
@@ -182,7 +182,7 @@ data class TomEndretUtbetalingAndel(
 sealed interface IUtfyltEndretUtbetalingAndel : IEndretUtbetalingAndel {
     val id: Long
     val behandlingId: Long
-    val personer: Set<Person>
+    val aktører: Set<Aktør>
     val prosent: BigDecimal
     val fom: YearMonth
     val tom: YearMonth
@@ -194,7 +194,7 @@ sealed interface IUtfyltEndretUtbetalingAndel : IEndretUtbetalingAndel {
 data class UtfyltEndretUtbetalingAndel(
     override val id: Long,
     override val behandlingId: Long,
-    override val personer: Set<Person>,
+    override val aktører: Set<Aktør>,
     override val prosent: BigDecimal,
     override val fom: YearMonth,
     override val tom: YearMonth,
@@ -206,7 +206,7 @@ data class UtfyltEndretUtbetalingAndel(
 data class UtfyltEndretUtbetalingAndelDeltBosted(
     override val id: Long,
     override val behandlingId: Long,
-    override val personer: Set<Person>,
+    override val aktører: Set<Aktør>,
     override val prosent: BigDecimal,
     override val fom: YearMonth,
     override val tom: YearMonth,
@@ -227,7 +227,7 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel =
             UtfyltEndretUtbetalingAndelDeltBosted(
                 id = this.id,
                 behandlingId = this.behandlingId,
-                personer = this.personer,
+                aktører = this.aktører,
                 prosent = this.prosent!!,
                 fom = this.fom!!,
                 tom = this.tom!!,
@@ -240,7 +240,7 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel =
             UtfyltEndretUtbetalingAndel(
                 id = this.id,
                 behandlingId = this.behandlingId,
-                personer = this.personer,
+                aktører = this.aktører,
                 prosent = this.prosent!!,
                 fom = this.fom!!,
                 tom = this.tom!!,

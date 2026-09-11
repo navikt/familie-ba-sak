@@ -408,8 +408,8 @@ class PersongrunnlagService(
                     ?.toMutableList() ?: mutableListOf()
             person.bostedsadresser =
                 personInfo.bostedsadresser
-                    .filtrerUtKunNorskeBostedsadresser()
                     .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
+                    .filtrerUtKunNorskeBostedsadresser()
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
                             bostedsadresse = it,
@@ -580,8 +580,8 @@ class PersongrunnlagService(
 
             person.bostedsadresser =
                 adresser.bostedsadresse
-                    .filtrerUtKunNorskeBostedsadresser()
                     .filtrerBortBostedsadresserFørEldsteBarn(eldsteBarnsFødselsdato)
+                    .filtrerUtKunNorskeBostedsadresser()
                     .map {
                         GrBostedsadresse.fraBostedsadresse(
                             bostedsadresse = it,

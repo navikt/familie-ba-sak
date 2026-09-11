@@ -4,20 +4,20 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
 fun lagEndretUtbetalingAndel(
     behandlingId: Long,
-    personer: Set<Person>,
+    aktører: Set<Aktør>,
     fom: YearMonth,
     tom: YearMonth,
     prosent: Int,
 ) = lagEndretUtbetalingAndel(
     behandlingId = behandlingId,
-    personer = personer,
+    aktører = aktører,
     fom = fom,
     tom = tom,
     prosent = BigDecimal(prosent),
@@ -26,7 +26,7 @@ fun lagEndretUtbetalingAndel(
 fun lagEndretUtbetalingAndel(
     id: Long = 0,
     behandlingId: Long = 0,
-    personer: Set<Person>,
+    aktører: Set<Aktør>,
     prosent: BigDecimal = BigDecimal.valueOf(100),
     fom: YearMonth = YearMonth.now().minusMonths(1),
     tom: YearMonth? = YearMonth.now(),
@@ -36,7 +36,7 @@ fun lagEndretUtbetalingAndel(
 ) = EndretUtbetalingAndel(
     id = id,
     behandlingId = behandlingId,
-    personer = personer.toMutableSet(),
+    aktører = aktører.toMutableSet(),
     prosent = prosent,
     fom = fom,
     tom = tom,
@@ -48,13 +48,13 @@ fun lagEndretUtbetalingAndel(
 
 fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     behandlingId: Long,
-    personer: Set<Person>,
+    aktører: Set<Aktør>,
     fom: YearMonth,
     tom: YearMonth?,
     prosent: Int,
 ) = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     behandlingId = behandlingId,
-    personer = personer,
+    aktører = aktører,
     fom = fom,
     tom = tom,
     prosent = BigDecimal(prosent),
@@ -63,7 +63,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
 fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     id: Long = 0,
     behandlingId: Long = 0,
-    personer: Set<Person>,
+    aktører: Set<Aktør>,
     prosent: BigDecimal = BigDecimal.valueOf(100),
     fom: YearMonth = YearMonth.now().minusMonths(1),
     tom: YearMonth? = YearMonth.now(),
@@ -76,7 +76,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
         EndretUtbetalingAndel(
             id = id,
             behandlingId = behandlingId,
-            personer = personer.toMutableSet(),
+            aktører = aktører.toMutableSet(),
             prosent = prosent,
             fom = fom,
             tom = tom,

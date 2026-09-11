@@ -10,9 +10,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsSv
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsSvar.SATSENDRING_EØS_INGEN_RELEVANTE_UTENLANDSK_PERIODEBELØP
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsSvar.SATSENDRING_EØS_KJØRT_OK
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -21,23 +19,24 @@ import no.nav.familie.ba.sak.kjerne.eøs.sats.SatsendringEøsValidering.validerA
 import no.nav.familie.ba.sak.kjerne.eøs.sats.filtrerErRelevantForSats
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 
 @Service
 class AutovedtakSatsendringEøsService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val behandlingService: BehandlingService,
     private val satsendringEøsKjøringService: SatsendringEøsKjøringService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
     private val autovedtakService: AutovedtakService,
     private val taskRepository: TaskRepositoryWrapper,
+    private val simuleringService: SimuleringService,
 ) : AutovedtakBehandlingService<SatsendringEøsData> {
     override fun skalAutovedtakBehandles(behandlingsdata: SatsendringEøsData): Boolean {
         val sisteVedtatteBehandling =
@@ -82,13 +81,15 @@ class AutovedtakSatsendringEøsService(
 
         val forrigeSats = EøsSatserRegister.hentSatsForLandIMåned(utbetalingsland, nySats.fom.minusMonths(1))
 
-        relevanteUtenlandskPeriodebeløp.forEach { utenlandskPeriodebeløp ->
-            validerAtUtenlandskPeriodebeløpKanOppdateresAutomatisk(
-                utenlandskPeriodebeløp = utenlandskPeriodebeløp,
-                forrigeSats = forrigeSats,
-                nySats = nySats,
-            )
-        }
+        relevanteUtenlandskPeriodebeløp
+            .filter { it.beløp != nySats.beløp }
+            .forEach { utenlandskPeriodebeløp ->
+                validerAtUtenlandskPeriodebeløpKanOppdateresAutomatisk(
+                    utenlandskPeriodebeløp = utenlandskPeriodebeløp,
+                    forrigeSats = forrigeSats,
+                    nySats = nySats,
+                )
+            }
 
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
@@ -99,6 +100,13 @@ class AutovedtakSatsendringEøsService(
                     satsendringEøsKjøringService.settBehandlingId(fagsakId, utbetalingsland, satsTidspunkt, behandling.id)
                 },
             )
+
+        simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterBehandlingsresultat)
+
+        val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingEtterBehandlingsresultat.id)
+        if (feilutbetaling > BigDecimal.ZERO) {
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av EØS-satsendring fører til feilutbetaling.\nEndring av EØS-sats må håndteres manuelt.")
+        }
 
         val opprettetVedtak =
             autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(

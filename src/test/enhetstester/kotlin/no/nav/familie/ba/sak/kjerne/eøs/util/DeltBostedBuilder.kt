@@ -77,7 +77,7 @@ fun Iterable<DeltBosted>.tilEndreteUtebetalingAndeler(): List<EndretUtbetalingAn
             deltBosted.barnPersoner.map {
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     behandlingId = deltBosted.behandlingId,
-                    personer = setOf(it),
+                    aktører = setOf(it.aktør),
                     fom = deltBosted.fom!!,
                     tom = deltBosted.tom,
                     prosent = deltBosted.prosent!!,

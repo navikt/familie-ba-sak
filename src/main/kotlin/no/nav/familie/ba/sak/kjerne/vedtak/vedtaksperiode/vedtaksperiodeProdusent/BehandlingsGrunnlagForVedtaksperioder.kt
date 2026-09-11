@@ -521,16 +521,16 @@ fun List<InternPeriodeOvergangsstønad>.filtrerPåAktør(aktør: Aktør) = this.
 fun List<AndelTilkjentYtelse>.filtrerPåAktør(aktør: Aktør) = this.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == aktør }
 
 @JvmName("endredeUtbetalingerFiltrerPåAktør")
-fun List<IUtfyltEndretUtbetalingAndel>.filtrerPåAktør(aktør: Aktør) = this.filter { it.personer.any { person -> person.aktør == aktør } }
+fun List<IUtfyltEndretUtbetalingAndel>.filtrerPåAktør(aktør: Aktør) = this.filter { aktør in it.aktører }
 
 @JvmName("utfyltKompetanseFiltrerPåAktør")
-fun List<UtfyltKompetanse>.filtrerPåAktør(aktør: Aktør) = this.filter { it.barnAktører.contains(aktør) }
+fun List<UtfyltKompetanse>.filtrerPåAktør(aktør: Aktør) = this.filter { aktør in it.barnAktører }
 
 @JvmName("utfyltValutakursFiltrerPåAktør")
-fun List<UtfyltValutakurs>.filtrerPåAktør(aktør: Aktør) = this.filter { it.barnAktører.contains(aktør) }
+fun List<UtfyltValutakurs>.filtrerPåAktør(aktør: Aktør) = this.filter { aktør in it.barnAktører }
 
 @JvmName("utfyltUtenlandskPeriodebeløpFiltrerPåAktør")
-fun List<UtfyltUtenlandskPeriodebeløp>.filtrerPåAktør(aktør: Aktør) = this.filter { it.barnAktører.contains(aktør) }
+fun List<UtfyltUtenlandskPeriodebeløp>.filtrerPåAktør(aktør: Aktør) = this.filter { aktør in it.barnAktører }
 
 private fun Periode<VedtaksperiodeGrunnlagForPerson>.erInnvilgetEllerEksplisittAvslag(): Boolean {
     val erInnvilget = verdi is VedtaksperiodeGrunnlagForPersonVilkårInnvilget

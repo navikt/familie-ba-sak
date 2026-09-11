@@ -5,12 +5,10 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
-import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,12 +22,10 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         TilkjentYtelse(behandling = behandling, endretDato = LocalDate.now(), opprettetDato = LocalDate.now())
     val beløp = BigDecimal(100)
 
-    val barnAktør1 = randomAktør(randomBarnFnr(10))
-    val barnAktør2 = randomAktør(randomBarnFnr(14))
+    val barn1 = randomAktør(randomBarnFnr(10))
+    val barn2 = randomAktør(randomBarnFnr(14))
 
-    val barn1 = tilfeldigPerson(personType = PersonType.BARN, aktør = barnAktør1)
-    val barn2 = tilfeldigPerson(personType = PersonType.BARN, aktør = barnAktør2)
-    val søker = tilfeldigPerson(personType = PersonType.SØKER)
+//    val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
     @BeforeEach
     fun setUp() {
@@ -85,7 +81,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             ).map {
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     behandlingId = behandling.id,
-                    personer = setOf(barn1),
+                    aktører = setOf(barn1),
                     fom = it.fom,
                     tom = it.tom,
                     prosent = 50,
@@ -100,7 +96,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             ).map {
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     behandlingId = behandling.id,
-                    personer = setOf(barn2),
+                    aktører = setOf(barn2),
                     fom = it.fom,
                     tom = it.tom,
                     prosent = 50,
@@ -121,64 +117,64 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         assertEquals(8, andelerTilkjentYtelserEtterEUAList.size)
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør1 }[0],
-            barn1.aktør.aktivFødselsnummer(),
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barn1 }[0],
+            barn1.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 1),
             YearMonth.of(2018, 3),
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør1 }[1],
-            barn1.aktør.aktivFødselsnummer(),
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barn1 }[1],
+            barn1.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 4),
             YearMonth.of(2018, 4),
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør1 }[2],
-            barn1.aktør.aktivFødselsnummer(),
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barn1 }[2],
+            barn1.aktivFødselsnummer(),
             beløp,
             YearMonth.of(2018, 10),
             YearMonth.of(2021, 8),
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør2 }[0],
-            barn2.aktør.aktivFødselsnummer(),
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barn2 }[0],
+            barn2.aktivFødselsnummer(),
             beløp,
             YearMonth.of(2018, 2),
             YearMonth.of(2018, 3),
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør2 }[1],
-            barn2.aktør.aktivFødselsnummer(),
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barn2 }[1],
+            barn2.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 4),
             YearMonth.of(2018, 5),
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør2 }[2],
-            barn2.aktør.aktivFødselsnummer(),
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barn2 }[2],
+            barn2.aktivFødselsnummer(),
             beløp,
             YearMonth.of(2018, 6),
             YearMonth.of(2018, 6),
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør2 }[3],
-            barn2.aktør.aktivFødselsnummer(),
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barn2 }[3],
+            barn2.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 7),
             YearMonth.of(2018, 8),
         )
 
         verifiserAndelTilkjentYtelse(
-            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barnAktør2 }[4],
-            barn2.aktør.aktivFødselsnummer(),
+            andelerTilkjentYtelserEtterEUAList.filter { it.aktør == barn2 }[4],
+            barn2.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 11),
             YearMonth.of(2021, 9),
@@ -199,13 +195,13 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
     }
 
     private fun lagAndelTilkjentYtelse(
-        barn: Person,
+        barn: Aktør,
         fom: YearMonth,
         tom: YearMonth,
     ) = AndelTilkjentYtelse(
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse,
-        aktør = barn.aktør,
+        aktør = barn,
         kalkulertUtbetalingsbeløp = beløp.toInt(),
         nasjonaltPeriodebeløp = beløp.toInt(),
         stønadFom = fom,

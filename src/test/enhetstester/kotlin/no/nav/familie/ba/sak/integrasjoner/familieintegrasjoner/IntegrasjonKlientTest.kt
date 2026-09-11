@@ -6,15 +6,22 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.mockk
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.kontrakter.felles.BrukerIdType
+import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.dokarkiv.AvsluttSakRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.DokarkivBruker
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClient
 import java.net.URI
+import java.time.LocalDateTime
 
 class IntegrasjonKlientTest {
     private lateinit var wiremockServerItem: WireMockServer
@@ -26,6 +33,65 @@ class IntegrasjonKlientTest {
         wiremockServerItem.start()
         integrasjonKlient = IntegrasjonKlient(URI.create(wiremockServerItem.baseUrl()), RestClient.create(), mockk(), 1)
     }
+
+    @Test
+    fun `avsluttSak - skal avslutte sak i dokarkiv`() {
+        // Arrange
+        wiremockServerItem.stubFor(
+            WireMock
+                .patch(WireMock.urlEqualTo("/arkiv/avsluttSak"))
+                .willReturn(WireMock.okJson("""{"data":null,"status":"SUKSESS","melding":"OK"}""")),
+        )
+
+        // Act
+        integrasjonKlient.avsluttSak(lagAvsluttSakRequest())
+
+        // Assert
+        wiremockServerItem.verify(WireMock.patchRequestedFor(WireMock.urlEqualTo("/arkiv/avsluttSak")))
+    }
+
+    @Test
+    fun `avsluttSak - skal ikke kaste feil når dokarkiv svarer 404 fordi fagsaken ikke har noen arkivsak`() {
+        // Arrange
+        wiremockServerItem.stubFor(
+            WireMock
+                .patch(WireMock.urlEqualTo("/arkiv/avsluttSak"))
+                .willReturn(
+                    WireMock
+                        .aResponse()
+                        .withStatus(404)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""{"data":null,"status":"FEILET","melding":"[dokarkiv.avsluttSak][Feil ved avslutting av sak i dokarkiv av journalpost ][org.springframework.web.client.HttpClientErrorException${'$'}NotFound]"}"""),
+                ),
+        )
+
+        // Act & Assert
+        assertDoesNotThrow { integrasjonKlient.avsluttSak(lagAvsluttSakRequest()) }
+    }
+
+    @Test
+    fun `avsluttSak - skal kaste feil når 404 ikke kommer fra dokarkiv`() {
+        // Arrange
+        wiremockServerItem.stubFor(
+            WireMock
+                .patch(WireMock.urlEqualTo("/arkiv/avsluttSak"))
+                .willReturn(WireMock.aResponse().withStatus(404)),
+        )
+
+        // Act & Assert
+        assertThrows<HttpClientErrorException.NotFound> { integrasjonKlient.avsluttSak(lagAvsluttSakRequest()) }
+    }
+
+    private fun lagAvsluttSakRequest() =
+        AvsluttSakRequest(
+            tema = Tema.BAR,
+            fagsakId = "1",
+            fagsaksystem = Fagsystem.BA,
+            bruker = DokarkivBruker(BrukerIdType.FNR, "12345678910"),
+            opprettetDato = LocalDateTime.now().minusYears(20),
+            avsluttetDato = LocalDateTime.now(),
+            administrativEnhet = "4820",
+        )
 
     @Test
     fun `hentEnheterSomNavIdentHarTilgangTil - skal hente enheter som NAV-ident har tilgang til`() {

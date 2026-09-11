@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -23,20 +24,24 @@ import java.time.LocalDateTime
 class AvstemmingServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val økonomiKlient = mockk<ØkonomiKlient>()
+    private val oppdragBackendKlient = mockk<OppdragBackendKlient>()
     private val beregningService = mockk<BeregningService>()
     private val taskService = mockk<TaskService>()
     private val batchRepository = mockk<BatchRepository>()
     private val dataChunkRepository = mockk<DataChunkRepository>()
     private val utbetalingsTidslinjeService = mockk<UtbetalingsTidslinjeService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
     private val avstemmingService =
         AvstemmingService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             økonomiKlient = økonomiKlient,
+            oppdragBackendKlient = oppdragBackendKlient,
             beregningService = beregningService,
             taskService = taskService,
             batchRepository = batchRepository,
             dataChunkRepository = dataChunkRepository,
             utbetalingsTidslinjeService = utbetalingsTidslinjeService,
+            featureToggleService = featureToggleService,
         )
 
     @Nested

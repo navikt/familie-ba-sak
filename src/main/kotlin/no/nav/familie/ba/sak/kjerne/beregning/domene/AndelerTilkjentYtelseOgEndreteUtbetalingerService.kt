@@ -96,7 +96,7 @@ private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
         andelTilkjentYtelse: AndelTilkjentYtelse,
         endretUtbetalingAndel: EndretUtbetalingAndel,
     ): Boolean =
-        endretUtbetalingAndel.personer.any { it.aktør == andelTilkjentYtelse.aktør } &&
+        andelTilkjentYtelse.aktør in endretUtbetalingAndel.aktører &&
             endretUtbetalingAndel.fom != null &&
             endretUtbetalingAndel.tom != null &&
             endretUtbetalingAndel.periode.overlapperHeltEllerDelvisMed(andelTilkjentYtelse.periode)
@@ -144,12 +144,12 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     fun overlapperMed(månedPeriode: MånedPeriode) = endretUtbetalingAndel.overlapperMed(månedPeriode)
 
     val periode get() = endretUtbetalingAndel.periode
-    val personer get() = endretUtbetalingAndel.personer
+    val aktører get() = endretUtbetalingAndel.aktører
     val begrunnelse get() = endretUtbetalingAndel.begrunnelse
     val søknadstidspunkt get() = endretUtbetalingAndel.søknadstidspunkt
     val avtaletidspunktDeltBosted get() = endretUtbetalingAndel.avtaletidspunktDeltBosted
     val prosent get() = endretUtbetalingAndel.prosent
-    val personIdenter get() = endretUtbetalingAndel.personer.map { it.aktør.aktivFødselsnummer() }
+    val personIdenter get() = endretUtbetalingAndel.aktører.map { it.aktivFødselsnummer() }
     val årsak get() = endretUtbetalingAndel.årsak
     val id get() = endretUtbetalingAndel.id
     val fom get() = endretUtbetalingAndel.fom

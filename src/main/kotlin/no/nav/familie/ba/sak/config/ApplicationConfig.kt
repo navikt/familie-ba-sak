@@ -25,7 +25,10 @@ import org.springframework.resilience.annotation.EnableResilientMethods
 )
 @EnableResilientMethods
 @ConfigurationPropertiesScan
-@Import(no.nav.familie.sikkerhet.context.FamilieFellesSpringSecurityKonfigurasjon::class)
+@Import(
+    no.nav.familie.sikkerhet.context.FamilieFellesSpringSecurityKonfigurasjon::class,
+    no.nav.familie.tilgangsmaskin.TilgangsmaskinKlientConfig::class,
+)
 class ApplicationConfig {
     @Bean
     fun logFilter(): FilterRegistrationBean<LogFilter> {

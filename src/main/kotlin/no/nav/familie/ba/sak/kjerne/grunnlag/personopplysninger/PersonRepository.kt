@@ -7,10 +7,16 @@ import org.springframework.data.jpa.repository.Query
 
 interface PersonRepository : JpaRepository<Person, Long> {
     @Query(
-        "SELECT p FROM Person p" +
-            " WHERE p.aktør = :aktør",
+        """
+            SELECT p
+            FROM Person p
+            JOIN p.personopplysningGrunnlag gr
+            WHERE p.aktør = :aktør
+              AND gr.aktiv = true
+            ORDER BY gr.opprettetTidspunkt DESC, p.id DESC
+        """,
     )
-    fun findByAktør(aktør: Aktør): List<Person>
+    fun finnPersonerIAktiveGrunnlag(aktør: Aktør): List<Person>
 
     @Query(
         """

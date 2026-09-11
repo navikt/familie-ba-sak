@@ -1,11 +1,11 @@
 # AGENTS.md — familie-ba-sak
 
-Backend for case management of child benefit (barnetrygd). Spring Boot 4 + Kotlin 2, Maven, PostgreSQL, Flyway, Kafka.  
+Backend for case management of child benefit (barnetrygd). Spring Boot 4 + Kotlin 2, Maven, PostgreSQL, Flyway, Kafka.
 Runs on Nais (GCP). Owned by team-baks (teamfamilie namespace).
 
 ## Build & Test Commands
 
-Always include `-Dkotlin.compiler.daemon=false` in every `mvn` command.  
+Always include `-Dkotlin.compiler.daemon=false` in every `mvn` command.
 The Kotlin compiler daemon fails to start in this environment due to RMI registry permission restrictions (`Operation not permitted`), so the compiler must run in-process instead.
 
 ```bash
@@ -35,9 +35,13 @@ mvn test -Dtest=MyTestClass -Dkotlin.compiler.daemon=false
 mvn test -Dtest=MyTestClass#myMethod -Dkotlin.compiler.daemon=false
 ```
 
-CI (pull requests) runs ktlint, unit tests, integration tests, and end-to-end tests (both toggle variants) in parallel.  
-Sonar runs after unit and integration tests complete. All jobs must pass.  
-Push to main (except changes in paths ignored by the workflow, e.g. `**.md`) builds with tests skipped and deploys dev-gcp → prod-gcp.
+Note: `mvn verify` does **not** run ktlint automatically — the Antrun plugin is only in `<pluginManagement>`, not bound into the actual build lifecycle. ktlint is enforced by a dedicated CI job on pull requests instead; run it locally with the command above before pushing.
+
+There is no failsafe plugin — integration tests run via surefire using the JUnit tag `integration`, not the `*IT` naming convention.
+
+CI (pull requests) runs ktlint, unit tests, integration tests, and end-to-end tests (both toggle variants) in parallel.
+Sonar runs after unit and integration tests complete. All jobs must pass.
+Push to main (except changes in paths ignored by the workflow, e.g. `**.md`) builds with tests skipped (`skip-tests: true`) and deploys dev-gcp → prod-gcp.
 
 ## Project Structure
 
@@ -45,8 +49,9 @@ Push to main (except changes in paths ignored by the workflow, e.g. `**.md`) bui
 src/
   main/kotlin/no/nav/familie/ba/sak/
     kjerne/                    # Domain logic (behandling, vedtak, beregning, eøs, vilkårsvurdering, ...)
+                               # REST controllers live alongside services here, not in a separate api/ layer
     config/                    # Spring configuration
-    ekstern/                   # External-facing APIs (pensjon, etc.)
+    ekstern/                   # External-facing APIs (pensjon, etc.) and DTOs (restDomene/)
     integrasjoner/             # Clients for other services (PDL, økonomi, ...)
     sikkerhet/                 # Auth/security
     statistikk/                # Statistics/reporting
@@ -65,56 +70,69 @@ src/
     resources/cucumber/        # Cucumber .feature files (BDD scenarios)
 ```
 
+## Architecture
+
+- No separate `api/` layer: REST controllers live alongside domain services in `kjerne/` (e.g. `kjerne/fagsak/FagsakController.kt`). DTOs mostly live in `ekstern/restDomene/`.
+- Domain entities/repositories are organized with a `domene/` subpackage in most (not all) domain areas — some, like `kjerne/fagsak/`, keep entity and repository directly in the package root.
+- Behandlingssteg (case processing step) pattern lives in `kjerne/steg/`: `BehandlingSteg<T>` interface (with `StegType` enum in the same file), orchestrated by `StegService`.
+- External contracts (`no.nav.familie.kontrakter:*`, `no.nav.familie.eksterne.kontrakter:*`) are consumed as published artifacts, not as a local API layer.
+
 ## Code Style
-
-### Language
-
-Write everything in Norwegian — code (variable names, class names, methods, comments), documentation, commit messages, PR descriptions, and error messages.  
-Exceptions are technical keywords, framework APIs, and standardized terms that don't translate naturally (e.g. `fun`, `class`, `repository`, `service`).
 
 ### Minimal Editing
 
-When fixing a bug or implementing a feature, change only what is necessary.  
-Do not rename variables, restructure working code, or refactor beyond the task at hand.  
+When fixing a bug or implementing a feature, change only what is necessary.
+Do not rename variables, restructure working code, or refactor beyond the task at hand.
 Keep diffs small and focused so they are easy to review.
+
+### Logging & PII
+
+Use `secureLogger` when logging national identity numbers (fødselsnummer) or other PII — never the standard logger. Import the shared top-level value `no.nav.familie.ba.sak.common.secureLogger` (defined in `common/Utils.kt`) rather than instantiating a new logger, unless the file you're editing already does otherwise.
 
 ### Testing Conventions
 
 - **Unit tests** go in `src/test/enhetstester/`. No `@Tag` needed (selected by excluding `integration` and `verdikjedetest` tags).
-- **Integration tests** go in `src/test/integrasjonstester/`. Must extend `AbstractSpringIntegrationTest` (which adds `@Tag("integration")` and activates mock profiles).
-- **End-to-end tests** extend `AbstractVerdikjedetest` with `@Tag("verdikjedetest")`. Use WireMock on port 1337.
+- **Integration tests** go in `src/test/integrasjonstester/`. Must extend `AbstractSpringIntegrationTest` (which adds `@Tag("integration")` and activates mock/fake profiles).
+- **End-to-end tests** extend `AbstractVerdikjedetest` with `@Tag("verdikjedetest")`. Note it also inherits `@Tag("integration")` via `WebSpringAuthTestRunner` — this is why the `integrasjonstest` profile explicitly excludes `verdikjedetest`. Uses WireMock via `@EnableWireMock`.
 - **Test data generators** live in `src/test/testdata/kotlin/.../datagenerator/`. Use these instead of creating ad-hoc test objects.
 - **Cucumber tests** are in `src/test/resources/cucumber/` with step defs in enhetstester. Run as unit tests (no DB needed). Controlled by `RunCucumberTest.kt`.
 - All three test source roots (`enhetstester`, `integrasjonstester`, `testdata`) are registered via `build-helper-maven-plugin`.
 - Test execution order is randomized (`runOrder=random`).
-- Integration tests require Docker (Testcontainers). They will fail without a running Docker daemon.
+- Integration tests require Docker (Testcontainers, JDBC `jdbc:tc:postgresql:` URL under profile `testcontainers`). They will fail without a running Docker daemon.
 - Structure test bodies with `// Arrange`, `// Act`, and `// Assert` comments. Use `// Act & Assert` when combined, e.g. with `assertThrows { ... }`.
+- Prefer AssertJ (`assertThat`) for new assertions. The codebase historically also uses JUnit Jupiter assertions and, rarely, Hamcrest — don't copy that pattern in new code.
+- Testnamn: backticks with a `skal` prefix, e.g. `` fun `skal beregne riktig beløp`() ``. Use `@Nested` for grouping.
 
 ### Key Dependencies & Frameworks
 
 - **JDK 25** (required; set in `pom.xml` and CI workflows)
 - **Spring Boot 4** with Jetty (Tomcat excluded), Spring Data JPA, Spring Kafka
-- **Kotlin 2** with `spring` and `jpa` compiler plugins (allopen/noarg)
-- **Auth**: `spring-security` for Azure AD / TokenX token validation
+- **Kotlin 2** with `spring` and `jpa` compiler plugins (allopen/noarg), language/API version 2.3
+- **Auth**: Spring Security for Azure AD and TokenX token validation
 - **Async tasks**: Nav's `prosessering` framework for background jobs
-- **Feature toggles**: Unleash. Toggle locally with `-D<flag>=true/false` as VM option.
-- **Coverage**: Kover (not JaCoCo) — reports go to `target/coverage/` or `target/site/kover/`
-- **JSON**: Jackson 3
+- **Feature toggles**: Unleash. Mock via profile `mock-unleash` (`FakeFeatureToggleService`) in tests; toggle locally with `-D<flag>=true/false` as VM option.
+- **Coverage**: Kover (not JaCoCo) — reports go to `target/coverage/{enhetstest,integrasjonstest}.xml`
 - **Mocking**: MockK (not Mockito)
-- **Cucumber 7.x** for BDD tests
+- **Cucumber** for BDD tests
 
-## Git Workflow
+## Database
 
-- Merge to `main` → auto-deploy: build → dev-gcp → prod-gcp.
-- Emergency deploy: manual workflow `manual-deploy-prod` (build and deploy) or `manual-deploy-with-image` (deploy existing image).
-- Nais manifests: `.nais/app-dev.yaml`, `.nais/app-prod.yaml`.
+- Flyway migrations in `src/main/resources/db/migration/` (bulk of migrations) and `src/main/resources/db/init/` (base tables, V1–V2 only).
+- Naming convention: `V<n>__snake_case_description.sql` with a sequential integer (not a timestamp). Check the highest existing `V<n>` before creating a new one.
+- Migrations that have been merged to main are immutable — write a new migration instead of editing an existing one.
 
 ## Auth Model
 
-- **Inbound**: Azure AD (from frontend `familie-ba-sak-frontend`, mottak, klage, pensjon, bidrag). TokenX from `familie-ba-minside-frontend` (citizen self-service).
-- **Outbound**: Azure AD on-behalf-of / client_credentials to integrasjoner, brev, klage, oppdrag, PDL, etc.
+- **Inbound**: Azure AD (from frontend `familie-ba-sak-frontend`, mottak, klage, pensjon, bidrag). TokenX on `/api/minside/**` for `familie-ba-minside-frontend` (citizen self-service).
+- **Outbound**: Azure AD on-behalf-of / client_credentials (via Texas / `token-klient`) to integrasjoner, brev, klage, oppdrag, PDL, and the Tilgangsmaskin (OBO only).
 - Role groups configured in Nais manifest (veileder, saksbehandler, beslutter, forvaltning, strengt fortrolig, fortrolig).
-- Namespace: `teamfamilie`. Azure AD + TokenX enabled. Kafka pool: `nav-dev`/`nav-prod`.
+- Namespace: `teamfamilie`. Kafka pool: `nav-dev`/`nav-prod`.
+
+## Git Workflow
+
+- Merge to `main` → auto-deploy: build (tests skipped) → dev-gcp → prod-gcp.
+- Emergency deploy: manual workflow `manual-deploy-prod` (runs full test suite, then build and deploy) or `manual-deploy-with-image` (deploy existing image).
+- Nais manifests: `.nais/app-dev.yaml`, `.nais/app-prod.yaml`.
 
 ## Boundaries
 

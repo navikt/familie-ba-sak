@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
@@ -78,13 +79,13 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
                     årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                 )
 
-            val aktør = lagPerson()
+            val aktør = lagAktør()
 
             every { behandlingHentOgPersisterService.hent(any()) } returns behandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
                 listOf(
                     lagAndelTilkjentYtelse(
-                        person = aktør,
+                        aktør = aktør,
                         fom = YearMonth.now().minusMonths(2),
                         tom = YearMonth.now().minusMonths(1),
                     ),
@@ -92,7 +93,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
             every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns
                 listOf(
                     lagEndretUtbetalingAndel(
-                        personer = setOf(aktør),
+                        aktører = setOf(aktør),
                         fom = YearMonth.now().minusMonths(3),
                         tom = YearMonth.now().minusMonths(2),
                         årsak = Årsak.ENDRE_MOTTAKER,
@@ -118,18 +119,18 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
                     årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                 )
 
-            val aktør = lagPerson()
+            val aktør = lagAktør()
 
             every { behandlingHentOgPersisterService.hent(any()) } returns behandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
                 listOf(
                     lagAndelTilkjentYtelse(
-                        person = aktør,
+                        aktør = aktør,
                         fom = YearMonth.now().minusMonths(3),
                         tom = YearMonth.now().minusMonths(2),
                     ),
                     lagAndelTilkjentYtelse(
-                        person = aktør,
+                        aktør = aktør,
                         fom = YearMonth.now().minusMonths(2),
                         tom = YearMonth.now().minusMonths(1),
                     ),
@@ -137,7 +138,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
             every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns
                 listOf(
                     lagEndretUtbetalingAndel(
-                        personer = setOf(aktør),
+                        aktører = setOf(aktør),
                         fom = YearMonth.now().minusMonths(3),
                         tom = YearMonth.now().minusMonths(1),
                         årsak = Årsak.ENDRE_MOTTAKER,

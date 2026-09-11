@@ -99,6 +99,11 @@ data class Adresse(
     }
 }
 
+/**
+ * Ugyldige kombinasjoner av fom og tom, som kan oppstå ved dårlig datakvalitet.
+ */
+fun Adresse.harUgyldigPeriode(): Boolean = erFomOgTomNull() || erFomOgTomSamme() || erFomEtterTom()
+
 fun Adresse.erSammeAdresse(annen: Adresse?): Boolean =
     when {
         annen == null -> false
@@ -156,7 +161,7 @@ fun List<Adresse>.lagTidslinjeForAdresser(
  **/
 fun List<Adresse>.filtrereUgyldigeAdresser(): List<Adresse> {
     val filtrert =
-        filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
+        filterNot { it.harUgyldigPeriode() }
             .groupBy { it.gyldigFraOgMed to it.gyldigTilOgMed }
             .values
             .map { likePerioder ->
@@ -173,7 +178,7 @@ fun List<Adresse>.filtrereUgyldigeAdresser(): List<Adresse> {
  **/
 fun List<Adresse>.filtrereUgyldigeOppholdsadresser(): List<Adresse> {
     val filtrert =
-        filterNot { it.erFomOgTomNull() || it.erFomOgTomSamme() || it.erFomEtterTom() }
+        filterNot { it.harUgyldigPeriode() }
             .velgSvalbardAdresserForIdentiskePerioder()
             .velgAdresserMedSenestTomVedLikFom()
 

@@ -15,6 +15,10 @@ spec:
   image: {{image}}
   port: 8089
   leaderElection: true
+  startup:
+    path: /internal/health/liveness
+    periodSeconds: 10
+    failureThreshold: 30
   liveness:
     path: /internal/health/liveness
     initialDelay: 30
@@ -102,6 +106,9 @@ spec:
           cluster: dev-gcp
         - application: familie-integrasjoner
           cluster: dev-fss
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
+          cluster: dev-gcp
         - application: familie-ba-infotrygd-feed
           cluster: dev-fss
         - application: familie-ba-infotrygd
@@ -146,7 +153,7 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: preprod
     - name: JDK_JAVA_OPTIONS
-      value: "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp"
+      value: "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -Dorg.apache.avro.SERIALIZABLE_PACKAGES=no.nav.person.pdl.aktor.v2"
     - name: APP_VERSION
       value: "{{ VERSION }}"
     - name: APP_BRANCH

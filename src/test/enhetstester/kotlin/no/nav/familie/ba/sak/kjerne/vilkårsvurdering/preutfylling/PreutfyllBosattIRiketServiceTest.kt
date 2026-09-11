@@ -128,6 +128,79 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
+    fun `skal gi ett oppfylt bosatt i riket vilkår fra eldste barns fødselsdato for søker som flyttet innenfor Norge mindre enn 12 mnd før fødselen`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val barnFødselsdato = LocalDate.now().minusMonths(1)
+        val søkerAktør = lagAktør()
+        val barnAktør = lagAktør()
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                barnasFødselsdatoer = listOf(barnFødselsdato),
+                søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                barnasIdenter = listOf(barnAktør.aktivFødselsnummer()),
+                barnAktør = listOf(barnAktør),
+                søkerAktør = søkerAktør,
+            ).also { grunnlag ->
+                grunnlag.personer.forEach {
+                    it.statsborgerskap = emptyList<GrStatsborgerskap>().toMutableList()
+                    when (it.type) {
+                        PersonType.SØKER -> {
+                            // Historiske adresser fra PDL mangler til-og-med og avsluttes av neste adresse
+                            it.bostedsadresser =
+                                mutableListOf(
+                                    lagGrVegadresseBostedsadresse(
+                                        periode = DatoIntervallEntitet(fom = barnFødselsdato.minusMonths(5)),
+                                        matrikkelId = 22222L,
+                                    ),
+                                    lagGrVegadresseBostedsadresse(
+                                        periode = DatoIntervallEntitet(fom = barnFødselsdato.minusYears(3)),
+                                        matrikkelId = 11111L,
+                                    ),
+                                )
+                        }
+
+                        else -> {
+                            it.bostedsadresser =
+                                mutableListOf(
+                                    lagGrVegadresseBostedsadresse(
+                                        periode = DatoIntervallEntitet(fom = barnFødselsdato),
+                                        matrikkelId = 22222L,
+                                    ),
+                                )
+                        }
+                    }
+                }
+            }
+
+        val vilkårsvurdering =
+            lagVilkårsvurdering(persongrunnlag, behandling).also {
+                it.personResultater = setOf(lagPersonResultat(vilkårsvurdering = it, aktør = søkerAktør))
+            }
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns null
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, listOf(søkerAktør))
+
+        // Assert
+        val vilkårResultater =
+            vilkårsvurdering.personResultater
+                .single { it.aktør == søkerAktør }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(vilkårResultater).hasSize(1)
+
+        val vilkårResultat = vilkårResultater.single()
+        assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
+        assertThat(vilkårResultat.periodeFom).isEqualTo(barnFødselsdato)
+        assertThat(vilkårResultat.periodeTom).isNull()
+        assertThat(vilkårResultat.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + "- Norsk bostedsadresse i minst 12 måneder.")
+    }
+
+    @Test
     fun `skal gi vilkårsresultat IKKE_OPPFYLT hvis bosatt i riket er mindre enn 12 mnd`() {
         // Arrange
         val behandling = lagBehandling()

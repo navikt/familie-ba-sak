@@ -1,9 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.bostedsadresse.GrBostedsadresse.Companion.fregManglendeFlytteDato
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.harUgyldigPeriode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.erFomEtterTom
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -15,13 +19,56 @@ import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
 
 object PersonopplysningsgrunnlagFiltreringUtils {
+    /**
+     * Bosatt i riket-vilkåret krever botid i Norge før eldste barn ble født (12 måneder, 6 måneder ved fødselshendelse).
+     * Bosteds- og oppholdsadresser beholdes derfor fra 12 måneder før eldste barns fødselsdato, slik at flytting innenfor
+     * Norge i denne perioden ikke fremstår som et brudd i botiden.
+     */
+    private const val ANTALL_MÅNEDER_ADRESSEHISTORIKK_FØR_ELDSTE_BARN = 12L
+
     fun List<Bostedsadresse>.filtrerBortBostedsadresserFørEldsteBarn(
         eldsteBarnsFødselsdato: LocalDate,
-    ): List<Bostedsadresse> = this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
+    ): List<Bostedsadresse> = filtrerBortAdresserSomOpphørerFør(cutoffDato = eldsteBarnsFødselsdato.tilCutoffDatoForAdresser()) { Adresse.opprettFra(it) }
 
     fun List<Oppholdsadresse>.filtrerBortOppholdsadresserFørEldsteBarn(
         eldsteBarnsFødselsdato: LocalDate,
-    ): List<Oppholdsadresse> = this.filter { it.gyldigTilOgMed?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
+    ): List<Oppholdsadresse> = filtrerBortAdresserSomOpphørerFør(cutoffDato = eldsteBarnsFødselsdato.tilCutoffDatoForAdresser()) { Adresse.opprettFra(it) }
+
+    private fun LocalDate.tilCutoffDatoForAdresser(): LocalDate = minusMonths(ANTALL_MÅNEDER_ADRESSEHISTORIKK_FØR_ELDSTE_BARN)
+
+    /**
+     * Historiske adresser fra PDL mangler ofte til-og-med-dato og opphører implisitt når neste adresse begynner.
+     * En adresse uten til-og-med regnes derfor som opphørt før cutoff-datoen dersom en annen adresse har fra-og-med som er
+     * senere enn dens egen, men ikke etter cutoff-datoen – uavhengig av rekkefølgen i listen. Adresser med lik fra-og-med
+     * avslutter ikke hverandre, og adresser uten fra-og-med beholdes alltid.
+     *
+     * Adresser med ugyldig periode og adresser med manglende flyttedato fra Freg (0001-01-01) avslutter ikke andre adresser
+     *
+     */
+    private fun <T> List<T>.filtrerBortAdresserSomOpphørerFør(
+        cutoffDato: LocalDate,
+        tilAdresse: (T) -> Adresse,
+    ): List<T> {
+        val adresser = map { it to tilAdresse(it) }
+        val fomDatoerSomAvslutterAndreAdresser =
+            adresser
+                .map { (_, adresse) -> adresse }
+                .filterNot { it.harUgyldigPeriode() }
+                .mapNotNull { it.fomUtenManglendeFlyttedato() }
+
+        return adresser
+            .filter { (_, adresse) ->
+                val fom = adresse.fomUtenManglendeFlyttedato()
+                val tom = adresse.gyldigTilOgMed
+                when {
+                    tom != null -> tom.isSameOrAfter(cutoffDato)
+                    fom != null -> fomDatoerSomAvslutterAndreAdresser.none { it.isAfter(fom) && it.isSameOrBefore(cutoffDato) }
+                    else -> true
+                }
+            }.map { (original, _) -> original }
+    }
+
+    private fun Adresse.fomUtenManglendeFlyttedato(): LocalDate? = gyldigFraOgMed?.takeUnless { it == fregManglendeFlytteDato }
 
     fun List<DeltBosted>.filtrerBortDeltBostedForSøker(
         personType: PersonType,

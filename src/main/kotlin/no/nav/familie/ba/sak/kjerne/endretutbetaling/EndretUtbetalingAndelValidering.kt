@@ -12,8 +12,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetaling3MndFom
 import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetaling3ÅrFom
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetTidslinjeForOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -82,7 +80,7 @@ object EndretUtbetalingAndelValidering {
         endretUtbetalingAndel.validerUtfyltEndring()
         if (eksisterendeEndringerPåBehandling.any {
                 it.overlapperMed(endretUtbetalingAndel.periode) &&
-                    it.personer.intersect(endretUtbetalingAndel.personer).isNotEmpty()
+                    it.aktører.intersect(endretUtbetalingAndel.aktører).isNotEmpty()
             }
         ) {
             throw FunksjonellFeil(
@@ -97,16 +95,16 @@ object EndretUtbetalingAndelValidering {
         andelTilkjentYtelser: Collection<AndelTilkjentYtelse>,
     ) {
         endretUtbetalingAndel.validerUtfyltEndring()
-        endretUtbetalingAndel.personer.forEach { person ->
+        endretUtbetalingAndel.aktører.forEach { aktør ->
             val minsteDatoForTilkjentYtelse =
                 andelTilkjentYtelser
-                    .filter { it.aktør == person.aktør }
+                    .filter { it.aktør == aktør }
                     .minByOrNull { it.stønadFom }
                     ?.stønadFom
 
             val størsteDatoForTilkjentYtelse =
                 andelTilkjentYtelser
-                    .filter { it.aktør == person.aktør }
+                    .filter { it.aktør == aktør }
                     .maxByOrNull { it.stønadTom }
                     ?.stønadTom
 
@@ -142,10 +140,10 @@ object EndretUtbetalingAndelValidering {
 
         return when (årsak) {
             Årsak.DELT_BOSTED -> {
-                endretUtbetalingAndel.personer.forEach { person ->
+                endretUtbetalingAndel.aktører.forEach { aktør ->
                     val deltBostedPerioder =
                         finnDeltBostedPerioderForPerson(
-                            person = person,
+                            aktør = aktør,
                             vilkårsvurdering = vilkårsvurdering,
                         )
                     validerDeltBosted(
@@ -251,7 +249,7 @@ object EndretUtbetalingAndelValidering {
                 }
 
         endredeUtvidetUtbetalingerAndelerMedÅrsakDeltBosted.forEach { endretPåUtvidetUtbetalinger ->
-            val endretUtbetalingAndelInneholderBarn = endretPåUtvidetUtbetalinger.personer.any { it.type == PersonType.BARN }
+            val endretUtbetalingAndelInneholderBarn = endretPåUtvidetUtbetalinger.andelerTilkjentYtelse.any { !it.erSøkersAndel() }
 
             val deltBostedEndringerISammePeriode =
                 endretUtbetalingAndeler.filter {
@@ -309,12 +307,16 @@ object EndretUtbetalingAndelValidering {
     }
 
     fun finnDeltBostedPerioderForPerson(
-        person: Person?,
+        aktør: Aktør?,
         vilkårsvurdering: Vilkårsvurdering?,
     ): List<MånedPeriode> {
-        if (vilkårsvurdering == null || person == null) return emptyList()
+        if (vilkårsvurdering == null || aktør == null) return emptyList()
+        val søkerAktør =
+            vilkårsvurdering.personResultater.firstOrNull { it.erSøkersResultater() }?.aktør
+                ?: throw FunksjonellFeil("Fant ikke søker i vilkårsvurdering")
+
         val deltBostedPerioder =
-            if (person.type == PersonType.SØKER) {
+            if (aktør == søkerAktør) {
                 vilkårsvurdering
                     .tilOppfyltDeltBostedTidslinjePerAktør()
                     .values
@@ -325,7 +327,7 @@ object EndretUtbetalingAndelValidering {
                 vilkårsvurdering
                     .tilOppfyltDeltBostedTidslinjePerAktør()
                     // Kun relevant med delt bosted tidslinjen for person (barnet)
-                    .getOrDefault(person.aktør, tomTidslinje())
+                    .getOrDefault(aktør, tomTidslinje())
                     .tilSammenhengendeDeltBostedPerioder()
             }
         return deltBostedPerioder

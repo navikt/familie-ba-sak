@@ -78,7 +78,7 @@ class ØkonomiService(
             return
         }
         try {
-            if (featureToggleService.isEnabled(FeatureToggle.OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG_GCP)) {
+            if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP, behandlingId)) {
                 oppdragBackendKlient.iverksettOppdrag(utbetalingsoppdrag)
             } else {
                 økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
@@ -101,7 +101,7 @@ class ØkonomiService(
         behandlingId: Long,
     ): OppdragStatus =
         if (tilkjentYtelseRepository.findByBehandling(behandlingId).skalIverksettesMotOppdrag()) {
-            if (featureToggleService.isEnabled(FeatureToggle.OPPDRAG_MIGRERING_IVERKSETT_OPPDRAG_GCP)) {
+            if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP, behandlingId)) {
                 oppdragBackendKlient.hentStatus(oppdragId)
             } else {
                 økonomiKlient.hentStatus(oppdragId)
@@ -119,7 +119,11 @@ class ØkonomiService(
                 behandlingsId = behandling.id.toString(),
             )
 
-        økonomiKlient.opprettManuellKvitteringPåOppdrag(oppdragId)
+        if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP)) {
+            oppdragBackendKlient.opprettManuellKvitteringPåOppdrag(oppdragId)
+        } else {
+            økonomiKlient.opprettManuellKvitteringPåOppdrag(oppdragId)
+        }
     }
 
     companion object {

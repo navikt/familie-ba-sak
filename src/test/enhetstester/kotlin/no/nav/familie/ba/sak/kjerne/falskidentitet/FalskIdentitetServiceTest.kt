@@ -47,7 +47,7 @@ class FalskIdentitetServiceTest {
 
             every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
             every { pdlRestKlient.hentFalskIdentitet(person.aktør.aktivFødselsnummer()) } returns PdlFalskIdentitet(erFalsk = true)
-            every { personRepository.findByAktør(person.aktør) } returns listOf(person)
+            every { personRepository.finnPersonerIAktiveGrunnlag(person.aktør) } returns listOf(person)
 
             // Act
             val falskIdentitet = falskIdentitetService.hentFalskIdentitet(person.aktør)
@@ -66,7 +66,7 @@ class FalskIdentitetServiceTest {
 
             every { featureToggleService.isEnabled(FeatureToggle.SKAL_HÅNDTERE_FALSK_IDENTITET) } returns true
             every { pdlRestKlient.hentFalskIdentitet(aktør.aktivFødselsnummer()) } returns PdlFalskIdentitet(erFalsk = true)
-            every { personRepository.findByAktør(aktør) } returns emptyList()
+            every { personRepository.finnPersonerIAktiveGrunnlag(aktør) } returns emptyList()
 
             // Act
             val falskIdentitet = falskIdentitetService.hentFalskIdentitet(aktør)

@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -43,11 +42,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 
 class EndretUtbetalingAndelServiceTest {
@@ -84,7 +80,7 @@ class EndretUtbetalingAndelServiceTest {
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                 behandlingId = behandling.id,
-                personer = setOf(barn),
+                aktører = setOf(barn.aktør),
                 årsak = Årsak.DELT_BOSTED,
                 fom = YearMonth.now().minusMonths(5),
                 tom = YearMonth.now().minusMonths(1),
@@ -92,7 +88,7 @@ class EndretUtbetalingAndelServiceTest {
         val restEndretUtbetalingAndel = endretUtbetalingAndel.tilEndretUtbetalingAndelDto()
 
         val andelerTilkjentYtelse =
-            listOf<AndelTilkjentYtelse>(
+            listOf(
                 lagAndelTilkjentYtelse(
                     person = barn,
                     fom = YearMonth.now().minusMonths(10),
@@ -121,6 +117,13 @@ class EndretUtbetalingAndelServiceTest {
                     lagFullstendigVilkårResultat = true,
                     personType = PersonType.BARN,
                     vilkårType = Vilkår.BOR_MED_SØKER,
+                ),
+                lagPersonResultat(
+                    vilkårsvurdering = vilkårsvurderingUtenDeltBosted,
+                    person = lagPerson(type = PersonType.SØKER),
+                    periodeFom = endretUtbetalingAndel.fom?.minusMonths(1)?.førsteDagIInneværendeMåned(),
+                    periodeTom = LocalDate.now(),
+                    lagFullstendigVilkårResultat = true,
                 ),
             )
 
@@ -159,7 +162,7 @@ class EndretUtbetalingAndelServiceTest {
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                 behandlingId = behandling.id,
-                personer = setOf(barn1, barn2),
+                aktører = setOf(barn1.aktør, barn2.aktør),
                 prosent = BigDecimal.ZERO,
                 årsak = Årsak.ENDRE_MOTTAKER,
                 fom = YearMonth.now(),
@@ -209,11 +212,11 @@ class EndretUtbetalingAndelServiceTest {
 
         assertThat(lagredeEndretUtbetalingAndeler[0].fom).isEqualTo(YearMonth.now())
         assertThat(lagredeEndretUtbetalingAndeler[0].tom).isEqualTo(YearMonth.now().plusYears(1))
-        assertThat(lagredeEndretUtbetalingAndeler[0].personer).containsExactlyInAnyOrder(barn1, barn2)
+        assertThat(lagredeEndretUtbetalingAndeler[0].aktører).containsExactlyInAnyOrder(barn1.aktør, barn2.aktør)
 
         assertThat(lagredeEndretUtbetalingAndeler[1].fom).isEqualTo(YearMonth.now().plusYears(1).plusMonths(1))
         assertThat(lagredeEndretUtbetalingAndeler[1].tom).isEqualTo(YearMonth.now().plusYears(2))
-        assertThat(lagredeEndretUtbetalingAndeler[1].personer).containsExactly(barn2)
+        assertThat(lagredeEndretUtbetalingAndeler[1].aktører).containsExactly(barn2.aktør)
 
         val slettetEndretUtbetalingAndel = slettetEndretUtbetalingAndelSlot.captured
         assertThat(slettetEndretUtbetalingAndel).isEqualTo(endretUtbetalingAndel.endretUtbetalingAndel)
@@ -229,7 +232,7 @@ class EndretUtbetalingAndelServiceTest {
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                 behandlingId = behandling.id,
-                personer = setOf(barn1, barn2),
+                aktører = setOf(barn1.aktør, barn2.aktør),
                 prosent = BigDecimal.ZERO,
                 årsak = Årsak.ENDRE_MOTTAKER,
                 fom = YearMonth.of(2025, 11),
@@ -374,7 +377,7 @@ class EndretUtbetalingAndelServiceTest {
             val forventetEndretUtbetalingAndel =
                 EndretUtbetalingAndel(
                     behandlingId = behandling.id,
-                    personer = mutableSetOf(barn),
+                    aktører = mutableSetOf(barn.aktør),
                     prosent = BigDecimal.ZERO,
                     fom = fomAndelTilkjentYtelse,
                     tom = søknadstidspunkt.minusMonths(4).toYearMonth(),
@@ -426,7 +429,7 @@ class EndretUtbetalingAndelServiceTest {
             val forventetEndretUtbetalingAndel =
                 EndretUtbetalingAndel(
                     behandlingId = behandling.id,
-                    personer = mutableSetOf(barnMedRegistrertTidspunkt),
+                    aktører = mutableSetOf(barnMedRegistrertTidspunkt.aktør),
                     prosent = BigDecimal.ZERO,
                     fom = fomAndelTilkjentYtelse,
                     tom = søknadstidspunkt.minusMonths(4).toYearMonth(),
@@ -480,7 +483,7 @@ class EndretUtbetalingAndelServiceTest {
             val forventetEndretUtbetalingAndel =
                 EndretUtbetalingAndel(
                     behandlingId = behandling.id,
-                    personer = mutableSetOf(søker),
+                    aktører = mutableSetOf(søker.aktør),
                     prosent = BigDecimal.ZERO,
                     fom = fomAndelTilkjentYtelse,
                     tom = søknadstidspunkt.minusMonths(4).toYearMonth(),
@@ -507,7 +510,7 @@ class EndretUtbetalingAndelServiceTest {
                 lagEndretUtbetalingAndel(
                     id = 999,
                     behandlingId = behandling.id,
-                    personer = setOf(barnIkkeFramstiltKravFor),
+                    aktører = setOf(barnIkkeFramstiltKravFor.aktør),
                     årsak = Årsak.ETTERBETALING_3MND,
                 )
 
@@ -533,7 +536,7 @@ class EndretUtbetalingAndelServiceTest {
             assertThat(slettedeIder.captured).doesNotContain(kopiertAndelForIkkeFramstilt.id)
             verify(exactly = 1) {
                 mockEndretUtbetalingAndelRepository.saveAllAndFlush(
-                    match<List<EndretUtbetalingAndel>> { andeler -> andeler.all { it.personer == setOf(barnFramstiltKravFor) } },
+                    match<List<EndretUtbetalingAndel>> { andeler -> andeler.all { it.aktører == setOf(barnFramstiltKravFor.aktør) } },
                 )
             }
         }
@@ -614,7 +617,7 @@ class EndretUtbetalingAndelServiceTest {
                 val behandling = lagBehandling()
                 val barn = lagPerson(type = PersonType.BARN)
                 val barnSomErFjernet = lagPerson(type = PersonType.BARN)
-                val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, personer = setOf(barnSomErFjernet))
+                val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, aktører = setOf(barnSomErFjernet.aktør))
                 val slettetEndretUtbetalingAndelSlot = slot<EndretUtbetalingAndel>()
 
                 every { mockEndretUtbetalingAndelRepository.findByBehandlingId(behandling.id) } returns listOf(endretUtbetalingAndel)
@@ -638,7 +641,7 @@ class EndretUtbetalingAndelServiceTest {
                 val barn = lagPerson(type = PersonType.BARN)
                 val fjernetBarn = lagPerson(type = PersonType.BARN)
 
-                val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, personer = setOf(barn, fjernetBarn))
+                val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, aktører = setOf(barn.aktør, fjernetBarn.aktør))
                 val lagretEndretUtbetalingAndelSlot = slot<EndretUtbetalingAndel>()
 
                 every { mockEndretUtbetalingAndelRepository.findByBehandlingId(behandling.id) } returns listOf(endretUtbetalingAndel)
@@ -649,7 +652,7 @@ class EndretUtbetalingAndelServiceTest {
                 endretUtbetalingAndelService.slettEndretUtbetalingAndelerForPersonerIkkeIPersonopplysningGrunnlag(behandling)
 
                 // Assert
-                assertThat(lagretEndretUtbetalingAndelSlot.captured.personer).containsExactly(barn)
+                assertThat(lagretEndretUtbetalingAndelSlot.captured.aktører).containsExactly(barn.aktør)
                 verify(exactly = 0) { mockEndretUtbetalingAndelRepository.delete(any()) }
             }
 
@@ -658,7 +661,7 @@ class EndretUtbetalingAndelServiceTest {
                 // Arrange
                 val behandling = lagBehandling()
                 val barn = lagPerson(type = PersonType.BARN)
-                val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, personer = setOf(barn))
+                val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, aktører = setOf(barn.aktør))
 
                 every { mockEndretUtbetalingAndelRepository.findByBehandlingId(behandling.id) } returns listOf(endretUtbetalingAndel)
                 every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns
@@ -677,18 +680,17 @@ class EndretUtbetalingAndelServiceTest {
     @Nested
     inner class KopierEndretUtbetalingAndelFraForrigeBehandling {
         @Test
-        fun `Skal bruke Personer fra inneværende behandlingen ved kopiering`() {
+        fun `Skal kopiere EndretUtbetalingAndel med aktørene uendret når de finnes i inneværende behandling`() {
             // Arrange
             val forrigeBehandling = lagBehandling()
             val behandling = lagBehandling()
             val aktør = lagAktør()
 
-            val gammelPerson = lagPerson(id = 1L, type = PersonType.BARN, aktør = aktør)
-            val nyPerson = lagPerson(id = 2L, type = PersonType.BARN, aktør = aktør)
-            val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, nyPerson)
+            val person = lagPerson(id = 1L, type = PersonType.BARN, aktør = aktør)
+            val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, person)
 
             val forrigeEndretUtbetalingAndel =
-                lagEndretUtbetalingAndel(id = 100L, behandlingId = forrigeBehandling.id, personer = setOf(gammelPerson))
+                lagEndretUtbetalingAndel(id = 100L, behandlingId = forrigeBehandling.id, aktører = setOf(aktør))
             val lagretEndretUtbetalingAndelSlot = slot<EndretUtbetalingAndel>()
 
             every { mockPersongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
@@ -705,12 +707,11 @@ class EndretUtbetalingAndelServiceTest {
             // Assert
             val lagret = lagretEndretUtbetalingAndelSlot.captured
             assertThat(lagret.behandlingId).isEqualTo(behandling.id)
-            assertThat(lagret.personer).extracting("id").containsExactly(2L)
-            assertThat(lagret.personer).extracting("id").doesNotContain(1L)
+            assertThat(lagret.aktører).containsExactly(aktør)
         }
 
         @Test
-        fun `Skal filtrere bort personer som ikke finnes i inneværende behandling`() {
+        fun `Skal filtrere bort aktører som ikke finnes i inneværende behandling`() {
             // Arrange
             val forrigeBehandling = lagBehandling()
             val behandling = lagBehandling()
@@ -728,7 +729,7 @@ class EndretUtbetalingAndelServiceTest {
                 lagEndretUtbetalingAndel(
                     id = 100L,
                     behandlingId = forrigeBehandling.id,
-                    personer = setOf(gammelPersonSomBlirMed, gammelPersonSomFallerUt),
+                    aktører = setOf(gammelPersonSomBlirMed.aktør, gammelPersonSomFallerUt.aktør),
                 )
             val lagretEndretUtbetalingAndelSlot = slot<EndretUtbetalingAndel>()
 
@@ -745,11 +746,11 @@ class EndretUtbetalingAndelServiceTest {
 
             // Assert
             val lagret = lagretEndretUtbetalingAndelSlot.captured
-            assertThat(lagret.personer).extracting("id").containsExactly(3L)
+            assertThat(lagret.aktører).containsExactly(nyPersonSomBlirMed.aktør)
         }
 
         @Test
-        fun `Skal filtrere bort EndretUtbetalingAndel hvis ingen av personene finnes i inneværende behandling`() {
+        fun `Skal filtrere bort EndretUtbetalingAndel hvis ingen av aktørene finnes i inneværende behandling`() {
             // Arrange
             val forrigeBehandling = lagBehandling()
             val behandling = lagBehandling()
@@ -759,7 +760,7 @@ class EndretUtbetalingAndelServiceTest {
             val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, lagPerson(id = 2L, type = PersonType.BARN))
 
             val forrigeEndretUtbetalingAndel =
-                lagEndretUtbetalingAndel(id = 100L, behandlingId = forrigeBehandling.id, personer = setOf(gammelPerson))
+                lagEndretUtbetalingAndel(id = 100L, behandlingId = forrigeBehandling.id, aktører = setOf(gammelPerson.aktør))
 
             every { mockPersongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
             every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(forrigeBehandling.id) } returns

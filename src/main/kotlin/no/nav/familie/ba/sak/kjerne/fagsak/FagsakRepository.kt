@@ -252,29 +252,6 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnFagsakerMedFlereMigreringsbehandlinger(month: LocalDateTime): List<FagsakMedFlereMigreringer>
 
     @Query(
-        """
-        WITH siste_iverksatte_behandling_for_løpende_fagsaker AS (
-            SELECT DISTINCT ON (b.fk_fagsak_id) b.id
-            FROM behandling b
-                INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-            WHERE f.status = 'LØPENDE'
-            AND ty.utbetalingsoppdrag IS NOT NULL
-            AND f.arkivert = false
-            ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC
-        )
-        SELECT DISTINCT personident.foedselsnummer
-        FROM siste_iverksatte_behandling_for_løpende_fagsaker b
-            INNER JOIN gr_personopplysninger po ON b.id = po.fk_behandling_id
-            INNER JOIN po_person p ON po.id = p.fk_gr_personopplysninger_id
-            INNER JOIN personident ON personident.fk_aktoer_id = p.fk_aktoer_id
-        WHERE personident.aktiv = true
-        """,
-        nativeQuery = true,
-    )
-    fun finnIdenterForLøpendeFagsaker(): List<String>
-
-    @Query(
         value = """
         WITH siste_vedtatte AS (
             -- Siste vedtatte behandling per fagsak
@@ -297,10 +274,18 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                    ON  p.fk_gr_personopplysninger_id = gr.id AND p.type = 'BARN'
             GROUP BY sv.fk_fagsak_id
         )
-        -- Fagsaker der yngste barn har fylt 18 år for mer enn 1 år siden
+        -- Fagsaker der yngste barn har fylt 18 år for mer enn 1 år siden,
+        -- og som ikke allerede har en LåsFagsakTask som ikke er ferdig behandlet
         SELECT yb.fk_fagsak_id
         FROM   yngste_barn yb
         WHERE  yb.yngste_foedselsdato + INTERVAL '19 years' <= CURRENT_DATE
+          AND NOT EXISTS (
+              SELECT 1
+              FROM   task t
+              WHERE  t.type    = 'låsFagsakTask'
+                AND  t.payload = CAST(yb.fk_fagsak_id AS TEXT)
+                AND  t.status  NOT IN ('FERDIG', 'AVVIKSHÅNDTERT')
+          )
         ORDER BY yb.fk_fagsak_id
         LIMIT :maksAntall
         """,

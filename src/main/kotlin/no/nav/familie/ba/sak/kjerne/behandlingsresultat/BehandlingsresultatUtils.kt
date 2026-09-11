@@ -12,6 +12,7 @@ object BehandlingsresultatUtils {
             behandling.opprettetÅrsak in
             listOf(
                 BehandlingÅrsak.SØKNAD,
+                BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
                 BehandlingÅrsak.FØDSELSHENDELSE,
                 BehandlingÅrsak.KLAGE,
             )

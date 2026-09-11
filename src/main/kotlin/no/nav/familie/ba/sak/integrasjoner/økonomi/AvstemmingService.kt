@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
@@ -25,28 +27,41 @@ import java.util.UUID
 class AvstemmingService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val økonomiKlient: ØkonomiKlient,
+    private val oppdragBackendKlient: OppdragBackendKlient,
     private val beregningService: BeregningService,
     private val taskService: TaskService,
     private val batchRepository: BatchRepository,
     private val dataChunkRepository: DataChunkRepository,
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun grensesnittavstemOppdrag(
         fraDato: LocalDateTime,
         tilDato: LocalDateTime,
         avstemmingId: UUID?,
     ) {
-        økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato, avstemmingId)
+        if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP)) {
+            oppdragBackendKlient.grensesnittavstemOppdrag(fraDato, tilDato, avstemmingId)
+        } else {
+            økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato, avstemmingId)
+        }
     }
 
     fun sendKonsistensavstemmingStart(
         avstemmingsdato: LocalDateTime,
         transaksjonsId: UUID,
     ) {
-        økonomiKlient.konsistensavstemOppdragStart(
-            avstemmingsdato,
-            transaksjonsId,
-        )
+        if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP)) {
+            oppdragBackendKlient.konsistensavstemOppdragStart(
+                avstemmingsdato,
+                transaksjonsId,
+            )
+        } else {
+            økonomiKlient.konsistensavstemOppdragStart(
+                avstemmingsdato,
+                transaksjonsId,
+            )
+        }
     }
 
     fun harBatchStatusFerdig(batchId: Long): Boolean {
@@ -90,11 +105,19 @@ class AvstemmingService(
         }
 
         if (sendTilØkonomi) {
-            økonomiKlient.konsistensavstemOppdragData(
-                avstemmingsdato,
-                perioderTilAvstemming,
-                transaksjonsId,
-            )
+            if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP)) {
+                oppdragBackendKlient.konsistensavstemOppdragData(
+                    avstemmingsdato,
+                    perioderTilAvstemming,
+                    transaksjonsId,
+                )
+            } else {
+                økonomiKlient.konsistensavstemOppdragData(
+                    avstemmingsdato,
+                    perioderTilAvstemming,
+                    transaksjonsId,
+                )
+            }
         } else {
             logger.info("Send datamelding til økonomi i dry-run modus for $transaksjonsId og $chunkNr")
         }
@@ -107,8 +130,11 @@ class AvstemmingService(
         transaksjonsId: UUID,
     ) {
         logger.info("Avslutter konsistensavstemming for $transaksjonsId")
-
-        økonomiKlient.konsistensavstemOppdragAvslutt(avstemmingsdato, transaksjonsId)
+        if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP)) {
+            oppdragBackendKlient.konsistensavstemOppdragAvslutt(avstemmingsdato, transaksjonsId)
+        } else {
+            økonomiKlient.konsistensavstemOppdragAvslutt(avstemmingsdato, transaksjonsId)
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

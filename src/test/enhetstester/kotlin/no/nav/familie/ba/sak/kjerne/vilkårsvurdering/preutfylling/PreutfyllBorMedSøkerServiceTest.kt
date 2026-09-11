@@ -154,7 +154,7 @@ class PreutfyllBorMedSøkerServiceTest {
     }
 
     @Test
-    fun `skal preutfylle bor fast hos søker vilkår til ikke oppfylt om barn har bodd på samme adresse i mindre enn 3 mnd`() {
+    fun `skal preutfylle bor fast hos søker vilkår til ikke oppfylt om barn har bodd på samme adresse i mindre enn 3 mnd og det er ikke første adresse i Norge`() {
         // Arrange
         val aktørSøker = randomAktør()
         val aktørBarn = randomAktør()
@@ -180,18 +180,39 @@ class PreutfyllBorMedSøkerServiceTest {
                 barnAktør = listOf(aktørBarn),
             ).also { persongrunnlag ->
                 persongrunnlag.personer.forEach { person ->
-                    person.bostedsadresser =
-                        mutableListOf(
-                            lagGrVegadresse(matrikkelId = 12345L)
-                                .also {
+                    if (person.type == PersonType.BARN) {
+                        person.bostedsadresser =
+                            mutableListOf(
+                                lagGrVegadresse(matrikkelId = 54321L).also {
                                     it.periode =
                                         DatoIntervallEntitet(
-                                            fom = if (person.type == PersonType.SØKER) LocalDate.now().minusYears(1) else LocalDate.now().minusMonths(2),
+                                            fom = fødselsdatoBarn,
+                                            tom = LocalDate.now().minusMonths(2).minusDays(1),
+                                        )
+                                    it.person = person
+                                },
+                                lagGrVegadresse(matrikkelId = 12345L).also {
+                                    it.periode =
+                                        DatoIntervallEntitet(
+                                            fom = LocalDate.now().minusMonths(2),
                                             tom = null,
                                         )
                                     it.person = person
                                 },
-                        )
+                            )
+                    } else {
+                        person.bostedsadresser =
+                            mutableListOf(
+                                lagGrVegadresse(matrikkelId = 12345L).also {
+                                    it.periode =
+                                        DatoIntervallEntitet(
+                                            fom = LocalDate.now().minusYears(1),
+                                            tom = null,
+                                        )
+                                    it.person = person
+                                },
+                            )
+                    }
                     person.deltBosted = mutableListOf()
                 }
             }
@@ -873,104 +894,6 @@ class PreutfyllBorMedSøkerServiceTest {
     }
 
     @Test
-    fun `skal oppfylt og ikke oppfylt perioder for barn under 3 måneder som først bor med søker så flytter bort og tilbake til søker`() {
-        // Arrange
-        val aktørSøker = randomAktør()
-        val aktørBarn = randomAktør()
-        val fødselsdatoBarn = LocalDate.now().minusMonths(2).minusWeeks(3)
-
-        val behandling = lagBehandling()
-
-        val persongrunnlagMedFlytting =
-            lagTestPersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                søkerPersonIdent = aktørSøker.aktivFødselsnummer(),
-                barnasIdenter = listOf(aktørBarn.aktivFødselsnummer()),
-                barnasFødselsdatoer = listOf(fødselsdatoBarn),
-                søkerAktør = aktørSøker,
-                barnAktør = listOf(aktørBarn),
-            ).also { persongrunnlag ->
-                val søker = persongrunnlag.personer.single { it.type == PersonType.SØKER }
-                søker.bostedsadresser =
-                    mutableListOf(
-                        lagGrVegadresse(matrikkelId = 1L)
-                            .also {
-                                it.periode =
-                                    DatoIntervallEntitet(
-                                        fom = LocalDate.now().minusYears(2),
-                                        tom = null,
-                                    )
-                                it.person = søker
-                            },
-                    )
-                val barn = persongrunnlag.personer.single { it.type == PersonType.BARN }
-                barn.bostedsadresser =
-                    mutableListOf(
-                        lagGrVegadresse(matrikkelId = 1L)
-                            .also {
-                                it.periode =
-                                    DatoIntervallEntitet(
-                                        fom = fødselsdatoBarn,
-                                        tom = fødselsdatoBarn.plusMonths(2),
-                                    )
-                                it.person = barn
-                            },
-                        lagGrVegadresse(matrikkelId = 2L)
-                            .also {
-                                it.periode =
-                                    DatoIntervallEntitet(
-                                        fom = fødselsdatoBarn.plusMonths(2).plusDays(1),
-                                        tom = null,
-                                    )
-                                it.person = barn
-                            },
-                        lagGrVegadresse(matrikkelId = 1L)
-                            .also {
-                                it.periode =
-                                    DatoIntervallEntitet(
-                                        fom = fødselsdatoBarn.plusMonths(2).plusWeeks(2).plusDays(1),
-                                        tom = null,
-                                    )
-                                it.person = barn
-                            },
-                    )
-                barn.deltBosted = mutableListOf()
-            }
-
-        val vilkårsvurdering =
-            lagVilkårsvurderingMedOverstyrendeResultater(
-                søker = persongrunnlagMedFlytting.søker,
-                barna = persongrunnlagMedFlytting.barna,
-                behandling = behandling,
-                overstyrendeVilkårResultater = emptyMap(),
-            )
-
-        every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagMedFlytting
-
-        // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
-
-        // Assert
-        val borFastHosSøkerVilkår =
-            vilkårsvurdering.personResultater
-                .first { it.aktør == aktørBarn }
-                .vilkårResultater
-                .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
-
-        assertThat(borFastHosSøkerVilkår).hasSize(2)
-
-        val periode1 = borFastHosSøkerVilkår.first { it.resultat == Resultat.OPPFYLT }
-        assertThat(periode1.periodeFom).isEqualTo(fødselsdatoBarn)
-        assertThat(periode1.periodeTom).isEqualTo(fødselsdatoBarn.plusMonths(2))
-        assertThat(periode1.begrunnelse).contains("Har samme bostedsadresse som søker")
-
-        val periode2 = borFastHosSøkerVilkår.first { it.resultat == Resultat.IKKE_OPPFYLT }
-        assertThat(periode2.periodeFom).isEqualTo(fødselsdatoBarn.plusMonths(2).plusDays(1))
-        assertThat(periode2.periodeTom).isNull()
-        assertThat(periode2.begrunnelse).contains("Har ikke hatt samme fast eller delt bostedsadresse som søker i minst 3 måneder")
-    }
-
-    @Test
     fun `skal kun preutfylle bor fast hos søker for barn i aktørerVilkårSkalPreutfyllesFor`() {
         // Arrange
         val nåDato = LocalDate.now()
@@ -1107,5 +1030,221 @@ class PreutfyllBorMedSøkerServiceTest {
             assertThat(it.level.toString()).isEqualTo("WARN")
             assertThat(it.formattedMessage).contains("Preutfylling av bor med søker feilet for aktør ${aktørBarnSomManglerIGrunnlag.aktørId}")
         }
+    }
+
+    @Test
+    fun `skal preutfylle bor fast hos søker vilkår til oppfylt for barn som er ny-innflyttet til Norge og bor på samme adresse som søker`() {
+        // Arrange
+        val aktørSøker = randomAktør()
+        val aktørBarn = randomAktør()
+        val fødselsdatoBarn = LocalDate.now().minusYears(5)
+
+        val behandling = lagBehandling()
+
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = aktørSøker.aktivFødselsnummer(),
+                barnasIdenter = listOf(aktørBarn.aktivFødselsnummer()),
+                søkerAktør = aktørSøker,
+                barnAktør = listOf(aktørBarn),
+            ).also { grunnlag ->
+                val søker = grunnlag.personer.single { it.type == PersonType.SØKER }
+                søker.bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresse(matrikkelId = 12345L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = LocalDate.now().minusYears(1),
+                                        tom = null,
+                                    )
+                                it.person = søker
+                            },
+                    )
+                val barn = grunnlag.personer.single { it.type == PersonType.BARN }
+                barn.bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresse(matrikkelId = 12345L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = LocalDate.now().minusMonths(2),
+                                        tom = null,
+                                    )
+                                it.person = barn
+                            },
+                    )
+                barn.deltBosted = mutableListOf()
+            }
+
+        val vilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                søker = lagPerson(type = PersonType.SØKER, aktør = aktørSøker, fødselsdato = LocalDate.now().minusYears(30)),
+                barna = listOf(lagPerson(type = PersonType.BARN, aktør = aktørBarn, fødselsdato = fødselsdatoBarn)),
+                behandling = behandling,
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+
+        every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlag
+
+        // Act
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+
+        // Assert
+        val borFastHosSøkerVilkår =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == aktørBarn }
+                .vilkårResultater
+                .single { it.vilkårType == Vilkår.BOR_MED_SØKER }
+
+        assertThat(borFastHosSøkerVilkår.resultat).isEqualTo(Resultat.OPPFYLT)
+    }
+
+    @Test
+    fun `skal preutfylle bor fast hos søker vilkår til ikke oppfylt for barn som er ny-innflyttet til Norge men bor på ulik adresse enn søker`() {
+        // Arrange
+        val aktørSøker = randomAktør()
+        val aktørBarn = randomAktør()
+        val fødselsdatoBarn = LocalDate.now().minusYears(5)
+
+        val behandling = lagBehandling()
+
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = aktørSøker.aktivFødselsnummer(),
+                barnasIdenter = listOf(aktørBarn.aktivFødselsnummer()),
+                søkerAktør = aktørSøker,
+                barnAktør = listOf(aktørBarn),
+            ).also { grunnlag ->
+                val søker = grunnlag.personer.single { it.type == PersonType.SØKER }
+                søker.bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresse(matrikkelId = 12345L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = LocalDate.now().minusYears(1),
+                                        tom = null,
+                                    )
+                                it.person = søker
+                            },
+                    )
+                val barn = grunnlag.personer.single { it.type == PersonType.BARN }
+                barn.bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresse(matrikkelId = 98765L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = LocalDate.now().minusMonths(2),
+                                        tom = null,
+                                    )
+                                it.person = barn
+                            },
+                    )
+                barn.deltBosted = mutableListOf()
+            }
+
+        val vilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                søker = lagPerson(type = PersonType.SØKER, aktør = aktørSøker, fødselsdato = LocalDate.now().minusYears(30)),
+                barna = listOf(lagPerson(type = PersonType.BARN, aktør = aktørBarn, fødselsdato = fødselsdatoBarn)),
+                behandling = behandling,
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+
+        every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlag
+
+        // Act
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+
+        // Assert
+        val borFastHosSøkerVilkår =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == aktørBarn }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
+
+        assertThat(borFastHosSøkerVilkår).allMatch { it.resultat == Resultat.IKKE_OPPFYLT }
+    }
+
+    @Test
+    fun `skal preutfylle bor fast hos søker vilkår til ikke oppfylt for barn som har hatt norsk adresse lenge men flyttet til søkers adresse for 2 mnd siden`() {
+        // Arrange
+        val aktørSøker = randomAktør()
+        val aktørBarn = randomAktør()
+        val fødselsdatoBarn = LocalDate.now().minusYears(5)
+
+        val behandling = lagBehandling()
+
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = aktørSøker.aktivFødselsnummer(),
+                barnasIdenter = listOf(aktørBarn.aktivFødselsnummer()),
+                søkerAktør = aktørSøker,
+                barnAktør = listOf(aktørBarn),
+            ).also { grunnlag ->
+                val søker = grunnlag.personer.single { it.type == PersonType.SØKER }
+                søker.bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresse(matrikkelId = 12345L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = LocalDate.now().minusYears(1),
+                                        tom = null,
+                                    )
+                                it.person = søker
+                            },
+                    )
+                val barn = grunnlag.personer.single { it.type == PersonType.BARN }
+                barn.bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresse(matrikkelId = 99999L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = fødselsdatoBarn,
+                                        tom = LocalDate.now().minusMonths(2).minusDays(1),
+                                    )
+                                it.person = barn
+                            },
+                        lagGrVegadresse(matrikkelId = 12345L)
+                            .also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = LocalDate.now().minusMonths(2),
+                                        tom = null,
+                                    )
+                                it.person = barn
+                            },
+                    )
+                barn.deltBosted = mutableListOf()
+            }
+
+        val vilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                søker = lagPerson(type = PersonType.SØKER, aktør = aktørSøker, fødselsdato = LocalDate.now().minusYears(30)),
+                barna = listOf(lagPerson(type = PersonType.BARN, aktør = aktørBarn, fødselsdato = fødselsdatoBarn)),
+                behandling = behandling,
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+
+        every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlag
+
+        // Act
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+
+        // Assert
+        val borFastHosSøkerVilkår =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == aktørBarn }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
+
+        assertThat(borFastHosSøkerVilkår).allMatch { it.resultat == Resultat.IKKE_OPPFYLT }
     }
 }

@@ -1,0 +1,13 @@
+ALTER TABLE po_person VALIDATE CONSTRAINT po_person_fk_gr_personopplysninger_id_fkey;
+
+ALTER TABLE po_statsborgerskap VALIDATE CONSTRAINT po_statsborgerskap_fk_po_person_id_fkey;
+
+ALTER TABLE po_opphold VALIDATE CONSTRAINT po_opphold_fk_po_person_id_fkey;
+
+ALTER TABLE po_arbeidsforhold VALIDATE CONSTRAINT po_arbeidsforhold_fk_po_person_id_fkey;
+
+ALTER TABLE po_sivilstand VALIDATE CONSTRAINT po_sivilstand_fk_po_person_id_fkey;
+
+ALTER TABLE po_bostedsadresse VALIDATE CONSTRAINT po_bostedsadresse_fk_po_person_id_fkey;
+
+ALTER TABLE po_doedsfall VALIDATE CONSTRAINT po_doedsfall_fk_po_person_id_fkey;

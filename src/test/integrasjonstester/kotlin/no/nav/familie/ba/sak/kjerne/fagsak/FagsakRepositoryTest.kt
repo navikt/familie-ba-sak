@@ -17,6 +17,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
+import no.nav.familie.ba.sak.task.LåsFagsakTask
+import no.nav.familie.prosessering.domene.Status
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -35,6 +38,7 @@ class FagsakRepositoryTest(
     @Autowired private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    @Autowired private val taskService: TaskService,
 ) : AbstractSpringIntegrationTest() {
     @Nested
     inner class FinnFagsakerSomSkalAvsluttes {
@@ -247,6 +251,54 @@ class FagsakRepositoryTest(
             assertThat(fagsakerSomSkalLåses).contains(fagsak.id)
         }
 
+        @ParameterizedTest
+        @EnumSource(value = Status::class, names = ["FERDIG", "AVVIKSHÅNDTERT"], mode = EnumSource.Mode.EXCLUDE)
+        fun `skal ikke returnere fagsak som allerede har en LåsFagsakTask som ikke er ferdig behandlet`(status: Status) {
+            // Arrange
+            val fagsak = opprettFagsak(fagsakStatus = FagsakStatus.AVSLUTTET)
+            val behandling = opprettBehandling(fagsak = fagsak)
+            lagrePersonopplysningGrunnlag(behandling = behandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(19).minusDays(1)))
+            lagreLåsFagsakTask(fagsakId = fagsak.id, status = status)
+
+            // Act
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
+
+            // Assert
+            assertThat(fagsakerSomSkalLåses).doesNotContain(fagsak.id)
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = Status::class, names = ["FERDIG", "AVVIKSHÅNDTERT"])
+        fun `skal returnere fagsak som har en LåsFagsakTask som er ferdig behandlet`(status: Status) {
+            // Arrange
+            val fagsak = opprettFagsak(fagsakStatus = FagsakStatus.AVSLUTTET)
+            val behandling = opprettBehandling(fagsak = fagsak)
+            lagrePersonopplysningGrunnlag(behandling = behandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(19).minusDays(1)))
+            lagreLåsFagsakTask(fagsakId = fagsak.id, status = status)
+
+            // Act
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
+
+            // Assert
+            assertThat(fagsakerSomSkalLåses).contains(fagsak.id)
+        }
+
+        @Test
+        fun `skal returnere fagsak når det kun finnes en uferdig LåsFagsakTask for en annen fagsak`() {
+            // Arrange
+            val fagsak = opprettFagsak(fagsakStatus = FagsakStatus.AVSLUTTET)
+            val behandling = opprettBehandling(fagsak = fagsak)
+            lagrePersonopplysningGrunnlag(behandling = behandling, barnasFødselsdatoer = listOf(LocalDate.now().minusYears(19).minusDays(1)))
+            val annenFagsak = opprettFagsak(fagsakStatus = FagsakStatus.AVSLUTTET)
+            lagreLåsFagsakTask(fagsakId = annenFagsak.id, status = Status.UBEHANDLET)
+
+            // Act
+            val fagsakerSomSkalLåses = fagsakRepository.finnAvsluttedeFagsakerSomSkalLåses(maksAntall = 100)
+
+            // Assert
+            assertThat(fagsakerSomSkalLåses).contains(fagsak.id)
+        }
+
         @Test
         fun `skal returnere fagsak når yngste barn fylte 18 år for nøyaktig 1 år siden`() {
             // Arrange
@@ -450,6 +502,18 @@ class FagsakRepositoryTest(
                 søkerAktør = behandling.fagsak.aktør,
                 barnAktør = barnAktører,
             ),
+        )
+    }
+
+    private fun lagreLåsFagsakTask(
+        fagsakId: Long,
+        status: Status,
+    ) {
+        // triggerTid frem i tid slik at TaskScheduler ikke plukker tasken mens testen kjører
+        taskService.save(
+            LåsFagsakTask
+                .opprettTask(fagsakId)
+                .copy(status = status, triggerTid = LocalDateTime.now().plusDays(1)),
         )
     }
 }

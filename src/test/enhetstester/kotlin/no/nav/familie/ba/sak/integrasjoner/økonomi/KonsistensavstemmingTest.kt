@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -34,6 +35,7 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KonsistensavstemmingTest {
     private val økonomiKlient = mockk<ØkonomiKlient>()
+    private val oppdragBackendKlient = mockk<OppdragBackendKlient>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val beregningService = mockk<BeregningService>()
     private val taskService = mockk<TaskService>(relaxed = true)
@@ -46,11 +48,13 @@ class KonsistensavstemmingTest {
         AvstemmingService(
             behandlingHentOgPersisterService,
             økonomiKlient,
+            oppdragBackendKlient,
             beregningService,
             taskService,
             batchRepository,
             dataChunkRepository,
             utbetalingsTidslinjeService,
+            featureToggleService,
         )
 
     private val batchId = 1000000L
@@ -65,6 +69,7 @@ class KonsistensavstemmingTest {
     @BeforeEach
     fun setUp() {
         every { taskService.save(any()) } returns Task(type = "dummy", payload = "")
+        every { featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP) } returns true
         konistensavstemmingStartTask = KonsistensavstemMotOppdragStartTask(avstemmingService)
         konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask =
             KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(avstemmingService, taskService, featureToggleService)
@@ -139,7 +144,7 @@ class KonsistensavstemmingTest {
 
         // sjekk at det har blitt sendt startmelding
         verify(exactly = 1) {
-            økonomiKlient.konsistensavstemOppdragStart(
+            oppdragBackendKlient.konsistensavstemOppdragStart(
                 avstemmingsdato = avstemmingsdatoSlot.captured,
                 transaksjonsId = transaksjonsId,
             )
@@ -295,7 +300,7 @@ class KonsistensavstemmingTest {
                 chunkNr = 1,
             )
         every {
-            økonomiKlient.konsistensavstemOppdragData(
+            oppdragBackendKlient.konsistensavstemOppdragData(
                 avstemmingsdato,
                 emptyList(),
                 transaksjonsId,
@@ -325,7 +330,7 @@ class KonsistensavstemmingTest {
         assertThat(dataChunkSlot.captured.erSendt).isTrue()
 
         verify(exactly = 1) {
-            økonomiKlient.konsistensavstemOppdragData(
+            oppdragBackendKlient.konsistensavstemOppdragData(
                 avstemmingsdato = avstemmingsdato,
                 perioderTilAvstemming = emptyList(),
                 transaksjonsId = transaksjonsId,
@@ -419,9 +424,9 @@ class KonsistensavstemmingTest {
             ),
         )
 
-        verify(exactly = 1) { økonomiKlient.konsistensavstemOppdragStart(any(), transaksjonsId) }
-        verify(exactly = 1) { økonomiKlient.konsistensavstemOppdragData(any(), any(), transaksjonsId) }
-        verify(exactly = 1) { økonomiKlient.konsistensavstemOppdragAvslutt(any(), transaksjonsId) }
+        verify(exactly = 1) { oppdragBackendKlient.konsistensavstemOppdragStart(any(), transaksjonsId) }
+        verify(exactly = 1) { oppdragBackendKlient.konsistensavstemOppdragData(any(), any(), transaksjonsId) }
+        verify(exactly = 1) { oppdragBackendKlient.konsistensavstemOppdragAvslutt(any(), transaksjonsId) }
     }
 
     @Test
@@ -491,9 +496,9 @@ class KonsistensavstemmingTest {
             ),
         )
 
-        verify(exactly = 0) { økonomiKlient.konsistensavstemOppdragStart(any(), transaksjonsId) }
-        verify(exactly = 0) { økonomiKlient.konsistensavstemOppdragData(any(), any(), transaksjonsId) }
-        verify(exactly = 0) { økonomiKlient.konsistensavstemOppdragAvslutt(any(), transaksjonsId) }
+        verify(exactly = 0) { oppdragBackendKlient.konsistensavstemOppdragStart(any(), transaksjonsId) }
+        verify(exactly = 0) { oppdragBackendKlient.konsistensavstemOppdragData(any(), any(), transaksjonsId) }
+        verify(exactly = 0) { oppdragBackendKlient.konsistensavstemOppdragAvslutt(any(), transaksjonsId) }
     }
 
     private fun lagMockForStartTaskHappCase(transaksjonsId: UUID): CapturingSlot<LocalDateTime> {
@@ -513,7 +518,7 @@ class KonsistensavstemmingTest {
 
         val avstemmingsdatoSlot = slot<LocalDateTime>()
         every {
-            økonomiKlient.konsistensavstemOppdragStart(
+            oppdragBackendKlient.konsistensavstemOppdragStart(
                 capture(avstemmingsdatoSlot),
                 transaksjonsId,
             )
@@ -544,7 +549,7 @@ class KonsistensavstemmingTest {
 
     private fun lagMockOppdragDataHappeCase(transaksjonsId: UUID) {
         every {
-            økonomiKlient.konsistensavstemOppdragData(
+            oppdragBackendKlient.konsistensavstemOppdragData(
                 any(),
                 any(),
                 transaksjonsId,
@@ -567,7 +572,7 @@ class KonsistensavstemmingTest {
 
     private fun lagMockAvsluttHappyCase(transaksjonsId: UUID) {
         every {
-            økonomiKlient.konsistensavstemOppdragAvslutt(
+            oppdragBackendKlient.konsistensavstemOppdragAvslutt(
                 any(),
                 transaksjonsId,
             )

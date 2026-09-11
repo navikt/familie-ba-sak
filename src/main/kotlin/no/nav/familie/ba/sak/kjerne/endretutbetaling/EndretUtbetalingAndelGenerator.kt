@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetaling3ÅrFom
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING_3MND
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING_3ÅR
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.tidslinje.utvidelser.beskjærTilOgMed
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.outerJoin
@@ -28,7 +28,7 @@ fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
     nåværendeAndeler: List<AndelTilkjentYtelse>,
     forrigeAndeler: List<AndelTilkjentYtelse>,
     nåværendeEndretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    personerPåBehandling: List<Person>,
+    aktørerPåBehandling: List<Aktør>,
     erAutomatiskGenerert: Boolean,
 ): List<EndretUtbetalingAndel> {
     val (datoForGyldigEtterbetaling, årsak) =
@@ -55,7 +55,7 @@ fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
                 val nåværendeAndelOverlapperMedEksisterendeEndretUtbetalingAndel =
                     nåværendeEndretUtbetalingAndeler.any {
                         it.overlapperMed(MånedPeriode(nåværendeAndel.stønadFom, nåværendeAndel.stønadTom)) &&
-                            it.personer.any { person -> person.aktør == aktør }
+                            aktør in it.aktører
                     }
 
                 aktør.takeIf { nåværendeBeløp > forrigeBeløp && !nåværendeAndelOverlapperMedEksisterendeEndretUtbetalingAndel }
@@ -68,7 +68,7 @@ fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
             EndretUtbetalingAndel(
                 id = 0,
                 behandlingId = behandling.id,
-                personer = personerPåBehandling.filter { periodeMedUgyldigEtterbetalingForAktører.verdi.contains(it.aktør) }.toMutableSet(),
+                aktører = aktørerPåBehandling.intersect(periodeMedUgyldigEtterbetalingForAktører.verdi).toMutableSet(),
                 prosent = BigDecimal.ZERO,
                 fom = periodeMedUgyldigEtterbetalingForAktører.fom?.toYearMonth(),
                 tom = periodeMedUgyldigEtterbetalingForAktører.tom?.toYearMonth(),
@@ -105,7 +105,7 @@ private fun kanSammenslås(
     andreEndretUtbetalingAndel: EndretUtbetalingAndel,
 ): Boolean =
     førsteEndretUtbetalingAndel.behandlingId == andreEndretUtbetalingAndel.behandlingId &&
-        førsteEndretUtbetalingAndel.personer == andreEndretUtbetalingAndel.personer &&
+        førsteEndretUtbetalingAndel.aktører == andreEndretUtbetalingAndel.aktører &&
         førsteEndretUtbetalingAndel.prosent == andreEndretUtbetalingAndel.prosent &&
         førsteEndretUtbetalingAndel.årsak == andreEndretUtbetalingAndel.årsak &&
         førsteEndretUtbetalingAndel.avtaletidspunktDeltBosted == andreEndretUtbetalingAndel.avtaletidspunktDeltBosted &&
