@@ -18,14 +18,14 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "FødselshendelsefiltreringResultat")
-@Table(name = "FOEDSELSHENDELSEFILTRERING_RESULTAT")
-class FødselshendelsefiltreringResultat(
+@Entity(name = "FiltreringResultat")
+@Table(name = "FILTRERING_RESULTAT")
+class FiltreringResultat(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "foedselshendelsefiltrering_resultat_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "filtrering_resultat_seq_generator")
     @SequenceGenerator(
-        name = "foedselshendelsefiltrering_resultat_seq_generator",
-        sequenceName = "foedselshendelsefiltrering_resultat_seq",
+        name = "filtrering_resultat_seq_generator",
+        sequenceName = "filtrering_resultat_seq",
         allocationSize = 50,
     )
     val id: Long = 0,
@@ -33,7 +33,7 @@ class FødselshendelsefiltreringResultat(
     val behandlingId: Long,
     @Enumerated(EnumType.STRING)
     @Column(name = "filtreringsregel")
-    val filtreringsregel: Filtreringsregel,
+    val filtreringsregel: Filtreringsregel.Identifikator,
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat")
     val resultat: Resultat,
@@ -46,7 +46,7 @@ class FødselshendelsefiltreringResultat(
     val regelInput: String? = null,
 ) : BaseEntitet() {
     override fun toString(): String =
-        "FødselshendelsefiltreringResultat(" +
+        "FiltreringResultat(" +
             "id=$id, " +
             "filtreringsregel=$filtreringsregel, " +
             "resultat=$resultat, " +
@@ -54,4 +54,4 @@ class FødselshendelsefiltreringResultat(
             ")"
 }
 
-fun List<FødselshendelsefiltreringResultat>.erOppfylt() = this.all { it.resultat == Resultat.OPPFYLT }
+fun List<FiltreringResultat>.erOppfylt() = this.all { it.resultat == Resultat.OPPFYLT }

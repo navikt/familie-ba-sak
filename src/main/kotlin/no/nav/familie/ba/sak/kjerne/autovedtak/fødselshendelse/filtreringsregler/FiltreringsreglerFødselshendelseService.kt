@@ -11,11 +11,10 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -25,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -40,32 +40,33 @@ class FiltreringsreglerFødselshendelseService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val clockProvider: ClockProvider,
-    private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
+    private val filtreringResultatRepository: FiltreringResultatRepository,
     private val behandlingService: BehandlingService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val filtreringsregelEvaluator: FiltreringsregelEvaluator,
 ) {
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
     val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
 
     init {
-        Filtreringsregel.entries.map {
+        FILTRERINGSREGLER_FØDSELSHENDELSE.map { regel ->
             Resultat.entries.forEach { resultat ->
-                filtreringsreglerMetrics["${it.name}_${resultat.name}"] =
+                filtreringsreglerMetrics["${regel.identifikator.name}_${resultat.name}"] =
                     Metrics.counter(
                         "familie.ba.sak.filtreringsregler.utfall",
                         "beskrivelse",
-                        it.name,
+                        regel.identifikator.name,
                         "resultat",
                         resultat.name,
                     )
 
-                filtreringsreglerFørsteUtfallMetrics[it.name] =
+                filtreringsreglerFørsteUtfallMetrics[regel.identifikator.name] =
                     Metrics.counter(
                         "familie.ba.sak.filtreringsregler.foersteutfall",
                         "beskrivelse",
-                        it.name,
+                        regel.identifikator.name,
                     )
             }
         }
@@ -75,12 +76,12 @@ class FiltreringsreglerFødselshendelseService(
         evalueringer: List<Evaluering>,
         behandlingId: Long,
         fakta: FiltreringsreglerFakta,
-    ): List<FødselshendelsefiltreringResultat> =
-        fødselshendelsefiltreringResultatRepository.saveAll(
+    ): List<FiltreringResultat> =
+        filtreringResultatRepository.saveAll(
             evalueringer.map {
-                FødselshendelsefiltreringResultat(
+                FiltreringResultat(
                     behandlingId = behandlingId,
-                    filtreringsregel = Filtreringsregel.valueOf(it.identifikator),
+                    filtreringsregel = Filtreringsregel.Identifikator.valueOf(it.identifikator),
                     resultat = it.resultat,
                     begrunnelse = it.begrunnelse,
                     evalueringsårsaker = it.evalueringÅrsaker.map { evalueringÅrsak -> evalueringÅrsak.toString() },
@@ -89,14 +90,14 @@ class FiltreringsreglerFødselshendelseService(
             },
         )
 
-    fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FødselshendelsefiltreringResultat> = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(behandlingId = behandlingId)
+    fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FiltreringResultat> = filtreringResultatRepository.finnFiltreringResultater(behandlingId = behandlingId)
 
     fun kjørFiltreringsregler(
-        nyBehandlingHendelse: NyBehandlingHendelse,
+        filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,
         behandling: Behandling,
-    ): List<FødselshendelsefiltreringResultat> {
-        val morsAktørId = personidentService.hentAktør(nyBehandlingHendelse.morsIdent)
-        val barnasAktørId = personidentService.hentAktørIder(nyBehandlingHendelse.barnasIdenter)
+    ): List<FiltreringResultat> {
+        val morsAktørId = personidentService.hentAktør(filtrerAutomatiskBehandlingData.søkersIdent)
+        val barnasAktørId = personidentService.hentAktørIder(filtrerAutomatiskBehandlingData.barnasIdenter)
 
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
@@ -116,20 +117,20 @@ class FiltreringsreglerFødselshendelseService(
         val harAndelerFremoverITid = sisteMånedMedBarnetrygd != null && sisteMånedMedBarnetrygd > YearMonth.now()
 
         val fakta =
-            FiltreringsreglerFakta(
-                mor = personopplysningGrunnlag.søker,
-                morMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
-                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato =
+            FiltreringsreglerFaktaFødselshendelse(
+                søker = personopplysningGrunnlag.søker,
+                søkerMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
+                søkerOppfyllerVilkårForUtvidetBarnetrygd =
                     morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
                         behandling,
                         barnaFraHendelse,
                     ),
-                morMottarEøsBarnetrygd = behandling.kategori == BehandlingKategori.EØS,
-                barnaFraHendelse = barnaFraHendelse,
+                søkerMottarEøsBarnetrygd = behandling.kategori == BehandlingKategori.EØS,
+                barnaSomSkalVurderes = barnaFraHendelse,
                 restenAvBarna = finnRestenAvBarnasPersonInfo(morsAktørId, barnaFraHendelse),
-                morLever = !personopplysningGrunnlag.søker.erDød(),
+                søkerLever = !personopplysningGrunnlag.søker.erDød(),
                 barnaLever = barnaFraHendelse.none { it.erDød() },
-                morHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
+                søkerHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
                 dagensDato = LocalDate.now(clockProvider.get()),
                 erFagsakenMigrertEtterBarnFødt =
                     erSakenMigrertEtterBarnFødt(
@@ -143,7 +144,7 @@ class FiltreringsreglerFødselshendelseService(
                     ),
                 morHarIkkeOpphørtBarnetrygd = andelerPåSisteBehandling.isEmpty() || harAndelerFremoverITid,
             )
-        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(fakta)
+        val evalueringer = filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, fakta)
         oppdaterMetrikker(evalueringer)
 
         logger.info("Resultater fra filtreringsregler på behandling $behandling: ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")

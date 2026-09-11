@@ -4,8 +4,8 @@ import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.MånedPeriode
@@ -21,18 +21,18 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -46,13 +46,15 @@ class FiltreringsreglerFødselshendelseServiceTest {
     private val personidentService = mockk<PersonidentService>()
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
-    private val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>()
+    private val filtreringResultatRepository = mockk<FiltreringResultatRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
 
     private var clockProvider = TestClockProvider()
+
+    private val filtreringsregelEvaluator = spyk(FiltreringsregelEvaluator())
 
     private val filtreringsreglerFødselshendelseService =
         FiltreringsreglerFødselshendelseService(
@@ -61,11 +63,12 @@ class FiltreringsreglerFødselshendelseServiceTest {
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             clockProvider = clockProvider,
-            fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
+            filtreringResultatRepository = filtreringResultatRepository,
             behandlingService = behandlingService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            filtreringsregelEvaluator = filtreringsregelEvaluator,
         )
 
     @Test
@@ -73,7 +76,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val sisteVedtatteBehandling = lagBehandling()
         val behandling = lagBehandling()
 
@@ -101,22 +104,21 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isTrue
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -126,7 +128,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
 
@@ -154,21 +156,20 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isFalse
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isFalse
 
-        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
+        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
             Resultat.OPPFYLT,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isTrue
@@ -179,7 +180,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
 
@@ -212,22 +213,21 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isTrue
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -237,7 +237,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
 
@@ -270,22 +270,21 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isTrue
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -297,8 +296,8 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val barn1 = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val barn2 = tilfeldigPerson(fødselsdato = LocalDate.of(2020, 1, 1))
 
-        val nyBehandlingHendelse =
-            NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData =
+            FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
 
@@ -331,21 +330,20 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isFalse
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isFalse
 
-        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
+        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO }.resultat).isEqualTo(
             Resultat.OPPFYLT,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isTrue
@@ -358,8 +356,8 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val barn1 = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val barn2 = tilfeldigPerson(fødselsdato = LocalDate.of(2020, 1, 1))
 
-        val nyBehandlingHendelse =
-            NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData =
+            FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
 
@@ -392,22 +390,21 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     ),
             )
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
-        assertThat(filtreringsreglerFakta.morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato).isTrue
+        assertThat(filtreringsreglerFakta.søkerOppfyllerVilkårForUtvidetBarnetrygd).isTrue
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -417,7 +414,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val sisteVedtatteBehandling = lagBehandling()
         val behandling = lagBehandling()
 
@@ -432,14 +429,13 @@ class FiltreringsreglerFødselshendelseServiceTest {
                 lagAndelTilkjentYtelse(it.fom, it.tom)
             }
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
@@ -447,7 +443,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         assertThat(filtreringsreglerFakta.morHarIkkeOpphørtBarnetrygd).isFalse
 
         assertThat(fødselshendelsefiltreringResultat.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel).isEqualTo(
-            Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isFalse
     }
@@ -457,7 +453,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val sisteVedtatteBehandling = lagBehandling()
         val behandling = lagBehandling()
 
@@ -467,21 +463,20 @@ class FiltreringsreglerFødselshendelseServiceTest {
         clearMocks(andelTilkjentYtelseRepository)
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns emptyList()
 
-        mockkObject(FiltreringsregelEvaluering)
-        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
+        val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
-        verify { FiltreringsregelEvaluering.evaluerFiltreringsregler(capture(filtreringsreglerFaktaSlot)) }
+        verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
 
         val fødselshendelsefiltreringResultat = fødselshendelsefiltreringResultatSlot.captured
         val filtreringsreglerFakta = filtreringsreglerFaktaSlot.captured
 
         assertThat(filtreringsreglerFakta.morHarIkkeOpphørtBarnetrygd).isTrue
 
-        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD }.resultat).isEqualTo(
+        assertThat(fødselshendelsefiltreringResultat.single { it.filtreringsregel == Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD }.resultat).isEqualTo(
             Resultat.OPPFYLT,
         )
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isTrue
@@ -492,7 +487,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         barna: List<Person>,
         behandling: Behandling,
         sisteVedtatteBehandling: Behandling,
-    ): CapturingSlot<List<FødselshendelsefiltreringResultat>> {
+    ): CapturingSlot<List<FiltreringResultat>> {
         every { personidentService.hentAktør(mor.aktør.aktørId) } returns mor.aktør
         every { personidentService.hentAktørIder(barna.map { it.aktør.aktørId }) } returns barna.map { it.aktør }
 
@@ -554,15 +549,15 @@ class FiltreringsreglerFødselshendelseServiceTest {
             }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
-        val fødselshendelsefiltreringResultatSlot = slot<List<FødselshendelsefiltreringResultat>>()
+        val filtreringResultatSlot = slot<List<FiltreringResultat>>()
 
         every {
-            fødselshendelsefiltreringResultatRepository.saveAll<FødselshendelsefiltreringResultat>(
+            filtreringResultatRepository.saveAll<FiltreringResultat>(
                 capture(
-                    fødselshendelsefiltreringResultatSlot,
+                    filtreringResultatSlot,
                 ),
             )
         } returns mockk()
-        return fødselshendelsefiltreringResultatSlot
+        return filtreringResultatSlot
     }
 }
