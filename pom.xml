@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -35,7 +35,7 @@
         <mockk.version>1.14.11</mockk.version>
         <token-validation-spring.version>6.0.8</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>3.1.0</springdoc.version>
+        <springdoc.version>3.1.1</springdoc.version>
         <kotlinx.version>1.11.0</kotlinx.version>
         <kotlinx-kover.version>0.9.9</kotlinx-kover.version>
         <mock-oauth2-server.version>6.0.2</mock-oauth2-server.version>
@@ -72,7 +72,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>4.1.0</version>
+                <version>4.1.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
