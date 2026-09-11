@@ -42,12 +42,12 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
 import java.time.LocalDate
 import java.time.Month
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 
 class FødselshendelseServiceTest {
     val filtreringsreglerFødselshendelseService = mockk<FiltreringsreglerFødselshendelseService>()

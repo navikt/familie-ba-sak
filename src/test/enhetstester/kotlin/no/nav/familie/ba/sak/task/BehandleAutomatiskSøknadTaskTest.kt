@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.task
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDate
-import java.util.Properties
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -27,6 +25,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import java.util.Properties
 
 class BehandleAutomatiskSøknadTaskTest {
     private val autovedtakStegService = mockk<AutovedtakStegService>()
@@ -61,11 +61,12 @@ class BehandleAutomatiskSøknadTaskTest {
             // Arrange
             val nyBehandlingUtenSøkersIdent = nyBehandling.copy(søkersIdent = null)
 
-            val task = Task(
-                type = TASK_STEP_TYPE,
-                payload = jsonMapper.writeValueAsString(BehandleAutomatiskSøknadTaskDTO(nyBehandlingUtenSøkersIdent)),
-                properties = Properties(),
-            )
+            val task =
+                Task(
+                    type = TASK_STEP_TYPE,
+                    payload = jsonMapper.writeValueAsString(BehandleAutomatiskSøknadTaskDTO(nyBehandlingUtenSøkersIdent)),
+                    properties = Properties(),
+                )
 
             // Act & Assert
             val feilmelding =
@@ -99,7 +100,7 @@ class BehandleAutomatiskSøknadTaskTest {
                             søkersIdent = søkersIdent,
                             barnasIdenter = nyBehandling.barnasIdenter,
                         ),
-                    førstegangKjørt = any()
+                    førstegangKjørt = any(),
                 )
             }
             verify(exactly = 0) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(any()) }
@@ -156,9 +157,10 @@ class BehandleAutomatiskSøknadTaskTest {
         @Test
         fun `skal kaste feil hvis søkers ident er null`() {
             // Act & assert
-            val exception = assertThrows<Feil> {
-                BehandleAutomatiskSøknadTask.opprettTask(BehandleAutomatiskSøknadTaskDTO(nyBehandling.copy(søkersIdent = null)))
-            }
+            val exception =
+                assertThrows<Feil> {
+                    BehandleAutomatiskSøknadTask.opprettTask(BehandleAutomatiskSøknadTaskDTO(nyBehandling.copy(søkersIdent = null)))
+                }
             assertThat(exception.message).isEqualTo("Søkers ident kan ikke være null i en ${BehandleAutomatiskSøknadTask::class.simpleName} task.")
         }
     }

@@ -78,9 +78,10 @@ class BehandleAutomatiskSøknadTask(
             if (dto.nyBehandling.søkersIdent == null) {
                 throw Feil("Søkers ident kan ikke være null i en ${BehandleAutomatiskSøknadTask::class.simpleName} task.")
             }
-            val properties = Properties().apply {
-                this["søkersIdent"] = dto.nyBehandling.søkersIdent
-            }
+            val properties =
+                Properties().apply {
+                    this["søkersIdent"] = dto.nyBehandling.søkersIdent
+                }
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = jsonMapper.writeValueAsString(dto),
