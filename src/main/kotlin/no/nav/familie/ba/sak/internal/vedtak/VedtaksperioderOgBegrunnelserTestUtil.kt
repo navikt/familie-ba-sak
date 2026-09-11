@@ -407,25 +407,28 @@ private fun hentTekstForEndretUtbetaling(
         """
 
     Og med endrede utbetalinger
-    | AktørId  | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |""" +
-            hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
-            hentEndretUtbetalingRader(endredeUtbetalinger)
+    | AktørId  | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |""" + rader
     }
 }
 
 private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetalingAndel>?): String =
     endredeUtbetalinger
-        ?.mapNotNull { endretUtbetalingAndel ->
-            (endretUtbetalingAndel.tilIEndretUtbetalingAndel() as? IUtfyltEndretUtbetalingAndel)
-                ?.let { it to endretUtbetalingAndel.avtaletidspunktDeltBosted }
-        }?.joinToString("") { (utfyltEndretUtbetalingAndel, avtaletidspunktDeltBosted) ->
-            """
-    | ${utfyltEndretUtbetalingAndel.aktører.joinToString(",") { aktør -> aktør.aktørId }} |${utfyltEndretUtbetalingAndel.behandlingId}|${
-                utfyltEndretUtbetalingAndel.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
-            }|${
-                utfyltEndretUtbetalingAndel.tom.sisteDagIInneværendeMåned().tilddMMyyyy()
-            }|${utfyltEndretUtbetalingAndel.årsak} | ${utfyltEndretUtbetalingAndel.prosent} | ${utfyltEndretUtbetalingAndel.søknadstidspunkt.tilddMMyyyy()} | ${avtaletidspunktDeltBosted?.tilddMMyyyy() ?: ""} |"""
-        } ?: ""
+        .orEmpty()
+        .mapNotNull { it.tilEndretUtbetalingRad() }
+        .joinToString("")
+
+private fun EndretUtbetalingAndel.tilEndretUtbetalingRad(): String? {
+    val utfylt = tilIEndretUtbetalingAndel() as? IUtfyltEndretUtbetalingAndel ?: return null
+
+    val aktørIder = utfylt.aktører.joinToString(",") { aktør -> aktør.aktørId }
+    val fom = utfylt.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
+    val tom = utfylt.tom.sisteDagIInneværendeMåned().tilddMMyyyy()
+    val søknadstidspunkt = utfylt.søknadstidspunkt.tilddMMyyyy()
+    val avtaletidspunkt = avtaletidspunktDeltBosted?.tilddMMyyyy() ?: ""
+
+    return """
+    | $aktørIder |${utfylt.behandlingId}|$fom|$tom|${utfylt.årsak} | ${utfylt.prosent} | $søknadstidspunkt | $avtaletidspunkt |"""
+}
 
 private fun hentTekstForTilkjentYtelse(
     andeler: List<AndelTilkjentYtelse>,
