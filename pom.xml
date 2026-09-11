@@ -31,7 +31,7 @@
         <familie.kontrakter.stønadsstatistikk>2.0_20260907115901_0a01077</familie.kontrakter.stønadsstatistikk>
         <felles-kontrakter.version>4.0_20260821102510_33ea755</felles-kontrakter.version>
         <utbetalingsgenerator.version>1.0_20260527092003_ed16208</utbetalingsgenerator.version>
-        <cucumber.version>7.34.7</cucumber.version>
+        <cucumber.version>7.34.8</cucumber.version>
         <mockk.version>1.14.11</mockk.version>
         <token-validation-spring.version>6.0.8</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
@@ -544,7 +544,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.4</version>
+                <version>3.6.0</version>
                 <configuration>
                     <!-- Trenger argline for å få injected javaagent for kover -->
                     <argLine>@{argLine} -XX:MinRAMPercentage=25 -XX:MaxRAMPercentage=75</argLine>
