@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 class AutomatiskBehandlingControllerTest {
     private val tilgangService = mockk<TilgangService>()
@@ -35,6 +36,7 @@ class AutomatiskBehandlingControllerTest {
             fagsakId = 1L,
             søkersIdent = "12345678910",
             barnasIdenter = listOf("12345678911"),
+            søknadMottattDato = LocalDate.now(),
         )
 
     @BeforeEach
