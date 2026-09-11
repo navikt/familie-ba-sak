@@ -30,7 +30,7 @@ data class UtvidetBehandlingDto(
     val søknadsgrunnlag: SøknadDTO?,
     val personer: List<PersonDto>,
     val personResultater: List<PersonResultatDto>,
-    val fødselshendelsefiltreringResultater: List<FødselshendelsefiltreringResultatDto>,
+    val fødselshendelsefiltreringResultater: List<FiltreringResultatDto>,
     val utbetalingsperioder: List<Utbetalingsperiode>,
     val personerMedAndelerTilkjentYtelse: List<PersonMedAndelerDto>,
     val endretUtbetalingAndeler: List<EndretUtbetalingAndelDto>,

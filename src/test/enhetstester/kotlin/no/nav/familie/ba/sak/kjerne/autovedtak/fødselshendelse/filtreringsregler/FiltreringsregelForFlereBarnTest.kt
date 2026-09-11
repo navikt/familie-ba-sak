@@ -18,8 +18,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForD�
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -57,31 +58,33 @@ class FiltreringsregelForFlereBarnTest {
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val personidentService = mockk<PersonidentService>()
-    val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>(relaxed = true)
+    val filtreringResultatRepository = mockk<FiltreringResultatRepository>(relaxed = true)
     val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     val tilkjentYtelseValideringServiceMock = mockk<TilkjentYtelseValideringService>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     var clockProvider = TestClockProvider()
+    val filtreringsregelEvaluator = FiltreringsregelEvaluator()
     val filtreringsreglerFødselshendelseService =
         FiltreringsreglerFødselshendelseService(
             personopplysningerService = personopplysningerServiceMock,
             personidentService = personidentService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepositoryMock,
             clockProvider = clockProvider,
-            fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
+            filtreringResultatRepository = filtreringResultatRepository,
             behandlingService = behandlingServiceMock,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            filtreringsregelEvaluator = filtreringsregelEvaluator,
         )
 
     init {
-        val fødselshendelsefiltreringResultatSlot = slot<List<FødselshendelsefiltreringResultat>>()
-        every { fødselshendelsefiltreringResultatRepository.saveAll(capture(fødselshendelsefiltreringResultatSlot)) } answers {
-            fødselshendelsefiltreringResultatSlot.captured
+        val filtreringResultatSlot = slot<List<FiltreringResultat>>()
+        every { filtreringResultatRepository.saveAll(capture(filtreringResultatSlot)) } answers {
+            filtreringResultatSlot.captured
         }
     }
 
@@ -89,7 +92,8 @@ class FiltreringsregelForFlereBarnTest {
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 genererFaktaMedTidligereBarn(1, 3, 7, 0),
             )
 
@@ -98,14 +102,15 @@ class FiltreringsregelForFlereBarnTest {
         Assertions.assertThat(
             evalueringer
                 .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                .any { it.identifikator == Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name },
+                .any { it.identifikator == Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name },
         )
     }
 
     @Test
     fun `Regelevaluering skal resultere i JA når det har ikke gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
                 genererFaktaMedTidligereBarn(0, 0, 0, 5),
             )
 
@@ -198,8 +203,8 @@ class FiltreringsregelForFlereBarnTest {
         // Act
         val fødselshendelsefiltreringResultater =
             filtreringsreglerFødselshendelseService.kjørFiltreringsregler(
-                NyBehandlingHendelse(
-                    morsIdent = gyldigAktør.aktivFødselsnummer(),
+                FiltrerAutomatiskBehandlingData(
+                    søkersIdent = gyldigAktør.aktivFødselsnummer(),
                     barnasIdenter =
                         listOf(
                             barnAktør0.aktivFødselsnummer(),
@@ -214,7 +219,7 @@ class FiltreringsregelForFlereBarnTest {
         Assertions.assertThat(
             fødselshendelsefiltreringResultater
                 .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                .any { it.filtreringsregel == Filtreringsregel.BARN_LEVER },
+                .any { it.filtreringsregel == Filtreringsregel.Identifikator.BARN_LEVER },
         )
     }
 
@@ -302,8 +307,8 @@ class FiltreringsregelForFlereBarnTest {
         // Act
         val fødselshendelsefiltreringResultater =
             filtreringsreglerFødselshendelseService.kjørFiltreringsregler(
-                NyBehandlingHendelse(
-                    morsIdent = gyldigAktør.aktivFødselsnummer(),
+                FiltrerAutomatiskBehandlingData(
+                    søkersIdent = gyldigAktør.aktivFødselsnummer(),
                     barnasIdenter =
                         listOf(
                             barnAktør0.aktivFødselsnummer(),
@@ -382,7 +387,7 @@ class FiltreringsregelForFlereBarnTest {
         manaderFodselTo: Long,
         manaderFodselForrigeFodsel: Long,
         dagerFodselForrigeFodsel: Long,
-    ): FiltreringsreglerFakta {
+    ): FiltreringsreglerFaktaFødselshendelse {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktør)
         val barn =
             listOf(
@@ -395,17 +400,17 @@ class FiltreringsregelForFlereBarnTest {
                 PersonInfo(LocalDate.now().minusMonths(manaderFodselForrigeFodsel).minusDays(dagerFodselForrigeFodsel)),
             )
 
-        return FiltreringsreglerFakta(
-            mor = mor,
-            barnaFraHendelse = barn,
+        return FiltreringsreglerFaktaFødselshendelse(
+            søker = mor,
+            barnaSomSkalVurderes = barn,
             restenAvBarna = restenAvBarna,
-            morLever = true,
+            søkerLever = true,
             barnaLever = true,
-            morHarVerge = false,
+            søkerHarVerge = false,
             dagensDato = LocalDate.now(),
             erFagsakenMigrertEtterBarnFødt = false,
             løperBarnetrygdForBarnetPåAnnenForelder = false,
-            morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+            søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
             morHarIkkeOpphørtBarnetrygd = true,
         )
     }

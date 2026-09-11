@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import java.time.LocalDate
 
 object EndringIEndretUtbetalingAndelUtil {
     fun lagEndringIEndretUbetalingAndelPerPersonTidslinje(
@@ -16,7 +17,7 @@ object EndringIEndretUtbetalingAndelUtil {
 
         val endringerTidslinje =
             nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
-                val endringIAvtaletidspunktDeltBosted = nåværende?.avtaletidspunktDeltBosted != forrige?.avtaletidspunktDeltBosted
+                val endringIAvtaletidspunktDeltBosted = nåværende.avtaletidspunktDeltBostedHvisDeltBosted() != forrige.avtaletidspunktDeltBostedHvisDeltBosted()
                 val endringIÅrsak = nåværende?.årsak != forrige?.årsak && !erKunEndringMellomEtterbetalingsårsaker(nåværende?.årsak, forrige?.årsak)
                 val endringISøknadstidspunkt = nåværende?.søknadstidspunkt != forrige?.søknadstidspunkt
                 val haddeTidligereIkkeSøknadstidspunkt = forrige?.søknadstidspunkt == null
@@ -28,6 +29,8 @@ object EndringIEndretUtbetalingAndelUtil {
 
         return endringerTidslinje
     }
+
+    private fun EndretUtbetalingAndel?.avtaletidspunktDeltBostedHvisDeltBosted(): LocalDate? = this?.avtaletidspunktDeltBosted?.takeIf { this.årsakErDeltBosted() }
 
     private val etterbetalingsårsaker = setOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND)
 

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.FiltreringsreglerSøknadService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -12,10 +13,11 @@ import org.springframework.stereotype.Service
 @Service
 class FiltreringAutomatiskBehandlingSteg(
     private val filtreringsreglerFødselshendelseService: FiltreringsreglerFødselshendelseService,
-) : BehandlingSteg<NyBehandlingHendelse> {
+    private val filtreringsreglerSøknadService: FiltreringsreglerSøknadService,
+) : BehandlingSteg<FiltrerAutomatiskBehandlingData> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: NyBehandlingHendelse,
+        data: FiltrerAutomatiskBehandlingData,
     ): StegType {
         logger.info("Kjører filtreringsregler for behandling ${behandling.id}")
 
@@ -34,6 +36,20 @@ class FiltreringAutomatiskBehandlingSteg(
                 }
             }
 
+            BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD -> {
+                val søknadfiltreringResultat =
+                    filtreringsreglerSøknadService.kjørFiltreringsregler(
+                        data,
+                        behandling,
+                    )
+
+                if (!søknadfiltreringResultat.erOppfylt()) {
+                    StegType.HENLEGG_BEHANDLING
+                } else {
+                    hentNesteStegForNormalFlyt(behandling)
+                }
+            }
+
             else -> {
                 throw Feil("Behandling ${behandling.id} har en årsak som ikke skal filtreres: ${behandling.opprettetÅrsak} ")
             }
@@ -46,3 +62,8 @@ class FiltreringAutomatiskBehandlingSteg(
         private val logger = LoggerFactory.getLogger(FiltreringAutomatiskBehandlingSteg::class.java)
     }
 }
+
+data class FiltrerAutomatiskBehandlingData(
+    val søkersIdent: String,
+    val barnasIdenter: List<String>,
+)
