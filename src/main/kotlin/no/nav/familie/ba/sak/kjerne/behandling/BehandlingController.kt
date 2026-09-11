@@ -160,6 +160,7 @@ data class NyBehandling(
     val fagsakId: Long,
     val nyEksternBehandlingRelasjon: NyEksternBehandlingRelasjon? = null,
     val begrunnelse: String? = null,
+    val søkersIdent: String? = null,
 ) {
     init { // Initiell validering på request
         when {
@@ -186,7 +187,7 @@ data class NyBehandling(
 
 data class Søknad(
     val fagsakId: Long,
-    val morsIdent: String,
+    val søkersIdent: String,
     val barnasIdenter: List<String>,
 )
 

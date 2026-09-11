@@ -117,6 +117,7 @@ class OppgaveService(
         begrunnelse: String = "",
         opprettLogginnslag: Boolean = false,
         manuellOppgaveType: ManuellOppgaveType,
+        oppgavetype: Oppgavetype,
     ): String {
         logger.info("Sender autovedtak til manuell behandling, se secureLogger for mer detaljer.")
         secureLogger.info("Sender autovedtak til manuell behandling. Begrunnelse: $begrunnelse")
@@ -124,6 +125,7 @@ class OppgaveService(
             behandlingId = behandlingId,
             beskrivelse = begrunnelse,
             manuellOppgaveType = manuellOppgaveType,
+            oppgavetype = oppgavetype,
         )
 
         if (opprettLogginnslag) {

@@ -34,7 +34,7 @@ class AutovedtakSøknadService(
                 behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
                 filtrerAutomatiskBehandlingData =
                     FiltrerAutomatiskBehandlingData(
-                        søkersIdent = behandlingsdata.søknad.morsIdent,
+                        søkersIdent = behandlingsdata.søknad.søkersIdent,
                         barnasIdenter = behandlingsdata.søknad.barnasIdenter,
                     ),
             )
