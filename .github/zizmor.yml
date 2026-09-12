@@ -1,0 +1,8 @@
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        "navikt/familie-baks-gha-workflows/*": ref-pin
+        "*": hash-pin
+  ref-version-mismatch:
+    disable: true
