@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -202,8 +203,8 @@ class FiltreringsregelForFlereBarnTest {
         // Act
         val fødselshendelsefiltreringResultater =
             filtreringsreglerFødselshendelseService.kjørFiltreringsregler(
-                NyBehandlingHendelse(
-                    morsIdent = gyldigAktør.aktivFødselsnummer(),
+                FiltrerAutomatiskBehandlingData(
+                    søkersIdent = gyldigAktør.aktivFødselsnummer(),
                     barnasIdenter =
                         listOf(
                             barnAktør0.aktivFødselsnummer(),
@@ -306,8 +307,8 @@ class FiltreringsregelForFlereBarnTest {
         // Act
         val fødselshendelsefiltreringResultater =
             filtreringsreglerFødselshendelseService.kjørFiltreringsregler(
-                NyBehandlingHendelse(
-                    morsIdent = gyldigAktør.aktivFødselsnummer(),
+                FiltrerAutomatiskBehandlingData(
+                    søkersIdent = gyldigAktør.aktivFødselsnummer(),
                     barnasIdenter =
                         listOf(
                             barnAktør0.aktivFødselsnummer(),
