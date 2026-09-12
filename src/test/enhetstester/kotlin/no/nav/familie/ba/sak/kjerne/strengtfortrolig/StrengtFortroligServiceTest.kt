@@ -643,7 +643,6 @@ class StrengtFortroligServiceTest {
         søknadsgrunnlag = søknadsgrunnlag,
         personer = personer,
         personResultater = emptyList(),
-        fødselshendelsefiltreringResultater = emptyList(),
         utbetalingsperioder = emptyList(),
         personerMedAndelerTilkjentYtelse = personerMedAndelerTilkjentYtelse,
         endretUtbetalingAndeler = endretUtbetalingAndeler,
