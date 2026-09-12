@@ -9,20 +9,14 @@ class FiltreringsregelEvaluator {
     fun <T : FiltreringsreglerFakta> evaluerFiltreringsregler(
         filtreringsregler: List<Filtreringsregel<T>>,
         fakta: T,
-    ): List<Evaluering> =
-        filtreringsregler.fold(mutableListOf()) { acc, filtreringsregel ->
-            if (acc.any { it.resultat == Resultat.IKKE_OPPFYLT }) {
-                acc.add(
-                    Evaluering(
-                        resultat = Resultat.IKKE_VURDERT,
-                        identifikator = filtreringsregel.identifikator.name,
-                        begrunnelse = "Ikke vurdert",
-                        evalueringÅrsaker = emptyList(),
-                    ),
-                )
+    ): List<Evaluering> {
+        var enRegelErIkkeOppfylt = false
+        return filtreringsregler.map { filtreringsregel ->
+            if (enRegelErIkkeOppfylt) {
+                filtreringsregel.identifikator.tilIkkeVurdertEvaluering()
             } else {
-                acc.add(filtreringsregel.evaluer(fakta).copy(identifikator = filtreringsregel.identifikator.name))
+                filtreringsregel.evaluer(fakta).also { enRegelErIkkeOppfylt = it.resultat == Resultat.IKKE_OPPFYLT }
             }
-            acc
         }
+    }
 }
