@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
-import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -24,14 +23,9 @@ class AutomatiskBehandlingController(
     fun opprettAutomatiskBehandlingAvSøknad(
         @RequestBody nyBehandling: NyBehandling,
     ) {
-        tilgangService.validerTilgangTilFagsak(
-            fagsakId = nyBehandling.fagsakId,
-            event = AuditLoggerEvent.CREATE,
-        )
-
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "opprette behandling",
+            minimumBehandlerRolle = BehandlerRolle.SYSTEM,
+            handling = "Oppretter behandling fra søknad",
         )
 
         val task = BehandleAutomatiskSøknadTask.opprettTask(BehandleAutomatiskSøknadTaskDTO(nyBehandling))

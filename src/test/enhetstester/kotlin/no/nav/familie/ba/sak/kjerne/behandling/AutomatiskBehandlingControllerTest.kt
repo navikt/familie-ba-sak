@@ -5,8 +5,8 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import java.time.LocalDate
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
-import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 
 class AutomatiskBehandlingControllerTest {
     private val tilgangService = mockk<TilgangService>()
@@ -48,43 +47,31 @@ class AutomatiskBehandlingControllerTest {
 
     @Nested
     inner class OpprettAutomatiskBehandlingAvSøknad {
-        @Test
-        fun `skal validere tilgang til fagsak`() {
-            // Act
-            automatiskBehandlingController.opprettAutomatiskBehandlingAvSøknad(nyBehandling)
-
-            // Assert
-            verify(exactly = 1) {
-                tilgangService.validerTilgangTilFagsak(
-                    fagsakId = nyBehandling.fagsakId,
-                    event = AuditLoggerEvent.CREATE,
-                )
-            }
-        }
 
         @Test
-        fun `skal verifisere at saksbehandler har riktig rolle`() {
+        fun `skal verifisere at kaller av endepunktet har riktig rolle`() {
             // Act
             automatiskBehandlingController.opprettAutomatiskBehandlingAvSøknad(nyBehandling)
 
             // Assert
             verify(exactly = 1) {
                 tilgangService.verifiserHarTilgangTilHandling(
-                    minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                    handling = "opprette behandling",
+                    minimumBehandlerRolle = BehandlerRolle.SYSTEM,
+                    handling = "Oppretter behandling fra søknad",
                 )
             }
         }
 
+
         @Test
-        fun `skal kaste feil hvis saksbehandler ikke har tilgang til fagsak`() {
+        fun `skal kaste feil kaller av endepunktet ikke har riktig rolle`() {
             // Arrange
             every {
-                tilgangService.validerTilgangTilFagsak(
-                    fagsakId = nyBehandling.fagsakId,
-                    event = AuditLoggerEvent.CREATE,
+                tilgangService.verifiserHarTilgangTilHandling(
+                    minimumBehandlerRolle = BehandlerRolle.SYSTEM,
+                    handling = "Oppretter behandling fra søknad",
                 )
-            } throws RolleTilgangskontrollFeil("Ikke tilgang")
+            } throws RolleTilgangskontrollFeil("Du har ikke system-tilgang.")
 
             // Act & Assert
             val feilmelding =
@@ -92,28 +79,7 @@ class AutomatiskBehandlingControllerTest {
                     automatiskBehandlingController.opprettAutomatiskBehandlingAvSøknad(nyBehandling)
                 }.message
 
-            assertThat(feilmelding).isEqualTo("Ikke tilgang")
-
-            verify(exactly = 0) { taskRepository.save(any()) }
-        }
-
-        @Test
-        fun `skal kaste feil hvis saksbehandler ikke har riktig rolle`() {
-            // Arrange
-            every {
-                tilgangService.verifiserHarTilgangTilHandling(
-                    minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                    handling = "opprette behandling",
-                )
-            } throws RolleTilgangskontrollFeil("Du har ikke saksbehandler-tilgang.")
-
-            // Act & Assert
-            val feilmelding =
-                assertThrows<RolleTilgangskontrollFeil> {
-                    automatiskBehandlingController.opprettAutomatiskBehandlingAvSøknad(nyBehandling)
-                }.message
-
-            assertThat(feilmelding).isEqualTo("Du har ikke saksbehandler-tilgang.")
+            assertThat(feilmelding).isEqualTo("Du har ikke system-tilgang.")
 
             verify(exactly = 0) { taskRepository.save(any()) }
         }
