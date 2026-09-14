@@ -140,7 +140,7 @@ private val morLever =
 private val barnLever =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.BARN_LEVER) { it.barnaLever }
 
-private val merEnn5MndSidenForrigeBarn =
+private val merEnn5MndEllerMindreEnnFemDagerSidenForrigeBarn =
     Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>(Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN) { fakta ->
         fakta.barnaSomSkalVurderes.all { barnFraHendelse ->
             fakta.restenAvBarna.all {
@@ -207,7 +207,7 @@ val FILTRERINGSREGLER_FØDSELSHENDELSE: List<Filtreringsregel<FiltreringsreglerF
         barnGyldigFnr,
         morLever,
         barnLever,
-        merEnn5MndSidenForrigeBarn,
+        merEnn5MndEllerMindreEnnFemDagerSidenForrigeBarn,
         morErOver18År,
         morHarIkkeVerge,
         morMottarIkkeLøpendeUtvidet,

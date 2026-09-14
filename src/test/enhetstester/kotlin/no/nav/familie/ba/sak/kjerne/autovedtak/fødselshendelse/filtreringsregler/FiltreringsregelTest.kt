@@ -13,7 +13,7 @@ import java.time.LocalDate
 
 internal class FiltreringsregelTest {
     private val gyldigAktørId = randomAktør()
-    private val merEnn5MndSidenForrigeBarn =
+    private val merEnn5MndEllerMindreEnnFemDagerSidenForrigeBarn =
         FILTRERINGSREGLER_FØDSELSHENDELSE.single { it.identifikator == Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN }
 
     @Test
@@ -30,7 +30,7 @@ internal class FiltreringsregelTest {
 
         // Act
         val evaluering =
-            merEnn5MndSidenForrigeBarn.evaluer(
+            merEnn5MndEllerMindreEnnFemDagerSidenForrigeBarn.evaluer(
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet1, barnet2),
@@ -63,7 +63,7 @@ internal class FiltreringsregelTest {
 
         // Act
         val evaluering =
-            merEnn5MndSidenForrigeBarn.evaluer(
+            merEnn5MndEllerMindreEnnFemDagerSidenForrigeBarn.evaluer(
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet1, barnet2),
@@ -93,7 +93,7 @@ internal class FiltreringsregelTest {
 
         // Act
         val evaluering =
-            merEnn5MndSidenForrigeBarn.evaluer(
+            merEnn5MndEllerMindreEnnFemDagerSidenForrigeBarn.evaluer(
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barn1Person),
