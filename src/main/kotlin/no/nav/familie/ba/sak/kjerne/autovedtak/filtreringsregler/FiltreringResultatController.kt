@@ -1,10 +1,10 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
+package no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.FiltreringResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilFiltreringResultatDto
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.MediaType

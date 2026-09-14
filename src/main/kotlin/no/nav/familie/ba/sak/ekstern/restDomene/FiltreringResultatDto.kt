@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.Filtreringsregel
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultat
 
 data class FiltreringResultatDto(
     val filtreringsregel: Filtreringsregel.Identifikator,
