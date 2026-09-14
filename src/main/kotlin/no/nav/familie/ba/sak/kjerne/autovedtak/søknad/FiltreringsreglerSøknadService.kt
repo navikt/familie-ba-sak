@@ -145,7 +145,7 @@ class FiltreringsreglerSøknadService(
                     filtreringsregel = Filtreringsregel.Identifikator.valueOf(it.identifikator),
                     resultat = it.resultat,
                     begrunnelse = it.begrunnelse,
-                    evalueringsårsaker = it.evalueringÅrsaker.map { evalueringÅrsak -> evalueringÅrsak.toString() },
+                    evalueringsårsaker = it.evalueringÅrsaker.map { evalueringÅrsak -> evalueringÅrsak.hentNavn() },
                     regelInput = fakta.convertDataClassToJson(),
                 )
             },

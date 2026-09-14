@@ -13,6 +13,8 @@ import java.time.LocalDate
 
 internal class FiltreringsregelTest {
     private val gyldigAktørId = randomAktør()
+    private val merEnn5MndEllerMindreEnnFemDagerSidenForrigeBarn =
+        FILTRERINGSREGLER_FØDSELSHENDELSE.single { it.identifikator == Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN }
 
     @Test
     fun `Regelevaluering skal resultere i JA når det har gått mer enn 5 måneder siden forrige barn ble født`() {
@@ -28,7 +30,7 @@ internal class FiltreringsregelTest {
 
         // Act
         val evaluering =
-            FiltreringsregelEvaluering.merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(
+            merEnn5MndEllerMindreEnnFemDagerSidenForrigeBarn.evaluer(
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet1, barnet2),
@@ -61,7 +63,7 @@ internal class FiltreringsregelTest {
 
         // Act
         val evaluering =
-            FiltreringsregelEvaluering.merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(
+            merEnn5MndEllerMindreEnnFemDagerSidenForrigeBarn.evaluer(
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barnet1, barnet2),
@@ -91,7 +93,7 @@ internal class FiltreringsregelTest {
 
         // Act
         val evaluering =
-            FiltreringsregelEvaluering.merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(
+            merEnn5MndEllerMindreEnnFemDagerSidenForrigeBarn.evaluer(
                 FiltreringsreglerFaktaFødselshendelse(
                     søker = mor,
                     barnaSomSkalVurderes = listOf(barn1Person),
@@ -111,32 +113,103 @@ internal class FiltreringsregelTest {
     }
 
     @Test
-    fun `Filtreringsreglene skal følge en fagbestemt rekkefølge`() {
-        // Arrange
-        val fagbestemtFiltreringsregelrekkefølge =
-            listOf(
-                Filtreringsregel.Identifikator.MOR_GYLDIG_FNR,
-                Filtreringsregel.Identifikator.BARN_GYLDIG_FNR,
-                Filtreringsregel.Identifikator.MOR_LEVER,
-                Filtreringsregel.Identifikator.BARN_LEVER,
-                Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
-                Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR,
-                Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE,
-                Filtreringsregel.Identifikator.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET,
-                Filtreringsregel.Identifikator.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
-                Filtreringsregel.Identifikator.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
-                Filtreringsregel.Identifikator.LØPER_IKKE_BARNETRYGD_FOR_BARNET,
-                Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
-                Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
-            )
+    fun `skal kjøre filtreringsreglene for fødselshendelse i fagbestemt rekkefølge`() {
+        // Act
+        val identifikatorer = FILTRERINGSREGLER_FØDSELSHENDELSE.map { it.identifikator }
 
         // Assert
-        assertThat(Filtreringsregel.Identifikator.entries.size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
-        assertThat(
-            Filtreringsregel.Identifikator
-                .entries
-                .zip(fagbestemtFiltreringsregelrekkefølge)
-                .all { (x, y) -> x == y },
-        ).isTrue
+        assertThat(identifikatorer).containsExactly(
+            Filtreringsregel.Identifikator.MOR_GYLDIG_FNR,
+            Filtreringsregel.Identifikator.BARN_GYLDIG_FNR,
+            Filtreringsregel.Identifikator.MOR_LEVER,
+            Filtreringsregel.Identifikator.BARN_LEVER,
+            Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
+            Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE,
+            Filtreringsregel.Identifikator.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
+            Filtreringsregel.Identifikator.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
+            Filtreringsregel.Identifikator.LØPER_IKKE_BARNETRYGD_FOR_BARNET,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
+        )
     }
+
+    @Test
+    fun `skal kjøre filtreringsreglene for søknad i fagbestemt rekkefølge`() {
+        // Act
+        val identifikatorer = FILTRERINGSREGLER_SØKNAD.map { it.identifikator }
+
+        // Assert
+        assertThat(identifikatorer).containsExactly(
+            Filtreringsregel.Identifikator.MOR_GYLDIG_FNR,
+            Filtreringsregel.Identifikator.BARN_GYLDIG_FNR,
+            Filtreringsregel.Identifikator.MOR_LEVER,
+            Filtreringsregel.Identifikator.BARN_LEVER,
+            Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE,
+            Filtreringsregel.Identifikator.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
+            Filtreringsregel.Identifikator.LØPER_IKKE_BARNETRYGD_FOR_BARNET,
+            Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+        )
+    }
+
+    @Test
+    fun `skal ha en filtreringsregel for hver identifikator`() {
+        // Act
+        val identifikatorer = (FILTRERINGSREGLER_FØDSELSHENDELSE + FILTRERINGSREGLER_SØKNAD).map { it.identifikator }.toSet()
+
+        // Assert
+        assertThat(identifikatorer).containsExactlyInAnyOrderElementsOf(Filtreringsregel.Identifikator.entries)
+    }
+
+    @Test
+    fun `skal beholde utfallsnavn, identifikator og beskrivelse som er persistert i FILTRERING_RESULTAT`() {
+        // Arrange
+        val persisterteUtfall =
+            listOf(
+                PersistertUtfall("MOR_HAR_GYLDIG_FNR", "MOR_GYLDIG_FNR", "Mor har gyldig fødselsnummer"),
+                PersistertUtfall("MOR_HAR_UGYLDIG_FNR", "MOR_GYLDIG_FNR", "Mor har ugyldig fødselsnummer"),
+                PersistertUtfall("BARN_HAR_GYLDIG_FNR", "BARN_GYLDIG_FNR", "Barn har gyldig fødselsnummer"),
+                PersistertUtfall("BARN_HAR_UGYLDIG_FNR", "BARN_GYLDIG_FNR", "Barn har ugyldig fødselsnummer"),
+                PersistertUtfall("MOR_LEVER", "MOR_LEVER", "Det er ikke registrert dødsdato på mor."),
+                PersistertUtfall("MOR_LEVER_IKKE", "MOR_LEVER", "Det er registrert dødsdato på mor."),
+                PersistertUtfall("BARNET_LEVER", "BARN_LEVER", "Det er ikke registrert dødsdato på barnet."),
+                PersistertUtfall("BARNET_LEVER_IKKE", "BARN_LEVER", "Det er registrert dødsdato på barnet."),
+                PersistertUtfall("MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL", "MER_ENN_5_MND_SIDEN_FORRIGE_BARN", "Det har gått mer enn fem måneder siden forrige barn ble født."),
+                PersistertUtfall("MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL", "MER_ENN_5_MND_SIDEN_FORRIGE_BARN", "Det har gått mindre enn fem måneder siden forrige barn ble født."),
+                PersistertUtfall("MOR_ER_OVER_18_ÅR", "MOR_ER_OVER_18_ÅR", "Mor er over 18 år."),
+                PersistertUtfall("MOR_ER_UNDER_18_ÅR", "MOR_ER_OVER_18_ÅR", "Mor er under 18 år."),
+                PersistertUtfall("MOR_ER_MYNDIG", "MOR_HAR_IKKE_VERGE", "Mor er myndig."),
+                PersistertUtfall("MOR_ER_UNDER_VERGEMÅL", "MOR_HAR_IKKE_VERGE", "Mor er under vergemål."),
+                PersistertUtfall("MOR_MOTTAR_IKKE_LØPENDE_UTVIDET", "MOR_MOTTAR_IKKE_LØPENDE_UTVIDET", "Mor mottar ikke utvidet barnetrygd."),
+                PersistertUtfall("MOR_MOTTAR_LØPENDE_UTVIDET", "MOR_MOTTAR_IKKE_LØPENDE_UTVIDET", "Mor mottar utvidet barnetrygd."),
+                PersistertUtfall("MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD", "MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD", "Mor har ikke løpende EØS-barnetrygd"),
+                PersistertUtfall("MOR_HAR_LØPENDE_EØS_BARNETRYGD", "MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD", "Mor har EØS-barnetrygd"),
+                PersistertUtfall("FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT", "FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT", "Fagsaken har ikke blitt migrert fra infotrygd etter barn ble født."),
+                PersistertUtfall("FAGSAK_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT", "FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT", "Fagsaken ble migrert fra infotrygd etter barn ble født."),
+                PersistertUtfall("LØPER_IKKE_BARNETRYGD_FOR_BARNET", "LØPER_IKKE_BARNETRYGD_FOR_BARNET", "Det løper ikke barnetrygd for barnet på annen forelder"),
+                PersistertUtfall("LØPER_ALLEREDE_FOR_ANNEN_FORELDER", "LØPER_IKKE_BARNETRYGD_FOR_BARNET", "Annen mottaker har barnetrygd for barnet"),
+                PersistertUtfall("MOR_OPPFYLLER_IKKE_VILKÅR_FOR_UTVIDET_BARNETRYGD_VED_FØDSELSDATO", "MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO", "Mor oppfyller ikke vilkår for utvidet barnetrygd"),
+                PersistertUtfall("MOR_OPPFYLLER_VILKÅR_FOR_UTVIDET_BARNETRYGD_VED_FØDSELSDATO", "MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO", "Mor oppfyller vilkår for utvidet barnetrygd"),
+                PersistertUtfall("MOR_HAR_IKKE_OPPHØRT_BARNETRYGD", "MOR_HAR_IKKE_OPPHØRT_BARNETRYGD", "Mor har ikke opphørt barnetrygd"),
+                PersistertUtfall("MOR_HAR_OPPHØRT_BARNETRYGD", "MOR_HAR_IKKE_OPPHØRT_BARNETRYGD", "Mor har vedtak om opphørt barnetrygd."),
+            )
+
+        // Act
+        val utfall =
+            Filtreringsregel.Identifikator.entries
+                .flatMap { listOf(it.oppfylt, it.ikkeOppfylt) }
+                .map { PersistertUtfall(it.hentNavn(), it.hentIdentifikator(), it.hentBeskrivelse()) }
+
+        // Assert
+        assertThat(utfall).containsExactlyInAnyOrderElementsOf(persisterteUtfall)
+    }
+
+    private data class PersistertUtfall(
+        val navn: String,
+        val identifikator: String,
+        val beskrivelse: String,
+    )
 }
