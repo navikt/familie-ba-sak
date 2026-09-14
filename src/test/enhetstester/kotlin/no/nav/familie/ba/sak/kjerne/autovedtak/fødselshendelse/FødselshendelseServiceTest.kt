@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -93,6 +94,11 @@ class FødselshendelseServiceTest {
         val barn2Person = lagPerson(type = PersonType.BARN)
         val barn2 = barn2Person.aktør.aktivFødselsnummer()
         val nyBehandlingHendelse = NyBehandlingHendelse(søker, listOf(barn2))
+        val filtrerAutomatiskBehandlingData =
+            FiltrerAutomatiskBehandlingData(
+                nyBehandlingHendelse.morsIdent,
+                nyBehandlingHendelse.barnasIdenter,
+            )
 
         every { fagsakService.hentNormalFagsak(søkerAktør) } returns fagsak
         every {
@@ -129,7 +135,7 @@ class FødselshendelseServiceTest {
         every {
             stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(
                 nyBehandling,
-                nyBehandlingHendelse,
+                filtrerAutomatiskBehandlingData,
             )
         } returns nyBehandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         every { stegService.håndterVilkårsvurdering(nyBehandling, any()) } returns

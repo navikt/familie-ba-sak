@@ -6,7 +6,6 @@ import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCache
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCacheRepository
 import no.nav.familie.valutakurs.ECBValutakursRestKlient
-import no.nav.familie.valutakurs.NorgesBankValutakursRestKlient
 import no.nav.familie.valutakurs.domene.ecb.ECBValutakursData
 import no.nav.familie.valutakurs.domene.ecb.Frequency
 import no.nav.familie.valutakurs.domene.ecb.toExchangeRates
@@ -28,9 +27,8 @@ import java.time.LocalDate
 class ECBServiceTest {
     private val ecbValutakursRestKlient = mockk<ECBValutakursRestKlient>()
     private val ecbValutakursCacheRepository = mockk<ECBValutakursCacheRepository>()
-    private val norgesBankValutakursRestKlient = mockk<NorgesBankValutakursRestKlient>(relaxed = true)
 
-    private val ecbService = ECBService(ecbValutakursRestKlient, norgesBankValutakursRestKlient, ecbValutakursCacheRepository)
+    private val ecbService = ECBService(ecbValutakursRestKlient, ecbValutakursCacheRepository)
 
     @AfterAll
     fun tearDown() {

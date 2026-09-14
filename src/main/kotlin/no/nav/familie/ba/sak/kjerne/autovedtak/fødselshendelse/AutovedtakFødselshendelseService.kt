@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -117,8 +118,13 @@ class AutovedtakFødselshendelseService(
                 ),
             )
 
-        val behandlingEtterFiltrering =
-            stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(behandling, nyBehandling)
+        val filtrerAutomatiskBehandlingData =
+            FiltrerAutomatiskBehandlingData(
+                søkersIdent = nyBehandling.morsIdent,
+                barnasIdenter = nyBehandling.barnasIdenter,
+            )
+
+        val behandlingEtterFiltrering = stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(behandling, filtrerAutomatiskBehandlingData)
 
         return if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
             stansetIAutomatiskFiltreringCounter.increment()

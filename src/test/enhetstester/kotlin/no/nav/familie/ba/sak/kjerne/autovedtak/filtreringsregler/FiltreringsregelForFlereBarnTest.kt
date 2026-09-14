@@ -42,6 +42,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -103,11 +104,9 @@ class FiltreringsregelForFlereBarnTest {
 
         // Assert
         Assertions.assertThat(evalueringer.erOppfylt()).isFalse
-        Assertions.assertThat(
-            evalueringer
-                .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                .any { it.identifikator == Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name },
-        )
+        Assertions
+            .assertThat(evalueringer.single { it.resultat == Resultat.IKKE_OPPFYLT }.identifikator)
+            .isEqualTo(Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name)
     }
 
     @Test
@@ -207,8 +206,8 @@ class FiltreringsregelForFlereBarnTest {
         // Act
         val fødselshendelsefiltreringResultater =
             filtreringsreglerFødselshendelseService.kjørFiltreringsregler(
-                NyBehandlingHendelse(
-                    morsIdent = gyldigAktør.aktivFødselsnummer(),
+                FiltrerAutomatiskBehandlingData(
+                    søkersIdent = gyldigAktør.aktivFødselsnummer(),
                     barnasIdenter =
                         listOf(
                             barnAktør0.aktivFødselsnummer(),
@@ -220,11 +219,9 @@ class FiltreringsregelForFlereBarnTest {
 
         // Assert
         Assertions.assertThat(fødselshendelsefiltreringResultater.erOppfylt()).isFalse
-        Assertions.assertThat(
-            fødselshendelsefiltreringResultater
-                .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                .any { it.filtreringsregel == Filtreringsregel.Identifikator.BARN_LEVER },
-        )
+        Assertions
+            .assertThat(fødselshendelsefiltreringResultater.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel)
+            .isEqualTo(Filtreringsregel.Identifikator.BARN_LEVER)
     }
 
     @Test
@@ -311,8 +308,8 @@ class FiltreringsregelForFlereBarnTest {
         // Act
         val fødselshendelsefiltreringResultater =
             filtreringsreglerFødselshendelseService.kjørFiltreringsregler(
-                NyBehandlingHendelse(
-                    morsIdent = gyldigAktør.aktivFødselsnummer(),
+                FiltrerAutomatiskBehandlingData(
+                    søkersIdent = gyldigAktør.aktivFødselsnummer(),
                     barnasIdenter =
                         listOf(
                             barnAktør0.aktivFødselsnummer(),

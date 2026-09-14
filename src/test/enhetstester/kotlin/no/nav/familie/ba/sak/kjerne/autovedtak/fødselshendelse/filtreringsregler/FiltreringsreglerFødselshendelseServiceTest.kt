@@ -30,13 +30,13 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.erOppfyl
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -80,7 +80,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val sisteVedtatteBehandling = lagBehandling()
         val behandling = lagBehandling()
 
@@ -111,7 +111,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
         verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
@@ -132,7 +132,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
 
@@ -163,7 +163,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
         verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
@@ -184,7 +184,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
 
@@ -220,7 +220,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
         verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
@@ -241,7 +241,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
 
@@ -277,7 +277,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
         verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
@@ -300,8 +300,8 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val barn1 = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val barn2 = tilfeldigPerson(fødselsdato = LocalDate.of(2020, 1, 1))
 
-        val nyBehandlingHendelse =
-            NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData =
+            FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
 
@@ -337,7 +337,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
         verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
@@ -360,8 +360,8 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val barn1 = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val barn2 = tilfeldigPerson(fødselsdato = LocalDate.of(2020, 1, 1))
 
-        val nyBehandlingHendelse =
-            NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData =
+            FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
         val behandling = lagBehandling()
         val sisteVedtatteBehandling = lagBehandling()
 
@@ -397,7 +397,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
         verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
@@ -418,7 +418,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val sisteVedtatteBehandling = lagBehandling()
         val behandling = lagBehandling()
 
@@ -436,7 +436,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
         verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }
@@ -457,7 +457,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         // Arrange
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
-        val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val sisteVedtatteBehandling = lagBehandling()
         val behandling = lagBehandling()
 
@@ -470,7 +470,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFaktaFødselshendelse>()
 
         // Act
-        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(nyBehandlingHendelse, behandling)
+        filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
 
         // Assert
         verify { filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, capture(filtreringsreglerFaktaSlot)) }

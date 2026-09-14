@@ -4,8 +4,10 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -317,4 +319,114 @@ class EndringIEndretUtbetalingAndelUtilTest {
         assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
         assertEquals(aug22, perioderMedEndring.single().tom?.toYearMonth())
     }
+
+    @Test
+    fun `skal ikke gi endring når avtaletidspunkt for delt bosted er ulikt på andeler som ikke gjelder delt bosted`() {
+        // Arrange
+        val søker = lagAktør()
+        val forrigeEndretAndel =
+            lagEndretUtbetalingAndel(
+                aktører = setOf(søker),
+                prosent = BigDecimal.ZERO,
+                fom = jan22,
+                tom = aug22,
+                årsak = Årsak.ETTERBETALING_3MND,
+                søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+                avtaletidspunktDeltBosted = sep22.førsteDagIInneværendeMåned(),
+            )
+
+        val nåværendeEndretAndel = forrigeEndretAndel.copy(avtaletidspunktDeltBosted = null)
+
+        // Act
+        val perioderMedEndring = finnPerioderMedEndring(forrigeEndretAndel, nåværendeEndretAndel)
+
+        // Assert
+        assertThat(perioderMedEndring).isEmpty()
+    }
+
+    @Test
+    fun `skal gi endring når avtaletidspunkt endres på andeler som gjelder delt bosted`() {
+        // Arrange
+        val barn = lagAktør()
+        val forrigeEndretAndel =
+            lagEndretUtbetalingAndel(
+                aktører = setOf(barn),
+                prosent = BigDecimal.ZERO,
+                fom = jan22,
+                tom = aug22,
+                årsak = Årsak.DELT_BOSTED,
+                søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+                avtaletidspunktDeltBosted = sep22.førsteDagIInneværendeMåned(),
+            )
+
+        val nåværendeEndretAndel = forrigeEndretAndel.copy(avtaletidspunktDeltBosted = des22.førsteDagIInneværendeMåned())
+
+        // Act
+        val perioderMedEndring = finnPerioderMedEndring(forrigeEndretAndel, nåværendeEndretAndel)
+
+        // Assert
+        assertThat(perioderMedEndring).hasSize(1)
+    }
+
+    @Test
+    fun `skal gi endring når årsak endres fra delt bosted selv om avtaletidspunktet beholdes`() {
+        // Arrange
+        val barn = lagAktør()
+        val forrigeEndretAndel =
+            lagEndretUtbetalingAndel(
+                aktører = setOf(barn),
+                prosent = BigDecimal.ZERO,
+                fom = jan22,
+                tom = aug22,
+                årsak = Årsak.DELT_BOSTED,
+                søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+                avtaletidspunktDeltBosted = sep22.førsteDagIInneværendeMåned(),
+            )
+
+        val nåværendeEndretAndel = forrigeEndretAndel.copy(årsak = Årsak.ETTERBETALING_3MND)
+
+        // Act
+        val perioderMedEndring = finnPerioderMedEndring(forrigeEndretAndel, nåværendeEndretAndel)
+
+        // Assert
+        assertThat(perioderMedEndring).hasSize(1)
+    }
+
+    @Test
+    fun `skal ikke gi endring når kun årsak mellom etterbetalingsårsaker og et utdatert avtaletidspunkt er ulikt`() {
+        // Arrange
+        val søker = lagAktør()
+        val forrigeEndretAndel =
+            lagEndretUtbetalingAndel(
+                aktører = setOf(søker),
+                prosent = BigDecimal.ZERO,
+                fom = jan22,
+                tom = aug22,
+                årsak = Årsak.ETTERBETALING_3ÅR,
+                søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+                avtaletidspunktDeltBosted = sep22.førsteDagIInneværendeMåned(),
+            )
+
+        val nåværendeEndretAndel =
+            forrigeEndretAndel.copy(
+                årsak = Årsak.ETTERBETALING_3MND,
+                avtaletidspunktDeltBosted = des22.førsteDagIInneværendeMåned(),
+            )
+
+        // Act
+        val perioderMedEndring = finnPerioderMedEndring(forrigeEndretAndel, nåværendeEndretAndel)
+
+        // Assert
+        assertThat(perioderMedEndring).isEmpty()
+    }
+
+    private fun finnPerioderMedEndring(
+        forrigeEndretAndel: EndretUtbetalingAndel,
+        nåværendeEndretAndel: EndretUtbetalingAndel,
+    ) = EndringIEndretUtbetalingAndelUtil
+        .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
+            forrigeEndretAndelerForPerson = listOf(forrigeEndretAndel),
+            nåværendeEndretAndelerForPerson = listOf(nåværendeEndretAndel),
+        ).tilPerioder()
+        .filter { it.verdi == true }
 }

@@ -165,7 +165,7 @@ fun EndretUtbetalingAndel.fraEndretUtbetalingAndelDto(
     this.tom = endretUtbetalingAndelDto.tom
     this.prosent = endretUtbetalingAndelDto.prosent ?: BigDecimal(0)
     this.årsak = endretUtbetalingAndelDto.årsak
-    this.avtaletidspunktDeltBosted = endretUtbetalingAndelDto.avtaletidspunktDeltBosted
+    this.avtaletidspunktDeltBosted = endretUtbetalingAndelDto.avtaletidspunktDeltBosted.takeIf { endretUtbetalingAndelDto.årsak == Årsak.DELT_BOSTED }
     this.søknadstidspunkt = endretUtbetalingAndelDto.søknadstidspunkt
     this.begrunnelse = endretUtbetalingAndelDto.begrunnelse
     this.aktører = aktører.toMutableSet()

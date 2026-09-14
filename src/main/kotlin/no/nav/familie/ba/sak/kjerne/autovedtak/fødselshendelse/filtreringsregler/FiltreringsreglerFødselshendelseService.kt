@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -30,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -89,7 +89,7 @@ class FiltreringsreglerFødselshendelseService(
                     filtreringsregel = Filtreringsregel.Identifikator.valueOf(it.identifikator),
                     resultat = it.resultat,
                     begrunnelse = it.begrunnelse,
-                    evalueringsårsaker = it.evalueringÅrsaker.map { evalueringÅrsak -> evalueringÅrsak.toString() },
+                    evalueringsårsaker = it.evalueringÅrsaker.map { evalueringÅrsak -> evalueringÅrsak.hentNavn() },
                     regelInput = fakta.convertDataClassToJson(),
                 )
             },
@@ -98,11 +98,11 @@ class FiltreringsreglerFødselshendelseService(
     fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FiltreringResultat> = filtreringResultatRepository.finnFiltreringResultater(behandlingId = behandlingId)
 
     fun kjørFiltreringsregler(
-        nyBehandlingHendelse: NyBehandlingHendelse,
+        filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,
         behandling: Behandling,
     ): List<FiltreringResultat> {
-        val morsAktørId = personidentService.hentAktør(nyBehandlingHendelse.morsIdent)
-        val barnasAktørId = personidentService.hentAktørIder(nyBehandlingHendelse.barnasIdenter)
+        val morsAktørId = personidentService.hentAktør(filtrerAutomatiskBehandlingData.søkersIdent)
+        val barnasAktørId = personidentService.hentAktørIder(filtrerAutomatiskBehandlingData.barnasIdenter)
 
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
