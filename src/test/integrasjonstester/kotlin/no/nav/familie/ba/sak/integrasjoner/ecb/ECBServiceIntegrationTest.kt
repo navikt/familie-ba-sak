@@ -6,7 +6,6 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCacheRepository
 import no.nav.familie.valutakurs.ECBValutakursRestKlient
-import no.nav.familie.valutakurs.NorgesBankValutakursRestKlient
 import no.nav.familie.valutakurs.domene.ecb.ECBValutakursData
 import no.nav.familie.valutakurs.domene.ecb.Frequency
 import no.nav.familie.valutakurs.domene.ecb.toExchangeRates
@@ -26,9 +25,8 @@ class ECBServiceIntegrationTest(
     @Autowired private val ecbValutakursCacheRepository: ECBValutakursCacheRepository,
 ) : AbstractSpringIntegrationTest() {
     private val ecbValutakursRestKlient = mockk<ECBValutakursRestKlient>()
-    private val norgesBankValutakursRestKlient = mockk<NorgesBankValutakursRestKlient>(relaxed = true)
 
-    private val ecbService = ECBService(ecbValutakursRestKlient = ecbValutakursRestKlient, norgesBankValutakursRestKlient = norgesBankValutakursRestKlient, ecbValutakursCacheRepository = ecbValutakursCacheRepository)
+    private val ecbService = ECBService(ecbValutakursRestKlient = ecbValutakursRestKlient, ecbValutakursCacheRepository = ecbValutakursCacheRepository)
 
     @Test
     fun `Skal teste at valutakurs hentes fra cache dersom valutakursen allerede er hentet fra ECB`() {

@@ -6,11 +6,9 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCache
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBValutakursCacheRepository
 import no.nav.familie.valutakurs.ECBValutakursRestKlient
-import no.nav.familie.valutakurs.NorgesBankValutakursRestKlient
 import no.nav.familie.valutakurs.domene.Valutakurs
 import no.nav.familie.valutakurs.domene.ecb.Frequency
 import no.nav.familie.valutakurs.domene.exchangeRateForCurrency
-import no.nav.familie.valutakurs.domene.norgesbank.Frekvens
 import no.nav.familie.valutakurs.exception.ValutakursClientException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,10 +18,9 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @Service
-@Import(ECBValutakursRestKlient::class, NorgesBankValutakursRestKlient::class)
+@Import(ECBValutakursRestKlient::class)
 class ECBService(
     private val ecbValutakursRestKlient: ECBValutakursRestKlient,
-    private val norgesBankValutakursRestKlient: NorgesBankValutakursRestKlient,
     private val ecbValutakursCacheRepository: ECBValutakursCacheRepository,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ECBService::class.java)
@@ -60,31 +57,13 @@ class ECBService(
                         )
                     }
 
-                loggValutakursSammenligning(eCBValutakursCache = lagretValutakurs)
                 return lagretValutakurs.kurs
             } catch (e: ValutakursClientException) {
                 throw ECBServiceException(e.message, e)
             }
         }
         logger.info("Valutakurs ble hentet fra cache for ${utenlandskValuta.saner()} på $kursDato")
-        loggValutakursSammenligning(eCBValutakursCache = valutakurs)
         return valutakurs.kurs
-    }
-
-    private fun loggValutakursSammenligning(eCBValutakursCache: ECBValutakursCache) {
-        try {
-            val valutakursHentetMedNorgesBankKlient =
-                norgesBankValutakursRestKlient.hentValutakurs(Frekvens.VIRKEDAG, eCBValutakursCache.valutakode!!, eCBValutakursCache.valutakursdato!!)
-            val differanse = eCBValutakursCache.kurs.minus(valutakursHentetMedNorgesBankKlient.kurs).abs()
-            if (differanse > BigDecimal(0)) {
-                logger.info("Differanse i valutakurs ved sammenligning av valutakurs-klienter. ECBKlient: ${eCBValutakursCache.kurs} vs NorgesBankKlient: ${valutakursHentetMedNorgesBankKlient.kurs}, for valuta ${eCBValutakursCache.valutakode} på dato ${eCBValutakursCache.valutakursdato}")
-            } else {
-                logger.info("Ingen differanse i valutakurs ved sammenligning av valutakurs-klienter. ECBKlient: ${eCBValutakursCache.kurs} vs NorgesBankKlient: ${valutakursHentetMedNorgesBankKlient.kurs}, for valuta ${eCBValutakursCache.valutakode} på dato ${eCBValutakursCache.valutakursdato}")
-            }
-        } catch (e: Exception) {
-            // Ønsker ikke å feile henting av valutakurs pga sammenligning, så logger kun ut exception dersom henting fra Norges Bank feiler.
-            logger.warn("Feil ved sammenligning av valutakurs-klienter", e)
-        }
     }
 
     private fun beregnValutakursINOK(
