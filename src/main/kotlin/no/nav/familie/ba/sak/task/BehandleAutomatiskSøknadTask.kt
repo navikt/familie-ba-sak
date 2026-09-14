@@ -63,7 +63,7 @@ class BehandleAutomatiskSøknadTask(
                 behandlingId = behandling.id,
                 begrunnelse = "Ikke kandidat for automatisk behandling. Må behandles manuelt.",
                 manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
-                oppgavetype = Oppgavetype.BehandleSak, // TODO : Finn ut om dette er korrekt oppgavetype
+                oppgavetype = Oppgavetype.BehandleSak,
             )
             logger.info("Henlegger automatisk behandling og oppretter oppgave: ${feil.message}")
         }
