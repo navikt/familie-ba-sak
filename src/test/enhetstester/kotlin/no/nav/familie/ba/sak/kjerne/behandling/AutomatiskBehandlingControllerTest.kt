@@ -33,7 +33,6 @@ class AutomatiskBehandlingControllerTest {
         NyBehandling(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsakId = 1L,
-            søkersIdent = "12345678910",
             barnasIdenter = listOf("12345678911"),
             søknadMottattDato = LocalDate.now(),
         )

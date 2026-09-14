@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.Properties
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 
 @Service
 @TaskStepBeskrivelse(
@@ -30,30 +31,29 @@ import java.util.Properties
 )
 class BehandleAutomatiskSøknadTask(
     private val autovedtakStegService: AutovedtakStegService,
-    private val personidentService: PersonidentService,
     private val oppgaveService: OppgaveService,
     private val stegService: StegService,
+    private val fagsakService: FagsakService,
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
         val dto = jsonMapper.readValue(task.payload, BehandleAutomatiskSøknadTaskDTO::class.java)
         val nyBehandling = dto.nyBehandling
+        val fagsakId = nyBehandling.fagsakId;
 
-        if (nyBehandling.søkersIdent == null) {
-            throw Feil("Søkers ident kan ikke være null i en ${BehandleAutomatiskSøknadTask::class.simpleName} task.")
-        }
+        val søkerAktør = fagsakService.hentAktør(fagsakId)
+        val søkersIdent = søkerAktør.aktivFødselsnummer()
 
         logger.info("Behandler automatisk søknad")
-        secureLogger.info("Behandler automatisk søknad, søker=${nyBehandling.søkersIdent}, barna=${nyBehandling.barnasIdenter}")
+        secureLogger.info("Behandler automatisk søknad, søker=${søkersIdent}, barna=${nyBehandling.barnasIdenter}")
 
         try {
-            val søkersAktør = personidentService.hentAktør(nyBehandling.søkersIdent)
             autovedtakStegService.kjørAutomatiskBehandlingSøknad(
-                mottakersAktør = søkersAktør,
+                mottakersAktør = søkerAktør,
                 søknad =
                     Søknad(
-                        fagsakId = nyBehandling.fagsakId,
-                        søkersIdent = nyBehandling.søkersIdent,
+                        fagsakId = fagsakId,
+                        søkersIdent = søkersIdent,
                         barnasIdenter = nyBehandling.barnasIdenter,
                     ),
             )
@@ -75,12 +75,9 @@ class BehandleAutomatiskSøknadTask(
 
         fun opprettTask(dto: BehandleAutomatiskSøknadTaskDTO): Task {
             val triggerTid = if (erKlokkenMellom21Og06()) utledKl06IdagEllerNesteDag() else LocalDateTime.now()
-            if (dto.nyBehandling.søkersIdent == null) {
-                throw Feil("Søkers ident kan ikke være null i en ${BehandleAutomatiskSøknadTask::class.simpleName} task.")
-            }
             val properties =
                 Properties().apply {
-                    this["søkersIdent"] = dto.nyBehandling.søkersIdent
+                    this["fagsakId"] = dto.nyBehandling.fagsakId.toString()
                 }
             return Task(
                 type = TASK_STEP_TYPE,
