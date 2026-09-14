@@ -21,7 +21,7 @@ class FiltreringsregelEvaluator {
                     ),
                 )
             } else {
-                acc.add(filtreringsregel.evaluer(fakta).copy(identifikator = filtreringsregel.identifikator.name))
+                acc.add(filtreringsregel.evaluer(fakta))
             }
             acc
         }

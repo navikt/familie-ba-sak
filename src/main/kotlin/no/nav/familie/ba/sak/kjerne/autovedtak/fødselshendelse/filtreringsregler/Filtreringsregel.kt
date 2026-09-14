@@ -1,101 +1,219 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.EvalueringÅrsak
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.Filtreringsregel.Identifikator
+import java.time.temporal.ChronoUnit
+import kotlin.math.abs
 
-data class Filtreringsregel<T : FiltreringsreglerFakta>(
+class Filtreringsregel<in T : FiltreringsreglerFakta>(
     val identifikator: Identifikator,
-    val evaluer: (T) -> Evaluering,
+    private val erOppfylt: (T) -> Boolean,
 ) {
-    enum class Identifikator {
-        MOR_GYLDIG_FNR,
-        BARN_GYLDIG_FNR,
-        MOR_LEVER,
-        BARN_LEVER,
-        MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
-        MOR_ER_OVER_18_ÅR,
-        MOR_HAR_IKKE_VERGE,
-        MOR_MOTTAR_IKKE_LØPENDE_UTVIDET,
-        MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
-        FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
-        LØPER_IKKE_BARNETRYGD_FOR_BARNET,
-        MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
-        MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
+    fun evaluer(fakta: T): Evaluering {
+        val evaluering = if (erOppfylt(fakta)) Evaluering.oppfylt(identifikator.oppfylt) else Evaluering.ikkeOppfylt(identifikator.ikkeOppfylt)
+        return evaluering.copy(identifikator = identifikator.name)
+    }
+
+    /**
+     * Navnet lagres i FILTRERING_RESULTAT.filtreringsregel og leses tilbake med valueOf, så det må ikke endres.
+     * Utfallsnavn og beskrivelser lagres i evalueringsaarsaker og begrunnelse.
+     */
+    enum class Identifikator(
+        oppfyltNavn: String,
+        oppfyltBeskrivelse: String,
+        ikkeOppfyltNavn: String,
+        ikkeOppfyltBeskrivelse: String,
+    ) {
+        MOR_GYLDIG_FNR(
+            oppfyltNavn = "MOR_HAR_GYLDIG_FNR",
+            oppfyltBeskrivelse = "Mor har gyldig fødselsnummer",
+            ikkeOppfyltNavn = "MOR_HAR_UGYLDIG_FNR",
+            ikkeOppfyltBeskrivelse = "Mor har ugyldig fødselsnummer",
+        ),
+        BARN_GYLDIG_FNR(
+            oppfyltNavn = "BARN_HAR_GYLDIG_FNR",
+            oppfyltBeskrivelse = "Barn har gyldig fødselsnummer",
+            ikkeOppfyltNavn = "BARN_HAR_UGYLDIG_FNR",
+            ikkeOppfyltBeskrivelse = "Barn har ugyldig fødselsnummer",
+        ),
+        MOR_LEVER(
+            oppfyltNavn = "MOR_LEVER",
+            oppfyltBeskrivelse = "Det er ikke registrert dødsdato på mor.",
+            ikkeOppfyltNavn = "MOR_LEVER_IKKE",
+            ikkeOppfyltBeskrivelse = "Det er registrert dødsdato på mor.",
+        ),
+        BARN_LEVER(
+            oppfyltNavn = "BARNET_LEVER",
+            oppfyltBeskrivelse = "Det er ikke registrert dødsdato på barnet.",
+            ikkeOppfyltNavn = "BARNET_LEVER_IKKE",
+            ikkeOppfyltBeskrivelse = "Det er registrert dødsdato på barnet.",
+        ),
+        MER_ENN_5_MND_SIDEN_FORRIGE_BARN(
+            oppfyltNavn = "MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL",
+            oppfyltBeskrivelse = "Det har gått mer enn fem måneder siden forrige barn ble født.",
+            ikkeOppfyltNavn = "MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL",
+            ikkeOppfyltBeskrivelse = "Det har gått mindre enn fem måneder siden forrige barn ble født.",
+        ),
+        MOR_ER_OVER_18_ÅR(
+            oppfyltNavn = "MOR_ER_OVER_18_ÅR",
+            oppfyltBeskrivelse = "Mor er over 18 år.",
+            ikkeOppfyltNavn = "MOR_ER_UNDER_18_ÅR",
+            ikkeOppfyltBeskrivelse = "Mor er under 18 år.",
+        ),
+        MOR_HAR_IKKE_VERGE(
+            oppfyltNavn = "MOR_ER_MYNDIG",
+            oppfyltBeskrivelse = "Mor er myndig.",
+            ikkeOppfyltNavn = "MOR_ER_UNDER_VERGEMÅL",
+            ikkeOppfyltBeskrivelse = "Mor er under vergemål.",
+        ),
+        MOR_MOTTAR_IKKE_LØPENDE_UTVIDET(
+            oppfyltNavn = "MOR_MOTTAR_IKKE_LØPENDE_UTVIDET",
+            oppfyltBeskrivelse = "Mor mottar ikke utvidet barnetrygd.",
+            ikkeOppfyltNavn = "MOR_MOTTAR_LØPENDE_UTVIDET",
+            ikkeOppfyltBeskrivelse = "Mor mottar utvidet barnetrygd.",
+        ),
+        MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD(
+            oppfyltNavn = "MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD",
+            oppfyltBeskrivelse = "Mor har ikke løpende EØS-barnetrygd",
+            ikkeOppfyltNavn = "MOR_HAR_LØPENDE_EØS_BARNETRYGD",
+            ikkeOppfyltBeskrivelse = "Mor har EØS-barnetrygd",
+        ),
+        FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT(
+            oppfyltNavn = "FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT",
+            oppfyltBeskrivelse = "Fagsaken har ikke blitt migrert fra infotrygd etter barn ble født.",
+            ikkeOppfyltNavn = "FAGSAK_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT",
+            ikkeOppfyltBeskrivelse = "Fagsaken ble migrert fra infotrygd etter barn ble født.",
+        ),
+        LØPER_IKKE_BARNETRYGD_FOR_BARNET(
+            oppfyltNavn = "LØPER_IKKE_BARNETRYGD_FOR_BARNET",
+            oppfyltBeskrivelse = "Det løper ikke barnetrygd for barnet på annen forelder",
+            ikkeOppfyltNavn = "LØPER_ALLEREDE_FOR_ANNEN_FORELDER",
+            ikkeOppfyltBeskrivelse = "Annen mottaker har barnetrygd for barnet",
+        ),
+        MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO(
+            oppfyltNavn = "MOR_OPPFYLLER_IKKE_VILKÅR_FOR_UTVIDET_BARNETRYGD_VED_FØDSELSDATO",
+            oppfyltBeskrivelse = "Mor oppfyller ikke vilkår for utvidet barnetrygd",
+            ikkeOppfyltNavn = "MOR_OPPFYLLER_VILKÅR_FOR_UTVIDET_BARNETRYGD_VED_FØDSELSDATO",
+            ikkeOppfyltBeskrivelse = "Mor oppfyller vilkår for utvidet barnetrygd",
+        ),
+        MOR_HAR_IKKE_OPPHØRT_BARNETRYGD(
+            oppfyltNavn = "MOR_HAR_IKKE_OPPHØRT_BARNETRYGD",
+            oppfyltBeskrivelse = "Mor har ikke opphørt barnetrygd",
+            ikkeOppfyltNavn = "MOR_HAR_OPPHØRT_BARNETRYGD",
+            ikkeOppfyltBeskrivelse = "Mor har vedtak om opphørt barnetrygd.",
+        ),
+        ;
+
+        val oppfylt: EvalueringÅrsak = Utfall(this, oppfyltNavn, oppfyltBeskrivelse)
+        val ikkeOppfylt: EvalueringÅrsak = Utfall(this, ikkeOppfyltNavn, ikkeOppfyltBeskrivelse)
+
+        private data class Utfall(
+            private val identifikator: Identifikator,
+            private val navn: String,
+            private val beskrivelse: String,
+        ) : EvalueringÅrsak {
+            override fun hentBeskrivelse(): String = beskrivelse
+
+            override fun hentMetrikkBeskrivelse(): String = beskrivelse
+
+            override fun hentIdentifikator(): String = identifikator.name
+
+            override fun hentNavn(): String = navn
+        }
     }
 }
 
+private val morGyldigFnr =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_GYLDIG_FNR) {
+        erGyldigFnr(it.søker.aktør.aktivFødselsnummer())
+    }
+
+private val barnGyldigFnr =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.BARN_GYLDIG_FNR) { fakta ->
+        fakta.barnaSomSkalVurderes.all { erGyldigFnr(it.aktør.aktivFødselsnummer()) }
+    }
+
+private val morLever =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_LEVER) { it.søkerLever }
+
+private val barnLever =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.BARN_LEVER) { it.barnaLever }
+
+private val merEnn5MndSidenForrigeBarn =
+    Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>(Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN) { fakta ->
+        fakta.barnaSomSkalVurderes.all { barnFraHendelse ->
+            fakta.restenAvBarna.all {
+                abs(ChronoUnit.MONTHS.between(barnFraHendelse.fødselsdato, it.fødselsdato)) > 5 ||
+                    abs(ChronoUnit.DAYS.between(barnFraHendelse.fødselsdato, it.fødselsdato)) <= 6
+            }
+        }
+    }
+
+private val morErOver18År =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_ER_OVER_18_ÅR) { it.søker.hentAlder() >= 18 }
+
+private val morHarIkkeVerge =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_HAR_IKKE_VERGE) { !it.søkerHarVerge }
+
+private val morMottarIkkeLøpendeUtvidet =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET) { !it.søkerMottarLøpendeUtvidet }
+
+private val morHarIkkeLøpendeEøsBarnetrygd =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD) { !it.søkerMottarEøsBarnetrygd }
+
+private val fagsakIkkeMigrertUtAvInfotrygdEtterBarnFødt =
+    Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>(Identifikator.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT) {
+        !it.erFagsakenMigrertEtterBarnFødt
+    }
+
+private val løperIkkeBarnetrygdForBarnet =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.LØPER_IKKE_BARNETRYGD_FOR_BARNET) { !it.løperBarnetrygdForBarnetPåAnnenForelder }
+
+private val morHarIkkeOppfyltUtvidetVilkårVedFødselsdato =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO) {
+        !it.søkerOppfyllerVilkårForUtvidetBarnetrygd
+    }
+
+private val morHarIkkeOpphørtBarnetrygd =
+    Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>(Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD) { it.morHarIkkeOpphørtBarnetrygd }
+
+private fun erGyldigFnr(personIdent: String): Boolean = !erBostNummer(personIdent) && !erFDatnummer(personIdent)
+
+private fun erFDatnummer(personIdent: String): Boolean = personIdent.substring(6).toInt() == 0
+
+/**
+ * BOST-nr har måned mellom 21 og 32
+ */
+private fun erBostNummer(personIdent: String): Boolean = personIdent.substring(2, 4).toInt() in 21..32
+
 val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøknad>> =
     listOf(
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_GYLDIG_FNR) {
-            FiltreringsregelEvaluering.harSøkerGyldigFnr(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.BARN_GYLDIG_FNR) {
-            FiltreringsregelEvaluering.barnHarGyldigFnr(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_LEVER) {
-            FiltreringsregelEvaluering.søkerLever(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.BARN_LEVER) {
-            FiltreringsregelEvaluering.barnLever(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR) {
-            FiltreringsregelEvaluering.erSøkerOver18år(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE) {
-            FiltreringsregelEvaluering.søkerHarIkkeVerge(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET) {
-            FiltreringsregelEvaluering.søkerMottarIkkeLøpendeUtvidet(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD) {
-            FiltreringsregelEvaluering.søkerHarIkkeLøpendeEøsBarnetrygd(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.LØPER_IKKE_BARNETRYGD_FOR_BARNET) {
-            FiltreringsregelEvaluering.løperIkkeBarnetrygdPåAnnenForelder(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO) {
-            FiltreringsregelEvaluering.søkerOppfyllerIkkeVilkårForUtvidetBarnetrygd(it)
-        },
+        morGyldigFnr,
+        barnGyldigFnr,
+        morLever,
+        barnLever,
+        morErOver18År,
+        morHarIkkeVerge,
+        morMottarIkkeLøpendeUtvidet,
+        morHarIkkeLøpendeEøsBarnetrygd,
+        løperIkkeBarnetrygdForBarnet,
+        morHarIkkeOppfyltUtvidetVilkårVedFødselsdato,
     )
 
 val FILTRERINGSREGLER_FØDSELSHENDELSE: List<Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>> =
     listOf(
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_GYLDIG_FNR) {
-            FiltreringsregelEvaluering.harSøkerGyldigFnr(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.BARN_GYLDIG_FNR) {
-            FiltreringsregelEvaluering.barnHarGyldigFnr(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_LEVER) {
-            FiltreringsregelEvaluering.søkerLever(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.BARN_LEVER) {
-            FiltreringsregelEvaluering.barnLever(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN) {
-            FiltreringsregelEvaluering.merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR) {
-            FiltreringsregelEvaluering.erSøkerOver18år(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE) {
-            FiltreringsregelEvaluering.søkerHarIkkeVerge(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET) {
-            FiltreringsregelEvaluering.søkerMottarIkkeLøpendeUtvidet(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD) {
-            FiltreringsregelEvaluering.søkerHarIkkeLøpendeEøsBarnetrygd(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT) {
-            FiltreringsregelEvaluering.fagsakIkkeMigrertEtterBarnBleFødt(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.LØPER_IKKE_BARNETRYGD_FOR_BARNET) {
-            FiltreringsregelEvaluering.løperIkkeBarnetrygdPåAnnenForelder(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO) {
-            FiltreringsregelEvaluering.søkerOppfyllerIkkeVilkårForUtvidetBarnetrygd(it)
-        },
-        Filtreringsregel(Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD) {
-            FiltreringsregelEvaluering.morHarIkkeOpphørtBarnetrygd(it)
-        },
+        morGyldigFnr,
+        barnGyldigFnr,
+        morLever,
+        barnLever,
+        merEnn5MndSidenForrigeBarn,
+        morErOver18År,
+        morHarIkkeVerge,
+        morMottarIkkeLøpendeUtvidet,
+        morHarIkkeLøpendeEøsBarnetrygd,
+        fagsakIkkeMigrertUtAvInfotrygdEtterBarnFødt,
+        løperIkkeBarnetrygdForBarnet,
+        morHarIkkeOppfyltUtvidetVilkårVedFødselsdato,
+        morHarIkkeOpphørtBarnetrygd,
     )
