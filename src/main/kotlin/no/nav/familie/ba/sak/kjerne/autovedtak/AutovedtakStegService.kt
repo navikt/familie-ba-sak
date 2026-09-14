@@ -364,7 +364,7 @@ class AutovedtakStegService(
             behandlingId = åpenBehandling.id,
             begrunnelse = begrunnelseForÅpenBehandling(automatiskBehandlingData),
             manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
-            oppgavetype = Oppgavetype.VurderLivshendelse,
+            oppgavetype = if (autovedtaktype === Autovedtaktype.SØKNAD) Oppgavetype.BehandleSak else Oppgavetype.VurderLivshendelse,
         )
         return true
     }
