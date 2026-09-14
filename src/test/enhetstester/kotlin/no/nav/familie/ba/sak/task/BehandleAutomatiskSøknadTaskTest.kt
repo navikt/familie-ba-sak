@@ -21,8 +21,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 
-class BehandleAutomatiskSøknadTaskTestysel {
+class BehandleAutomatiskSøknadTaskTest {
     private val autovedtakStegService = mockk<AutovedtakStegService>()
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveService = mockk<OppgaveService>()
@@ -115,12 +116,14 @@ class BehandleAutomatiskSøknadTaskTestysel {
     @Nested
     inner class OpprettTask {
         @Test
-        fun `skal sette riktig type og metadata`() {
+        fun `skal sette riktig type, metadata, og trigger tid`() {
             // Act
-            val task = BehandleAutomatiskSøknadTask.opprettTask(BehandleAutomatiskSøknadTaskDTO(nyBehandling))
+            val nåtidspunkt = LocalDateTime.of(2026, 9, 14, 21, 1, 0)
+            val task = BehandleAutomatiskSøknadTask.opprettTask(BehandleAutomatiskSøknadTaskDTO(nyBehandling), nåtidspunkt)
 
             // Assert
             assertThat(task.type).isEqualTo(BehandleAutomatiskSøknadTask.TASK_STEP_TYPE)
+            assertThat(task.triggerTid).isEqualTo(LocalDateTime.of(2026, 9, 15, 6, 0, 0))
             assertThat(task.metadata["fagsakId"]).isEqualTo(nyBehandling.fagsakId.toString())
         }
     }

@@ -5,7 +5,6 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import java.time.LocalDate
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 class AutomatiskBehandlingControllerTest {
     private val tilgangService = mockk<TilgangService>()
@@ -46,7 +46,6 @@ class AutomatiskBehandlingControllerTest {
 
     @Nested
     inner class OpprettAutomatiskBehandlingAvSøknad {
-
         @Test
         fun `skal verifisere at kaller av endepunktet har riktig rolle`() {
             // Act
@@ -60,7 +59,6 @@ class AutomatiskBehandlingControllerTest {
                 )
             }
         }
-
 
         @Test
         fun `skal kaste feil kaller av endepunktet ikke har riktig rolle`() {
