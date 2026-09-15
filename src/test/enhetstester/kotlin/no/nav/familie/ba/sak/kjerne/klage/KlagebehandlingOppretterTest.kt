@@ -25,7 +25,6 @@ import no.nav.familie.kontrakter.felles.klage.Klagebehandlingsårsak
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -56,29 +55,8 @@ class KlagebehandlingOppretterTest {
             strengtFortroligService,
         )
 
-    @BeforeEach
-    fun setup() {
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_KUNNE_BEHANDLE_BA_INSTITUSJONSFAGSAKER_I_KLAGE) } returns true
-    }
-
     @Nested
     inner class OpprettKlage {
-        @Test
-        fun `skal kaste exception hvis man prøver å opprette en klagebehandling for en institusjonsfagsak om toggelen er skrudd av`() {
-            // Arrange
-            val fagsak = lagFagsak(type = FagsakType.INSTITUSJON)
-            val klageMottattDato = dagensDato.plusDays(1)
-
-            every { featureToggleService.isEnabled(FeatureToggle.SKAL_KUNNE_BEHANDLE_BA_INSTITUSJONSFAGSAKER_I_KLAGE) } returns false
-
-            // Act & assert
-            val exception =
-                assertThrows<FunksjonellFeil> {
-                    klagebehandlingOppretter.opprettKlage(fagsak, klageMottattDato)
-                }
-            assertThat(exception.message).isEqualTo("Oppretting av klagebehandlinger for institusjonsfagsaker er ikke implementert.")
-        }
-
         @Test
         fun `skal kaste exception hvis klagebehandlingen blir mottatt etter dagens dato`() {
             // Arrange
