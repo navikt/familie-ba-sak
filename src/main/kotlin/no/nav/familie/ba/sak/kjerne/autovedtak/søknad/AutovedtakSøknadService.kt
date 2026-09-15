@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.prosessering.internal.TaskService
@@ -23,6 +24,7 @@ class AutovedtakSøknadService(
     private val simuleringService: SimuleringService,
     private val taskService: TaskService,
     private val autovedtakSøknadBegrunnelseService: AutovedtakSøknadBegrunnelseService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) : AutovedtakBehandlingService<SøknadData> {
     override fun skalAutovedtakBehandles(behandlingsdata: SøknadData): Boolean = true
 
@@ -39,16 +41,23 @@ class AutovedtakSøknadService(
                     ),
             )
 
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.id)
+        val erVilkårsvurderingOppfylt = vilkårsvurdering.personResultater.flatMap { it.vilkårResultater }.all { it.erOppfylt() }
+
+        if (!erVilkårsvurderingOppfylt) {
+            throw AutovedtakMåBehandlesManueltFeil("Vilkårsvurderingen er ikke oppfylt.\nBehandling av søknad må håndteres manuelt.")
+        }
+
         val simulering = simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterBehandlingsresultat)
 
         val harIngenUtbetaling = simulering.flatMap { it.økonomiSimuleringPostering }.all { it.beløp == BigDecimal.ZERO }
         if (harIngenUtbetaling) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til ingen utbetaling.\nEndring av søknad må håndteres manuelt.")
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til ingen utbetaling.\nBehandling av søknad må håndteres manuelt.")
         }
 
         val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingEtterBehandlingsresultat.id)
         if (feilutbetaling > BigDecimal.ZERO) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til feilutbetaling.\nEndring av søknad må håndteres manuelt.")
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til feilutbetaling.\nBehandling av søknad må håndteres manuelt.")
         }
 
         if (behandlingEtterBehandlingsresultat.steg == StegType.IVERKSETT_MOT_OPPDRAG) {
