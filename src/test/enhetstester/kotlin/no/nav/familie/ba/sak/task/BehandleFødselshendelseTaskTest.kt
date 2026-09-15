@@ -204,8 +204,9 @@ internal class BehandleFødselshendelseTaskTest {
                     morsIdent = randomFnr(),
                     barnasIdenter = listOf("61031999277"),
                 )
-            // Act
             val nåtidspunkt = LocalDateTime.of(2026, 12, 18, 17, 0, 0)
+
+            // Act
             val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling), nåtidspunkt)
 
             // Assert
