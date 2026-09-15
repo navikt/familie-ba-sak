@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåba
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.Søknad
@@ -67,10 +68,17 @@ class AutovedtakStegServiceTest {
 
     private val fagsak = defaultFagsak()
     private val mottakersAktør = lagAktør(randomFnr())
+
     private val søknad =
         Søknad(
             fagsakId = fagsak.id,
             søkersIdent = mottakersAktør.aktivFødselsnummer(),
+            barnasIdenter = listOf(randomFnr()),
+        )
+
+    private val nyBehandlingHendelse =
+        NyBehandlingHendelse(
+            morsIdent = mottakersAktør.aktivFødselsnummer(),
             barnasIdenter = listOf(randomFnr()),
         )
 
@@ -218,6 +226,90 @@ class AutovedtakStegServiceTest {
                 autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, søknad)
             }
             verify(exactly = 0) { autovedtakSøknadService.kjørBehandling(any()) }
+        }
+    }
+
+    @Nested
+    inner class KjørBehandlingFødselshendelse {
+        @BeforeEach
+        fun setUp() {
+            every {
+                autovedtakFødselshendelseService.skalAutovedtakBehandles(FødselshendelseData(nyBehandlingHendelse))
+            } returns true
+            every { fagsakService.hentNormalFagsak(mottakersAktør) } returns fagsak
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
+            every {
+                autovedtakFødselshendelseService.kjørBehandling(FødselshendelseData(nyBehandlingHendelse))
+            } returns "Fødselshendelse: Behandling ferdig"
+        }
+
+        @Test
+        fun `skal returnere tidlig uten å hente fagsak når autovedtak ikke skal behandles`() {
+            // Arrange
+            every {
+                autovedtakFødselshendelseService.skalAutovedtakBehandles(FødselshendelseData(nyBehandlingHendelse))
+            } returns false
+
+            // Act
+            val resultat = autovedtakStegService.kjørBehandlingFødselshendelse(mottakersAktør, nyBehandlingHendelse)
+
+            // Assert
+            assertThat(resultat).isEqualTo("Fødselshendelse: Skal ikke behandles")
+            verify(exactly = 0) { fagsakService.hentNormalFagsak(any()) }
+            verify(exactly = 0) { autovedtakFødselshendelseService.kjørBehandling(any()) }
+        }
+
+        @Test
+        fun `skal kjøre behandling og returnere resultat når det ikke finnes noen åpen behandling`() {
+            // Act
+            val resultat = autovedtakStegService.kjørBehandlingFødselshendelse(mottakersAktør, nyBehandlingHendelse)
+
+            // Assert
+            assertThat(resultat).isEqualTo("Fødselshendelse: Behandling ferdig")
+            verify(exactly = 1) { autovedtakFødselshendelseService.kjørBehandling(FødselshendelseData(nyBehandlingHendelse)) }
+        }
+
+        @Test
+        fun `skal opprette oppgave med oppgavetype VurderLivshendelse og returnere at bruker har åpen behandling når man ikke kan snike i køen`() {
+            // Arrange
+            val åpenBehandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.UTREDES)
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns åpenBehandling
+            every { snikeIKøenService.kanSnikeForbi(åpenBehandling) } returns false
+
+            // Act
+            val resultat = autovedtakStegService.kjørBehandlingFødselshendelse(mottakersAktør, nyBehandlingHendelse)
+
+            // Assert
+            assertThat(resultat).isEqualTo("Fødselshendelse: Bruker har åpen behandling")
+            verify(exactly = 0) { autovedtakFødselshendelseService.kjørBehandling(any()) }
+            verify(exactly = 1) {
+                oppgaveService.opprettOppgaveForManuellBehandling(
+                    behandlingId = åpenBehandling.id,
+                    begrunnelse = "Fødselshendelse: Bruker har åpen behandling",
+                    manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
+                    oppgavetype = Oppgavetype.VurderLivshendelse,
+                )
+            }
+        }
+
+        @Test
+        fun `skal sette åpen behandling på maskinell vent med årsak FØDSELSHENDELSE og likevel kjøre ny behandling når man kan snike i køen`() {
+            // Arrange
+            val åpenBehandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.UTREDES)
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns åpenBehandling
+            every { snikeIKøenService.kanSnikeForbi(åpenBehandling) } returns true
+            every { snikeIKøenService.settAktivBehandlingPåMaskinellVent(any(), any()) } just Runs
+
+            // Act
+            val resultat = autovedtakStegService.kjørBehandlingFødselshendelse(mottakersAktør, nyBehandlingHendelse)
+
+            // Assert
+            assertThat(resultat).isEqualTo("Fødselshendelse: Behandling ferdig")
+            verify(exactly = 1) {
+                snikeIKøenService.settAktivBehandlingPåMaskinellVent(åpenBehandling.id, SettPåMaskinellVentÅrsak.FØDSELSHENDELSE)
+                autovedtakFødselshendelseService.kjørBehandling(FødselshendelseData(nyBehandlingHendelse))
+            }
+            verify(exactly = 0) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) }
         }
     }
 }
