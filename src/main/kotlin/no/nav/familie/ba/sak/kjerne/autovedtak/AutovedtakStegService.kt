@@ -135,12 +135,16 @@ class AutovedtakStegService(
         mottakersAktør: Aktør,
         søknad: Søknad,
         førstegangKjørt: LocalDateTime = LocalDateTime.now(),
-    ): String =
-        kjørBehandling(
+    ): String {
+        if (!featureToggleService.isEnabled(FeatureToggle.SKAL_BEHANDLE_SOKNAD_AUTOMATISK, false)) {
+            throw Feil("Toggle SKAL_BEHANDLE_SOKNAD_AUTOMATISK er skrudd av.")
+        }
+        return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = SøknadData(søknad),
             førstegangKjørt = førstegangKjørt,
         )
+    }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun kjørBehandlingFødselshendelse(
