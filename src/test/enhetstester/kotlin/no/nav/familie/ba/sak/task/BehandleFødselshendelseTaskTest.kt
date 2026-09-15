@@ -20,10 +20,13 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.error.RekjørSenereException
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class BehandleFødselshendelseTaskTest {
     private val pdlRestKlient =
@@ -188,6 +191,26 @@ internal class BehandleFødselshendelseTaskTest {
             settOppBehandleFødselshendelseTask(autovedtakStegService).doTask(
                 fødselshendelseTask,
             )
+        }
+    }
+
+    @Nested
+    inner class OpprettTask {
+        @Test
+        fun `skal sette riktig type, metadata, og trigger tid`() {
+            // Arrange
+            val nyBehandling =
+                NyBehandlingHendelse(
+                    morsIdent = randomFnr(),
+                    barnasIdenter = listOf("61031999277"),
+                )
+            // Act
+            val nåtidspunkt = LocalDateTime.of(2026, 12, 18, 17, 0, 0)
+            val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling), nåtidspunkt)
+
+            // Assert
+            assertThat(task.type).isEqualTo(BehandleFødselshendelseTask.TASK_STEP_TYPE)
+            assertThat(task.triggerTid).isEqualTo(LocalDateTime.of(2026, 12, 28, 6, 0, 0))
         }
     }
 

@@ -24,7 +24,6 @@ import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import java.util.Properties
 
@@ -107,8 +106,11 @@ class BehandleFødselshendelseTask(
         const val TASK_STEP_TYPE = "behandleFødselshendelseTask"
         private val logger = LoggerFactory.getLogger(BehandleFødselshendelseTask::class.java)
 
-        fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
-            val triggerTid = if (erKlokkenMellom21Og06()) utledKl06IdagEllerNesteDag() else LocalDateTime.now()
+        fun opprettTask(
+            behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO,
+            nåtidspunkt: LocalDateTime = LocalDateTime.now(),
+        ): Task {
+            val triggerTid = utledNesteTriggerTidIHverdagerForTask(nåtidspunkt.plusDays(7))
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = jsonMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
@@ -117,17 +119,8 @@ class BehandleFødselshendelseTask(
                         this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
                     },
             ).copy(
-                triggerTid = triggerTid.plusDays(7),
+                triggerTid = triggerTid,
             )
         }
-
-        private fun erKlokkenMellom21Og06(localTime: LocalTime = LocalTime.now()): Boolean = localTime.isAfter(LocalTime.of(21, 0)) || localTime.isBefore(LocalTime.of(6, 0))
-
-        private fun utledKl06IdagEllerNesteDag(date: LocalDateTime = LocalDateTime.now()): LocalDateTime =
-            if (date.toLocalTime().isBefore(LocalTime.of(6, 0))) {
-                date.withHour(6)
-            } else {
-                date.plusDays(1).withHour(6)
-            }
     }
 }
