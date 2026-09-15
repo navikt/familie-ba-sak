@@ -6,8 +6,12 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
+import java.math.BigDecimal
 import java.time.YearMonth
 
 class EndringIUtbetalingUtilTest {
@@ -283,5 +287,85 @@ class EndringIUtbetalingUtilTest {
 
         // Assert
         Assertions.assertNull(endringstidspunkt)
+    }
+
+    enum class EndretFelt {
+        SATS,
+        PROSENT,
+        KALKULERT_UTBETALINGSBELØP,
+        NASJONALT_PERIODEBELØP,
+        DIFFERANSEBEREGNET_PERIODEBELØP,
+        BELØP_UTEN_ENDRET_UTBETALING,
+    }
+
+    @ParameterizedTest
+    @EnumSource(EndretFelt::class)
+    fun `skal finne aktør med endring i andel når kun ett felt er endret`(endretFelt: EndretFelt) {
+        // Arrange
+        val aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndel =
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = des22,
+                aktør = aktør,
+                beløp = 1054,
+                sats = 1054,
+                prosent = BigDecimal(100),
+                nasjonaltPeriodebeløp = 1054,
+                differanseberegnetPeriodebeløp = 500,
+                beløpUtenEndretUtbetaling = 1054,
+                kalkulertUtbetalingsbeløp = 1054,
+            )
+
+        val nåværendeAndel =
+            when (endretFelt) {
+                EndretFelt.SATS -> forrigeAndel.copy(sats = 2000)
+                EndretFelt.PROSENT -> forrigeAndel.copy(prosent = BigDecimal(50))
+                EndretFelt.KALKULERT_UTBETALINGSBELØP -> forrigeAndel.copy(kalkulertUtbetalingsbeløp = 2000)
+                EndretFelt.NASJONALT_PERIODEBELØP -> forrigeAndel.copy(nasjonaltPeriodebeløp = 2000)
+                EndretFelt.DIFFERANSEBEREGNET_PERIODEBELØP -> forrigeAndel.copy(differanseberegnetPeriodebeløp = 501)
+                EndretFelt.BELØP_UTEN_ENDRET_UTBETALING -> forrigeAndel.copy(beløpUtenEndretUtbetaling = 2000)
+            }
+
+        // Act
+        val aktørerMedEndring =
+            EndringIUtbetalingUtil.finnAktørerMedEndringIAndeler(
+                nåværendeAndeler = listOf(nåværendeAndel),
+                forrigeAndeler = listOf(forrigeAndel),
+            )
+
+        // Assert
+        assertThat(aktørerMedEndring).containsExactly(aktør)
+    }
+
+    @Test
+    fun `skal ikke finne aktør med endring i andel når andelene er identiske`() {
+        // Arrange
+        val aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val andel =
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = des22,
+                aktør = aktør,
+                beløp = 1054,
+                sats = 1054,
+                prosent = BigDecimal(100),
+                nasjonaltPeriodebeløp = 1054,
+                differanseberegnetPeriodebeløp = 500,
+                beløpUtenEndretUtbetaling = 1054,
+                kalkulertUtbetalingsbeløp = 1054,
+            )
+
+        // Act
+        val aktørerMedEndring =
+            EndringIUtbetalingUtil.finnAktørerMedEndringIAndeler(
+                nåværendeAndeler = listOf(andel),
+                forrigeAndeler = listOf(andel),
+            )
+
+        // Assert
+        assertThat(aktørerMedEndring).isEmpty()
     }
 }

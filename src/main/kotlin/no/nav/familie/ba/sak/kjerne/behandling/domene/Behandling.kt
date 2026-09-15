@@ -288,6 +288,8 @@ data class Behandling(
             else -> OppgaveBehandlingTema.OrdinærBarnetrygd
         }
 
+    fun skalHoppeOverValideringIBehandlingsresultat() = skalBehandlesAutomatisk && !erSatsendringMånedligValutajusteringEllerRegionstillegg() && !erAutomatiskSøknad()
+
     companion object {
         val comparator = BehandlingStegComparator()
     }

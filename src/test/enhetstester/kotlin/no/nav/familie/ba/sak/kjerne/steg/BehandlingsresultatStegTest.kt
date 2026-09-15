@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.ENDRE_MIGRERINGSDATO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
@@ -113,12 +114,13 @@ class BehandlingsresultatStegTest {
             justRun { behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(any()) }
             justRun { behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(any()) }
             justRun { behandlingsresultatstegValideringService.validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(any()) }
+            justRun { behandlingsresultatstegValideringService.validerAutomatiskBehandlingAvSøknad(any()) }
         }
 
         @ParameterizedTest
         @EnumSource(
             value = BehandlingÅrsak::class,
-            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "SATSENDRING_EØS"],
+            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "SATSENDRING_EØS", "AUTOMATISK_BEHANDLING_AV_SØKNAD"],
             mode = EXCLUDE,
         )
         fun `skal ikke valideres om behandlingen ikke har riktig årsak for behandling som skal automatisk behandles`(
@@ -250,6 +252,20 @@ class BehandlingsresultatStegTest {
             // Assert
             verify(exactly = 1) {
                 behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(any())
+            }
+        }
+
+        @Test
+        fun `skal validere automatisk behandling av søknad`() {
+            // Arrange
+            val behandling = lagBehandling(skalBehandlesAutomatisk = true, årsak = AUTOMATISK_BEHANDLING_AV_SØKNAD)
+
+            // Act
+            behandlingsresultatSteg.preValiderSteg(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatstegValideringService.validerAutomatiskBehandlingAvSøknad(behandling)
             }
         }
     }

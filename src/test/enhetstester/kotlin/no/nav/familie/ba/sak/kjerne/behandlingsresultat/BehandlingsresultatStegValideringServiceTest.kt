@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.REVURDERING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SATSENDRING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SATSENDRING_EØS
@@ -46,6 +47,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.prosessering.error.RekjørSenereException
@@ -54,6 +56,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -71,6 +75,7 @@ class BehandlingsresultatStegValideringServiceTest {
     private val persongrunnlagService = mockk<no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService>()
     private val clockProvider = lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 10, 10))
     private val satsendringEøsKjøringService: SatsendringEøsKjøringService = mockk()
+    private val søknadGrunnlagService: SøknadGrunnlagService = mockk()
 
     private val behandlingsresultatStegValideringService =
         BehandlingsresultatStegValideringService(
@@ -86,6 +91,7 @@ class BehandlingsresultatStegValideringServiceTest {
             persongrunnlagService = persongrunnlagService,
             clockProvider = clockProvider,
             satsendringEøsKjøringService = satsendringEøsKjøringService,
+            søknadGrunnlagService = søknadGrunnlagService,
         )
 
     private val barn = lagPerson(type = PersonType.BARN)
@@ -1951,6 +1957,202 @@ class BehandlingsresultatStegValideringServiceTest {
             // Act & Assert
             assertDoesNotThrow {
                 behandlingsresultatStegValideringService.validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(nåværendeBehandling)
+            }
+        }
+    }
+
+    @Nested
+    inner class ValiderAtKunBarnSøktForHarEndringIAndel {
+        private val barnSøktFor = lagPerson(type = PersonType.BARN)
+        private val barnIkkeSøktFor = lagPerson(type = PersonType.BARN)
+        private val nåværendeBehandling = lagBehandling()
+        private val forrigeBehandling = lagBehandling()
+
+        private fun lagAndelTilkjentYtelse(
+            aktør: Aktør,
+            beløp: Int = 1000,
+        ) = lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 1), tom = YearMonth.of(2030, 1), aktør = aktør, beløp = beløp)
+
+        @Test
+        fun `kaster ikke feil når det ikke finnes forrige behandling og kun søkt barn har andeler`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns null
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(barnSøktFor.aktør))
+            every {
+                søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = nåværendeBehandling, forrigeBehandling = null)
+            } returns listOf(barnSøktFor.aktør)
+
+            // Act & Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerAtKunBarnSøktForHarEndringIAndel(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `kaster AutovedtakMåBehandlesManueltFeil når det ikke finnes forrige behandling og barn det ikke er søkt for har fått andel`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns null
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(barnSøktFor.aktør), lagAndelTilkjentYtelse(barnIkkeSøktFor.aktør))
+            every {
+                søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = nåværendeBehandling, forrigeBehandling = null)
+            } returns listOf(barnSøktFor.aktør)
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                behandlingsresultatStegValideringService.validerAtKunBarnSøktForHarEndringIAndel(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `kaster AutovedtakMåBehandlesManueltFeil når barn det ikke er søkt for har fått andel med 0 i beløp uten forrige behandling`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns null
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(barnSøktFor.aktør), lagAndelTilkjentYtelse(barnIkkeSøktFor.aktør, beløp = 0))
+            every {
+                søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = nåværendeBehandling, forrigeBehandling = null)
+            } returns listOf(barnSøktFor.aktør)
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                behandlingsresultatStegValideringService.validerAtKunBarnSøktForHarEndringIAndel(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `kaster ikke feil når det finnes forrige behandling og ingen endringer i andeler`() {
+            // Arrange
+            val andeler = listOf(lagAndelTilkjentYtelse(barnSøktFor.aktør), lagAndelTilkjentYtelse(barnIkkeSøktFor.aktør))
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns forrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns andeler
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns andeler
+            every {
+                søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = nåværendeBehandling, forrigeBehandling = forrigeBehandling)
+            } returns listOf(barnSøktFor.aktør)
+
+            // Act & Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerAtKunBarnSøktForHarEndringIAndel(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `kaster ikke feil når det finnes forrige behandling og endring i beløp kun på søkt barn`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns forrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(barnSøktFor.aktør, beløp = 2000), lagAndelTilkjentYtelse(barnIkkeSøktFor.aktør))
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(barnSøktFor.aktør, beløp = 1000), lagAndelTilkjentYtelse(barnIkkeSøktFor.aktør))
+            every {
+                søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = nåværendeBehandling, forrigeBehandling = forrigeBehandling)
+            } returns listOf(barnSøktFor.aktør)
+
+            // Act & Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerAtKunBarnSøktForHarEndringIAndel(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `kaster AutovedtakMåBehandlesManueltFeil når det finnes forrige behandling og endring i beløp på barn det ikke er søkt for`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns forrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(barnSøktFor.aktør), lagAndelTilkjentYtelse(barnIkkeSøktFor.aktør, beløp = 2000))
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(barnSøktFor.aktør), lagAndelTilkjentYtelse(barnIkkeSøktFor.aktør, beløp = 1000))
+            every {
+                søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = nåværendeBehandling, forrigeBehandling = forrigeBehandling)
+            } returns listOf(barnSøktFor.aktør)
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                behandlingsresultatStegValideringService.validerAtKunBarnSøktForHarEndringIAndel(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `kaster AutovedtakMåBehandlesManueltFeil når prosent er endret på ikke-søkt barn uten beløpsendring`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns forrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(barnSøktFor.aktør),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2024, 1),
+                        tom = YearMonth.of(2030, 1),
+                        aktør = barnIkkeSøktFor.aktør,
+                        beløp = 1000,
+                        prosent = BigDecimal(50),
+                    ),
+                )
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(barnSøktFor.aktør), lagAndelTilkjentYtelse(barnIkkeSøktFor.aktør, beløp = 1000))
+            every {
+                søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = nåværendeBehandling, forrigeBehandling = forrigeBehandling)
+            } returns listOf(barnSøktFor.aktør)
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                behandlingsresultatStegValideringService.validerAtKunBarnSøktForHarEndringIAndel(nåværendeBehandling)
+            }
+        }
+
+        @Test
+        fun `kaster AutovedtakMåBehandlesManueltFeil når søker har fått ny andel`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(nåværendeBehandling) } returns forrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(barnSøktFor.aktør),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2024, 1),
+                        tom = YearMonth.of(2030, 1),
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        aktør = søker.aktør,
+                        beløp = 1000,
+                    ),
+                )
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(barnSøktFor.aktør))
+            every {
+                søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = nåværendeBehandling, forrigeBehandling = forrigeBehandling)
+            } returns listOf(barnSøktFor.aktør)
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                behandlingsresultatStegValideringService.validerAtKunBarnSøktForHarEndringIAndel(nåværendeBehandling)
+            }
+        }
+    }
+
+    @Nested
+    inner class ValiderBehandlingresultat {
+        @ParameterizedTest
+        @EnumSource(value = Behandlingsresultat::class, names = ["INNVILGET", "DELVIS_INNVILGET"])
+        fun `kaster ikke feil når behandlingsresultatet er innvilget eller delvis innvilget`(behandlingsresultat: Behandlingsresultat) {
+            // Arrange
+            val behandling = lagBehandling(resultat = behandlingsresultat)
+
+            // Act & Assert
+            assertDoesNotThrow {
+                behandlingsresultatStegValideringService.validerBehandlingresultat(behandling)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = Behandlingsresultat::class, names = ["INNVILGET", "DELVIS_INNVILGET"], mode = EnumSource.Mode.EXCLUDE)
+        fun `kaster AutovedtakMåBehandlesManueltFeil når behandlingsresultatet ikke er innvilget eller delvis innvilget`(behandlingsresultat: Behandlingsresultat) {
+            // Arrange
+            val behandling = lagBehandling(resultat = behandlingsresultat)
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                behandlingsresultatStegValideringService.validerBehandlingresultat(behandling)
             }
         }
     }
