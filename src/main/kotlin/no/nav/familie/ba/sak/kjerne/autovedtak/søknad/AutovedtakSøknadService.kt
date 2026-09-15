@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SøknadData
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
@@ -48,6 +49,10 @@ class AutovedtakSøknadService(
             throw AutovedtakMåBehandlesManueltFeil("Vilkårsvurderingen er ikke oppfylt.\nBehandling av søknad må håndteres manuelt.")
         }
 
+        if (behandlingEtterBehandlingsresultat.resultat !in setOf(Behandlingsresultat.INNVILGET, Behandlingsresultat.DELVIS_INNVILGET)) {
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til behandlingsresultat ${behandlingEtterBehandlingsresultat.resultat}.\nKun innvilgelse og delvis innvilgelse kan behandles automatisk.")
+        }
+
         val simulering = simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterBehandlingsresultat)
 
         val harIngenUtbetaling = simulering.flatMap { it.økonomiSimuleringPostering }.all { it.beløp == BigDecimal.ZERO }
@@ -61,7 +66,7 @@ class AutovedtakSøknadService(
         }
 
         if (behandlingEtterBehandlingsresultat.steg == StegType.IVERKSETT_MOT_OPPDRAG) {
-            autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad()
+            autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(behandlingEtterBehandlingsresultat)
         }
 
         val opprettetVedtak =
