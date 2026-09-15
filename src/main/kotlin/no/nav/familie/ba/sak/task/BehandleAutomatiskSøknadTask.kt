@@ -83,7 +83,7 @@ class BehandleAutomatiskSøknadTask(
                 payload = jsonMapper.writeValueAsString(dto),
                 properties = properties,
             ).copy(
-                triggerTid = utledNesteTriggerTidIHverdagerForTask(nåtidspunkt), // TODO : Sjekk om vi skal vente til neste hverdag eller bare kjøre med en gang
+                triggerTid = utledNesteTriggerTidIHverdagerForTask(nåtidspunkt),
             )
         }
     }
