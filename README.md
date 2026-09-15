@@ -27,34 +27,41 @@ under `Edit Configurations -> VM Options`
 
 #### Database i egen container
 
-Postgres-databasen kan settes opp slik:
+Postgres kjøres enklest opp med `docker-compose.yaml` som ligger i rota av prosjektet. Compose-tjenesten `postgres`
+oppretter databasen `familie-ba-sak` automatisk med riktig bruker og passord (matcher spring-profilen `postgres` i
+`src/test/resources/application-postgres.yaml`), så du slipper de manuelle `psql`-stegene.
 
-1. Lag en dockercontainer: 
-```
-docker run --name familie-ba-sak-postgres -e POSTGRES_PASSWORD=test -d -p 5432:5432 postgres
-```
-2. List opp alle containerne og finn container id for container med name = familie-ba-sak-postgres: 
+Start databasen (kjør fra rota av prosjektet):
 
 ```
-docker ps
-```
-3. Kjør docker container: 
-```
-docker exec -it <container_id> bash
+docker compose up -d postgres
 ```
 
-4. Åpne postgres som brukeren "postgres":
+Bruker du **Colima** i stedet for Docker Desktop, tilbyr Colima en Docker-kompatibel daemon, så du bruker samme
+`docker`-kommando – start bare Colima først:
+
 ```
-psql -U postgres
+colima start
+docker compose up -d postgres
 ```
 
-5. Lag en database med navn "familie-ba-sak": 
+Bruker du **Podman**, start Podman-maskinen og bruk `podman compose`:
+
 ```
-CREATE DATABASE "familie-ba-sak";
+podman machine start
+podman compose up -d postgres
 ```
 
-Legg til databasen i Intellij: 
-1. Trykk på database på høyre side og "+" -> data source -> postgreSQL
+Nyttige kommandoer:
+
+* Stoppe databasen: `docker compose stop postgres`
+* Stoppe og fjerne containeren: `docker compose down` (legg til `-v` for også å slette dataene i volumet `db`)
+* Se logger: `docker compose logs -f postgres`
+
+(Bytt ut `docker` med `podman` dersom du bruker Podman.)
+
+Legg til databasen i IntelliJ:
+1. Trykk på Database på høyre side og "+" -> Data Source -> PostgreSQL
 2. Fyll inn port=5432, user=postgres, passord=test og database=familie-ba-sak
 
 OBS: Pass på at du ikke kjører postgres lokalt på samme port (5432)
