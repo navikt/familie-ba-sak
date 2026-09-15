@@ -4,8 +4,6 @@ services:
         container_name: familie-ba-sak-postgres
         restart: always
         environment:
-            # Matcher spring-profilen "postgres" (src/test/resources/application-postgres.yaml).
-            # POSTGRES_DB oppretter databasen automatisk, så du slipper å kjøre CREATE DATABASE manuelt.
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: test
             POSTGRES_DB: familie-ba-sak
