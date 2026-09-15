@@ -251,6 +251,7 @@ class PersongrunnlagService(
     ): PersonopplysningGrunnlag {
         val nyttPersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
         val alleBarna = barnFraInneværendeBehandling.union(barnFraForrigeBehandling).toList()
+        val relevanteAktører = setOf(aktør) + barnFraInneværendeBehandling + barnFraForrigeBehandling
         val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringNasjonalEllerMånedligValutajustering() || behandling.erSatsendringEøs()
 
         val sisteBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
@@ -297,6 +298,7 @@ class PersongrunnlagService(
                 behandlingUnderkategori = behandling.underkategori,
                 skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                 eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
+                relevanteAktører = relevanteAktører,
             )
 
         nyttPersonopplysningGrunnlag.personer.add(søker)
@@ -313,6 +315,7 @@ class PersongrunnlagService(
                         behandlingUnderkategori = behandling.underkategori,
                         skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                         eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
+                        relevanteAktører = relevanteAktører,
                     ),
                 )
             } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
@@ -329,7 +332,7 @@ class PersongrunnlagService(
         }
 
         if (søker.hentSterkesteMedlemskap() == Medlemskap.EØS && behandling.skalBehandlesAutomatisk) {
-            hentFarEllerMedmorAktør(barnFraInneværendeBehandling)?.also { farEllerMedmor ->
+            hentFarEllerMedmorAktør(barnFraInneværendeBehandling, relevanteAktører)?.also { farEllerMedmor ->
                 nyttPersonopplysningGrunnlag.personer.add(
                     hentPerson(
                         aktør = farEllerMedmor,
@@ -340,6 +343,7 @@ class PersongrunnlagService(
                         behandlingUnderkategori = behandling.underkategori,
                         skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                         eldsteBarnsFødselsdato = eldsteBarnsFødselsdato,
+                        relevanteAktører = relevanteAktører,
                     ),
                 )
             }
@@ -382,12 +386,13 @@ class PersongrunnlagService(
         behandlingUnderkategori: BehandlingUnderkategori,
         skalHenteEnkelPersonInfo: Boolean = false,
         eldsteBarnsFødselsdato: LocalDate,
+        relevanteAktører: Set<Aktør>,
     ): Person {
         val personInfo =
             if (skalHenteEnkelPersonInfo) {
                 personopplysningerService.hentPersoninfoEnkel(aktør)
             } else {
-                personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+                personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør, relevanteAktører)
             }
 
         lagreHistoriskeIdenter(personInfo.historiskeIdenter, aktør)
@@ -533,10 +538,13 @@ class PersongrunnlagService(
         secureLogger.warn("Barn ${barnAktør.aktivFødselsnummer()} har opphørt ident med løpende andeler, og blir kopiert fra forrige personopplysningsgrunnlag.")
     }
 
-    private fun hentFarEllerMedmorAktør(barna: List<Aktør>): Aktør? {
+    private fun hentFarEllerMedmorAktør(
+        barna: List<Aktør>,
+        relevanteAktører: Set<Aktør>,
+    ): Aktør? {
         val barnasFarEllerMedmorAktører =
             barna
-                .map { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør = it) }
+                .map { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør = it, relevanteAktører = relevanteAktører) }
                 .flatMap { barn ->
                     barn.forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR || it.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR }
                 }.map { it.aktør }

@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutoma
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -44,25 +45,33 @@ class FakePersonopplysningerService(
     familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     integrasjonKlient: IntegrasjonKlient,
     falskIdentitetService: FalskIdentitetService,
+    personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 ) : PersonopplysningerService(
         pdlRestKlient,
         systemOnlyPdlRestKlient,
         familieIntegrasjonerTilgangskontrollService,
         integrasjonKlient,
         falskIdentitetService,
+        personopplysningGrunnlagRepository,
     ) {
     init {
         settPersoninfoMedRelasjonerForPredefinerteTestpersoner()
     }
 
-    override fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
+    override fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+        aktør: Aktør,
+        relevanteAktører: Set<Aktør>?,
+    ): PersonInfo {
         validerFødselsnummer(aktør.aktivFødselsnummer())
         sjekkPersonIkkeFunnet(aktør.aktivFødselsnummer())
 
         return personInfo[aktør.aktivFødselsnummer()] ?: personInfo.getValue(INTEGRASJONER_FNR)
     }
 
-    override fun hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PdlPersonInfo {
+    override fun hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(
+        aktør: Aktør,
+        relevanteAktører: Set<Aktør>?,
+    ): PdlPersonInfo {
         validerFødselsnummer(aktør.aktivFødselsnummer())
         sjekkPersonIkkeFunnet(aktør.aktivFødselsnummer())
 
