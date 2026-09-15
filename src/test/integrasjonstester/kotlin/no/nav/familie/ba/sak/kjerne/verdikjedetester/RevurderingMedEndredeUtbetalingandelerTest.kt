@@ -110,7 +110,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val behandlingRevurdering =
             stegService.håndterNyBehandling(nyRevurdering(fagsakId = fagsak.id))
 
-        persongrunnlagService.lagreOgDeaktiverGammel(
+        persongrunnlagService.lagreOgSlettGammelt(
             lagTestPersonopplysningGrunnlag(
                 behandlingId = behandlingRevurdering.id,
                 søkerPersonIdent = fnr,
@@ -229,7 +229,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         søknadGrunnlagRepository.save(søknadGrunnlag)
 
-        persongrunnlagService.lagreOgDeaktiverGammel(
+        persongrunnlagService.lagreOgSlettGammelt(
             lagTestPersonopplysningGrunnlag(
                 behandlingId = førstegangsbehandling.id,
                 søkerPersonIdent = søkersIdent,
