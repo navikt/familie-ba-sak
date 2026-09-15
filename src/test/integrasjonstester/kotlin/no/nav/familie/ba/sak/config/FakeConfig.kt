@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.felles.tokenklient.entraid.EntraIDClient
 import no.nav.familie.prosessering.internal.TaskService
@@ -143,6 +144,7 @@ class FakeConfig {
         familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
         integrasjonKlient: IntegrasjonKlient,
         falskIdentitetService: FalskIdentitetService,
+        personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     ): FakePersonopplysningerService =
         FakePersonopplysningerService(
             pdlRestKlient = pdlRestKlient,
@@ -150,6 +152,7 @@ class FakeConfig {
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             integrasjonKlient = integrasjonKlient,
             falskIdentitetService = falskIdentitetService,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
         )
 
     @Bean
