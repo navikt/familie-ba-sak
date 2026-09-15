@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.Behandlingstema
@@ -62,6 +63,7 @@ class OppgaveServiceTest {
     private val mockedOpprettTaskService: OpprettTaskService = mockk()
     private val mockedLoggService: LoggService = mockk()
     private val mockedTilpassArbeidsfordelingService: TilpassArbeidsfordelingService = mockk()
+    private val mockTilgangService: TilgangService = mockk()
     private val oppgaveService: OppgaveService =
         OppgaveService(
             integrasjonKlient = mockedIntegrasjonKlient,
