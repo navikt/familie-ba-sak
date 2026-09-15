@@ -48,10 +48,6 @@ class KlagebehandlingOppretter(
         fagsak: Fagsak,
         klageMottattDato: LocalDate,
     ): UUID {
-        if (fagsak.type === FagsakType.INSTITUSJON && !featureToggleService.isEnabled(FeatureToggle.SKAL_KUNNE_BEHANDLE_BA_INSTITUSJONSFAGSAKER_I_KLAGE)) {
-            throw FunksjonellFeil("Oppretting av klagebehandlinger for institusjonsfagsaker er ikke implementert.")
-        }
-
         if (klageMottattDato.isAfter(LocalDate.now(clockProvider.get()))) {
             throw FunksjonellFeil("Kan ikke opprette klage med krav mottatt frem i tid.")
         }
