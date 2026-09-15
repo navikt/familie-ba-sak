@@ -122,7 +122,7 @@ class VilkårsvurderingTestController(
                 personopplysningGrunnlag!!,
             )
 
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(nyVilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
