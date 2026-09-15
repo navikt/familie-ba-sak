@@ -1,0 +1,27 @@
+name: Zizmor
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/**']
+  pull_request:
+    paths: ['.github/**']
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  # Avbryter kun PR-kjøringer. På main ville en avbrutt kjøring latt være å laste
+  # opp SARIF, og alerts hadde blitt stående utdatert til neste trigger.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  zizmor:
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/zizmor.yaml@main # ratchet:exclude
+    permissions:
+      security-events: write
+      contents: read
+      actions: read

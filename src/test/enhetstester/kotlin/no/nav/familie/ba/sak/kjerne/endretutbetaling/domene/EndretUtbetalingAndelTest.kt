@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.beregnGyldigTom
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.beregnGyldigTomPerAktør
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.skalSplitteEndretUtbetalingAndel
@@ -378,6 +379,38 @@ internal class EndretUtbetalingAndelTest {
             assertThat(andreAndel.fom).isEqualTo(YearMonth.of(2025, 11))
             assertThat(andreAndel.tom).isEqualTo(YearMonth.of(2025, 12))
             assertThat(andreAndel.aktører).containsExactlyInAnyOrder(aktør2, aktør3)
+        }
+    }
+
+    @Nested
+    inner class FraEndretUtbetalingAndelDto {
+        @Test
+        fun `skal ikke lagre avtaletidspunkt for delt bosted når årsaken ikke er delt bosted`() {
+            // Arrange
+            val aktør = lagAktør()
+            val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = 1L)
+            val dto = lagEndretUtbetalingAndelDto(årsak = Årsak.ETTERBETALING_3MND, avtaletidspunktDeltBosted = LocalDate.of(2024, 11, 9))
+
+            // Act
+            endretUtbetalingAndel.fraEndretUtbetalingAndelDto(dto, listOf(aktør))
+
+            // Assert
+            assertThat(endretUtbetalingAndel.avtaletidspunktDeltBosted).isNull()
+        }
+
+        @Test
+        fun `skal lagre avtaletidspunkt for delt bosted når årsaken er delt bosted`() {
+            // Arrange
+            val aktør = lagAktør()
+            val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = 1L)
+            val avtaletidspunkt = LocalDate.of(2024, 11, 9)
+            val dto = lagEndretUtbetalingAndelDto(årsak = Årsak.DELT_BOSTED, avtaletidspunktDeltBosted = avtaletidspunkt)
+
+            // Act
+            endretUtbetalingAndel.fraEndretUtbetalingAndelDto(dto, listOf(aktør))
+
+            // Assert
+            assertThat(endretUtbetalingAndel.avtaletidspunktDeltBosted).isEqualTo(avtaletidspunkt)
         }
     }
 }

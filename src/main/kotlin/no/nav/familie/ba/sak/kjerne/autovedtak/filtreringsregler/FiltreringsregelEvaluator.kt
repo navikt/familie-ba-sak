@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
+package no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -21,7 +21,7 @@ class FiltreringsregelEvaluator {
                     ),
                 )
             } else {
-                acc.add(filtreringsregel.evaluer(fakta).copy(identifikator = filtreringsregel.identifikator.name))
+                acc.add(filtreringsregel.evaluer(fakta))
             }
             acc
         }

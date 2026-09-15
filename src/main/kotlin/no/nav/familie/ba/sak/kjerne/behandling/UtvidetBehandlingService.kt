@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilArbeidsfordelingPåBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBehandlingStegTilstandDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilFiltreringResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanseDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertEtterbetalingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertVedtakDto
@@ -19,7 +18,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakursDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilVedtakDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -62,7 +60,6 @@ class UtvidetBehandlingService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
-    private val filtreringResultatRepository: FiltreringResultatRepository,
     private val settPåVentService: SettPåVentService,
     private val kompetanseRepository: KompetanseRepository,
     private val valutakursRepository: ValutakursRepository,
@@ -160,11 +157,6 @@ class UtvidetBehandlingService(
                         }?.map { personDto -> personDto.copy(erNyttBarn = nyeBarn.contains(personDto.personIdent)) }
                         ?: emptyList(),
                 personResultater = personResultater?.map { it.tilPersonResultatDto() } ?: emptyList(),
-                fødselshendelsefiltreringResultater =
-                    filtreringResultatRepository
-                        .finnFiltreringResultater(
-                            behandlingId = behandling.id,
-                        ).map { it.tilFiltreringResultatDto() },
                 utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling, personopplysningGrunnlag),
                 personerMedAndelerTilkjentYtelse =
                     personopplysningGrunnlag?.tilPersonerMedAndelerDto(andelerTilkjentYtelse)
