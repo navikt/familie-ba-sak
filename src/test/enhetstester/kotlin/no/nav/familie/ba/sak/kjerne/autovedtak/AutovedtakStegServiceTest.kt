@@ -87,7 +87,7 @@ class AutovedtakStegServiceTest {
     inner class KjørAutomatiskBehandlingSøknad {
         @BeforeEach
         fun setUp() {
-            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BEHANDLE_SOKNAD_AUTOMATISK) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BEHANDLE_SOKNAD_AUTOMATISK, false) } returns true
             every { autovedtakSøknadService.skalAutovedtakBehandles(SøknadData(søknad)) } returns true
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
@@ -97,7 +97,7 @@ class AutovedtakStegServiceTest {
         @Test
         fun `skal kaste Feil når toggle SKAL_BEHANDLE_SOKNAD_AUTOMATISK er skrudd av`() {
             // Arrange
-            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BEHANDLE_SOKNAD_AUTOMATISK) } returns false
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BEHANDLE_SOKNAD_AUTOMATISK, false) } returns false
 
             // Act & Assert
             assertThrows<Feil> {
