@@ -73,4 +73,7 @@ enum class FeatureToggle(
 
     // NAV-29077
     BRUK_FAMILIE_OPPDRAG_BACKEND_GCP("familie-baks-sak.bruk-familie-oppdrag-backend-gcp"),
+
+    // NAV-30720
+    SKAL_BEHANDLE_SOKNAD_AUTOMATISK("familie-ba-sak.skal-behandle-soknad-automatisk"),
 }

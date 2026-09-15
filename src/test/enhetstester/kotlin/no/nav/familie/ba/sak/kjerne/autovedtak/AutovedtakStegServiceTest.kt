@@ -6,6 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAktør
@@ -86,10 +87,24 @@ class AutovedtakStegServiceTest {
     inner class KjørAutomatiskBehandlingSøknad {
         @BeforeEach
         fun setUp() {
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BEHANDLE_SOKNAD_AUTOMATISK, false) } returns true
             every { autovedtakSøknadService.skalAutovedtakBehandles(SøknadData(søknad)) } returns true
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
             every { autovedtakSøknadService.kjørBehandling(SøknadData(søknad)) } returns "Søknad: Behandling ferdig"
+        }
+
+        @Test
+        fun `skal kaste Feil når toggle SKAL_BEHANDLE_SOKNAD_AUTOMATISK er skrudd av`() {
+            // Arrange
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BEHANDLE_SOKNAD_AUTOMATISK, false) } returns false
+
+            // Act & Assert
+            assertThrows<Feil> {
+                autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, søknad)
+            }
+            verify(exactly = 0) { fagsakService.hentPåFagsakId(any()) }
+            verify(exactly = 0) { autovedtakSøknadService.kjørBehandling(any()) }
         }
 
         @Test
