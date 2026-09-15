@@ -58,6 +58,7 @@ class OpprettTaskService(
         beskrivelse: String? = null,
         fristForFerdigstillelse: LocalDate = LocalDate.now(),
         manuellOppgaveType: ManuellOppgaveType,
+        oppgavetype: Oppgavetype,
     ) {
         taskRepository.save(
             Task(
@@ -66,7 +67,7 @@ class OpprettTaskService(
                     jsonMapper.writeValueAsString(
                         OpprettOppgaveTaskDTO(
                             behandlingId,
-                            Oppgavetype.VurderLivshendelse,
+                            oppgavetype,
                             fristForFerdigstillelse,
                             null,
                             beskrivelse,

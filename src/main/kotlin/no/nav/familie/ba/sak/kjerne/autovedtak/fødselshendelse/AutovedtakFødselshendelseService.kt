@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRe
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -233,6 +234,7 @@ class AutovedtakFødselshendelseService(
             behandlingId = behandling.id,
             begrunnelse = "Fødselshendelse: $begrunnelseForManuellOppgave",
             manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
+            oppgavetype = Oppgavetype.VurderLivshendelse,
         )
 
         return "Henlegger behandling $behandling automatisk på grunn av ugyldig resultat"

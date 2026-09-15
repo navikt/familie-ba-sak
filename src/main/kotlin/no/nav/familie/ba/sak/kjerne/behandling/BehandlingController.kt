@@ -186,7 +186,7 @@ data class NyBehandling(
 
 data class Søknad(
     val fagsakId: Long,
-    val morsIdent: String,
+    val søkersIdent: String,
     val barnasIdenter: List<String>,
 )
 
