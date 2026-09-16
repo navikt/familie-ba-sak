@@ -103,6 +103,48 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
             ikkeOppfyltNavn = "MOR_HAR_OPPHØRT_BARNETRYGD",
             ikkeOppfyltBeskrivelse = "Mor har vedtak om opphørt barnetrygd.",
         ),
+        SØKER_GYLDIG_FNR(
+            oppfyltNavn = "SØKER_HAR_GYLDIG_FNR",
+            oppfyltBeskrivelse = "Søker har gyldig fødselsnummer",
+            ikkeOppfyltNavn = "SØKER_HAR_UGYLDIG_FNR",
+            ikkeOppfyltBeskrivelse = "Søker har ugyldig fødselsnummer",
+        ),
+        SØKER_HAR_HAR_IKKE_D_NUMMER(
+            oppfyltNavn = "SØKER_HAR_IKKE_D_NUMMER",
+            oppfyltBeskrivelse = "Søker har ikke d-nummer",
+            ikkeOppfyltNavn = "SØKER_HAR_D_NUMMER",
+            ikkeOppfyltBeskrivelse = "Søker har d-nummer",
+        ),
+        BARN_HAR_HAR_IKKE_D_NUMMER(
+            oppfyltNavn = "BARN_HAR_IKKE_D_NUMMER",
+            oppfyltBeskrivelse = "Barn har ikke d-nummer",
+            ikkeOppfyltNavn = "BARN_HAR_D_NUMMER",
+            ikkeOppfyltBeskrivelse = "Barn har d-nummer",
+        ),
+        SØKER_LEVER(
+            oppfyltNavn = "SØKER_LEVER",
+            oppfyltBeskrivelse = "Det er ikke registrert dødsdato på søker.",
+            ikkeOppfyltNavn = "SØKER_LEVER_IKKE",
+            ikkeOppfyltBeskrivelse = "Det er registrert dødsdato på søker.",
+        ),
+        SØKER_ER_OVER_18_ÅR(
+            oppfyltNavn = "SØKER_ER_OVER_18_ÅR",
+            oppfyltBeskrivelse = "Søker er over 18 år.",
+            ikkeOppfyltNavn = "SØKER_ER_UNDER_18_ÅR",
+            ikkeOppfyltBeskrivelse = "Søker er under 18 år.",
+        ),
+        SØKER_HAR_IKKE_VERGE(
+            oppfyltNavn = "Søker_ER_MYNDIG",
+            oppfyltBeskrivelse = "Søker er myndig.",
+            ikkeOppfyltNavn = "SØKER_ER_UNDER_VERGEMÅL",
+            ikkeOppfyltBeskrivelse = "Søker er under vergemål.",
+        ),
+        SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR(
+            oppfyltNavn = "SØKER_OPPFYLLER_IKKE_VILKÅR_FOR_UTVIDET_BARNETRYGD",
+            oppfyltBeskrivelse = "Søker oppfyller ikke vilkår for utvidet barnetrygd",
+            ikkeOppfyltNavn = "SØKER_OPPFYLLER_VILKÅR_FOR_UTVIDET_BARNETRYGD_VED",
+            ikkeOppfyltBeskrivelse = "Søker oppfyller vilkår for utvidet barnetrygd",
+        ),
         ;
 
         val oppfylt: EvalueringÅrsak = Utfall(this, oppfyltNavn, oppfyltBeskrivelse)
@@ -128,6 +170,10 @@ private val morGyldigFnr =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_GYLDIG_FNR) {
         erGyldigFnr(it.søker.aktør.aktivFødselsnummer())
     }
+private val søkerGyldigFnr =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_GYLDIG_FNR) {
+        erGyldigFnr(it.søker.aktør.aktivFødselsnummer())
+    }
 
 private val barnGyldigFnr =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.BARN_GYLDIG_FNR) { fakta ->
@@ -136,6 +182,9 @@ private val barnGyldigFnr =
 
 private val morLever =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_LEVER) { it.søkerLever }
+
+private val søkerLever =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_LEVER) { it.søkerLever }
 
 private val barnLever =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.BARN_LEVER) { it.barnaLever }
@@ -153,8 +202,14 @@ private val merEnn5MndEllerMindreEnnFemDagerSidenForrigeBarn =
 private val morErOver18År =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_ER_OVER_18_ÅR) { it.søker.hentAlder() >= 18 }
 
+private val søkerErOver18År =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_ER_OVER_18_ÅR) { it.søker.hentAlder() >= 18 }
+
 private val morHarIkkeVerge =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_HAR_IKKE_VERGE) { !it.søkerHarVerge }
+
+private val søkerHarIkkeVerge =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_HAR_IKKE_VERGE) { !it.søkerHarVerge }
 
 private val morMottarIkkeLøpendeUtvidet =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET) { !it.søkerMottarLøpendeUtvidet }
@@ -182,6 +237,18 @@ private fun erGyldigFnr(personIdent: String): Boolean = !erBostNummer(personIden
 
 private fun erFDatnummer(personIdent: String): Boolean = personIdent.substring(6).toInt() == 0
 
+private fun erIkkeDNummer(personIdent: String): Boolean = personIdent.substring(0, 1).toInt() != 4
+
+private val søkerHarIkkeDNummer =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_HAR_HAR_IKKE_D_NUMMER) {
+        erIkkeDNummer(it.søker.aktør.aktivFødselsnummer())
+    }
+
+private val barnHarIkkeDNummer =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.BARN_GYLDIG_FNR) { fakta ->
+        fakta.barnaSomSkalVurderes.all { erIkkeDNummer(it.aktør.aktivFødselsnummer()) }
+    }
+
 /**
  * BOST-nr har måned mellom 21 og 32
  */
@@ -189,16 +256,14 @@ private fun erBostNummer(personIdent: String): Boolean = personIdent.substring(2
 
 val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøknad>> =
     listOf(
-        morGyldigFnr,
+        søkerHarIkkeDNummer,
+        barnHarIkkeDNummer,
+        søkerGyldigFnr,
         barnGyldigFnr,
-        morLever,
+        søkerLever,
         barnLever,
-        morErOver18År,
-        morHarIkkeVerge,
-        morMottarIkkeLøpendeUtvidet,
-        morHarIkkeLøpendeEøsBarnetrygd,
-        løperIkkeBarnetrygdForBarnet,
-        morHarIkkeOppfyltUtvidetVilkårVedFødselsdato,
+        søkerErOver18År,
+        søkerHarIkkeVerge,
     )
 
 val FILTRERINGSREGLER_FØDSELSHENDELSE: List<Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>> =

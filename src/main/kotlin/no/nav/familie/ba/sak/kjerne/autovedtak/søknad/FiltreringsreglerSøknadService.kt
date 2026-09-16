@@ -28,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
-import kotlin.collections.forEach
 
 @Service
 class FiltreringsreglerSøknadService(
@@ -48,7 +47,7 @@ class FiltreringsreglerSøknadService(
         filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,
         behandling: Behandling,
     ): List<FiltreringResultat> {
-        val aktørMor = personidentService.hentAktør(filtrerAutomatiskBehandlingData.søkersIdent)
+        val aktørSøker = personidentService.hentAktør(filtrerAutomatiskBehandlingData.søkersIdent)
         val aktørBarna = personidentService.hentAktørIder(filtrerAutomatiskBehandlingData.barnasIdenter)
 
         val personopplysningGrunnlag =
@@ -62,7 +61,7 @@ class FiltreringsreglerSøknadService(
                 søker = personopplysningGrunnlag.søker,
                 søkerMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
                 søkerOppfyllerVilkårForUtvidetBarnetrygd =
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
+                    søkerOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
                         behandling,
                         barnaFraSøknad,
                     ),
@@ -70,7 +69,7 @@ class FiltreringsreglerSøknadService(
                 barnaSomSkalVurderes = barnaFraSøknad,
                 søkerLever = !personopplysningGrunnlag.søker.erDød(),
                 barnaLever = barnaFraSøknad.none { it.erDød() },
-                søkerHarVerge = personopplysningerService.harVerge(aktørMor).harVerge,
+                søkerHarVerge = personopplysningerService.harVerge(aktørSøker).harVerge,
                 løperBarnetrygdForBarnetPåAnnenForelder =
                     tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
                         behandling = behandling,
@@ -94,7 +93,7 @@ class FiltreringsreglerSøknadService(
         )
     }
 
-    private fun morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
+    private fun søkerOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
         behandling: Behandling,
         barnaFraHendelse: List<Person>,
     ): Boolean {
