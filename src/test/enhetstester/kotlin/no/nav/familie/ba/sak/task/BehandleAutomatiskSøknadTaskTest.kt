@@ -4,11 +4,14 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Søknad
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -20,6 +23,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -28,6 +32,7 @@ class BehandleAutomatiskSøknadTaskTest {
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val stegService = mockk<StegService>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
 
     private val behandleAutomatiskSøknadTask =
         BehandleAutomatiskSøknadTask(
@@ -35,10 +40,12 @@ class BehandleAutomatiskSøknadTaskTest {
             oppgaveService = oppgaveService,
             stegService = stegService,
             fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         )
 
     private val søkersIdent = randomFnr()
     private val søkersAktør = randomAktør(søkersIdent)
+    private val fagsak = lagFagsak(aktør = søkersAktør)
 
     private val nyBehandling =
         NyBehandling(
@@ -55,7 +62,8 @@ class BehandleAutomatiskSøknadTaskTest {
             // Arrange
             val task = BehandleAutomatiskSøknadTask.opprettTask(BehandleAutomatiskSøknadTaskDTO(nyBehandling))
 
-            every { fagsakService.hentAktør(nyBehandling.fagsakId) } returns søkersAktør
+            every { fagsakService.hentPåFagsakId(nyBehandling.fagsakId) } returns fagsak
+            every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(nyBehandling.fagsakId) } returns false
             every { autovedtakStegService.kjørAutomatiskBehandlingSøknad(any(), any(), any()) } returns "KJØRT OK"
 
             // Act
@@ -84,9 +92,11 @@ class BehandleAutomatiskSøknadTaskTest {
             val task = BehandleAutomatiskSøknadTask.opprettTask(BehandleAutomatiskSøknadTaskDTO(nyBehandling))
             val behandling = lagBehandling()
 
-            every { fagsakService.hentAktør(nyBehandling.fagsakId) } returns søkersAktør
-            every { autovedtakStegService.kjørAutomatiskBehandlingSøknad(any(), any(), any()) } throws
-                AutovedtakMåBehandlesManueltFeil("Ikke kandidat for automatisk behandling")
+            every { fagsakService.hentPåFagsakId(nyBehandling.fagsakId) } returns fagsak
+            every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(nyBehandling.fagsakId) } returns false
+            every {
+                autovedtakStegService.kjørAutomatiskBehandlingSøknad(any(), any(), any())
+            } throws AutovedtakMåBehandlesManueltFeil("Ikke kandidat for automatisk behandling")
             every { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling) } returns behandling
             every {
                 oppgaveService.opprettOppgaveForManuellBehandling(
@@ -110,6 +120,23 @@ class BehandleAutomatiskSøknadTaskTest {
                     oppgavetype = Oppgavetype.BehandleSak,
                 )
             }
+        }
+
+        @Test
+        fun `skal kaste feil og ikke behandle søknad hvis det finnes en åpen behandling på fagsak`() {
+            // Arrange
+            val task = BehandleAutomatiskSøknadTask.opprettTask(BehandleAutomatiskSøknadTaskDTO(nyBehandling))
+
+            every { fagsakService.hentPåFagsakId(nyBehandling.fagsakId) } returns fagsak
+            every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(nyBehandling.fagsakId) } returns true
+
+            // Act & Assert
+            val exception = assertThrows<Feil> { behandleAutomatiskSøknadTask.doTask(task) }
+            assertThat(exception.message).isEqualTo("Det er ikke mulig å behandle en søknad automatisk hvis fagsak=${nyBehandling.fagsakId} har en åpen behandling.")
+
+            verify(exactly = 0) { autovedtakStegService.kjørAutomatiskBehandlingSøknad(any(), any(), any()) }
+            verify(exactly = 0) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(any()) }
+            verify(exactly = 0) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) }
         }
     }
 
