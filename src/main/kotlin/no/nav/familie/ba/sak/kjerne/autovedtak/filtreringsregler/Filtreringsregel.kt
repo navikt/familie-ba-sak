@@ -245,7 +245,7 @@ private val søkerHarIkkeDNummer =
     }
 
 private val barnHarIkkeDNummer =
-    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.BARN_GYLDIG_FNR) { fakta ->
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.BARN_HAR_HAR_IKKE_D_NUMMER) { fakta ->
         fakta.barnaSomSkalVurderes.all { erIkkeDNummer(it.aktør.aktivFødselsnummer()) }
     }
 

@@ -145,7 +145,7 @@ internal class FiltreringsregelTest {
         // Assert
         assertThat(identifikatorer).containsExactly(
             Filtreringsregel.Identifikator.SØKER_HAR_HAR_IKKE_D_NUMMER,
-            Filtreringsregel.Identifikator.BARN_GYLDIG_FNR,
+            Filtreringsregel.Identifikator.BARN_HAR_HAR_IKKE_D_NUMMER,
             Filtreringsregel.Identifikator.SØKER_GYLDIG_FNR,
             Filtreringsregel.Identifikator.BARN_GYLDIG_FNR,
             Filtreringsregel.Identifikator.SØKER_LEVER,
@@ -176,6 +176,7 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
             Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
             Filtreringsregel.Identifikator.SØKER_HAR_HAR_IKKE_D_NUMMER,
+            Filtreringsregel.Identifikator.BARN_HAR_HAR_IKKE_D_NUMMER,
             Filtreringsregel.Identifikator.SØKER_GYLDIG_FNR,
             Filtreringsregel.Identifikator.SØKER_LEVER,
             Filtreringsregel.Identifikator.SØKER_ER_OVER_18_ÅR,
