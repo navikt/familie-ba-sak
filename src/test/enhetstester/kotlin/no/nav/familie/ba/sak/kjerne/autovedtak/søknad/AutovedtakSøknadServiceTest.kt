@@ -1,30 +1,24 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
-import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
-import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
-import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
-import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SøknadData
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.Søknad
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -33,16 +27,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
-import java.math.BigDecimal
 
 class AutovedtakSøknadServiceTest {
     private val autovedtakService = mockk<AutovedtakService>()
     private val simuleringService = mockk<SimuleringService>()
     private val taskService = mockk<TaskService>()
     private val autovedtakSøknadBegrunnelseService = mockk<AutovedtakSøknadBegrunnelseService>()
-    private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
+    private val autovedtakSøknadValideringService = mockk<AutovedtakSøknadValideringService>()
 
     private val autovedtakSøknadService =
         AutovedtakSøknadService(
@@ -50,11 +41,12 @@ class AutovedtakSøknadServiceTest {
             simuleringService = simuleringService,
             taskService = taskService,
             autovedtakSøknadBegrunnelseService = autovedtakSøknadBegrunnelseService,
-            vilkårsvurderingService = vilkårsvurderingService,
+            autovedtakSøknadValideringService = autovedtakSøknadValideringService,
         )
 
     private val fagsak = lagFagsak()
     private val behandling = lagBehandling(fagsak = fagsak, førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG, resultat = Behandlingsresultat.INNVILGET)
+    private val simulering = listOf(lagØkonomiSimuleringMottaker(behandling = behandling))
     private val søknad =
         Søknad(
             fagsakId = fagsak.id,
@@ -88,117 +80,56 @@ class AutovedtakSøknadServiceTest {
                 )
             } returns behandling
 
-            every {
-                vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id)
-            } returns lagVilkårsvurdering(behandling = behandling)
-
-            every {
-                simuleringService.oppdaterSimuleringPåBehandling(behandling)
-            } returns
-                listOf(
-                    lagØkonomiSimuleringMottaker(
-                        behandling = behandling,
-                        økonomiSimuleringPostering = listOf(lagØkonomiSimuleringPostering(beløp = 100)),
-                    ),
-                )
-
-            every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
-            every { autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(any()) } just Runs
+            justRun { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(any()) }
+            every { simuleringService.oppdaterSimuleringPåBehandling(behandling) } returns simulering
+            justRun { autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(any()) }
+            justRun { autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(any()) }
             every { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling) } returns lagVedtak(behandling = behandling)
             every { taskService.save(any()) } returns mockk()
         }
 
         @Test
-        fun `skal kaste AutovedtakMåBehandlesManueltFeil når vilkårsvurderingen ikke er oppfylt`() {
-            // Arrange
-            val vilkårsvurdering =
-                lagVilkårsvurdering(
-                    behandling = behandling,
-                    lagPersonResultater = {
-                        setOf(
-                            lagPersonResultat(
-                                vilkårsvurdering = it,
-                                aktør = fagsak.aktør,
-                                lagVilkårResultater = { personResultat ->
-                                    setOf(
-                                        lagVilkårResultat(
-                                            personResultat = personResultat,
-                                            resultat = Resultat.IKKE_OPPFYLT,
-                                        ),
-                                    )
-                                },
-                            ),
-                        )
-                    },
-                )
-            every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id) } returns vilkårsvurdering
-
-            // Act & Assert
-            val feil =
-                assertThrows<AutovedtakMåBehandlesManueltFeil> {
-                    autovedtakSøknadService.kjørBehandling(søknadData)
-                }
-            assertThat(feil.message).isEqualTo("Vilkårsvurderingen er ikke oppfylt.\nBehandling av søknad må håndteres manuelt.")
-        }
-
-        @ParameterizedTest
-        @EnumSource(value = Behandlingsresultat::class, names = ["INNVILGET", "DELVIS_INNVILGET"], mode = EnumSource.Mode.EXCLUDE)
-        fun `skal kaste AutovedtakMåBehandlesManueltFeil når behandlingsresultatet ikke er innvilget eller delvis innvilget`(resultat: Behandlingsresultat) {
-            // Arrange
-            behandling.resultat = resultat
-
-            // Act & Assert
-            val feil =
-                assertThrows<AutovedtakMåBehandlesManueltFeil> {
-                    autovedtakSøknadService.kjørBehandling(søknadData)
-                }
-            assertThat(feil.message).isEqualTo("Automatisk behandling av søknad fører til behandlingsresultat $resultat.\nKun innvilgelse og delvis innvilgelse kan behandles automatisk.")
-            verify(exactly = 0) { simuleringService.oppdaterSimuleringPåBehandling(any()) }
-        }
-
-        @ParameterizedTest
-        @EnumSource(value = Behandlingsresultat::class, names = ["INNVILGET", "DELVIS_INNVILGET"])
-        fun `skal fullføre behandlingen når behandlingsresultatet er innvilget eller delvis innvilget`(resultat: Behandlingsresultat) {
-            // Arrange
-            behandling.resultat = resultat
-
+        fun `skal validere behandlingen etter behandlingsresultat og simuleringen før vedtak`() {
             // Act
-            val resultatAvKjøring = autovedtakSøknadService.kjørBehandling(søknadData)
+            autovedtakSøknadService.kjørBehandling(søknadData)
 
             // Assert
-            assertThat(resultatAvKjøring).isEqualTo(AutovedtakStegService.BEHANDLING_FERDIG)
+            verifyOrder {
+                autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(any(), any(), any(), any())
+                autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling)
+                simuleringService.oppdaterSimuleringPåBehandling(behandling)
+                autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
+                autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling)
+            }
         }
 
         @Test
-        fun `skal kaste AutovedtakMåBehandlesManueltFeil når automatisk behandling ikke fører til noen utbetaling`() {
+        fun `skal ikke simulere eller opprette vedtak når behandlingen må behandles manuelt`() {
             // Arrange
-            every { simuleringService.oppdaterSimuleringPåBehandling(behandling) } returns
-                listOf(
-                    lagØkonomiSimuleringMottaker(
-                        behandling = behandling,
-                        økonomiSimuleringPostering = listOf(lagØkonomiSimuleringPostering(beløp = 0)),
-                    ),
-                )
+            every { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling) } throws
+                AutovedtakMåBehandlesManueltFeil("Behandling av søknad må håndteres manuelt.")
 
             // Act & Assert
-            val feil =
-                assertThrows<AutovedtakMåBehandlesManueltFeil> {
-                    autovedtakSøknadService.kjørBehandling(søknadData)
-                }
-            assertThat(feil.message).isEqualTo("Automatisk behandling av søknad fører til ingen utbetaling.\nBehandling av søknad må håndteres manuelt.")
+            assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadService.kjørBehandling(søknadData) }
+            verify(exactly = 0) {
+                simuleringService.oppdaterSimuleringPåBehandling(any())
+                autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
+                taskService.save(any())
+            }
         }
 
         @Test
-        fun `skal kaste AutovedtakMåBehandlesManueltFeil når automatisk behandling fører til feilutbetaling`() {
+        fun `skal ikke opprette vedtak når simuleringen må behandles manuelt`() {
             // Arrange
-            every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ONE
+            every { autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering) } throws
+                AutovedtakMåBehandlesManueltFeil("Behandling av søknad må håndteres manuelt.")
 
             // Act & Assert
-            val feil =
-                assertThrows<AutovedtakMåBehandlesManueltFeil> {
-                    autovedtakSøknadService.kjørBehandling(søknadData)
-                }
-            assertThat(feil.message).isEqualTo("Automatisk behandling av søknad fører til feilutbetaling.\nBehandling av søknad må håndteres manuelt.")
+            assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadService.kjørBehandling(søknadData) }
+            verify(exactly = 0) {
+                autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
+                taskService.save(any())
+            }
         }
 
         @Test
@@ -231,30 +162,13 @@ class AutovedtakSøknadServiceTest {
                     filtrerAutomatiskBehandlingData = any(),
                 )
             } returns behandlingUtenIverksettelse
-            every {
-                vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingUtenIverksettelse.id)
-            } returns lagVilkårsvurdering(behandling = behandlingUtenIverksettelse)
-
-            every {
-                simuleringService.oppdaterSimuleringPåBehandling(behandlingUtenIverksettelse)
-            } returns
-                listOf(
-                    lagØkonomiSimuleringMottaker(
-                        behandling = behandlingUtenIverksettelse,
-                        økonomiSimuleringPostering = listOf(lagØkonomiSimuleringPostering(beløp = 100)),
-                    ),
-                )
-
-            every { simuleringService.hentFeilutbetaling(behandlingUtenIverksettelse.id) } returns BigDecimal.ZERO
-
+            every { simuleringService.oppdaterSimuleringPåBehandling(behandlingUtenIverksettelse) } returns simulering
             every {
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandlingUtenIverksettelse)
             } returns lagVedtak(behandling = behandlingUtenIverksettelse)
 
             // Act & Assert
-            assertThrows<Feil> {
-                autovedtakSøknadService.kjørBehandling(søknadData)
-            }
+            assertThrows<Feil> { autovedtakSøknadService.kjørBehandling(søknadData) }
             verify(exactly = 0) {
                 autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(any())
             }
