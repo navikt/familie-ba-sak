@@ -139,6 +139,18 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
             ikkeOppfyltNavn = "SØKER_ER_UNDER_VERGEMÅL",
             ikkeOppfyltBeskrivelse = "Søker er under vergemål.",
         ),
+        SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET(
+            oppfyltNavn = "SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET",
+            oppfyltBeskrivelse = "Søker mottar ikke utvidet barnetrygd.",
+            ikkeOppfyltNavn = "SØKER_MOTTAR_LØPENDE_UTVIDET",
+            ikkeOppfyltBeskrivelse = "Søker mottar utvidet barnetrygd.",
+        ),
+        SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD(
+            oppfyltNavn = "SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD",
+            oppfyltBeskrivelse = "Søker har ikke løpende EØS-barnetrygd",
+            ikkeOppfyltNavn = "SØKER_HAR_LØPENDE_EØS_BARNETRYGD",
+            ikkeOppfyltBeskrivelse = "Søker har EØS-barnetrygd",
+        ),
         SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR(
             oppfyltNavn = "SØKER_OPPFYLLER_IKKE_VILKÅR_FOR_UTVIDET_BARNETRYGD",
             oppfyltBeskrivelse = "Søker oppfyller ikke vilkår for utvidet barnetrygd",
@@ -217,6 +229,12 @@ private val morMottarIkkeLøpendeUtvidet =
 private val morHarIkkeLøpendeEøsBarnetrygd =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD) { !it.søkerMottarEøsBarnetrygd }
 
+private val søkerMottarIkkeLøpendeUtvidet =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET) { !it.søkerMottarLøpendeUtvidet }
+
+private val søkerHarIkkeLøpendeEøsBarnetrygd =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD) { !it.søkerMottarEøsBarnetrygd }
+
 private val fagsakIkkeMigrertUtAvInfotrygdEtterBarnFødt =
     Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>(Identifikator.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT) {
         !it.erFagsakenMigrertEtterBarnFødt
@@ -264,6 +282,8 @@ val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøkn
         barnLever,
         søkerErOver18År,
         søkerHarIkkeVerge,
+        søkerMottarIkkeLøpendeUtvidet,
+        søkerHarIkkeLøpendeEøsBarnetrygd,
     )
 
 val FILTRERINGSREGLER_FØDSELSHENDELSE: List<Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>> =

@@ -152,6 +152,8 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.BARN_LEVER,
             Filtreringsregel.Identifikator.SØKER_ER_OVER_18_ÅR,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_VERGE,
+            Filtreringsregel.Identifikator.SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET,
+            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
         )
     }
 
@@ -181,6 +183,8 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_LEVER,
             Filtreringsregel.Identifikator.SØKER_ER_OVER_18_ÅR,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_VERGE,
+            Filtreringsregel.Identifikator.SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET,
+            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
         )
     }
 
@@ -227,6 +231,26 @@ internal class FiltreringsregelTest {
                 PersistertUtfall("SØKER_ER_UNDER_18_ÅR", "SØKER_ER_OVER_18_ÅR", "Søker er under 18 år."),
                 PersistertUtfall("Søker_ER_MYNDIG", "SØKER_HAR_IKKE_VERGE", "Søker er myndig."),
                 PersistertUtfall("SØKER_ER_UNDER_VERGEMÅL", "SØKER_HAR_IKKE_VERGE", "Søker er under vergemål."),
+                PersistertUtfall(
+                    "SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET",
+                    "SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET",
+                    "Søker mottar ikke utvidet barnetrygd.",
+                ),
+                PersistertUtfall(
+                    "SØKER_MOTTAR_LØPENDE_UTVIDET",
+                    "SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET",
+                    "Søker mottar utvidet barnetrygd.",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD",
+                    "SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD",
+                    "Søker har ikke løpende EØS-barnetrygd",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_LØPENDE_EØS_BARNETRYGD",
+                    "SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD",
+                    "Søker har EØS-barnetrygd",
+                ),
                 PersistertUtfall(
                     "SØKER_OPPFYLLER_IKKE_VILKÅR_FOR_UTVIDET_BARNETRYGD",
                     "SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR",
