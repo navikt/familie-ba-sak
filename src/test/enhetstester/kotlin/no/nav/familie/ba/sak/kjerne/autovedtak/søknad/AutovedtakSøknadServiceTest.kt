@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SøknadData
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.Søknad
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -32,6 +33,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 
 class AutovedtakSøknadServiceTest {
@@ -51,7 +54,7 @@ class AutovedtakSøknadServiceTest {
         )
 
     private val fagsak = lagFagsak()
-    private val behandling = lagBehandling(fagsak = fagsak, førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG)
+    private val behandling = lagBehandling(fagsak = fagsak, førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG, resultat = Behandlingsresultat.INNVILGET)
     private val søknad =
         Søknad(
             fagsakId = fagsak.id,
@@ -100,7 +103,7 @@ class AutovedtakSøknadServiceTest {
                 )
 
             every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
-            every { autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad() } just Runs
+            every { autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(any()) } just Runs
             every { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling) } returns lagVedtak(behandling = behandling)
             every { taskService.save(any()) } returns mockk()
         }
@@ -136,6 +139,34 @@ class AutovedtakSøknadServiceTest {
                     autovedtakSøknadService.kjørBehandling(søknadData)
                 }
             assertThat(feil.message).isEqualTo("Vilkårsvurderingen er ikke oppfylt.\nBehandling av søknad må håndteres manuelt.")
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = Behandlingsresultat::class, names = ["INNVILGET", "DELVIS_INNVILGET"], mode = EnumSource.Mode.EXCLUDE)
+        fun `skal kaste AutovedtakMåBehandlesManueltFeil når behandlingsresultatet ikke er innvilget eller delvis innvilget`(resultat: Behandlingsresultat) {
+            // Arrange
+            behandling.resultat = resultat
+
+            // Act & Assert
+            val feil =
+                assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                    autovedtakSøknadService.kjørBehandling(søknadData)
+                }
+            assertThat(feil.message).isEqualTo("Automatisk behandling av søknad fører til behandlingsresultat $resultat.\nKun innvilgelse og delvis innvilgelse kan behandles automatisk.")
+            verify(exactly = 0) { simuleringService.oppdaterSimuleringPåBehandling(any()) }
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = Behandlingsresultat::class, names = ["INNVILGET", "DELVIS_INNVILGET"])
+        fun `skal fullføre behandlingen når behandlingsresultatet er innvilget eller delvis innvilget`(resultat: Behandlingsresultat) {
+            // Arrange
+            behandling.resultat = resultat
+
+            // Act
+            val resultatAvKjøring = autovedtakSøknadService.kjørBehandling(søknadData)
+
+            // Assert
+            assertThat(resultatAvKjøring).isEqualTo(AutovedtakStegService.BEHANDLING_FERDIG)
         }
 
         @Test
@@ -183,7 +214,7 @@ class AutovedtakSøknadServiceTest {
             assertThat(resultat).isEqualTo(AutovedtakStegService.BEHANDLING_FERDIG)
             assertThat(taskSlot.captured.type).isEqualTo(IverksettMotOppdragTask.TASK_STEP_TYPE)
             verify(exactly = 1) {
-                autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad()
+                autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(behandling)
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling)
             }
         }
@@ -191,7 +222,7 @@ class AutovedtakSøknadServiceTest {
         @Test
         fun `skal kaste Feil når behandlingsteg etter behandlingsresultat ikke er IVERKSETT_MOT_OPPDRAG`() {
             // Arrange
-            val behandlingUtenIverksettelse = lagBehandling(fagsak = fagsak, førsteSteg = StegType.FERDIGSTILLE_BEHANDLING)
+            val behandlingUtenIverksettelse = lagBehandling(fagsak = fagsak, førsteSteg = StegType.FERDIGSTILLE_BEHANDLING, resultat = Behandlingsresultat.INNVILGET)
             every {
                 autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
                     fagsakId = søknad.fagsakId,
@@ -225,7 +256,7 @@ class AutovedtakSøknadServiceTest {
                 autovedtakSøknadService.kjørBehandling(søknadData)
             }
             verify(exactly = 0) {
-                autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad()
+                autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(any())
             }
         }
     }

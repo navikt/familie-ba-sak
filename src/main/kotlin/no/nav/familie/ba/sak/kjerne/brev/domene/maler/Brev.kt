@@ -172,6 +172,7 @@ enum class Brevmal(
     AUTOVEDTAK_FINNMARKSTILLEGG(true, "autovedtakFinnmarkstillegg", "Vedtak finnmarkstillegg innvilget"),
     AUTOVEDTAK_SVALBARDTILLEGG(true, "autovedtakSvalbardtillegg", "Vedtak svalbardtillegg innvilget"),
     AUTOVEDTAK_SATSENDRING_EØS(true, "satsendringEos", "Vedtak EØS-satsendring"),
+    AUTOVEDTAK_SØKNAD(true, "autovedtakSoknad", "Autovedtak søknad"),
     ;
 
     fun skalGenerereForside(): Boolean =
@@ -235,6 +236,7 @@ enum class Brevmal(
             AUTOVEDTAK_FINNMARKSTILLEGG,
             AUTOVEDTAK_SVALBARDTILLEGG,
             AUTOVEDTAK_SATSENDRING_EØS,
+            AUTOVEDTAK_SØKNAD,
             -> throw Feil("$this støtter ikke generering av forside")
         }
 
@@ -331,6 +333,7 @@ enum class Brevmal(
             AUTOVEDTAK_FINNMARKSTILLEGG,
             AUTOVEDTAK_SVALBARDTILLEGG,
             AUTOVEDTAK_SATSENDRING_EØS,
+            AUTOVEDTAK_SØKNAD,
             -> throw Feil("Ingen dokumenttype for $this")
         }
 
@@ -381,6 +384,7 @@ enum class Brevmal(
                 AUTOVEDTAK_FINNMARKSTILLEGG,
                 AUTOVEDTAK_SVALBARDTILLEGG,
                 AUTOVEDTAK_SATSENDRING_EØS,
+                AUTOVEDTAK_SØKNAD,
                 -> Distribusjonstype.VEDTAK
 
                 HENLEGGE_TRUKKET_SØKNAD,
