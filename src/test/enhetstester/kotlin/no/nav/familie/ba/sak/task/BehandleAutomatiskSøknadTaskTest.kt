@@ -102,7 +102,7 @@ class BehandleAutomatiskSøknadTaskTest {
                 oppgaveService.opprettOppgaveForManuellBehandling(
                     behandlingId = behandling.id,
                     begrunnelse = any(),
-                    manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
+                    manuellOppgaveType = ManuellOppgaveType.SØKNAD,
                     oppgavetype = Oppgavetype.BehandleSak,
                 )
             } returns "oppgaveId"
@@ -116,7 +116,7 @@ class BehandleAutomatiskSøknadTaskTest {
                 oppgaveService.opprettOppgaveForManuellBehandling(
                     behandlingId = behandling.id,
                     begrunnelse = "Ikke kandidat for automatisk behandling. Må behandles manuelt.",
-                    manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
+                    manuellOppgaveType = ManuellOppgaveType.SØKNAD,
                     oppgavetype = Oppgavetype.BehandleSak,
                 )
             }
