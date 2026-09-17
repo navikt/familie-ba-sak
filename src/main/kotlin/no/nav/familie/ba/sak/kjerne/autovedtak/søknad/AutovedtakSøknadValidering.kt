@@ -80,12 +80,4 @@ object AutovedtakSøknadValidering {
             throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til feilutbetaling.\n$MÅ_HÅNDTERES_MANUELT")
         }
     }
-
-    private fun AndelTilkjentYtelse.felterHarEndretSegSidenForrigeBehandling(forrigeAndel: AndelTilkjentYtelse): Boolean =
-        this.sats != forrigeAndel.sats ||
-            this.prosent.compareTo(forrigeAndel.prosent) != 0 ||
-            this.kalkulertUtbetalingsbeløp != forrigeAndel.kalkulertUtbetalingsbeløp ||
-            this.nasjonaltPeriodebeløp != forrigeAndel.nasjonaltPeriodebeløp ||
-            this.differanseberegnetPeriodebeløp != forrigeAndel.differanseberegnetPeriodebeløp ||
-            this.beløpUtenEndretUtbetaling != forrigeAndel.beløpUtenEndretUtbetaling
 }
