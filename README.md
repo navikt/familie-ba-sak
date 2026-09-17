@@ -27,34 +27,29 @@ under `Edit Configurations -> VM Options`
 
 #### Database i egen container
 
-Postgres-databasen kan settes opp slik:
+Databaseoppsettet er **felles for hele Team Familie** og bor i [navikt/familie](https://github.com/navikt/familie)
+(`docker-compose.yaml` + `init-multiple-databases.sh`), slik at det er identisk for alle appene.
 
-1. Lag en dockercontainer: 
-```
-docker run --name familie-ba-sak-postgres -e POSTGRES_PASSWORD=test -d -p 5432:5432 postgres
-```
-2. List opp alle containerne og finn container id for container med name = familie-ba-sak-postgres: 
+Du trenger **ikke** å klone `navikt/familie` manuelt – kjør hjelpescriptet fra rota av dette repoet:
 
 ```
-docker ps
-```
-3. Kjør docker container: 
-```
-docker exec -it <container_id> bash
+./startLokalDatabase.sh
 ```
 
-4. Åpne postgres som brukeren "postgres":
-```
-psql -U postgres
-```
+Scriptet henter (eller oppdaterer) det delte oppsettet fra `navikt/familie` og starter en postgres-container med alle
+familie-databasene, inkludert `familie-ba-sak`. Databasen opprettes automatisk med bruker/passord som matcher
+spring-profilen `postgres` i `src/test/resources/application-postgres.yaml`.
 
-5. Lag en database med navn "familie-ba-sak": 
-```
-CREATE DATABASE "familie-ba-sak";
-```
+> Krever SSH-tilgang til `navikt/familie` og en kjørende container-motor (Docker Desktop, Colima eller Podman).
+> Bruker du Colima/Podman: start `colima start` eller `podman machine start` først.
 
-Legg til databasen i Intellij: 
-1. Trykk på database på høyre side og "+" -> data source -> postgreSQL
+Se [navikt/familie – Postgres lokalt](https://github.com/navikt/familie/blob/main/doc/onboarding/testing-lokalt/Postgres.md)
+for detaljer og nyttige PSQL-kommandoer.
+
+
+
+Legg til databasen i IntelliJ:
+1. Trykk på Database på høyre side og "+" -> Data Source -> PostgreSQL
 2. Fyll inn port=5432, user=postgres, passord=test og database=familie-ba-sak
 
 OBS: Pass på at du ikke kjører postgres lokalt på samme port (5432)

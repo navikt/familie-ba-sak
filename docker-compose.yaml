@@ -1,4 +1,5 @@
 services:
+
     texas:
         image: ghcr.io/nais/texas:latest
         container_name: familie-ba-sak-texas-1
@@ -21,3 +22,4 @@ services:
         restart: on-failure
         labels:
             - "com.docker.compose.project=familie-ba-sak"
+
