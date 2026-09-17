@@ -96,6 +96,12 @@ class FiltreringsreglerSøknadService(
                     forelderBarnRelasjonerForSøknadsbarna.any {
                         it.adressebeskyttelseGradering.erGradering6Eller19()
                     },
+                søkerOgBarnHarForelderBarnRelasjon =
+                    barnaFraSøknad.all { barnFraSøknad ->
+                        forelderBarnRelasjonerForSøknadsbarna.any {
+                            it.aktør == barnFraSøknad.aktør
+                        }
+                    },
             )
 
         val evalueringer = filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_SØKNAD, fakta)

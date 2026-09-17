@@ -133,6 +133,12 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
             ikkeOppfyltNavn = "BARN_HAR_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
             ikkeOppfyltBeskrivelse = "Barn har adressebeskyttelse gradering 6 eller 19",
         ),
+        SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON(
+            oppfyltNavn = "SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON",
+            oppfyltBeskrivelse = "Søker og barn har en forelder/barn-relasjon",
+            ikkeOppfyltNavn = "SØKER_OG_BARN_HAR_IKKE_FORELDER_BARN_RELASJON",
+            ikkeOppfyltBeskrivelse = "Søker og barn har ikke en forelder/barn-relasjon",
+        ),
         SØKER_LEVER(
             oppfyltNavn = "SØKER_LEVER",
             oppfyltBeskrivelse = "Det er ikke registrert dødsdato på søker.",
@@ -289,6 +295,11 @@ private val barnHarIkkeAdressebeskyttelseGradering6Eller19 =
         !it.barnHarAdressebeskyttelseGradering6Eller19
     }
 
+private val søkerOgBarnHarForelderBarnRelasjon =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON) {
+        it.søkerOgBarnHarForelderBarnRelasjon
+    }
+
 /**
  * BOST-nr har måned mellom 21 og 32
  */
@@ -308,6 +319,7 @@ val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøkn
         søkerHarIkkeVerge,
         søkerMottarIkkeLøpendeUtvidet,
         søkerHarIkkeLøpendeEøsBarnetrygd,
+        søkerOgBarnHarForelderBarnRelasjon,
     )
 
 val FILTRERINGSREGLER_FØDSELSHENDELSE: List<Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>> =

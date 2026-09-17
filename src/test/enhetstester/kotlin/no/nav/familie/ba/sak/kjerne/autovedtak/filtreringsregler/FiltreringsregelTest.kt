@@ -154,6 +154,7 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_VERGE,
             Filtreringsregel.Identifikator.SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
+            Filtreringsregel.Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON,
         )
     }
 
@@ -181,6 +182,7 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.BARN_HAR_IKKE_D_NUMMER,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19,
             Filtreringsregel.Identifikator.BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19,
+            Filtreringsregel.Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON,
             Filtreringsregel.Identifikator.SØKER_GYLDIG_FNR,
             Filtreringsregel.Identifikator.SØKER_LEVER,
             Filtreringsregel.Identifikator.SØKER_ER_OVER_18_ÅR,
@@ -246,6 +248,16 @@ internal class FiltreringsregelTest {
                     "BARN_HAR_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
                     "BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
                     "Barn har adressebeskyttelse gradering 6 eller 19",
+                ),
+                PersistertUtfall(
+                    "SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON",
+                    "SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON",
+                    "Søker og barn har en forelder/barn-relasjon",
+                ),
+                PersistertUtfall(
+                    "SØKER_OG_BARN_HAR_IKKE_FORELDER_BARN_RELASJON",
+                    "SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON",
+                    "Søker og barn har ikke en forelder/barn-relasjon",
                 ),
                 PersistertUtfall("SØKER_LEVER", "SØKER_LEVER", "Det er ikke registrert dødsdato på søker."),
                 PersistertUtfall("SØKER_LEVER_IKKE", "SØKER_LEVER", "Det er registrert dødsdato på søker."),

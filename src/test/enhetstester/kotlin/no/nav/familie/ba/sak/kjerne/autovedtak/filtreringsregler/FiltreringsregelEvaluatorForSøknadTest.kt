@@ -39,27 +39,6 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_D_NUMMER)
         }
 
-        @Nested
-        inner class NårSøkerEllerBarnHarAdressebeskyttelseGradering6Eller19 {
-            @Test
-            fun `skal avvise når søker har adressebeskyttelse gradering 6 eller 19`() {
-                // Act
-                val evalueringer = evaluer(søkerHarAdressebeskyttelseGradering6Eller19 = true)
-
-                // Assert
-                assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19)
-            }
-
-            @Test
-            fun `skal avvise når barn har adressebeskyttelse gradering 6 eller 19`() {
-                // Act
-                val evalueringer = evaluer(barnHarAdressebeskyttelseGradering6Eller19 = true)
-
-                // Assert
-                assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19)
-            }
-        }
-
         @Test
         fun `skal avvise når barn har d-nummer`() {
             // Act
@@ -68,6 +47,36 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_HAR_IKKE_D_NUMMER)
         }
+    }
+
+    @Nested
+    inner class NårSøkerEllerBarnHarAdressebeskyttelseGradering6Eller19 {
+        @Test
+        fun `skal avvise når søker har adressebeskyttelse gradering 6 eller 19`() {
+            // Act
+            val evalueringer = evaluer(søkerHarAdressebeskyttelseGradering6Eller19 = true)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19)
+        }
+
+        @Test
+        fun `skal avvise når barn har adressebeskyttelse gradering 6 eller 19`() {
+            // Act
+            val evalueringer = evaluer(barnHarAdressebeskyttelseGradering6Eller19 = true)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19)
+        }
+    }
+
+    @Test
+    fun `skal avvise når ikke alle søknadsbarna har foreldre barn-relasjon til søker`() {
+        // Act
+        val evalueringer = evaluer(søkerOgBarnHarForelderBarnRelasjon = false)
+
+        // Assert
+        assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON)
     }
 
     @Nested
@@ -164,6 +173,7 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
         søkerMottarEøsBarnetrygd: Boolean = false,
         søkerHarAdressebeskyttelseGradering6Eller19: Boolean = false,
         barnHarAdressebeskyttelseGradering6Eller19: Boolean = false,
+        søkerOgBarnHarForelderBarnRelasjon: Boolean = true,
     ): List<Evaluering> =
         filtreringsregelEvaluator.evaluerFiltreringsregler(
             FILTRERINGSREGLER_SØKNAD,
@@ -180,6 +190,7 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
                 søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling = false,
                 søkerHarAdressebeskyttelseGradering6Eller19 = søkerHarAdressebeskyttelseGradering6Eller19,
                 barnHarAdressebeskyttelseGradering6Eller19 = barnHarAdressebeskyttelseGradering6Eller19,
+                søkerOgBarnHarForelderBarnRelasjon = søkerOgBarnHarForelderBarnRelasjon,
             ),
         )
 
