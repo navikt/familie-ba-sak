@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
@@ -38,4 +39,26 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
         """,
     )
     fun finnSøkerOgBarnAktørerTilFagsak(fagsakId: Long): Set<PersonEnkel>
+
+    @Query(
+        """
+        SELECT DISTINCT relevantPerson.aktør
+        FROM Person relevantPerson
+        JOIN relevantPerson.personopplysningGrunnlag relevantGrunnlag
+        JOIN Behandling relevantBehandling ON relevantBehandling.id = relevantGrunnlag.behandlingId
+        WHERE relevantGrunnlag.aktiv = true
+        AND relevantPerson.type IN ('SØKER', 'BARN')
+        AND relevantBehandling.fagsak.arkivert = false
+        AND EXISTS (
+            SELECT 1
+            FROM Person person
+            JOIN person.personopplysningGrunnlag personGrunnlag
+            JOIN Behandling behandling ON behandling.id = personGrunnlag.behandlingId
+            WHERE person.aktør = :aktør
+            AND personGrunnlag.aktiv = true
+            AND behandling.fagsak.id = relevantBehandling.fagsak.id
+        )
+        """,
+    )
+    fun finnSøkerOgBarnPåFagsakerHvorAktørInngår(aktør: Aktør): Set<Aktør>
 }
