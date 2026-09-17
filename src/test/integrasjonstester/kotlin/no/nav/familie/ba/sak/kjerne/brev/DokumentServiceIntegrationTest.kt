@@ -363,7 +363,7 @@ class DokumentServiceIntegrationTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+        vilkårsvurderingService.lagreNyOgSlettGammel(
             lagVilkårsvurdering(
                 behandling.fagsak.aktør,
                 behandling,
@@ -413,7 +413,7 @@ class DokumentServiceIntegrationTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+        vilkårsvurderingService.lagreNyOgSlettGammel(
             lagVilkårsvurdering(
                 behandling.fagsak.aktør,
                 behandling,
@@ -461,7 +461,7 @@ class DokumentServiceIntegrationTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+        vilkårsvurderingService.lagreNyOgSlettGammel(
             lagVilkårsvurdering(
                 behandling.fagsak.aktør,
                 behandling,
@@ -509,7 +509,7 @@ class DokumentServiceIntegrationTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+        vilkårsvurderingService.lagreNyOgSlettGammel(
             lagVilkårsvurdering(
                 behandling.fagsak.aktør,
                 behandling,

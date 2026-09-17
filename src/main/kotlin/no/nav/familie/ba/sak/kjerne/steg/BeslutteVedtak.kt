@@ -28,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
@@ -52,7 +51,6 @@ class BeslutteVedtak(
     private val beregningService: BeregningService,
     private val taskRepository: TaskRepositoryWrapper,
     private val loggService: LoggService,
-    private val vilkårsvurderingService: VilkårsvurderingService,
     private val featureToggleService: FeatureToggleService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val saksbehandlerContext: SaksbehandlerContext,
@@ -178,10 +176,6 @@ class BeslutteVedtak(
         behandling: Behandling,
         totrinnskontroll: Totrinnskontroll,
     ): StegType {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
-        val kopiertVilkårsVurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertVilkårsVurdering)
-
         behandlingService.opprettOgInitierNyttVedtakForBehandling(
             behandling = behandling,
             kopierVedtakBegrunnelser = true,

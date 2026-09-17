@@ -206,7 +206,7 @@ class StegServiceIntegrationTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling, aktiv = true)
 
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering = vilkårsvurdering)
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
         behandling.status = BehandlingStatus.AVSLUTTET
@@ -233,7 +233,7 @@ class StegServiceIntegrationTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling, aktiv = true)
 
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering = vilkårsvurdering)
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.FATTER_VEDTAK
@@ -271,7 +271,7 @@ class StegServiceIntegrationTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+        vilkårsvurderingService.lagreNyOgSlettGammel(
             lagVilkårsvurdering(
                 søkerAktørId,
                 behandling,
