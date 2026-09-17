@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.fake.FakeSystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.FakeTilbakekrevingKlient
 import no.nav.familie.ba.sak.fake.FakeTilgangsmaskinKlient
-import no.nav.familie.ba.sak.fake.FakeØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
@@ -65,11 +64,6 @@ class FakeConfig {
     @Primary
     @Profile("fake-ecb-valutakurs-rest-klient")
     fun fakeECBValutakursRestKlient(): FakeECBValutakursRestKlient = FakeECBValutakursRestKlient()
-
-    @Bean
-    @Primary
-    @Profile("fake-økonomi-klient")
-    fun fakeØkonomiKlient(): FakeØkonomiKlient = FakeØkonomiKlient()
 
     @Bean
     @Primary

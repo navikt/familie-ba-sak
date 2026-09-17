@@ -70,14 +70,6 @@ class RestClientConfig(
             .lagMaskinTilMaskinRestKlient(scope)
             .medJsonContentType()
 
-    @Bean("økonomiRestClient")
-    fun økonomiRestClient(
-        @Value("\${FAMILIE_OPPDRAG_SCOPE}") scope: String,
-    ): RestClient =
-        entraIDRestClientFactory
-            .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
-            .medJsonContentType()
-
     // Går mot familie-oppdrag-backend som kjører i GCP.
     @Bean("oppdragBackendRestClient")
     fun oppdragBackendRestClient(
