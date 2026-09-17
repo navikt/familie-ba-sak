@@ -109,13 +109,13 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
             ikkeOppfyltNavn = "SØKER_HAR_UGYLDIG_FNR",
             ikkeOppfyltBeskrivelse = "Søker har ugyldig fødselsnummer",
         ),
-        SØKER_HAR_HAR_IKKE_D_NUMMER(
+        SØKER_HAR_IKKE_D_NUMMER(
             oppfyltNavn = "SØKER_HAR_IKKE_D_NUMMER",
             oppfyltBeskrivelse = "Søker har ikke d-nummer",
             ikkeOppfyltNavn = "SØKER_HAR_D_NUMMER",
             ikkeOppfyltBeskrivelse = "Søker har d-nummer",
         ),
-        BARN_HAR_HAR_IKKE_D_NUMMER(
+        BARN_HAR_IKKE_D_NUMMER(
             oppfyltNavn = "BARN_HAR_IKKE_D_NUMMER",
             oppfyltBeskrivelse = "Barn har ikke d-nummer",
             ikkeOppfyltNavn = "BARN_HAR_D_NUMMER",
@@ -134,7 +134,7 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
             ikkeOppfyltBeskrivelse = "Søker er under 18 år.",
         ),
         SØKER_HAR_IKKE_VERGE(
-            oppfyltNavn = "Søker_ER_MYNDIG",
+            oppfyltNavn = "SØKER_ER_MYNDIG",
             oppfyltBeskrivelse = "Søker er myndig.",
             ikkeOppfyltNavn = "SØKER_ER_UNDER_VERGEMÅL",
             ikkeOppfyltBeskrivelse = "Søker er under vergemål.",
@@ -154,7 +154,7 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
         SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR(
             oppfyltNavn = "SØKER_OPPFYLLER_IKKE_VILKÅR_FOR_UTVIDET_BARNETRYGD",
             oppfyltBeskrivelse = "Søker oppfyller ikke vilkår for utvidet barnetrygd",
-            ikkeOppfyltNavn = "SØKER_OPPFYLLER_VILKÅR_FOR_UTVIDET_BARNETRYGD_VED",
+            ikkeOppfyltNavn = "SØKER_OPPFYLLER_VILKÅR_FOR_UTVIDET_BARNETRYGD",
             ikkeOppfyltBeskrivelse = "Søker oppfyller vilkår for utvidet barnetrygd",
         ),
         ;
@@ -258,12 +258,12 @@ private fun erFDatnummer(personIdent: String): Boolean = personIdent.substring(6
 private fun erIkkeDNummer(personIdent: String): Boolean = personIdent.substring(0, 1).toInt() != 4
 
 private val søkerHarIkkeDNummer =
-    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_HAR_HAR_IKKE_D_NUMMER) {
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_HAR_IKKE_D_NUMMER) {
         erIkkeDNummer(it.søker.aktør.aktivFødselsnummer())
     }
 
 private val barnHarIkkeDNummer =
-    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.BARN_HAR_HAR_IKKE_D_NUMMER) { fakta ->
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.BARN_HAR_IKKE_D_NUMMER) { fakta ->
         fakta.barnaSomSkalVurderes.all { erIkkeDNummer(it.aktør.aktivFødselsnummer()) }
     }
 

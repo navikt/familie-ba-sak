@@ -36,7 +36,7 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
             val evalueringer = evaluer(søker = søker(ident = "44086226621"))
 
             // Assert
-            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_HAR_IKKE_D_NUMMER)
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_D_NUMMER)
         }
 
         @Test
@@ -45,7 +45,7 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
             val evalueringer = evaluer(barna = listOf(barn(ident = "41111777001")))
 
             // Assert
-            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_HAR_HAR_IKKE_D_NUMMER)
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_HAR_IKKE_D_NUMMER)
         }
     }
 
