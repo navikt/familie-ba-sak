@@ -133,6 +133,18 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
         }
     }
 
+    @Nested
+    inner class NårDetUtbetalesBarnetrygdForBarnetTilAnnenMottaker {
+        @Test
+        fun `skal avvise når det utbetales barnetrygd for barnet til annen mottaker i inneværende måned`() {
+            // Act
+            val evalueringer = evaluer(utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned = true)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED)
+        }
+    }
+
     private fun evaluer(
         søker: Person = søker(),
         barna: List<Person> = listOf(barn()),
@@ -141,6 +153,7 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
         søkerHarVerge: Boolean = false,
         søkerMottarLøpendeUtvidet: Boolean = false,
         søkerMottarEøsBarnetrygd: Boolean = false,
+        utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned: Boolean = false,
     ): List<Evaluering> =
         filtreringsregelEvaluator.evaluerFiltreringsregler(
             FILTRERINGSREGLER_SØKNAD,
@@ -153,7 +166,7 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
                 søkerLever = søkerLever,
                 barnaLever = barnaLever,
                 søkerHarVerge = søkerHarVerge,
-                løperBarnetrygdForBarnetPåAnnenForelder = false,
+                utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned = utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned,
                 søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling = false,
             ),
         )

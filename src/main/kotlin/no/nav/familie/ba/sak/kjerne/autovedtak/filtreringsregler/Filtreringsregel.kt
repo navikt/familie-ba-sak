@@ -157,6 +157,12 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
             ikkeOppfyltNavn = "SØKER_OPPFYLLER_VILKÅR_FOR_UTVIDET_BARNETRYGD",
             ikkeOppfyltBeskrivelse = "Søker oppfyller vilkår for utvidet barnetrygd",
         ),
+        UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED(
+            oppfyltNavn = "UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED",
+            oppfyltBeskrivelse = "Det utbetales ikke barnetrygd for barnet til annen mottaker i inneværende måned",
+            ikkeOppfyltNavn = "UTBETALES_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED",
+            ikkeOppfyltBeskrivelse = "Det utbetales barnetrygd for barnet til annen mottaker i inneværende måned",
+        ),
         ;
 
         val oppfylt: EvalueringÅrsak = Utfall(this, oppfyltNavn, oppfyltBeskrivelse)
@@ -241,7 +247,12 @@ private val fagsakIkkeMigrertUtAvInfotrygdEtterBarnFødt =
     }
 
 private val løperIkkeBarnetrygdForBarnet =
-    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.LØPER_IKKE_BARNETRYGD_FOR_BARNET) { !it.løperBarnetrygdForBarnetPåAnnenForelder }
+    Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>(Identifikator.LØPER_IKKE_BARNETRYGD_FOR_BARNET) { !it.løperBarnetrygdForBarnetPåAnnenForelder }
+
+private val utbetalesIkkeBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED) {
+        !it.utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned
+    }
 
 private val morHarIkkeOppfyltUtvidetVilkårVedFødselsdato =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO) {
@@ -284,6 +295,7 @@ val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøkn
         søkerHarIkkeVerge,
         søkerMottarIkkeLøpendeUtvidet,
         søkerHarIkkeLøpendeEøsBarnetrygd,
+        utbetalesIkkeBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned,
     )
 
 val FILTRERINGSREGLER_FØDSELSHENDELSE: List<Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>> =

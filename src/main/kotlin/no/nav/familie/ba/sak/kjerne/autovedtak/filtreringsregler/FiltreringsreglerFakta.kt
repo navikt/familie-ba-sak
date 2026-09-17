@@ -14,7 +14,6 @@ sealed class FiltreringsreglerFakta {
     abstract val søkerLever: Boolean
     abstract val barnaLever: Boolean
     abstract val søkerHarVerge: Boolean
-    abstract val løperBarnetrygdForBarnetPåAnnenForelder: Boolean
 }
 
 data class FiltreringsreglerFaktaFødselshendelse(
@@ -26,7 +25,7 @@ data class FiltreringsreglerFaktaFødselshendelse(
     override val søkerLever: Boolean,
     override val barnaLever: Boolean,
     override val søkerHarVerge: Boolean,
-    override val løperBarnetrygdForBarnetPåAnnenForelder: Boolean,
+    val løperBarnetrygdForBarnetPåAnnenForelder: Boolean,
     val restenAvBarna: List<PersonInfo>,
     val erFagsakenMigrertEtterBarnFødt: Boolean, // TODO : Er det relevant?
     val morHarIkkeOpphørtBarnetrygd: Boolean,
@@ -42,6 +41,6 @@ data class FiltreringsreglerFaktaSøknad(
     override val søkerLever: Boolean,
     override val barnaLever: Boolean,
     override val søkerHarVerge: Boolean,
-    override val løperBarnetrygdForBarnetPåAnnenForelder: Boolean,
+    val utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned: Boolean,
     val søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling: Boolean, // TODO : Skal vi gjøre denne sjekken i baks-mottak? Sjekk med Anna
 ) : FiltreringsreglerFakta()
