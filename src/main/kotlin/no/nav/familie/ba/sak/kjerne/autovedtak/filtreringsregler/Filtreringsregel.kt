@@ -115,11 +115,23 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
             ikkeOppfyltNavn = "SØKER_HAR_D_NUMMER",
             ikkeOppfyltBeskrivelse = "Søker har d-nummer",
         ),
+        SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19(
+            oppfyltNavn = "SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
+            oppfyltBeskrivelse = "Søker har ikke adressebeskyttelse gradering 6 eller 19",
+            ikkeOppfyltNavn = "SØKER_HAR_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
+            ikkeOppfyltBeskrivelse = "Søker har adressebeskyttelse gradering 6 eller 19",
+        ),
         BARN_HAR_IKKE_D_NUMMER(
             oppfyltNavn = "BARN_HAR_IKKE_D_NUMMER",
             oppfyltBeskrivelse = "Barn har ikke d-nummer",
             ikkeOppfyltNavn = "BARN_HAR_D_NUMMER",
             ikkeOppfyltBeskrivelse = "Barn har d-nummer",
+        ),
+        BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19(
+            oppfyltNavn = "BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
+            oppfyltBeskrivelse = "Barn har ikke adressebeskyttelse gradering 6 eller 19",
+            ikkeOppfyltNavn = "BARN_HAR_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
+            ikkeOppfyltBeskrivelse = "Barn har adressebeskyttelse gradering 6 eller 19",
         ),
         SØKER_LEVER(
             oppfyltNavn = "SØKER_LEVER",
@@ -267,6 +279,16 @@ private val barnHarIkkeDNummer =
         fakta.barnaSomSkalVurderes.all { erIkkeDNummer(it.aktør.aktivFødselsnummer()) }
     }
 
+private val søkerHarIkkeAdressebeskyttelseGradering6Eller19 =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19) {
+        !it.søkerHarAdressebeskyttelseGradering6Eller19
+    }
+
+private val barnHarIkkeAdressebeskyttelseGradering6Eller19 =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19) {
+        !it.barnHarAdressebeskyttelseGradering6Eller19
+    }
+
 /**
  * BOST-nr har måned mellom 21 og 32
  */
@@ -276,6 +298,8 @@ val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøkn
     listOf(
         søkerHarIkkeDNummer,
         barnHarIkkeDNummer,
+        søkerHarIkkeAdressebeskyttelseGradering6Eller19,
+        barnHarIkkeAdressebeskyttelseGradering6Eller19,
         søkerGyldigFnr,
         barnGyldigFnr,
         søkerLever,
