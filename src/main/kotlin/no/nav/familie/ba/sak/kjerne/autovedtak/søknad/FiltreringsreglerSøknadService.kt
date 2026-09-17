@@ -29,8 +29,13 @@ import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.springframework.stereotype.Service
 import java.time.YearMonth
+
+private fun ADRESSEBESKYTTELSEGRADERING?.erGradering6Eller19(): Boolean =
+    this == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
+        this == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
 
 @Service
 class FiltreringsreglerSøknadService(
@@ -65,6 +70,15 @@ class FiltreringsreglerSøknadService(
             søknadService.finnDigitalSøknad(behandling.id)
                 ?: throw Feil("Fant ikke digital søknad for behandling ${behandling.id}")
 
+        val pdlPersonInfo =
+            personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(
+                aktørSøker,
+                aktørBarna.toSet(),
+            )
+        val personInfo = pdlPersonInfo.personInfoBase()
+        val forelderBarnRelasjonerForSøknadsbarna =
+            personInfo.forelderBarnRelasjon.filter { it.aktør in aktørBarna }
+
         val fakta =
             FiltreringsreglerFaktaSøknad(
                 søker = personopplysningGrunnlag.søker,
@@ -90,6 +104,12 @@ class FiltreringsreglerSøknadService(
                 søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden = søknad.harKryssetForFosterhjemEllerBeredskapshjemForMinstEttBarn(),
                 søknadenInneholderVedlegg = søknad.inneholderVedlegg,
                 søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling = false, // TODO Fix me
+                søkerHarAdressebeskyttelseGradering6Eller19 =
+                    personInfo.adressebeskyttelseGradering.erGradering6Eller19(),
+                barnHarAdressebeskyttelseGradering6Eller19 =
+                    forelderBarnRelasjonerForSøknadsbarna.any {
+                        it.adressebeskyttelseGradering.erGradering6Eller19()
+                    },
             )
 
         val evalueringer = filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_SØKNAD, fakta)
