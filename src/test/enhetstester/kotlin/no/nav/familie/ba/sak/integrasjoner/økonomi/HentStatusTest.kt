@@ -4,8 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
@@ -35,8 +33,6 @@ import java.time.LocalDate
 import java.time.Month
 
 class HentStatusTest {
-    private val økonomiKlient = mockk<ØkonomiKlient>()
-
     private val oppdragBackendKlient = mockk<OppdragBackendKlient>()
 
     private val beregningService: BeregningService = mockk()
@@ -49,29 +45,22 @@ class HentStatusTest {
 
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator = mockk()
 
-    private val featureToggleService: FeatureToggleService = mockk()
-
     @BeforeEach
     fun setUp() {
         val økonomiService =
             ØkonomiService(
-                økonomiKlient = økonomiKlient,
                 oppdragBackendKlient = oppdragBackendKlient,
                 tilkjentYtelseValideringService = mockk(),
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
                 utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
                 behandlingHentOgPersisterService = mockk(),
                 oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService,
-                featureToggleService = featureToggleService,
             )
         statusFraOppdrag =
             StatusFraOppdrag(
                 økonomiService = økonomiService,
                 taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() },
             )
-
-        every { featureToggleService.isEnabled(toggle = any()) } returns false
-        every { featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP, any<Long>()) } returns true
     }
 
     @Test

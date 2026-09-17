@@ -510,14 +510,12 @@ class CucumberMock(
 
     val økonomiService =
         ØkonomiService(
-            økonomiKlient = mockØkonomiKlient(),
             oppdragBackendKlient = mockOppdragBackendKlient(),
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService,
-            featureToggleService = mockFeatureToggleService(),
         )
 
     val håndterIverksettMotØkonomiSteg =
