@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Deploy bisys-opphoer-av-barnetrygd-topic til dev
         uses: nais/deploy/actions/deploy@027a91857992525139798892f2804b0ca21f4af6 # ratchet:nais/deploy/actions/deploy@v2
         env:
