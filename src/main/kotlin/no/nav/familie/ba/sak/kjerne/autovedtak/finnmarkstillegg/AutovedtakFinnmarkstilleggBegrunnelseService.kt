@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.autovedtak.leggTilBegrunnelseIVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService

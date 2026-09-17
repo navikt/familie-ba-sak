@@ -529,6 +529,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetSkjermetBarnIgangsetteINormalFagsak"
     },
+    INNVILGET_AUTOMATISK_SØKNAD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetAutomatiskSoknad"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -1605,6 +1609,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingEtterbetalingTreMaanederTilbakeITid"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_AUTOMATISK {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingTreMaanederTilbakeITidAutomatisk"
     },
     ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_SED {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING

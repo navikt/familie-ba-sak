@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.error.RekjørSenereException
 import no.nav.familie.util.VirkedagerProvider
 import no.nav.familie.util.VirkedagerProvider.nesteVirkedag
@@ -134,12 +135,16 @@ class AutovedtakStegService(
         mottakersAktør: Aktør,
         søknad: Søknad,
         førstegangKjørt: LocalDateTime = LocalDateTime.now(),
-    ): String =
-        kjørBehandling(
+    ): String {
+        if (!featureToggleService.isEnabled(FeatureToggle.SKAL_BEHANDLE_SOKNAD_AUTOMATISK, false)) {
+            throw Feil("Toggle SKAL_BEHANDLE_SOKNAD_AUTOMATISK er skrudd av.")
+        }
+        return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = SøknadData(søknad),
             førstegangKjørt = førstegangKjørt,
         )
+    }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun kjørBehandlingFødselshendelse(
@@ -363,6 +368,7 @@ class AutovedtakStegService(
             behandlingId = åpenBehandling.id,
             begrunnelse = begrunnelseForÅpenBehandling(automatiskBehandlingData),
             manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
+            oppgavetype = if (autovedtaktype == Autovedtaktype.SØKNAD) Oppgavetype.BehandleSak else Oppgavetype.VurderLivshendelse,
         )
         return true
     }

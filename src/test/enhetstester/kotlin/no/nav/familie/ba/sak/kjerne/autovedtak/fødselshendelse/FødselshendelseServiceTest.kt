@@ -42,6 +42,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
@@ -143,7 +144,7 @@ class FødselshendelseServiceTest {
                 .copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
                 .leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)
         every { stegService.håndterHenleggBehandling(any(), any()) } returns nyBehandling
-        every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
+        every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) } returns ""
         every { persongrunnlagService.hentSøker(nyBehandling.id) } returns søkerPerson
         every { persongrunnlagService.hentBarna(nyBehandling) } returns listOf(barn1Person, barn2Person)
 
@@ -204,6 +205,7 @@ class FødselshendelseServiceTest {
                 behandlingId = any(),
                 beskrivelse = "Fødselshendelse: Barnet (fødselsdato: ${barn1Person.fødselsdato.tilKortString()}) er ikke bosatt med mor.",
                 manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
             )
         }
     }

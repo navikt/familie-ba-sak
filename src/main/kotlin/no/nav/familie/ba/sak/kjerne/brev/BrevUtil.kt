@@ -79,8 +79,7 @@ fun hentAutomatiskVedtaksbrevtype(
         }
 
         BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD -> {
-            // TODO : Legg til automatisk behandling
-            throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
+            Brevmal.AUTOVEDTAK_SØKNAD
         }
 
         else -> {

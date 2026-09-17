@@ -7,10 +7,12 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SøknadData
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.prosessering.internal.TaskService
@@ -23,6 +25,7 @@ class AutovedtakSøknadService(
     private val simuleringService: SimuleringService,
     private val taskService: TaskService,
     private val autovedtakSøknadBegrunnelseService: AutovedtakSøknadBegrunnelseService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) : AutovedtakBehandlingService<SøknadData> {
     override fun skalAutovedtakBehandles(behandlingsdata: SøknadData): Boolean = true
 
@@ -34,25 +37,36 @@ class AutovedtakSøknadService(
                 behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
                 filtrerAutomatiskBehandlingData =
                     FiltrerAutomatiskBehandlingData(
-                        søkersIdent = behandlingsdata.søknad.morsIdent,
+                        søkersIdent = behandlingsdata.søknad.søkersIdent,
                         barnasIdenter = behandlingsdata.søknad.barnasIdenter,
                     ),
             )
+
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.id)
+        val erVilkårsvurderingOppfylt = vilkårsvurdering.personResultater.flatMap { it.vilkårResultater }.all { it.erOppfylt() }
+
+        if (!erVilkårsvurderingOppfylt) {
+            throw AutovedtakMåBehandlesManueltFeil("Vilkårsvurderingen er ikke oppfylt.\nBehandling av søknad må håndteres manuelt.")
+        }
+
+        if (behandlingEtterBehandlingsresultat.resultat !in setOf(Behandlingsresultat.INNVILGET, Behandlingsresultat.DELVIS_INNVILGET)) {
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til behandlingsresultat ${behandlingEtterBehandlingsresultat.resultat}.\nKun innvilgelse og delvis innvilgelse kan behandles automatisk.")
+        }
 
         val simulering = simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterBehandlingsresultat)
 
         val harIngenUtbetaling = simulering.flatMap { it.økonomiSimuleringPostering }.all { it.beløp == BigDecimal.ZERO }
         if (harIngenUtbetaling) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til ingen utbetaling.\nEndring av søknad må håndteres manuelt.")
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til ingen utbetaling.\nBehandling av søknad må håndteres manuelt.")
         }
 
         val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingEtterBehandlingsresultat.id)
         if (feilutbetaling > BigDecimal.ZERO) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til feilutbetaling.\nEndring av søknad må håndteres manuelt.")
+            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til feilutbetaling.\nBehandling av søknad må håndteres manuelt.")
         }
 
         if (behandlingEtterBehandlingsresultat.steg == StegType.IVERKSETT_MOT_OPPDRAG) {
-            autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad()
+            autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(behandlingEtterBehandlingsresultat)
         }
 
         val opprettetVedtak =
