@@ -27,38 +27,26 @@ under `Edit Configurations -> VM Options`
 
 #### Database i egen container
 
-Postgres kjøres enklest opp med `docker-compose.yaml` som ligger i rota av prosjektet. Compose-tjenesten `postgres`
-oppretter databasen `familie-ba-sak` automatisk med riktig bruker og passord (matcher spring-profilen `postgres` i
-`src/test/resources/application-postgres.yaml`), så du slipper de manuelle `psql`-stegene.
+Databaseoppsettet er **felles for hele Team Familie** og bor i [navikt/familie](https://github.com/navikt/familie)
+(`docker-compose.yaml` + `init-multiple-databases.sh`), slik at det er identisk for alle appene.
 
-Start databasen (kjør fra rota av prosjektet):
-
-```
-docker compose up -d postgres
-```
-
-Bruker du **Colima** i stedet for Docker Desktop, tilbyr Colima en Docker-kompatibel daemon, så du bruker samme
-`docker`-kommando – start bare Colima først:
+Du trenger **ikke** å klone `navikt/familie` manuelt – kjør hjelpescriptet fra rota av dette repoet:
 
 ```
-colima start
-docker compose up -d postgres
+./startLokalDatabase.sh
 ```
 
-Bruker du **Podman**, start Podman-maskinen og bruk `podman compose`:
+Scriptet henter (eller oppdaterer) det delte oppsettet fra `navikt/familie` og starter en postgres-container med alle
+familie-databasene, inkludert `familie-ba-sak`. Databasen opprettes automatisk med bruker/passord som matcher
+spring-profilen `postgres` i `src/test/resources/application-postgres.yaml`.
 
-```
-podman machine start
-podman compose up -d postgres
-```
+> Krever SSH-tilgang til `navikt/familie` og en kjørende container-motor (Docker Desktop, Colima eller Podman).
+> Bruker du Colima/Podman: start `colima start` eller `podman machine start` først.
 
-Nyttige kommandoer:
+Se [navikt/familie – Postgres lokalt](https://github.com/navikt/familie/blob/main/doc/onboarding/testing-lokalt/Postgres.md)
+for detaljer og nyttige PSQL-kommandoer.
 
-* Stoppe databasen: `docker compose stop postgres`
-* Stoppe og fjerne containeren: `docker compose down` (legg til `-v` for også å slette dataene i volumet `db`)
-* Se logger: `docker compose logs -f postgres`
 
-(Bytt ut `docker` med `podman` dersom du bruker Podman.)
 
 Legg til databasen i IntelliJ:
 1. Trykk på Database på høyre side og "+" -> Data Source -> PostgreSQL

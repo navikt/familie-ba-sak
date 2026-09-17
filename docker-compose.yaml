@@ -1,18 +1,4 @@
 services:
-    postgres:
-        image: postgres:17
-        container_name: familie-ba-sak-postgres
-        restart: always
-        environment:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: test
-            POSTGRES_DB: familie-ba-sak
-        ports:
-            - "5432:5432"
-        volumes:
-            - db:/var/lib/postgresql/data
-        labels:
-            - "com.docker.compose.project=familie-ba-sak"
 
     texas:
         image: ghcr.io/nais/texas:latest
@@ -37,5 +23,3 @@ services:
         labels:
             - "com.docker.compose.project=familie-ba-sak"
 
-volumes:
-    db: {}
