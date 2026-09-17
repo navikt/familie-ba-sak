@@ -91,12 +91,7 @@ class PersonopplysningerService(
                                 throw funksjonellFeil
                             }
 
-                            val aktørerSomIkkeKanIgnoreres =
-                                relevanteAktører
-                                    ?: personopplysningGrunnlagRepository
-                                        .finnSøkerOgBarnPåFagsakerHvorAktørInngår(aktør)
-                                        .takeIf { aktører -> aktører.isNotEmpty() }
-
+                            val aktørerSomIkkeKanIgnoreres = finnAktørerSomIkkeKanIgnoreres(aktør, relevanteAktører)
                             if (aktørerSomIkkeKanIgnoreres != null && it.aktør !in aktørerSomIkkeKanIgnoreres) {
                                 logger.warn("Ignorerer relasjon med falsk identitet som ikke er blant relevante aktører")
                                 secureLogger.warn("Ignorerer relasjon med falsk identitet: ${it.aktør.aktivFødselsnummer()} til ${aktør.aktivFødselsnummer()} som ikke er blant relevante aktører")
@@ -125,6 +120,15 @@ class PersonopplysningerService(
             forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
         )
     }
+
+    private fun finnAktørerSomIkkeKanIgnoreres(
+        aktør: Aktør,
+        relevanteAktører: Set<Aktør>?,
+    ): Set<Aktør>? =
+        relevanteAktører
+            ?: personopplysningGrunnlagRepository
+                .finnSøkerOgBarnPåFagsakerHvorAktørInngår(aktør)
+                .takeIf { aktører -> aktører.isNotEmpty() }
 
     fun hentPdlPersonInfoEnkel(aktør: Aktør): PdlPersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.ENKEL)
 
