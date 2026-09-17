@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class FiltreringsregelEvaluatorTest {
+internal class FiltreringsregelEvaluatorForFødselshendelseTest {
     private val gyldigAktørId = randomAktør()
     private val filtreringsregelEvaluator = FiltreringsregelEvaluator()
 
