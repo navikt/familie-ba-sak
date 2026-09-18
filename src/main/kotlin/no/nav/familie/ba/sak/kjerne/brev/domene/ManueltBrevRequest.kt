@@ -100,6 +100,8 @@ data class ManueltBrevRequest(
 ) {
     override fun toString(): String = "${ManueltBrevRequest::class}, $brevmal"
 
+    fun finnBarnIBrevMedIdent(): List<String> = barnIBrev.filter { it.isNotBlank() }
+
     fun enhetNavn(): String = this.enhet?.enhetNavn ?: throw Feil("Finner ikke enhetsnavn på manuell brevrequest")
 
     fun mottakerlandSED(): List<String> =
