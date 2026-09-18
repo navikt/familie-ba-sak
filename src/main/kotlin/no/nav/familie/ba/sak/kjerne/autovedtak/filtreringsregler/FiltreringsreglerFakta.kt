@@ -50,4 +50,8 @@ data class FiltreringsreglerFaktaSøknad(
     val søkerHarAdressebeskyttelseGradering6Eller19: Boolean = false,
     val barnHarAdressebeskyttelseGradering6Eller19: Boolean = false,
     val søkerOgBarnHarForelderBarnRelasjon: Boolean = true,
+    val søkerHarAktivNorskBostedsadresse: Boolean = false,
+    val barnHarAktivNorskBostedsadresse: Boolean = false,
+    val søkerHarUkrainskStatsborgerskap: Boolean = false,
+    val barnHarUkrainskStatsborgerskap: Boolean = false,
 ) : FiltreringsreglerFakta()

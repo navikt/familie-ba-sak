@@ -24,13 +24,17 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iUkraina
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.tidslinje.utvidelser.verdiPåTidspunkt
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.YearMonth
 
 private fun ADRESSEBESKYTTELSEGRADERING?.erGradering6Eller19(): Boolean =
@@ -116,6 +120,13 @@ class FiltreringsreglerSøknadService(
                             it.aktør == barnFraSøknad.aktør
                         }
                     },
+                søkerHarAktivNorskBostedsadresse = harAktivNorskBostedsadresse(listOf(personopplysningGrunnlag.søker), LocalDate.now()),
+                barnHarAktivNorskBostedsadresse = harAktivNorskBostedsadresse(barnaFraSøknad, LocalDate.now()),
+                søkerHarUkrainskStatsborgerskap = personopplysningGrunnlag.søker.statsborgerskap.iUkraina(),
+                barnHarUkrainskStatsborgerskap =
+                    barnaFraSøknad.any {
+                        it.statsborgerskap.iUkraina()
+                    },
             )
 
         val evalueringer = filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_SØKNAD, fakta)
@@ -152,6 +163,15 @@ class FiltreringsreglerSøknadService(
             } ?: false
         } ?: false
     }
+
+    private fun harAktivNorskBostedsadresse(
+        personer: List<Person>,
+        tidspunkt: LocalDate,
+    ): Boolean =
+        personer.all { person ->
+            val tidslinje = Adresser.opprettFra(person = person).lagErBosattINorgeTidslinje()
+            tidslinje.verdiPåTidspunkt(tidspunkt) == true
+        }
 
     private fun oppdaterMetrikker(evalueringer: List<Evaluering>) {
         var førsteutfall = true

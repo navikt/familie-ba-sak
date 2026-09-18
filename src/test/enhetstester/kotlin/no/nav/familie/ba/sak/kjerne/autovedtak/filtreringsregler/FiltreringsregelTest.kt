@@ -159,7 +159,11 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN,
             Filtreringsregel.Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG,
+            Filtreringsregel.Identifikator.SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE,
+            Filtreringsregel.Identifikator.BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE,
             Filtreringsregel.Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON,
+            Filtreringsregel.Identifikator.SØKER_ER_IKKE_UKRAINSK_STATSBORGER,
+            Filtreringsregel.Identifikator.BARN_ER_IKKE_UKRAINSK_STATSBORGER,
         )
     }
 
@@ -199,6 +203,10 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN,
             Filtreringsregel.Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG,
             Filtreringsregel.Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON,
+            Filtreringsregel.Identifikator.SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE,
+            Filtreringsregel.Identifikator.BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE,
+            Filtreringsregel.Identifikator.SØKER_ER_IKKE_UKRAINSK_STATSBORGER,
+            Filtreringsregel.Identifikator.BARN_ER_IKKE_UKRAINSK_STATSBORGER,
         )
     }
 
@@ -262,12 +270,52 @@ internal class FiltreringsregelTest {
                 PersistertUtfall(
                     "SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON",
                     "SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON",
-                    "Søker og barn har en foreldre/barn-relasjon",
+                    "Søker og barn har en forelder/barn-relasjon",
                 ),
                 PersistertUtfall(
                     "SØKER_OG_BARN_HAR_IKKE_FORELDER_BARN_RELASJON",
                     "SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON",
                     "Søker og barn har ikke en forelder/barn-relasjon",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "Søker har aktiv norsk bostedsadresse per i dag",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_IKKE_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "Søker har ikke aktiv norsk bostedsadresse per i dag",
+                ),
+                PersistertUtfall(
+                    "BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "Barn har aktiv norsk bostedsadresse per i dag",
+                ),
+                PersistertUtfall(
+                    "BARN_HAR_IKKE_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "Barn har ikke aktiv norsk bostedsadresse per i dag",
+                ),
+                PersistertUtfall(
+                    "SØKER_ER_IKKE_UKRAINSK_STATSBORGER",
+                    "SØKER_ER_IKKE_UKRAINSK_STATSBORGER",
+                    "Søker er ikke ukrainsk statsborger",
+                ),
+                PersistertUtfall(
+                    "SØKER_ER_UKRAINSK_STATSBORGER",
+                    "SØKER_ER_IKKE_UKRAINSK_STATSBORGER",
+                    "Søker er ukrainsk statsborger",
+                ),
+                PersistertUtfall(
+                    "BARN_ER_IKKE_UKRAINSK_STATSBORGER",
+                    "BARN_ER_IKKE_UKRAINSK_STATSBORGER",
+                    "Barn er ikke ukrainsk statsborger",
+                ),
+                PersistertUtfall(
+                    "BARN_ER_UKRAINSK_STATSBORGER",
+                    "BARN_ER_IKKE_UKRAINSK_STATSBORGER",
+                    "Barn er ukrainsk statsborger",
                 ),
                 PersistertUtfall("SØKER_LEVER", "SØKER_LEVER", "Det er ikke registrert dødsdato på søker."),
                 PersistertUtfall("SØKER_LEVER_IKKE", "SØKER_LEVER", "Det er registrert dødsdato på søker."),

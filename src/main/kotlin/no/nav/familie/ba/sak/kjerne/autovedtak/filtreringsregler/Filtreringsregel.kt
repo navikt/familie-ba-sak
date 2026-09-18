@@ -135,9 +135,33 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
         ),
         SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON(
             oppfyltNavn = "SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON",
-            oppfyltBeskrivelse = "Søker og barn har en foreldre/barn-relasjon",
+            oppfyltBeskrivelse = "Søker og barn har en forelder/barn-relasjon",
             ikkeOppfyltNavn = "SØKER_OG_BARN_HAR_IKKE_FORELDER_BARN_RELASJON",
             ikkeOppfyltBeskrivelse = "Søker og barn har ikke en forelder/barn-relasjon",
+        ),
+        SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE(
+            oppfyltNavn = "SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+            oppfyltBeskrivelse = "Søker har aktiv norsk bostedsadresse per i dag",
+            ikkeOppfyltNavn = "SØKER_HAR_IKKE_AKTIV_NORSK_BOSTEDSADRESSE",
+            ikkeOppfyltBeskrivelse = "Søker har ikke aktiv norsk bostedsadresse per i dag",
+        ),
+        BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE(
+            oppfyltNavn = "BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+            oppfyltBeskrivelse = "Barn har aktiv norsk bostedsadresse per i dag",
+            ikkeOppfyltNavn = "BARN_HAR_IKKE_AKTIV_NORSK_BOSTEDSADRESSE",
+            ikkeOppfyltBeskrivelse = "Barn har ikke aktiv norsk bostedsadresse per i dag",
+        ),
+        SØKER_ER_IKKE_UKRAINSK_STATSBORGER(
+            oppfyltNavn = "SØKER_ER_IKKE_UKRAINSK_STATSBORGER",
+            oppfyltBeskrivelse = "Søker er ikke ukrainsk statsborger",
+            ikkeOppfyltNavn = "SØKER_ER_UKRAINSK_STATSBORGER",
+            ikkeOppfyltBeskrivelse = "Søker er ukrainsk statsborger",
+        ),
+        BARN_ER_IKKE_UKRAINSK_STATSBORGER(
+            oppfyltNavn = "BARN_ER_IKKE_UKRAINSK_STATSBORGER",
+            oppfyltBeskrivelse = "Barn er ikke ukrainsk statsborger",
+            ikkeOppfyltNavn = "BARN_ER_UKRAINSK_STATSBORGER",
+            ikkeOppfyltBeskrivelse = "Barn er ukrainsk statsborger",
         ),
         SØKER_LEVER(
             oppfyltNavn = "SØKER_LEVER",
@@ -355,6 +379,26 @@ private val søkerOgBarnHarForelderBarnRelasjon =
         it.søkerOgBarnHarForelderBarnRelasjon
     }
 
+private val søkerHarAktivNorskBostedsadresse =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE) {
+        it.søkerHarAktivNorskBostedsadresse
+    }
+
+private val barnHarAktivNorskBostedsadresse =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE) {
+        it.barnHarAktivNorskBostedsadresse
+    }
+
+private val søkerErIkkeUkrainskStatsborger =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKER_ER_IKKE_UKRAINSK_STATSBORGER) {
+        !it.søkerHarUkrainskStatsborgerskap
+    }
+
+private val barnErIkkeUkrainskStatsborger =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.BARN_ER_IKKE_UKRAINSK_STATSBORGER) {
+        !it.barnHarUkrainskStatsborgerskap
+    }
+
 /**
  * BOST-nr har måned mellom 21 og 32
  */
@@ -379,7 +423,11 @@ val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøkn
         søkerHarIkkeKryssetForDeltBostedISøknaden,
         søkerHarIkkeKryssetForFosterhjemEllerBeredskapshjemISøknaden,
         søknadenInneholderIkkeVedlegg,
+        søkerHarAktivNorskBostedsadresse,
+        barnHarAktivNorskBostedsadresse,
         søkerOgBarnHarForelderBarnRelasjon,
+        søkerErIkkeUkrainskStatsborger,
+        barnErIkkeUkrainskStatsborger,
     )
 
 val FILTRERINGSREGLER_FØDSELSHENDELSE: List<Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>> =
