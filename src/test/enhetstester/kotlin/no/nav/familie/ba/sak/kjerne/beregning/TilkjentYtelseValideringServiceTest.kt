@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import org.assertj.core.api.Assertions.assertThat
@@ -417,6 +418,277 @@ class TilkjentYtelseValideringServiceTest {
                     tilkjentYtelseValideringService.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandlingMor)
                 }
             assertThat(exception.message).contains("Vi finner utbetalinger som overstiger 100%")
+        }
+    }
+
+    @Nested
+    inner class BarnetrygdUtbetalesForBarnIAnnenFagsakIMåned {
+        private val behandling = lagBehandling()
+        private val barn = lagPerson(type = PersonType.BARN)
+        private val vurderingsmåned = YearMonth.of(2025, 11)
+
+        @Test
+        fun `skal returnere true når det utbetales barnetrygd for barnet i en annen fagsak i vurderingsmåneden`() {
+            // Arrange
+            stubRelevantTilkjentYtelseForBarnet(
+                fom = vurderingsmåned.minusMonths(3),
+                tom = vurderingsmåned.plusMonths(3),
+            )
+
+            // Act
+            val finnesUtbetalingIAnnenFagsak =
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = behandling,
+                    barna = listOf(barn),
+                    måned = vurderingsmåned,
+                )
+
+            // Assert
+            assertThat(finnesUtbetalingIAnnenFagsak).isTrue()
+        }
+
+        @Test
+        fun `skal returnere false når utbetalingen i den andre fagsaken opphørte før vurderingsmåneden`() {
+            // Arrange
+            stubRelevantTilkjentYtelseForBarnet(
+                fom = vurderingsmåned.minusMonths(6),
+                tom = vurderingsmåned.minusMonths(1),
+            )
+
+            // Act
+            val finnesUtbetalingIAnnenFagsak =
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = behandling,
+                    barna = listOf(barn),
+                    måned = vurderingsmåned,
+                )
+
+            // Assert
+            assertThat(finnesUtbetalingIAnnenFagsak).isFalse()
+        }
+
+        @Test
+        fun `skal returnere false når utbetalingen i den andre fagsaken først starter etter vurderingsmåneden`() {
+            // Arrange
+            stubRelevantTilkjentYtelseForBarnet(
+                fom = vurderingsmåned.plusMonths(1),
+                tom = vurderingsmåned.plusMonths(6),
+            )
+
+            // Act
+            val finnesUtbetalingIAnnenFagsak =
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = behandling,
+                    barna = listOf(barn),
+                    måned = vurderingsmåned,
+                )
+
+            // Assert
+            assertThat(finnesUtbetalingIAnnenFagsak).isFalse()
+        }
+
+        @Test
+        fun `skal returnere false når andelen i vurderingsmåneden er en nullutbetaling`() {
+            // Arrange
+            stubRelevantTilkjentYtelseForBarnet(
+                fom = vurderingsmåned.minusMonths(3),
+                tom = vurderingsmåned.plusMonths(3),
+                kalkulertUtbetalingsbeløp = 0,
+            )
+
+            // Act
+            val finnesUtbetalingIAnnenFagsak =
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = behandling,
+                    barna = listOf(barn),
+                    måned = vurderingsmåned,
+                )
+
+            // Assert
+            assertThat(finnesUtbetalingIAnnenFagsak).isFalse()
+        }
+
+        @Test
+        fun `skal se bort fra andeler som tilhører andre personer enn barnet`() {
+            // Arrange
+            val annenPerson = lagPerson()
+            stubRelevantTilkjentYtelseForBarnet(
+                fom = vurderingsmåned.minusMonths(3),
+                tom = vurderingsmåned.plusMonths(3),
+                aktør = annenPerson.aktør,
+            )
+
+            // Act
+            val finnesUtbetalingIAnnenFagsak =
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = behandling,
+                    barna = listOf(barn),
+                    måned = vurderingsmåned,
+                )
+
+            // Assert
+            assertThat(finnesUtbetalingIAnnenFagsak).isFalse()
+        }
+
+        @Test
+        fun `skal returnere false når barnet ikke har relevante tilkjente ytelser i andre fagsaker`() {
+            // Arrange
+            every {
+                beregningServiceMock.hentRelevanteTilkjentYtelserForPerson(
+                    aktør = barn.aktør,
+                    fagsakId = behandling.fagsak.id,
+                )
+            } returns emptyList()
+
+            // Act
+            val finnesUtbetalingIAnnenFagsak =
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = behandling,
+                    barna = listOf(barn),
+                    måned = vurderingsmåned,
+                )
+
+            // Assert
+            assertThat(finnesUtbetalingIAnnenFagsak).isFalse()
+        }
+
+        @Test
+        fun `skal returnere true når andelen dekker nøyaktig vurderingsmåneden`() {
+            // Arrange
+            stubRelevantTilkjentYtelseForBarnet(fom = vurderingsmåned, tom = vurderingsmåned)
+
+            // Act
+            val finnesUtbetalingIAnnenFagsak =
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = behandling,
+                    barna = listOf(barn),
+                    måned = vurderingsmåned,
+                )
+
+            // Assert
+            assertThat(finnesUtbetalingIAnnenFagsak).isTrue()
+        }
+
+        @Test
+        fun `skal se bort fra søkers ytelser selv om de ligger på barnets aktør`() {
+            // Arrange
+            stubRelevantTilkjentYtelseForBarnet(
+                fom = vurderingsmåned.minusMonths(3),
+                tom = vurderingsmåned.plusMonths(3),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+            )
+
+            // Act
+            val finnesUtbetalingIAnnenFagsak =
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = behandling,
+                    barna = listOf(barn),
+                    måned = vurderingsmåned,
+                )
+
+            // Assert
+            assertThat(finnesUtbetalingIAnnenFagsak).isFalse()
+        }
+
+        @Test
+        fun `skal returnere true når ordinær barnetrygd er differanseberegnet til null, men finnmarkstillegget utbetales`() {
+            // Arrange
+            val annenBehandling = lagBehandling(fagsak = lagFagsak(id = behandling.fagsak.id + 1))
+            val tilkjentYtelse =
+                lagTilkjentYtelse(behandling = annenBehandling) { tilkjentYtelse ->
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            fom = vurderingsmåned,
+                            tom = vurderingsmåned,
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                            behandling = annenBehandling,
+                            tilkjentYtelse = tilkjentYtelse,
+                            aktør = barn.aktør,
+                            kalkulertUtbetalingsbeløp = 0,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = vurderingsmåned,
+                            tom = vurderingsmåned,
+                            ytelseType = YtelseType.FINNMARKSTILLEGG,
+                            behandling = annenBehandling,
+                            tilkjentYtelse = tilkjentYtelse,
+                            aktør = barn.aktør,
+                            kalkulertUtbetalingsbeløp = 500,
+                        ),
+                    )
+                }
+            every {
+                beregningServiceMock.hentRelevanteTilkjentYtelserForPerson(
+                    aktør = barn.aktør,
+                    fagsakId = behandling.fagsak.id,
+                )
+            } returns listOf(tilkjentYtelse)
+
+            // Act
+            val finnesUtbetalingIAnnenFagsak =
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = behandling,
+                    barna = listOf(barn),
+                    måned = vurderingsmåned,
+                )
+
+            // Assert
+            assertThat(finnesUtbetalingIAnnenFagsak).isTrue()
+        }
+
+        @Test
+        fun `skal returnere true når bare ett av flere barn har utbetaling i vurderingsmåneden`() {
+            // Arrange
+            val barnUtenUtbetaling = lagPerson(type = PersonType.BARN)
+            every {
+                beregningServiceMock.hentRelevanteTilkjentYtelserForPerson(
+                    aktør = barnUtenUtbetaling.aktør,
+                    fagsakId = behandling.fagsak.id,
+                )
+            } returns emptyList()
+            stubRelevantTilkjentYtelseForBarnet(fom = vurderingsmåned, tom = vurderingsmåned)
+
+            // Act
+            val finnesUtbetalingIAnnenFagsak =
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = behandling,
+                    barna = listOf(barnUtenUtbetaling, barn),
+                    måned = vurderingsmåned,
+                )
+
+            // Assert
+            assertThat(finnesUtbetalingIAnnenFagsak).isTrue()
+        }
+
+        private fun stubRelevantTilkjentYtelseForBarnet(
+            fom: YearMonth,
+            tom: YearMonth,
+            kalkulertUtbetalingsbeløp: Int = 1766,
+            aktør: Aktør = barn.aktør,
+            ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+        ) {
+            val annenBehandling = lagBehandling(fagsak = lagFagsak(id = behandling.fagsak.id + 1))
+            val tilkjentYtelse =
+                lagTilkjentYtelse(behandling = annenBehandling) { tilkjentYtelse ->
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            fom = fom,
+                            tom = tom,
+                            ytelseType = ytelseType,
+                            behandling = annenBehandling,
+                            tilkjentYtelse = tilkjentYtelse,
+                            aktør = aktør,
+                            kalkulertUtbetalingsbeløp = kalkulertUtbetalingsbeløp,
+                        ),
+                    )
+                }
+
+            every {
+                beregningServiceMock.hentRelevanteTilkjentYtelserForPerson(
+                    aktør = barn.aktør,
+                    fagsakId = behandling.fagsak.id,
+                )
+            } returns listOf(tilkjentYtelse)
         }
     }
 

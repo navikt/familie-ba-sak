@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 
 import io.micrometer.core.instrument.Counter
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.secureLogger
@@ -28,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
+import java.time.YearMonth
 
 @Service
 class FiltreringsreglerSøknadService(
@@ -39,6 +41,7 @@ class FiltreringsreglerSøknadService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val filtreringsregelEvaluator: FiltreringsregelEvaluator,
+    private val clockProvider: ClockProvider,
 ) {
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
     val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
@@ -70,10 +73,11 @@ class FiltreringsreglerSøknadService(
                 søkerLever = !personopplysningGrunnlag.søker.erDød(),
                 barnaLever = barnaFraSøknad.none { it.erDød() },
                 søkerHarVerge = personopplysningerService.harVerge(aktørSøker).harVerge,
-                løperBarnetrygdForBarnetPåAnnenForelder =
-                    tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
+                utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned =
+                    tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
                         behandling = behandling,
                         barna = barnaFraSøknad,
+                        måned = YearMonth.now(clockProvider.get()),
                     ),
                 søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling = false, // TODO Fix me
             )

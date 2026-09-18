@@ -152,6 +152,7 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_VERGE,
             Filtreringsregel.Identifikator.SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
+            Filtreringsregel.Identifikator.UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED,
         )
     }
 
@@ -183,6 +184,7 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_VERGE,
             Filtreringsregel.Identifikator.SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
+            Filtreringsregel.Identifikator.UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED,
         )
     }
 
@@ -258,6 +260,16 @@ internal class FiltreringsregelTest {
                     "SØKER_OPPFYLLER_VILKÅR_FOR_UTVIDET_BARNETRYGD",
                     "SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR",
                     "Søker oppfyller vilkår for utvidet barnetrygd",
+                ),
+                PersistertUtfall(
+                    "UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED",
+                    "UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED",
+                    "Det utbetales ikke barnetrygd for barnet til annen mottaker i inneværende måned",
+                ),
+                PersistertUtfall(
+                    "UTBETALES_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED",
+                    "UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED",
+                    "Det utbetales barnetrygd for barnet til annen mottaker i inneværende måned",
                 ),
             )
 

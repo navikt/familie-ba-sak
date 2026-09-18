@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.YearMonth
 
 @Service
 class TilkjentYtelseValideringService(
@@ -102,6 +104,23 @@ class TilkjentYtelseValideringService(
             beregningService
                 .hentRelevanteTilkjentYtelserForPerson(aktør = it.aktør, fagsakId = behandling.fagsak.id)
                 .isNotEmpty()
+        }
+
+    fun barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+        behandling: Behandling,
+        barna: List<Person>,
+        måned: YearMonth,
+    ): Boolean =
+        barna.any { barn ->
+            beregningService
+                .hentRelevanteTilkjentYtelserForPerson(aktør = barn.aktør, fagsakId = behandling.fagsak.id)
+                .flatMap { it.andelerTilkjentYtelse }
+                .any { andel ->
+                    andel.aktør == barn.aktør &&
+                        !andel.erSøkersAndel() &&
+                        andel.kalkulertUtbetalingsbeløp > 0 &&
+                        andel.periode.inkluderer(måned)
+                }
         }
 
     fun finnAktørerMedUgyldigEtterbetalingsperiode(
