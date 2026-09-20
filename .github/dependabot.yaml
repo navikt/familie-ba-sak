@@ -12,7 +12,7 @@ updates:
     schedule:
       interval: daily
     cooldown:
-      default-days: 4
+      default-days: 7
       exclude:
         - "no.nav.familie*"
     open-pull-requests-limit: 10
@@ -44,7 +44,7 @@ updates:
     schedule:
       interval: daily
     cooldown:
-      default-days: 4
+      default-days: 7
       exclude:
         - "no.nav.familie*"
     open-pull-requests-limit: 10

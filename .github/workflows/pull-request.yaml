@@ -9,6 +9,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   ktlint:
     name: Ktlint
@@ -17,7 +20,6 @@ jobs:
     uses: navikt/familie-baks-gha-workflows/.github/workflows/ktlint.yaml@main # ratchet:exclude
     with:
       java-version: '25'
-    secrets: inherit
 
   enhetstest:
     name: Enhetstest
@@ -30,7 +32,6 @@ jobs:
       coverage-artifact-name: 'enhetstest'
       coverage-artifact-path: 'target/coverage/enhetstest.xml'
       java-version: '25'
-    secrets: inherit
 
   integrasjonstest:
     name: Integrasjonstest
@@ -43,7 +44,6 @@ jobs:
       coverage-artifact-name: 'integrasjonstest'
       coverage-artifact-path: 'target/coverage/integrasjonstest.xml'
       java-version: '25'
-    secrets: inherit
 
   verdikjedetest-feature-toggle-av:
     name: Verdikjedetester feature toggle av
@@ -53,7 +53,6 @@ jobs:
     with:
       profile: 'verdikjedetest-feature-toggle-av'
       java-version: '25'
-    secrets: inherit
 
   verdikjedetest-feature-toggle-paa:
     name: Verdikjedetester feature toggle på
@@ -63,16 +62,19 @@ jobs:
     with:
       profile: 'verdikjedetest-feature-toggle-paa'
       java-version: '25'
-    secrets: inherit
 
   sonar:
     if: github.actor != 'dependabot[bot]' && github.event_name != 'merge_group'
     name: Sonar
     needs: [ enhetstest, integrasjonstest ]
     runs-on: 'ubuntu-latest'
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
       - name: Setup Java
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # ratchet:actions/setup-java@v4

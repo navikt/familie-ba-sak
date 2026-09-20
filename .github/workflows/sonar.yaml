@@ -9,6 +9,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   enhetstest:
     name: Unit test
@@ -21,7 +24,6 @@ jobs:
       coverage-artifact-name: 'enhetstest'
       coverage-artifact-path: 'target/coverage/enhetstest.xml'
       java-version: '25'
-    secrets: inherit
 
   integrasjonstest:
     name: Integration test
@@ -34,15 +36,18 @@ jobs:
       coverage-artifact-name: 'integrasjonstest'
       coverage-artifact-path: 'target/coverage/integrasjonstest.xml'
       java-version: '25'
-    secrets: inherit
 
   sonar:
     name: Sonar
     needs: [ enhetstest, integrasjonstest ]
     runs-on: 'ubuntu-latest'
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
       - name: Setup Java
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # ratchet:actions/setup-java@v4
