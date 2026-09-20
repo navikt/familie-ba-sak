@@ -153,6 +153,10 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
             Filtreringsregel.Identifikator.UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED,
+            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_PÅ_EØS_SPØRSMÅL_I_SØKNADEN,
+            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN,
+            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN,
+            Filtreringsregel.Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG,
         )
     }
 
@@ -185,6 +189,10 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
             Filtreringsregel.Identifikator.UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED,
+            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_PÅ_EØS_SPØRSMÅL_I_SØKNADEN,
+            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN,
+            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN,
+            Filtreringsregel.Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG,
         )
     }
 
@@ -270,6 +278,46 @@ internal class FiltreringsregelTest {
                     "UTBETALES_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED",
                     "UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED",
                     "Det utbetales barnetrygd for barnet til annen mottaker i inneværende måned",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_IKKE_KRYSSET_PÅ_EØS_SPØRSMÅL_I_SØKNADEN",
+                    "SØKER_HAR_IKKE_KRYSSET_PÅ_EØS_SPØRSMÅL_I_SØKNADEN",
+                    "Søker har ikke krysset på EØS-spørsmål i søknaden",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_KRYSSET_PÅ_EØS_SPØRSMÅL_I_SØKNADEN",
+                    "SØKER_HAR_IKKE_KRYSSET_PÅ_EØS_SPØRSMÅL_I_SØKNADEN",
+                    "Søker har krysset på EØS-spørsmål i søknaden",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN",
+                    "SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN",
+                    "Søker har ikke krysset for delt bosted for noen av barna i søknaden",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN",
+                    "SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN",
+                    "Søker har krysset for delt bosted for minst ett av barna i søknaden",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN",
+                    "SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN",
+                    "Søker har ikke krysset for at noen av barna er i fosterhjem eller beredskapshjem i søknaden",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN",
+                    "SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN",
+                    "Søker har krysset for at minst ett av barna er i fosterhjem eller beredskapshjem i søknaden",
+                ),
+                PersistertUtfall(
+                    "SØKNADEN_INNEHOLDER_IKKE_VEDLEGG",
+                    "SØKNADEN_INNEHOLDER_IKKE_VEDLEGG",
+                    "Søknaden inneholder ikke vedlegg",
+                ),
+                PersistertUtfall(
+                    "SØKNADEN_INNEHOLDER_VEDLEGG",
+                    "SØKNADEN_INNEHOLDER_IKKE_VEDLEGG",
+                    "Søknaden inneholder vedlegg",
                 ),
             )
 

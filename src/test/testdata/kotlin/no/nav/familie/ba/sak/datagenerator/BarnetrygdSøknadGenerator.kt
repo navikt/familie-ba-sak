@@ -4,6 +4,11 @@ import no.nav.familie.kontrakter.ba.søknad.v1.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.ba.søknad.v1.SøknadAdresse
 import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
 import no.nav.familie.kontrakter.ba.søknad.v5.RegistrertBostedType
+import no.nav.familie.kontrakter.ba.søknad.v7.Dokumentasjonsbehov
+import no.nav.familie.kontrakter.ba.søknad.v7.Søknaddokumentasjon
+import no.nav.familie.kontrakter.ba.søknad.v7.Søknadsvedlegg
+import no.nav.familie.kontrakter.ba.søknad.v8.AndreForelder
+import no.nav.familie.kontrakter.ba.søknad.v8.AndreForelderUtvidet
 import no.nav.familie.kontrakter.felles.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ba.søknad.v10.Barn as BarnV10
 import no.nav.familie.kontrakter.ba.søknad.v10.BarnetrygdSøknad as BarnetrygdSøknadV10
@@ -18,13 +23,16 @@ fun lagBarnetrygdSøknadV10(
     søknadstype: Søknadstype = Søknadstype.ORDINÆR,
     erEøs: Boolean = false,
     originalspråk: String = "nb",
+    inneholderVedlegg: Boolean = false,
+    erFosterbarn: Boolean = false,
+    harKryssetForDeltBosted: Boolean = false,
 ): BarnetrygdSøknadV10 =
     BarnetrygdSøknadV10(
         kontraktVersjon = 10,
         søker = lagSøkerV10(søkerFnr),
-        barn = barnFnr.map { lagBarnV10(it) },
+        barn = barnFnr.map { lagBarnV10(it, erFosterbarn = erFosterbarn, harKryssetForDeltBosted = harKryssetForDeltBosted) },
         antallEøsSteg = if (erEøs) 1 else 0,
-        dokumentasjon = emptyList(),
+        dokumentasjon = lagSøknaddokumentasjon(inneholderVedlegg = inneholderVedlegg),
         originalSpråk = originalspråk,
         finnesPersonMedAdressebeskyttelse = false,
         søknadstype = søknadstype,
@@ -38,13 +46,16 @@ fun lagBarnetrygdSøknadV9(
     søknadstype: Søknadstype = Søknadstype.ORDINÆR,
     erEøs: Boolean = false,
     originalspråk: String = "nb",
+    inneholderVedlegg: Boolean = false,
+    erFosterbarn: Boolean = false,
+    harKryssetForDeltBosted: Boolean = false,
 ): BarnetrygdSøknadV9 =
     BarnetrygdSøknadV9(
         kontraktVersjon = 9,
         søker = lagSøkerV8(søkerFnr),
-        barn = barnFnr.map { lagBarnV8(it) },
+        barn = barnFnr.map { lagBarnV8(it, erFosterbarn = erFosterbarn, harKryssetForDeltBosted = harKryssetForDeltBosted) },
         antallEøsSteg = if (erEøs) 1 else 0,
-        dokumentasjon = emptyList(),
+        dokumentasjon = lagSøknaddokumentasjon(inneholderVedlegg = inneholderVedlegg),
         originalSpråk = originalspråk,
         finnesPersonMedAdressebeskyttelse = false,
         søknadstype = søknadstype,
@@ -83,18 +94,22 @@ fun lagSøkerV10(fnr: String): SøkerV10 =
         tidligereSamboere = emptyList(),
     )
 
-fun lagBarnV10(fnr: String): BarnV10 =
+fun lagBarnV10(
+    fnr: String,
+    erFosterbarn: Boolean = false,
+    harKryssetForDeltBosted: Boolean = false,
+): BarnV10 =
     BarnV10(
         harEøsSteg = false,
         ident = lagStringSøknadsfelt(fnr),
         navn = lagStringSøknadsfelt(""),
         registrertBostedType = lagStringSøknadsfelt(RegistrertBostedType.REGISTRERT_SOKERS_ADRESSE),
         alder = null,
-        andreForelder = null,
+        andreForelder = if (harKryssetForDeltBosted) lagAndreForelder() else null,
         utenlandsperioder = emptyList(),
         omsorgsperson = null,
         idNummer = emptyList(),
-        spørsmål = emptyMap(),
+        spørsmål = lagBarnSpørsmål(erFosterbarn = erFosterbarn),
         eøsBarnetrygdsperioder = emptyList(),
     )
 
@@ -129,23 +144,59 @@ fun lagSøkerV8(fnr: String): SøkerV8 =
         tidligereSamboere = emptyList(),
     )
 
-fun lagBarnV8(fnr: String): BarnV8 =
+fun lagBarnV8(
+    fnr: String,
+    erFosterbarn: Boolean = false,
+    harKryssetForDeltBosted: Boolean = false,
+): BarnV8 =
     BarnV8(
         harEøsSteg = false,
         ident = lagStringSøknadsfelt(fnr),
         navn = lagStringSøknadsfelt(""),
         registrertBostedType = lagStringSøknadsfelt(RegistrertBostedType.REGISTRERT_SOKERS_ADRESSE),
         alder = null,
-        andreForelder = null,
+        andreForelder = if (harKryssetForDeltBosted) lagAndreForelder() else null,
         utenlandsperioder = emptyList(),
         omsorgsperson = null,
         idNummer = emptyList(),
-        spørsmål = emptyMap(),
+        spørsmål = lagBarnSpørsmål(erFosterbarn = erFosterbarn),
         eøsBarnetrygdsperioder = emptyList(),
     )
 
+private fun lagBarnSpørsmål(erFosterbarn: Boolean): Map<String, Søknadsfelt<Any>> = mapOf("erFosterbarn" to lagStringSøknadsfelt<Any>(erFosterbarn.tilSøknadssvar()))
+
+private fun lagAndreForelder(): AndreForelder =
+    AndreForelder(
+        kanIkkeGiOpplysninger = lagStringSøknadsfelt("NEI"),
+        skriftligAvtaleOmDeltBosted = lagStringSøknadsfelt("JA"),
+        utvidet = AndreForelderUtvidet(),
+    )
+
+private fun lagSøknaddokumentasjon(inneholderVedlegg: Boolean): List<Søknaddokumentasjon> =
+    if (inneholderVedlegg) {
+        listOf(
+            Søknaddokumentasjon(
+                dokumentasjonsbehov = Dokumentasjonsbehov.ANNEN_DOKUMENTASJON,
+                harSendtInn = true,
+                opplastedeVedlegg =
+                    listOf(
+                        Søknadsvedlegg(
+                            dokumentId = "1",
+                            navn = "vedlegg.pdf",
+                            tittel = Dokumentasjonsbehov.ANNEN_DOKUMENTASJON,
+                        ),
+                    ),
+                dokumentasjonSpråkTittel = emptyMap(),
+            ),
+        )
+    } else {
+        emptyList()
+    }
+
+private fun Boolean.tilSøknadssvar(): String = if (this) "JA" else "NEI"
+
 fun <T> lagStringSøknadsfelt(verdi: T): Søknadsfelt<T> =
     Søknadsfelt(
-        label = mapOf("no" to ""),
-        verdi = mapOf("no" to verdi),
+        label = mapOf("nb" to ""),
+        verdi = mapOf("nb" to verdi),
     )

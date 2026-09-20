@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -41,6 +42,7 @@ class FiltreringsreglerSøknadService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val filtreringsregelEvaluator: FiltreringsregelEvaluator,
+    private val søknadService: SøknadService,
     private val clockProvider: ClockProvider,
 ) {
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
@@ -58,6 +60,10 @@ class FiltreringsreglerSøknadService(
                 ?: throw Feil("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         val barnaFraSøknad = personopplysningGrunnlag.barna.filter { aktørBarna.contains(it.aktør) }
+
+        val søknad =
+            søknadService.finnDigitalSøknad(behandling.id)
+                ?: throw Feil("Fant ikke digital søknad for behandling ${behandling.id}")
 
         val fakta =
             FiltreringsreglerFaktaSøknad(
@@ -79,6 +85,10 @@ class FiltreringsreglerSøknadService(
                         barna = barnaFraSøknad,
                         måned = YearMonth.now(clockProvider.get()),
                     ),
+                søkerHarKryssetPåEøsSpørsmålISøknaden = søknad.harKryssetPåEøsSpørsmål,
+                søkerHarKryssetForDeltBostedISøknaden = søknad.harKryssetForDeltBostedForMinstEttBarn(),
+                søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden = søknad.harKryssetForFosterhjemEllerBeredskapshjemForMinstEttBarn(),
+                søknadenInneholderVedlegg = søknad.inneholderVedlegg,
                 søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling = false, // TODO Fix me
             )
 

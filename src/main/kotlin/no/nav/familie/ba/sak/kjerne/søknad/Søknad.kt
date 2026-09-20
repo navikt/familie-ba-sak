@@ -10,12 +10,20 @@ data class Søknad(
     val barn: List<Barn>,
     val behandlingKategori: BehandlingKategori,
     val behandlingUnderkategori: BehandlingUnderkategori,
+    val harKryssetPåEøsSpørsmål: Boolean,
+    val inneholderVedlegg: Boolean,
     val målform: Målform = Målform.NB,
-)
+) {
+    fun harKryssetForDeltBostedForMinstEttBarn(): Boolean = barn.any { it.harKryssetForDeltBosted }
+
+    fun harKryssetForFosterhjemEllerBeredskapshjemForMinstEttBarn(): Boolean = barn.any { it.erFosterbarn }
+}
 
 data class Barn(
     val fnr: String,
     val planleggerÅBoINorge12Mnd: Boolean,
+    val erFosterbarn: Boolean,
+    val harKryssetForDeltBosted: Boolean,
 )
 
 data class Søker(
