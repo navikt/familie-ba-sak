@@ -74,12 +74,12 @@ class FiltreringsreglerSøknadService(
             søknadService.finnDigitalSøknad(behandling.id)
                 ?: throw Feil("Fant ikke digital søknad for behandling ${behandling.id}")
 
-        val pdlPersonInfo =
-            personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(
-                aktørSøker,
-                aktørBarna.toSet(),
-            )
-        val personInfo = pdlPersonInfo.personInfoBase()
+        val personInfo =
+            personopplysningerService
+                .hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(
+                    aktør = aktørSøker,
+                    relevanteAktører = aktørBarna.toSet(),
+                ).personInfoBase()
         val forelderBarnRelasjonerForSøknadsbarna =
             personInfo.forelderBarnRelasjon.filter { it.aktør in aktørBarna }
 

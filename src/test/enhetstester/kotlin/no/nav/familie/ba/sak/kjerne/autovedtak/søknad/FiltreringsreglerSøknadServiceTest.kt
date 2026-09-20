@@ -283,6 +283,18 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
+    fun `skal sette fakta når barn har adressebeskyttelse gradering 6 eller 19`() {
+        // Act
+        val fakta =
+            kjørFiltreringsregler(
+                barnHarAdressebeskyttelseGradering6Eller19 = true,
+            )
+
+        // Assert
+        assertThat(fakta.barnHarAdressebeskyttelseGradering6Eller19).isTrue
+    }
+
+    @Test
     fun `skal sette fakta når barn er ukrainsk statsborger`() {
         // Act
         val fakta =
@@ -307,6 +319,7 @@ class FiltreringsreglerSøknadServiceTest {
     private fun kjørFiltreringsregler(
         tilpassGrunnlag: (PersonopplysningGrunnlag) -> Unit = {},
         personInfo: PersonInfo? = null,
+        barnHarAdressebeskyttelseGradering6Eller19: Boolean = false,
     ): FiltreringsreglerFaktaSøknad {
         // Arrange
         val søkersIdent = randomFnr()
