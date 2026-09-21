@@ -184,7 +184,7 @@ class PersongrunnlagServiceTest {
             val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
 
             every { persongrunnlagService.hentAktiv(behandling.id) } returns null
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { persongrunnlagService.lagreOgSlettGammelt(any()) } answers { firstArg() }
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
             every { personopplysningerService.hentPersoninfoEnkel(barnFraInneværendeBehandling.aktør) } returns PersonInfo(barnFraInneværendeBehandling.fødselsdato)
             every { personopplysningerService.hentPersoninfoEnkel(barnFraForrigeBehandling.aktør) } returns PersonInfo(barnFraForrigeBehandling.fødselsdato)
