@@ -4,11 +4,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.TestClockProvider
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.datagenerator.lagSøknad
 import no.nav.familie.ba.sak.datagenerator.lagPersonInfo
+import no.nav.familie.ba.sak.datagenerator.lagSøknad
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -344,6 +344,7 @@ class FiltreringsreglerSøknadServiceTest {
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns grunnlag
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
         every { personopplysningerService.harVerge(grunnlag.søker.aktør) } returns VergeResponse(false)
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad()
         every {
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
                 grunnlag.søker.aktør,
