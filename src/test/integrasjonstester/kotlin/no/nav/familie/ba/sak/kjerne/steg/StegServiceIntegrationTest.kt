@@ -8,9 +8,8 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.fake.FakeOppdragBackendKlient
+import no.nav.familie.ba.sak.fake.FakeOppdragBackendKlient.Companion.leggTilSimuleringResultat
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.fake.FakeØkonomiKlient
-import no.nav.familie.ba.sak.fake.FakeØkonomiKlient.Companion.leggTilSimuleringResultat
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -89,8 +88,6 @@ class StegServiceIntegrationTest(
     private val oppgaveRepository: OppgaveRepository,
     @Autowired
     private val brevmalService: BrevmalService,
-    @Autowired
-    private val fakeØkonomiKlient: FakeØkonomiKlient,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal sette default-verdier på gift-vilkår for barn`() {

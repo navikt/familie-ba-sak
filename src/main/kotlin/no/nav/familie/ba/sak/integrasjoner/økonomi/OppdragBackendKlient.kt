@@ -231,3 +231,9 @@ class OppdragBackendKlient(
         private const val FAMILIE_OPPDRAG_BACKEND = "familie-oppdrag-backend"
     }
 }
+
+data class UtbetalingsoppdragMedBehandlingOgFagsak(
+    val fagsakId: Long,
+    val behandlingId: Long,
+    val utbetalingsoppdrag: Utbetalingsoppdrag,
+)

@@ -118,8 +118,6 @@ spec:
         - application: tilbakekreving-backend
           namespace: tilbake
           cluster: dev-gcp
-        - application: familie-oppdrag
-          cluster: dev-fss
         - application: familie-oppdrag-backend
           cluster: dev-gcp
         - application: familie-klage
@@ -131,7 +129,6 @@ spec:
         - host: unleash.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
-        - host: familie-oppdrag.dev-fss-pub.nais.io
         - host: familie-ba-infotrygd.dev-fss-pub.nais.io
         - host: familie-ba-infotrygd-feed.dev-fss-pub.nais.io
         - host: sdw-wsrest.ecb.europa.eu
