@@ -76,10 +76,10 @@ class FiltreringsreglerSøknadService(
 
         val personInfo =
             personopplysningerService
-                .hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(
+                .hentPersoninfoMedRelasjonerOgRegisterinformasjon(
                     aktør = aktørSøker,
                     relevanteAktører = aktørBarna.toSet(),
-                ).personInfoBase()
+                )
         val forelderBarnRelasjonerForSøknadsbarna =
             personInfo.forelderBarnRelasjon.filter { it.aktør in aktørBarna }
 

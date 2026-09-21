@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsregelEvaluator
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsreglerFaktaSøknad
@@ -346,23 +345,26 @@ class FiltreringsreglerSøknadServiceTest {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
         every { personopplysningerService.harVerge(grunnlag.søker.aktør) } returns VergeResponse(false)
         every {
-            personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
                 grunnlag.søker.aktør,
                 setOf(barn.aktør),
             )
-        } returns
-                PdlPersonInfo.Person(
-                    personInfo
-                        ?: lagPersonInfo(
-                            forelderBarnRelasjon =
-                                setOf(
-                                    ForelderBarnRelasjon(
-                                        aktør = barn.aktør,
-                                        relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                                    ),
-                                ),
+        } returns (
+            personInfo
+                ?: lagPersonInfo(
+                    forelderBarnRelasjon =
+                        setOf(
+                            ForelderBarnRelasjon(
+                                aktør = barn.aktør,
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                adressebeskyttelseGradering =
+                                    ADRESSEBESKYTTELSEGRADERING
+                                        .STRENGT_FORTROLIG
+                                        .takeIf { barnHarAdressebeskyttelseGradering6Eller19 },
+                            ),
                         ),
                 )
+        )
         every {
             tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
                 behandling = behandling,
