@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -64,31 +63,32 @@ class FagsakServiceIntegrationTest(
                 barnAktør = barnAktør,
             )
 
-        val personopplysningGrunnlag = mutableListOf<PersonopplysningGrunnlag>()
-
         val fagsakMor = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
-        val behandlingMor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakMor))
-        personopplysningGrunnlag.add(persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor)))
-        personopplysningGrunnlag.add(persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor)))
-        behandlingService.oppdaterStatusPåBehandling(behandlingMor.id, BehandlingStatus.AVSLUTTET)
-        val behandlingMor2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakMor))
-        personopplysningGrunnlag.add(persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor2)))
+        val behandling1Mor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakMor))
+        val personopplysningGrunnlag1Behandling1Mor = persongrunnlagService.lagreOgSlettGammelt(opprettGrunnlag(behandling1Mor))
+        val personopplysningGrunnlag2Behandling1Mor = persongrunnlagService.lagreOgSlettGammelt(opprettGrunnlag(behandling1Mor))
+        behandlingService.oppdaterStatusPåBehandling(behandling1Mor.id, BehandlingStatus.AVSLUTTET)
+        val behandling2Mor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakMor))
+        val personopplysningGrunnlag1Behandling2Mor = persongrunnlagService.lagreOgSlettGammelt(opprettGrunnlag(behandling2Mor))
 
         val fagsakFar = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandlingFar = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakFar))
-        personopplysningGrunnlag.add(persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingFar)))
+        val personopplysningGrunnlagFar = persongrunnlagService.lagreOgSlettGammelt(opprettGrunnlag(behandlingFar))
 
         // Oppretter fagsak med tilhørende behandling og personopplsyninggrunnlag, og arkiverer den.
         val arkivertFagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandlingArkivertFagsak = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(arkivertFagsak))
-        personopplysningGrunnlag.add(persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingArkivertFagsak)))
+        val personopplysningGrunnlagArkivertFagsak = persongrunnlagService.lagreOgSlettGammelt(opprettGrunnlag(behandlingArkivertFagsak))
         fagsakService.lagre(arkivertFagsak.also { it.arkivert = true })
 
         // Act
         val fagsaker = fagsakService.hentFagsakerPåPerson(barnAktør.first())
 
         // Assert
+        val personopplysningGrunnlag = setOf(personopplysningGrunnlag2Behandling1Mor, personopplysningGrunnlag1Behandling2Mor, personopplysningGrunnlagFar, personopplysningGrunnlagArkivertFagsak)
         assertEquals(2, fagsaker.size)
+        assertThat(persongrunnlagRepository.findById(personopplysningGrunnlag1Behandling1Mor.id)).isEmpty()
+        assertThat(persongrunnlagRepository.findById(personopplysningGrunnlag2Behandling1Mor.id)).isPresent()
         assertThat(persongrunnlagRepository.findAll().map { it.id }).containsAll(personopplysningGrunnlag.map { it.id })
     }
 

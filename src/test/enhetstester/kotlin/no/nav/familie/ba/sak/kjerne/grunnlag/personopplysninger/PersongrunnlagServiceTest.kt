@@ -46,6 +46,7 @@ class PersongrunnlagServiceTest {
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
+    private val personopplysningGrunnlagLagreService = mockk<PersonopplysningGrunnlagLagreService>()
     private val loggService = mockk<LoggService>()
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val kodeverkService = mockk<KodeverkService>()
@@ -55,6 +56,7 @@ class PersongrunnlagServiceTest {
         spyk(
             PersongrunnlagService(
                 personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+                personopplysningGrunnlagLagreService = personopplysningGrunnlagLagreService,
                 statsborgerskapService = mockk(),
                 arbeidsfordelingService = mockk(relaxed = true),
                 personopplysningerService = personopplysningerService,
@@ -148,7 +150,7 @@ class PersongrunnlagServiceTest {
                 }
             behandlinger.forEach { behandling ->
                 every { persongrunnlagService.hentAktiv(behandling.id) } returns null
-                every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+                every { personopplysningGrunnlagLagreService.lagreOgSlettGammelt(any()) } answers { firstArg() }
                 every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
                 every { personopplysningerService.hentPersoninfoEnkel(barnet.aktør) } returns PersonInfo(barnet.fødselsdato)
                 every {
@@ -182,7 +184,7 @@ class PersongrunnlagServiceTest {
             val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
 
             every { persongrunnlagService.hentAktiv(behandling.id) } returns null
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { persongrunnlagService.lagreOgSlettGammelt(any()) } answers { firstArg() }
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
             every { personopplysningerService.hentPersoninfoEnkel(barnFraInneværendeBehandling.aktør) } returns PersonInfo(barnFraInneværendeBehandling.fødselsdato)
             every { personopplysningerService.hentPersoninfoEnkel(barnFraForrigeBehandling.aktør) } returns PersonInfo(barnFraForrigeBehandling.fødselsdato)
@@ -310,7 +312,7 @@ class PersongrunnlagServiceTest {
             val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
 
             every { persongrunnlagService.hentAktiv(behandling.id) } returns null
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningGrunnlagLagreService.lagreOgSlettGammelt(any()) } answers { firstArg() }
 
             every { personopplysningerService.hentPersoninfoEnkel(eldsteBarnInneværendeBehandling.aktør) } returns PersonInfo(eldsteBarnInneværendeBehandling.fødselsdato)
             every { personopplysningerService.hentPersoninfoEnkel(yngsteBarnInneværendeBehandling.aktør) } returns PersonInfo(yngsteBarnInneværendeBehandling.fødselsdato)
@@ -361,7 +363,7 @@ class PersongrunnlagServiceTest {
             val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 
             every { persongrunnlagService.hentAktiv(behandling.id) } returns null
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningGrunnlagLagreService.lagreOgSlettGammelt(any()) } answers { firstArg() }
 
             every { personopplysningerService.hentPersoninfoEnkel(eldsteBarnForrigeBehandling.aktør) } returns PersonInfo(eldsteBarnForrigeBehandling.fødselsdato)
             every { personopplysningerService.hentPersoninfoEnkel(yngsteBarnForrigeBehandling.aktør) } returns PersonInfo(yngsteBarnForrigeBehandling.fødselsdato)
@@ -410,7 +412,7 @@ class PersongrunnlagServiceTest {
             val behandling = lagBehandling()
 
             every { persongrunnlagService.hentAktiv(behandling.id) } returns null
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningGrunnlagLagreService.lagreOgSlettGammelt(any()) } answers { firstArg() }
             every { personopplysningerService.hentPersoninfoEnkel(eldsteBarn.aktør) } returns PersonInfo(eldsteBarn.fødselsdato)
             every { personopplysningerService.hentPersoninfoEnkel(yngreBarn.aktør) } returns PersonInfo(yngreBarn.fødselsdato)
 
@@ -472,7 +474,7 @@ class PersongrunnlagServiceTest {
             val behandling = lagBehandling()
 
             every { persongrunnlagService.hentAktiv(behandling.id) } returns null
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningGrunnlagLagreService.lagreOgSlettGammelt(any()) } answers { firstArg() }
             every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
 
             val gammelAdresse =
@@ -539,7 +541,7 @@ class PersongrunnlagServiceTest {
             val behandling = lagBehandling()
 
             every { persongrunnlagService.hentAktiv(behandling.id) } returns null
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningGrunnlagLagreService.lagreOgSlettGammelt(any()) } answers { firstArg() }
             every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
 
             val norskAdresseFørUtvandring =
@@ -596,7 +598,7 @@ class PersongrunnlagServiceTest {
             val behandling = lagBehandling()
 
             every { persongrunnlagService.hentAktiv(behandling.id) } returns null
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { persongrunnlagService.lagreOgSlettGammelt(any()) } answers { firstArg() }
             every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
 
             val adresseFørFlytting =
@@ -677,7 +679,7 @@ class PersongrunnlagServiceTest {
             // Assert
             assertThat(oppdatertPersonopplysningGrunnlag).isSameAs(aktivtGrunnlag)
             assertThat(oppdatertPersonopplysningGrunnlag.endretTidspunkt).isAfter(opprinneligEndretTidspunkt)
-            verify(exactly = 0) { persongrunnlagService.lagreOgDeaktiverGammel(any()) }
+            verify(exactly = 0) { personopplysningGrunnlagLagreService.lagreOgSlettGammelt(any()) }
         }
 
         @Test
@@ -692,7 +694,7 @@ class PersongrunnlagServiceTest {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns sisteVedtatteBehandling
             every { persongrunnlagService.hentAktiv(behandling.id) } returns null
             every { persongrunnlagService.hentAktiv(sisteVedtatteBehandling.id) } returns null
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningGrunnlagLagreService.lagreOgSlettGammelt(any()) } answers { firstArg() }
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
 
             every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
@@ -744,7 +746,7 @@ class PersongrunnlagServiceTest {
             every { persongrunnlagService.hentAktiv(behandling.id) } returns null
             every { persongrunnlagService.hentAktiv(sisteVedtatteBehandling.id) } returns forrigeGrunnlag
             every { persongrunnlagService.hentAktivThrows(sisteVedtatteBehandling.id) } returns forrigeGrunnlag
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningGrunnlagLagreService.lagreOgSlettGammelt(any()) } answers { firstArg() }
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
 
             every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
@@ -796,7 +798,7 @@ class PersongrunnlagServiceTest {
             every { persongrunnlagService.hentAktiv(behandling.id) } returns null
             every { persongrunnlagService.hentAktiv(sisteVedtatteBehandling.id) } returns forrigeGrunnlag
             every { persongrunnlagService.hentAktivThrows(sisteVedtatteBehandling.id) } returns forrigeGrunnlag
-            every { persongrunnlagService.lagreOgDeaktiverGammel(any()) } answers { firstArg() }
+            every { personopplysningGrunnlagLagreService.lagreOgSlettGammelt(any()) } answers { firstArg() }
             every { personopplysningGrunnlagRepository.save(any()) } answers { firstArg() }
 
             every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
