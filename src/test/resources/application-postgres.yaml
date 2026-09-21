@@ -39,7 +39,6 @@ TILGANGSMASKIN_SCOPE: "dummy"
 SANITY_DATASET: "ba-test"
 
 FAMILIE_BREV_API_URL: http://localhost:8001
-FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
 FAMILIE_OPPDRAG_BACKEND_API_URL: http://localhost:8087/api
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:28085/api
 TILGANGSMASKIN_API_URL: http://localhost:28085/tilgangsmaskin
@@ -64,7 +63,6 @@ NAIS_TOKEN_ENDPOINT: http://localhost/token
 NAIS_TOKEN_EXCHANGE_ENDPOINT: http://localhost/token/exchange
 
 PDL_SCOPE: dummy
-FAMILIE_OPPDRAG_SCOPE: dummy
 FAMILIE_OPPDRAG_BACKEND_SCOPE: dummy
 FAMILIE_BA_INFOTRYGD_SCOPE: dummy
 FAMILIE_BA_INFOTRYGD_FEED_SCOPE: dummy

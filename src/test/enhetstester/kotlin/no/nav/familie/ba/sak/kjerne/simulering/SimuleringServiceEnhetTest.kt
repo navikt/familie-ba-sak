@@ -3,14 +3,12 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.integrasjoner.økonomi.OppdragBackendKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -41,7 +39,6 @@ import java.time.LocalDate
 import java.time.LocalDate.now
 
 internal class SimuleringServiceEnhetTest {
-    private val økonomiKlient: ØkonomiKlient = mockk()
     private val oppdragBackendKlient: OppdragBackendKlient = mockk()
     private val beregningService: BeregningService = mockk()
     private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository = mockk()
@@ -51,11 +48,9 @@ internal class SimuleringServiceEnhetTest {
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator = mockk()
     private val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
 
     private val simuleringService: SimuleringService =
         SimuleringService(
-            økonomiKlient = økonomiKlient,
             oppdragBackendKlient = oppdragBackendKlient,
             beregningService = beregningService,
             økonomiSimuleringMottakerRepository = økonomiSimuleringMottakerRepository,
@@ -65,7 +60,6 @@ internal class SimuleringServiceEnhetTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             persongrunnlagService = persongrunnlagService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
-            featureToggleService = featureToggleService,
         )
 
     @ParameterizedTest

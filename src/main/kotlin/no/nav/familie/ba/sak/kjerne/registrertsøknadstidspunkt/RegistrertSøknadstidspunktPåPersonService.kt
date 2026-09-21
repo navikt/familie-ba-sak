@@ -21,7 +21,7 @@ class RegistrertSøknadstidspunktPåPersonService(
 
     @Transactional
     fun settSøknadstidspunktForPersonerFremstiltKravFor(behandling: Behandling) {
-        if (behandling.opprettetÅrsak != BehandlingÅrsak.SØKNAD) return
+        if (behandling.opprettetÅrsak != BehandlingÅrsak.SØKNAD && behandling.opprettetÅrsak != BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD) return
 
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)?.toLocalDate() ?: return
         val personerFremstiltKravFor = søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null).toSet()

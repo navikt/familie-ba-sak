@@ -40,7 +40,7 @@ class SøknadGrunnlagService(
         val søknadDTO = hentAktivSøknadDto(behandlingId = behandling.id)
         val personerFremstiltKravFor =
             when {
-                behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD -> {
+                behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD || behandling.opprettetÅrsak == BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD -> {
                     // alle barna som er krysset av på søknad
                     val barnFraSøknad =
                         søknadDTO

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.ENDRE_MIGRERINGSDATO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
@@ -89,7 +90,7 @@ class VilkårsvurderingForNyBehandlingService(
                 )
             }
 
-            !in listOf(SØKNAD, FØDSELSHENDELSE) -> {
+            !in listOf(SØKNAD, AUTOMATISK_BEHANDLING_AV_SØKNAD, FØDSELSHENDELSE) -> {
                 initierVilkårsvurderingForBehandling(
                     behandling = behandling,
                     bekreftEndringerViaFrontend = true,
@@ -199,7 +200,7 @@ class VilkårsvurderingForNyBehandlingService(
                 ?.map { it.aktør } ?: emptyList()
 
         val initiellVilkårsvurdering =
-            if (!behandling.skalBehandlesAutomatisk && !behandling.erTekniskEndring() && !behandling.erFalskIdentitet()) {
+            if ((!behandling.skalBehandlesAutomatisk && !behandling.erTekniskEndring() && !behandling.erFalskIdentitet()) || behandling.erAutomatiskSøknad()) {
                 genererOgPreutfyllInitiellVilkårsvurdering(
                     behandling = behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,

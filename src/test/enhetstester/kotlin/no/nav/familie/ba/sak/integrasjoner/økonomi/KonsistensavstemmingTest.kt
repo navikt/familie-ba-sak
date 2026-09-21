@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -34,7 +33,6 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KonsistensavstemmingTest {
-    private val økonomiKlient = mockk<ØkonomiKlient>()
     private val oppdragBackendKlient = mockk<OppdragBackendKlient>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val beregningService = mockk<BeregningService>()
@@ -47,14 +45,12 @@ class KonsistensavstemmingTest {
     private val avstemmingService =
         AvstemmingService(
             behandlingHentOgPersisterService,
-            økonomiKlient,
             oppdragBackendKlient,
             beregningService,
             taskService,
             batchRepository,
             dataChunkRepository,
             utbetalingsTidslinjeService,
-            featureToggleService,
         )
 
     private val batchId = 1000000L
@@ -69,7 +65,6 @@ class KonsistensavstemmingTest {
     @BeforeEach
     fun setUp() {
         every { taskService.save(any()) } returns Task(type = "dummy", payload = "")
-        every { featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP) } returns true
         konistensavstemmingStartTask = KonsistensavstemMotOppdragStartTask(avstemmingService)
         konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask =
             KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(avstemmingService, taskService, featureToggleService)

@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.sats.EøsSatserRegister
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -45,6 +46,7 @@ class AutovedtakSatsendringEøsServiceTest {
     private val utenlandskPeriodebeløpService = mockk<UtenlandskPeriodebeløpService>()
     private val autovedtakService = mockk<AutovedtakService>()
     private val taskRepository = mockk<TaskRepositoryWrapper>()
+    private val simuleringService = mockk<SimuleringService>()
 
     private val service =
         AutovedtakSatsendringEøsService(
@@ -53,6 +55,7 @@ class AutovedtakSatsendringEøsServiceTest {
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
             autovedtakService = autovedtakService,
             taskRepository = taskRepository,
+            simuleringService = simuleringService,
         )
 
     private val land = "SE"
@@ -87,6 +90,8 @@ class AutovedtakSatsendringEøsServiceTest {
         every { EøsSatserRegister.satser } returns listOf(forrigeSats, gjeldendeSats)
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
         every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(any()) } returns emptyList()
+        every { simuleringService.oppdaterSimuleringPåBehandling(any()) } returns emptyList()
+        every { simuleringService.hentFeilutbetaling(any<Long>()) } returns BigDecimal.ZERO
     }
 
     @AfterEach
@@ -163,6 +168,21 @@ class AutovedtakSatsendringEøsServiceTest {
             every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(any()) } returns listOf(utenlandskPeriodebeløp)
             every { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) } returns lagVedtak()
             every { taskRepository.save(any()) } returns mockk()
+        }
+
+        @Test
+        fun `kaster feil når autovedtak fører til feilutbetaling`() {
+            // Arrange
+            every {
+                autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(any(), any(), any(), any())
+            } returns lagBehandling(fagsak = fagsak, førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG)
+
+            every { simuleringService.hentFeilutbetaling(any<Long>()) } returns BigDecimal("100")
+
+            // Act & Assert
+            assertThatThrownBy { service.kjørBehandling(satsendringEøsData) }
+                .isInstanceOf(AutovedtakMåBehandlesManueltFeil::class.java)
+                .hasMessageContaining("feilutbetaling")
         }
 
         @Test

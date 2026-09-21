@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.OppdaterTilkjentYtelseService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilUtbetalingsoppdragDto
@@ -23,14 +21,12 @@ import org.springframework.web.client.RestClientResponseException
 
 @Service
 class ØkonomiService(
-    private val økonomiKlient: ØkonomiKlient,
     private val oppdragBackendKlient: OppdragBackendKlient,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
     private val oppdaterTilkjentYtelseService: OppdaterTilkjentYtelseService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
@@ -78,11 +74,7 @@ class ØkonomiService(
             return
         }
         try {
-            if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP, behandlingId)) {
-                oppdragBackendKlient.iverksettOppdrag(utbetalingsoppdrag)
-            } else {
-                økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
-            }
+            oppdragBackendKlient.iverksettOppdrag(utbetalingsoppdrag)
         } catch (exception: Exception) {
             if (exception is RestClientResponseException &&
                 exception.statusCode == HttpStatus.CONFLICT
@@ -101,11 +93,7 @@ class ØkonomiService(
         behandlingId: Long,
     ): OppdragStatus =
         if (tilkjentYtelseRepository.findByBehandling(behandlingId).skalIverksettesMotOppdrag()) {
-            if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP, behandlingId)) {
-                oppdragBackendKlient.hentStatus(oppdragId)
-            } else {
-                økonomiKlient.hentStatus(oppdragId)
-            }
+            oppdragBackendKlient.hentStatus(oppdragId)
         } else {
             OppdragStatus.KVITTERT_OK
         }
@@ -119,11 +107,7 @@ class ØkonomiService(
                 behandlingsId = behandling.id.toString(),
             )
 
-        if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_OPPDRAG_BACKEND_GCP)) {
-            oppdragBackendKlient.opprettManuellKvitteringPåOppdrag(oppdragId)
-        } else {
-            økonomiKlient.opprettManuellKvitteringPåOppdrag(oppdragId)
-        }
+        oppdragBackendKlient.opprettManuellKvitteringPåOppdrag(oppdragId)
     }
 
     companion object {

@@ -30,7 +30,7 @@ class LogFagsakIdForJournalpostTask(
 
         val journalpost = integrasjonKlient.hentJournalpost(journalpostId)
 
-        journalpost.sak?.let { secureLogger.info(it.convertDataClassToJson()) } ?: throw Feil("Fant ikke fagsak informasjon i journalpost $journalpostId")
+        journalpost.sak?.let { secureLogger.info("journalpostId $journalpostId: ${it.convertDataClassToJson()}") } ?: throw Feil("Fant ikke fagsak informasjon i journalpost $journalpostId")
     }
 
     companion object {

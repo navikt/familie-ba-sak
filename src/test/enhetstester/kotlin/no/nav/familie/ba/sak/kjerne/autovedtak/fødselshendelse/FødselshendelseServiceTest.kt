@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.FødselshendelseData
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -35,12 +35,14 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.any
@@ -48,7 +50,7 @@ import java.time.LocalDate
 import java.time.Month
 
 class FødselshendelseServiceTest {
-    val filtreringsreglerService = mockk<FiltreringsreglerService>()
+    val filtreringsreglerFødselshendelseService = mockk<FiltreringsreglerFødselshendelseService>()
     val taskRepository = mockk<TaskRepositoryWrapper>()
     val behandlingRepository = mockk<BehandlingRepository>()
     val fagsakService = mockk<FagsakService>()
@@ -68,7 +70,7 @@ class FødselshendelseServiceTest {
         AutovedtakFødselshendelseService(
             fagsakService,
             behandlingHentOgPersisterService,
-            filtreringsreglerService,
+            filtreringsreglerFødselshendelseService,
             taskRepository,
             vilkårsvurderingRepository,
             persongrunnlagService,
@@ -93,6 +95,11 @@ class FødselshendelseServiceTest {
         val barn2Person = lagPerson(type = PersonType.BARN)
         val barn2 = barn2Person.aktør.aktivFødselsnummer()
         val nyBehandlingHendelse = NyBehandlingHendelse(søker, listOf(barn2))
+        val filtrerAutomatiskBehandlingData =
+            FiltrerAutomatiskBehandlingData(
+                nyBehandlingHendelse.morsIdent,
+                nyBehandlingHendelse.barnasIdenter,
+            )
 
         every { fagsakService.hentNormalFagsak(søkerAktør) } returns fagsak
         every {
@@ -127,9 +134,9 @@ class FødselshendelseServiceTest {
         every { behandlingHentOgPersisterService.hent(nyBehandling.id) } returns nyBehandling
         every { stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandlingHendelse) } returns nyBehandling
         every {
-            stegService.håndterFiltreringsreglerForFødselshendelser(
+            stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(
                 nyBehandling,
-                nyBehandlingHendelse,
+                filtrerAutomatiskBehandlingData,
             )
         } returns nyBehandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         every { stegService.håndterVilkårsvurdering(nyBehandling, any()) } returns
@@ -137,7 +144,7 @@ class FødselshendelseServiceTest {
                 .copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
                 .leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)
         every { stegService.håndterHenleggBehandling(any(), any()) } returns nyBehandling
-        every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""
+        every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) } returns ""
         every { persongrunnlagService.hentSøker(nyBehandling.id) } returns søkerPerson
         every { persongrunnlagService.hentBarna(nyBehandling) } returns listOf(barn1Person, barn2Person)
 
@@ -198,6 +205,7 @@ class FødselshendelseServiceTest {
                 behandlingId = any(),
                 beskrivelse = "Fødselshendelse: Barnet (fødselsdato: ${barn1Person.fødselsdato.tilKortString()}) er ikke bosatt med mor.",
                 manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
             )
         }
     }

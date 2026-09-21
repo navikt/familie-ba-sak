@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.VergeData
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -30,28 +31,38 @@ class PersonopplysningerService(
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val integrasjonKlient: IntegrasjonKlient,
     private val falskIdentitetService: FalskIdentitetService,
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 ) {
-    fun hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PdlPersonInfo {
+    fun hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(
+        aktør: Aktør,
+        relevanteAktører: Set<Aktør>? = null,
+    ): PdlPersonInfo {
         val pdlPersoninfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val personinfo =
             when (pdlPersoninfo) {
                 is PdlPersonInfo.Person -> pdlPersoninfo.personInfo
                 is PdlPersonInfo.FalskPerson -> return PdlPersonInfo.FalskPerson(pdlPersoninfo.falskIdentitetPersonInfo)
             }
-        return PdlPersonInfo.Person(personinfo.medRelasjonerOgEgenAnsattInfo(aktør))
+        return PdlPersonInfo.Person(personinfo.medRelasjonerOgEgenAnsattInfo(aktør, relevanteAktører))
     }
 
-    fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
+    fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+        aktør: Aktør,
+        relevanteAktører: Set<Aktør>? = null,
+    ): PersonInfo {
         val pdlPersoninfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val personInfo =
             when (pdlPersoninfo) {
                 is PdlPersonInfo.Person -> pdlPersoninfo.personInfo
                 is PdlPersonInfo.FalskPerson -> throw FunksjonellFeil(PERSON_HAR_FALSK_IDENTITET)
             }
-        return personInfo.medRelasjonerOgEgenAnsattInfo(aktør)
+        return personInfo.medRelasjonerOgEgenAnsattInfo(aktør, relevanteAktører)
     }
 
-    private fun PersonInfo.medRelasjonerOgEgenAnsattInfo(aktør: Aktør): PersonInfo {
+    private fun PersonInfo.medRelasjonerOgEgenAnsattInfo(
+        aktør: Aktør,
+        relevanteAktører: Set<Aktør>? = null,
+    ): PersonInfo {
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
         val relasjonsidenter = this.forelderBarnRelasjon.map { it.aktør.aktivFødselsnummer() }
         val tilgangPerIdent = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(relasjonsidenter)
@@ -75,6 +86,19 @@ class PersonopplysningerService(
                             logger.warn("Ignorerer relasjon: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
                             secureLogger.warn("Ignorerer relasjon ${it.aktør.aktivFødselsnummer()} til ${aktør.aktivFødselsnummer()}: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
                             null
+                        } catch (funksjonellFeil: FunksjonellFeil) {
+                            if (funksjonellFeil.message != FalskIdentitetService.KAN_IKKE_HÅNDTERE_FALSK_IDENTITET) {
+                                throw funksjonellFeil
+                            }
+
+                            val aktørerSomIkkeKanIgnoreres = finnAktørerSomIkkeKanIgnoreres(aktør, relevanteAktører)
+                            if (aktørerSomIkkeKanIgnoreres != null && it.aktør !in aktørerSomIkkeKanIgnoreres) {
+                                logger.warn("Ignorerer relasjon med falsk identitet som ikke er blant relevante aktører")
+                                secureLogger.warn("Ignorerer relasjon med falsk identitet: ${it.aktør.aktivFødselsnummer()} til ${aktør.aktivFødselsnummer()} som ikke er blant relevante aktører")
+                                null
+                            } else {
+                                throw funksjonellFeil
+                            }
                         }
                     } else {
                         identerMedAdressebeskyttelse.add(Pair(it.aktør, it.relasjonsrolle))
@@ -96,6 +120,15 @@ class PersonopplysningerService(
             forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
         )
     }
+
+    private fun finnAktørerSomIkkeKanIgnoreres(
+        aktør: Aktør,
+        relevanteAktører: Set<Aktør>?,
+    ): Set<Aktør>? =
+        relevanteAktører
+            ?: personopplysningGrunnlagRepository
+                .finnSøkerOgBarnPåFagsakerHvorAktørInngår(aktør)
+                .takeIf { aktører -> aktører.isNotEmpty() }
 
     fun hentPdlPersonInfoEnkel(aktør: Aktør): PdlPersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.ENKEL)
 

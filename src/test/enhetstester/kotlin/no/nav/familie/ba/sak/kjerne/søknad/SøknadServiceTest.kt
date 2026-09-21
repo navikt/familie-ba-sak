@@ -40,7 +40,16 @@ class SøknadServiceTest {
             val barn2 = randomFnr()
             val versjonertBarnetrygdSøknadV9 =
                 VersjonertBarnetrygdSøknadV9(
-                    barnetrygdSøknad = lagBarnetrygdSøknadV9(barnFnr = listOf(barn1, barn2), søknadstype = Søknadstype.ORDINÆR, erEøs = true, originalspråk = "nn"),
+                    barnetrygdSøknad =
+                        lagBarnetrygdSøknadV9(
+                            barnFnr = listOf(barn1, barn2),
+                            søknadstype = Søknadstype.ORDINÆR,
+                            erEøs = true,
+                            originalspråk = "nn",
+                            inneholderVedlegg = true,
+                            erFosterbarn = true,
+                            harKryssetForDeltBosted = true,
+                        ),
                 )
 
             every { behandlingSøknadsinfoService.finnDigitalSøknad(behandling.id)?.journalpostId } returns journalpostId
@@ -57,6 +66,10 @@ class SøknadServiceTest {
             assertThat(søknad?.behandlingKategori).isEqualTo(BehandlingKategori.EØS)
             assertThat(søknad?.behandlingUnderkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
             assertThat(søknad?.målform).isEqualTo(Målform.NN)
+            assertThat(søknad?.harKryssetPåEøsSpørsmål).isTrue()
+            assertThat(søknad?.inneholderVedlegg).isTrue()
+            assertThat(søknad?.barn?.map { it.erFosterbarn }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.harKryssetForDeltBosted }).containsOnly(true)
         }
 
         @Test
@@ -68,7 +81,16 @@ class SøknadServiceTest {
             val barn2 = randomFnr()
             val versjonertBarnetrygdSøknadV10 =
                 VersjonertBarnetrygdSøknadV10(
-                    barnetrygdSøknad = lagBarnetrygdSøknadV10(barnFnr = listOf(barn1, barn2), søknadstype = Søknadstype.ORDINÆR, erEøs = true, originalspråk = "nn"),
+                    barnetrygdSøknad =
+                        lagBarnetrygdSøknadV10(
+                            barnFnr = listOf(barn1, barn2),
+                            søknadstype = Søknadstype.ORDINÆR,
+                            erEøs = true,
+                            originalspråk = "nn",
+                            inneholderVedlegg = true,
+                            erFosterbarn = true,
+                            harKryssetForDeltBosted = true,
+                        ),
                 )
 
             every { behandlingSøknadsinfoService.finnDigitalSøknad(behandling.id)?.journalpostId } returns journalpostId
@@ -85,6 +107,34 @@ class SøknadServiceTest {
             assertThat(søknad?.behandlingKategori).isEqualTo(BehandlingKategori.EØS)
             assertThat(søknad?.behandlingUnderkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
             assertThat(søknad?.målform).isEqualTo(Målform.NN)
+            assertThat(søknad?.harKryssetPåEøsSpørsmål).isTrue()
+            assertThat(søknad?.inneholderVedlegg).isTrue()
+            assertThat(søknad?.barn?.map { it.erFosterbarn }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.harKryssetForDeltBosted }).containsOnly(true)
+        }
+
+        @Test
+        fun `skal mappe fakta om søknaden til false når søker ikke har krysset av og det ikke er lastet opp vedlegg`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val journalpostId = "123456789"
+            val versjonertBarnetrygdSøknadV10 =
+                VersjonertBarnetrygdSøknadV10(
+                    barnetrygdSøknad = lagBarnetrygdSøknadV10(barnFnr = listOf(randomFnr())),
+                )
+
+            every { behandlingSøknadsinfoService.finnDigitalSøknad(behandling.id)?.journalpostId } returns journalpostId
+            every { integrasjonKlient.hentVersjonertBarnetrygdSøknad(journalpostId) } returns versjonertBarnetrygdSøknadV10
+            every { søknadMapperLookup.hentSøknadMapperForVersjon(versjonertBarnetrygdSøknadV10.barnetrygdSøknad.kontraktVersjon) } returns SøknadMapperV10()
+
+            // Act
+            val søknad = søknadService.finnDigitalSøknad(behandlingId = behandling.id)
+
+            // Assert
+            assertThat(søknad?.harKryssetPåEøsSpørsmål).isFalse()
+            assertThat(søknad?.inneholderVedlegg).isFalse()
+            assertThat(søknad?.barn?.map { it.erFosterbarn }).containsOnly(false)
+            assertThat(søknad?.barn?.map { it.harKryssetForDeltBosted }).containsOnly(false)
         }
 
         @Test

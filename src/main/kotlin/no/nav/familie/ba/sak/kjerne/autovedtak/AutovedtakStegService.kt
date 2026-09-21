@@ -13,16 +13,19 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.AutovedtakSatsendringEøsService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggService
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
+import no.nav.familie.ba.sak.kjerne.behandling.Søknad
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.error.RekjørSenereException
 import no.nav.familie.util.VirkedagerProvider
 import no.nav.familie.util.VirkedagerProvider.nesteVirkedag
@@ -44,6 +47,7 @@ enum class Autovedtaktype(
     val displayName: String,
 ) {
     FØDSELSHENDELSE("Fødselshendelse"),
+    SØKNAD("Søknad"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     OMREGNING_BREV("Omregning"),
     FINNMARKSTILLEGG("Finnmarkstillegg"),
@@ -53,6 +57,12 @@ enum class Autovedtaktype(
 
 sealed interface AutomatiskBehandlingData {
     val type: Autovedtaktype
+}
+
+data class SøknadData(
+    val søknad: Søknad,
+) : AutomatiskBehandlingData {
+    override val type = Autovedtaktype.SØKNAD
 }
 
 data class FødselshendelseData(
@@ -107,6 +117,7 @@ class AutovedtakStegService(
     private val autovedtakFinnmarkstilleggService: AutovedtakFinnmarkstilleggService,
     private val autovedtakSvalbardtilleggService: AutovedtakSvalbardtilleggService,
     private val autovedtakSatsendringEøsService: AutovedtakSatsendringEøsService,
+    private val autovedtakSøknadService: AutovedtakSøknadService,
     private val snikeIKøenService: SnikeIKøenService,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -118,6 +129,22 @@ class AutovedtakStegService(
         Autovedtaktype.entries.associateWith {
             Metrics.counter("behandling.saksbehandling.autovedtak.aapen_behandling", "type", it.name)
         }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun kjørAutomatiskBehandlingSøknad(
+        mottakersAktør: Aktør,
+        søknad: Søknad,
+        førstegangKjørt: LocalDateTime = LocalDateTime.now(),
+    ): String {
+        if (!featureToggleService.isEnabled(FeatureToggle.SKAL_BEHANDLE_SOKNAD_AUTOMATISK, false)) {
+            throw Feil("Toggle SKAL_BEHANDLE_SOKNAD_AUTOMATISK er skrudd av.")
+        }
+        return kjørBehandling(
+            mottakersAktør = mottakersAktør,
+            automatiskBehandlingData = SøknadData(søknad),
+            førstegangKjørt = førstegangKjørt,
+        )
+    }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun kjørBehandlingFødselshendelse(
@@ -211,6 +238,7 @@ class AutovedtakStegService(
                 is FinnmarkstilleggData -> autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
                 is SvalbardtilleggData -> autovedtakSvalbardtilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
                 is SatsendringEøsData -> autovedtakSatsendringEøsService.skalAutovedtakBehandles(automatiskBehandlingData)
+                is SøknadData -> autovedtakSøknadService.skalAutovedtakBehandles(automatiskBehandlingData)
             }
 
         if (!skalAutovedtakBehandles) {
@@ -245,6 +273,7 @@ class AutovedtakStegService(
                 is FinnmarkstilleggData -> autovedtakFinnmarkstilleggService.kjørBehandling(automatiskBehandlingData)
                 is SvalbardtilleggData -> autovedtakSvalbardtilleggService.kjørBehandling(automatiskBehandlingData)
                 is SatsendringEøsData -> autovedtakSatsendringEøsService.kjørBehandling(automatiskBehandlingData)
+                is SøknadData -> autovedtakSøknadService.kjørBehandling(automatiskBehandlingData)
             }
 
         secureLoggAutovedtakBehandling(
@@ -271,6 +300,8 @@ class AutovedtakStegService(
             is FødselshendelseData,
             is SmåbarnstilleggData,
             -> null
+
+            is SøknadData -> behandlingsdata.søknad.fagsakId
         }
 
     private fun håndterÅpenBehandlingOgAvbrytAutovedtak(
@@ -337,6 +368,7 @@ class AutovedtakStegService(
             behandlingId = åpenBehandling.id,
             begrunnelse = begrunnelseForÅpenBehandling(automatiskBehandlingData),
             manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
+            oppgavetype = if (autovedtaktype == Autovedtaktype.SØKNAD) Oppgavetype.BehandleSak else Oppgavetype.VurderLivshendelse,
         )
         return true
     }
@@ -379,4 +411,5 @@ private fun Autovedtaktype.tilMaskinellVentÅrsak() =
         Autovedtaktype.FINNMARKSTILLEGG -> SettPåMaskinellVentÅrsak.FINNMARKSTILLEGG
         Autovedtaktype.SVALBARDTILLEGG -> SettPåMaskinellVentÅrsak.SVALBARDTILLEGG
         Autovedtaktype.SATSENDRING_EØS -> SettPåMaskinellVentÅrsak.SATSENDRING_EØS
+        Autovedtaktype.SØKNAD -> SettPåMaskinellVentÅrsak.SØKNAD
     }

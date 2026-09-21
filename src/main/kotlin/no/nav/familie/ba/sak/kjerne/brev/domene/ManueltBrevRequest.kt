@@ -100,6 +100,8 @@ data class ManueltBrevRequest(
 ) {
     override fun toString(): String = "${ManueltBrevRequest::class}, $brevmal"
 
+    fun finnBarnIBrevMedIdent(): List<String> = barnIBrev.filter { it.isNotBlank() }
+
     fun enhetNavn(): String = this.enhet?.enhetNavn ?: throw Feil("Finner ikke enhetsnavn på manuell brevrequest")
 
     fun mottakerlandSED(): List<String> =
@@ -615,6 +617,7 @@ fun ManueltBrevRequest.tilBrev(
         Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG,
         Brevmal.AUTOVEDTAK_SVALBARDTILLEGG,
         Brevmal.AUTOVEDTAK_SATSENDRING_EØS,
+        Brevmal.AUTOVEDTAK_SØKNAD,
         Brevmal.TILBAKEKREVINGSVEDTAK_MOTREGNING,
         -> {
             throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")

@@ -2,6 +2,9 @@ package no.nav.familie.ba.sak.kjerne.søknad
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erFosterbarn
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harKryssetForDeltBosted
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.inneholderVedlegg
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.tilBehandlingUnderkategori
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV10
@@ -34,6 +37,8 @@ class SøknadMapperV10 : SøknadMapper {
                         Barn(
                             fnr = it.fnr,
                             planleggerÅBoINorge12Mnd = it.spørsmål.hentVerdiForSøknadsfelt(SøknadsFeltId.PLANLEGGER_Å_BO_I_NORGE_12_MND_BARN).tilBoolskSvar(),
+                            erFosterbarn = it.spørsmål.erFosterbarn(),
+                            harKryssetForDeltBosted = it.andreForelder.harKryssetForDeltBosted(),
                         )
                     },
             behandlingUnderkategori = versjonertBarnetrygdSøknad.barnetrygdSøknad.søknadstype.tilBehandlingUnderkategori(),
@@ -42,6 +47,8 @@ class SøknadMapperV10 : SøknadMapper {
                     .takeIf { it > 0 }
                     ?.let { BehandlingKategori.EØS }
                     ?: BehandlingKategori.NASJONAL,
+            harKryssetPåEøsSpørsmål = versjonertBarnetrygdSøknad.barnetrygdSøknad.antallEøsSteg > 0,
+            inneholderVedlegg = versjonertBarnetrygdSøknad.barnetrygdSøknad.dokumentasjon.inneholderVedlegg(),
             målform =
                 when (versjonertBarnetrygdSøknad.barnetrygdSøknad.originalSpråk) {
                     "nb" -> Målform.NB

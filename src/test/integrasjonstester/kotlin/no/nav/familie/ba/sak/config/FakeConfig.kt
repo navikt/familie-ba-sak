@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.fake.FakeSystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.FakeTilbakekrevingKlient
 import no.nav.familie.ba.sak.fake.FakeTilgangsmaskinKlient
-import no.nav.familie.ba.sak.fake.FakeØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
@@ -28,6 +27,7 @@ import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.felles.tokenklient.entraid.EntraIDClient
 import no.nav.familie.prosessering.internal.TaskService
@@ -64,11 +64,6 @@ class FakeConfig {
     @Primary
     @Profile("fake-ecb-valutakurs-rest-klient")
     fun fakeECBValutakursRestKlient(): FakeECBValutakursRestKlient = FakeECBValutakursRestKlient()
-
-    @Bean
-    @Primary
-    @Profile("fake-økonomi-klient")
-    fun fakeØkonomiKlient(): FakeØkonomiKlient = FakeØkonomiKlient()
 
     @Bean
     @Primary
@@ -143,6 +138,7 @@ class FakeConfig {
         familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
         integrasjonKlient: IntegrasjonKlient,
         falskIdentitetService: FalskIdentitetService,
+        personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     ): FakePersonopplysningerService =
         FakePersonopplysningerService(
             pdlRestKlient = pdlRestKlient,
@@ -150,6 +146,7 @@ class FakeConfig {
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             integrasjonKlient = integrasjonKlient,
             falskIdentitetService = falskIdentitetService,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
         )
 
     @Bean

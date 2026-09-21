@@ -1,8 +1,7 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
+package no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler
 
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigSøker
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -14,8 +13,9 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class FiltreringsregelTest {
+internal class FiltreringsregelEvaluatorForFødselshendelseTest {
     private val gyldigAktørId = randomAktør()
+    private val filtreringsregelEvaluator = FiltreringsregelEvaluator()
 
     @Test
     fun `Regelevaluering skal resultere i Ja`() {
@@ -26,17 +26,18 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = mor,
-                    barnaFraHendelse = listOf(barnet),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = mor,
+                    barnaSomSkalVurderes = listOf(barnet),
                     restenAvBarna = restenAvBarna,
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
@@ -54,25 +55,26 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = mor,
-                    morMottarLøpendeUtvidet = true,
-                    barnaFraHendelse = listOf(barnet),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = mor,
+                    søkerMottarLøpendeUtvidet = true,
+                    barnaSomSkalVurderes = listOf(barnet),
                     restenAvBarna = restenAvBarna,
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET)
     }
 
     @Test
@@ -84,26 +86,27 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = mor,
-                    morMottarLøpendeUtvidet = false,
-                    barnaFraHendelse = listOf(barnet),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = mor,
+                    søkerMottarLøpendeUtvidet = false,
+                    barnaSomSkalVurderes = listOf(barnet),
                     restenAvBarna = restenAvBarna,
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morMottarEøsBarnetrygd = true,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerMottarEøsBarnetrygd = true,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD)
     }
 
     @Test
@@ -115,90 +118,25 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = mor,
-                    barnaFraHendelse = listOf(barnet),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = mor,
+                    barnaSomSkalVurderes = listOf(barnet),
                     restenAvBarna = restenAvBarna,
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_ER_OVER_18_ÅR)
-    }
-
-    @Test
-    fun `Regelevaluering skal resultere i JA når det har gått mer enn 5 måneder siden forrige barn ble født`() {
-        // Arrange
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
-        val barnet1 = tilfeldigPerson(LocalDate.now().plusMonths(0)).copy(aktør = gyldigAktørId)
-        val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(aktør = gyldigAktørId)
-        val restenAvBarna: List<PersonInfo> =
-            listOf(
-                PersonInfo(LocalDate.now().minusMonths(8).minusDays(1)),
-                PersonInfo(LocalDate.now().minusMonths(8)),
-            )
-
-        // Act
-        val evaluering =
-            Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
-                FiltreringsreglerFakta(
-                    mor = mor,
-                    barnaFraHendelse = listOf(barnet1, barnet2),
-                    restenAvBarna = restenAvBarna,
-                    morLever = true,
-                    barnaLever = true,
-                    morHarVerge = false,
-                    løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    erFagsakenMigrertEtterBarnFødt = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true,
-                ),
-            )
-
-        // Assert
-        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
-    }
-
-    @Test
-    fun `Regelevaluering skal resultere i NEI når det har gått mindre enn 5 måneder siden forrige barn ble født`() {
-        // Arrange
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
-        val barnet1 = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
-        val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(aktør = gyldigAktørId)
-        val restenAvBarna: List<PersonInfo> =
-            listOf(
-                PersonInfo(LocalDate.now().minusMonths(5).minusDays(1)),
-                PersonInfo(LocalDate.now().minusMonths(8)),
-            )
-
-        // Act
-        val evaluering =
-            Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
-                FiltreringsreglerFakta(
-                    mor = mor,
-                    barnaFraHendelse = listOf(barnet1, barnet2),
-                    restenAvBarna = restenAvBarna,
-                    morLever = true,
-                    barnaLever = true,
-                    morHarVerge = false,
-                    erFagsakenMigrertEtterBarnFødt = false,
-                    løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true,
-                ),
-            )
-
-        // Assert
-        assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR)
     }
 
     @Test
@@ -210,24 +148,25 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = mor,
-                    barnaFraHendelse = listOf(barnet),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = mor,
+                    barnaSomSkalVurderes = listOf(barnet),
                     restenAvBarna = restenAvBarna,
-                    morLever = false,
+                    søkerLever = false,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_LEVER)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_LEVER)
     }
 
     @Test
@@ -239,24 +178,25 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = mor,
-                    barnaFraHendelse = listOf(barnet),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = mor,
+                    barnaSomSkalVurderes = listOf(barnet),
                     restenAvBarna = restenAvBarna,
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = false,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.BARN_LEVER)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.BARN_LEVER)
     }
 
     @Test
@@ -268,38 +208,25 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = mor,
-                    barnaFraHendelse = listOf(barnet),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = mor,
+                    barnaSomSkalVurderes = listOf(barnet),
                     restenAvBarna = restenAvBarna,
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = true,
+                    søkerHarVerge = true,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
-        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_HAR_IKKE_VERGE)
-    }
-
-    fun assertIkkeOppfyltFiltreringsregel(
-        evalueringer: List<Evaluering>,
-        filtreringsregel: Filtreringsregel,
-    ) {
-        evalueringer.forEach {
-            if (it.evalueringÅrsaker.first().hentIdentifikator() == filtreringsregel.name) {
-                Assertions.assertEquals(Resultat.IKKE_OPPFYLT, it.resultat)
-                return
-            } else {
-                Assertions.assertEquals(Resultat.OPPFYLT, it.resultat)
-            }
-        }
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE)
     }
 
     @Test
@@ -313,22 +240,23 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_ER_OVER_18_ÅR)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR)
     }
 
     @Test
@@ -342,53 +270,24 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
-    }
-
-    @Test
-    fun `Tvillinger født på samme dag skal gi oppfylt`() {
-        // Arrange
-        val mor =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = lagAktør(randomFnr()))
-        val barn1Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = lagAktør(randomFnr()))
-        val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-10-23"))
-
-        // Act
-        val evaluering =
-            Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
-                FiltreringsreglerFakta(
-                    mor = mor,
-                    barnaFraHendelse = listOf(barn1Person),
-                    restenAvBarna = listOf(barn2PersonInfo),
-                    morLever = true,
-                    barnaLever = true,
-                    morHarVerge = false,
-                    erFagsakenMigrertEtterBarnFødt = false,
-                    løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
-                    morHarIkkeOpphørtBarnetrygd = true,
-                ),
-            )
-
-        // Assert
-        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
     }
 
     @Test
@@ -402,23 +301,24 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
-                    morLever = false,
+                    søkerLever = false,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_LEVER)
     }
 
     @Test
@@ -432,22 +332,23 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = false,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_LEVER)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.BARN_LEVER)
     }
 
     @Test
@@ -461,23 +362,24 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = true,
+                    søkerHarVerge = true,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_HAR_IKKE_VERGE)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_VERGE)
     }
 
     @Test
@@ -491,23 +393,24 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
-                    morLever = false,
+                    søkerLever = false,
                     barnaLever = true,
-                    morHarVerge = true,
+                    søkerHarVerge = true,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_LEVER)
     }
 
     @Test
@@ -524,17 +427,18 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person, barn2Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person, barn2Person),
                     restenAvBarna = listOf(barn3PersonInfo),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
@@ -554,23 +458,24 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(barn3PersonInfo),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_GYLDIG_FNR)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_GYLDIG_FNR)
     }
 
     @Test
@@ -585,23 +490,24 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person, barn2Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person, barn2Person),
                     restenAvBarna = listOf(),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_GYLDIG_FNR)
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.BARN_GYLDIG_FNR)
     }
 
     @Test
@@ -614,26 +520,27 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = true,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     dagensDato = LocalDate.parse("2020-10-23"),
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
-        assertIkkeOppfyltFiltreringsregel(
+        assertFørsteIkkeOppfylteRegel(
             evalueringer,
-            Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
+            Filtreringsregel.Identifikator.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
         )
     }
 
@@ -649,17 +556,18 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
@@ -678,23 +586,25 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = true,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
 
         // Assert
         Assertions.assertTrue(!evalueringer.erOppfylt())
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.LØPER_IKKE_BARNETRYGD_FOR_BARNET)
     }
 
     @Test
@@ -707,22 +617,24 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = true,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = true,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO)
     }
 
     @Test
@@ -735,17 +647,18 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = true,
                 ),
             )
@@ -764,61 +677,38 @@ internal class FiltreringsregelTest {
 
         // Act
         val evalueringer =
-            FiltreringsregelEvaluering.evaluerFiltreringsregler(
-                FiltreringsreglerFakta(
-                    mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person),
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_FØDSELSHENDELSE,
+                FiltreringsreglerFaktaFødselshendelse(
+                    søker = søkerPerson,
+                    barnaSomSkalVurderes = listOf(barn1Person),
                     restenAvBarna = listOf(),
-                    morLever = true,
+                    søkerLever = true,
                     barnaLever = true,
-                    morHarVerge = false,
+                    søkerHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                    søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
                     morHarIkkeOpphørtBarnetrygd = false,
                 ),
             )
 
         // Assert
         assertThat(evalueringer.erOppfylt()).isFalse
+        assertFørsteIkkeOppfylteRegel(evalueringer, Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD)
     }
 
-    private fun assertEnesteRegelMedResultatNei(
+    private fun assertFørsteIkkeOppfylteRegel(
         evalueringer: List<Evaluering>,
-        filtreringsRegel: Filtreringsregel,
+        filtreringsregel: Filtreringsregel.Identifikator,
     ) {
-        assertThat(1).isEqualTo(evalueringer.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
-        assertThat(filtreringsRegel.name)
-            .isEqualTo(evalueringer.filter { it.resultat == Resultat.IKKE_OPPFYLT }[0].identifikator)
-    }
-
-    @Test
-    fun `Filtreringsreglene skal følge en fagbestemt rekkefølge`() {
-        // Arrange
-        val fagbestemtFiltreringsregelrekkefølge =
-            listOf(
-                Filtreringsregel.MOR_GYLDIG_FNR,
-                Filtreringsregel.BARN_GYLDIG_FNR,
-                Filtreringsregel.MOR_LEVER,
-                Filtreringsregel.BARN_LEVER,
-                Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
-                Filtreringsregel.MOR_ER_OVER_18_ÅR,
-                Filtreringsregel.MOR_HAR_IKKE_VERGE,
-                Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET,
-                Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
-                Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
-                Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET,
-                Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
-                Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
-            )
-
-        // Assert
-        assertThat(Filtreringsregel.entries.size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
-        assertThat(
-            Filtreringsregel
-                .entries
-                .zip(fagbestemtFiltreringsregelrekkefølge)
-                .all { (x, y) -> x == y },
-        ).isTrue
+        val indeks = evalueringer.indexOfFirst { it.identifikator == filtreringsregel.name }
+        assertThat(indeks).isNotNegative()
+        assertThat(evalueringer.take(indeks)).allSatisfy { assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT) }
+        assertThat(evalueringer[indeks].resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+        assertThat(evalueringer.drop(indeks + 1)).allSatisfy {
+            assertThat(it.resultat).isEqualTo(Resultat.IKKE_VURDERT)
+            assertThat(it.evalueringÅrsaker).isEmpty()
+        }
     }
 }

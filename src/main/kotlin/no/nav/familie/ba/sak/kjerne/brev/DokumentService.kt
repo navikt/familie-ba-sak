@@ -190,12 +190,12 @@ class DokumentService(
             validerBrevmottakerService.validerAtFagsakIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 fagsakId = fagsakId,
                 manueltBrevRequest.manuelleBrevmottakere,
-                barnLagtTilIBrev = manueltBrevRequest.barnIBrev,
+                barnLagtTilIBrev = manueltBrevRequest.finnBarnIBrevMedIdent(),
             )
         } else {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 behandlingId = behandling.id,
-                ekstraBarnLagtTilIBrev = manueltBrevRequest.barnIBrev,
+                ekstraBarnLagtTilIBrev = manueltBrevRequest.finnBarnIBrevMedIdent(),
             )
         }
 
@@ -346,7 +346,7 @@ class DokumentService(
                     arbeidsfordelingService
                         .hentArbeidsfordelingsenhetPåIdenter(
                             fagsak = fagsak,
-                            barnIdenter = manueltBrevRequest.barnIBrev,
+                            barnIdenter = manueltBrevRequest.finnBarnIBrevMedIdent(),
                             behandlingstype = sisteVedtatteBehandling?.kategori?.tilOppgavebehandlingType(),
                         ).run {
                             Enhet(enhetId = enhetId, enhetNavn = enhetNavn)
@@ -356,7 +356,7 @@ class DokumentService(
                 arbeidsfordelingService
                     .hentArbeidsfordelingsenhetPåIdenter(
                         fagsak = fagsak,
-                        barnIdenter = manueltBrevRequest.barnIBrev,
+                        barnIdenter = manueltBrevRequest.finnBarnIBrevMedIdent(),
                         behandlingstype = null,
                     ).run {
                         Enhet(enhetId = enhetId, enhetNavn = enhetNavn)

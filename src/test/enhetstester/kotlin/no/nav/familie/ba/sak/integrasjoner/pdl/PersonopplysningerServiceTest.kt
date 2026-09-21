@@ -1,5 +1,6 @@
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
@@ -16,7 +17,9 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
+import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService.Companion.KAN_IKKE_HÅNDTERE_FALSK_IDENTITET
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.assertj.core.api.Assertions.assertThat
@@ -29,6 +32,7 @@ class PersonopplysningerServiceTest {
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService = mockk()
     private val integrasjonKlient: IntegrasjonKlient = mockk()
     private val falskIdentitetService: FalskIdentitetService = mockk()
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository = mockk()
     private val personopplysningerService: PersonopplysningerService =
         PersonopplysningerService(
             pdlRestKlient = pdlRestKlient,
@@ -36,6 +40,7 @@ class PersonopplysningerServiceTest {
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             integrasjonKlient = integrasjonKlient,
             falskIdentitetService = falskIdentitetService,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
         )
 
     @Test
@@ -128,6 +133,134 @@ class PersonopplysningerServiceTest {
         assertThat(barnRelasjon.navn).isEqualTo(barn.navn)
         assertThat(barnRelasjon.fødselsdato).isEqualTo(barn.fødselsdato)
         assertThat(barnRelasjon.kjønn).isEqualTo(barn.kjønn)
+    }
+
+    @Test
+    fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon skal ignorere relasjon med falsk identitet som ikke er blant relevante aktører`() {
+        // Arrange
+        val person = lagPerson()
+        val relasjon = lagPerson()
+        val personInfo =
+            PersonInfo(
+                fødselsdato = person.fødselsdato,
+                navn = person.navn,
+                kjønn = person.kjønn,
+                forelderBarnRelasjon = setOf(ForelderBarnRelasjon(aktør = relasjon.aktør, relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR)),
+            )
+        val tilganger =
+            mapOf(
+                relasjon.aktør.aktivFødselsnummer() to Tilgang(personIdent = relasjon.aktør.aktivFødselsnummer(), harTilgang = true),
+            )
+
+        every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } returns personInfo
+        every { pdlRestKlient.hentPerson(relasjon.aktør, PersonInfoQuery.ENKEL) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
+        every { falskIdentitetService.hentFalskIdentitet(relasjon.aktør) } throws FunksjonellFeil(KAN_IKKE_HÅNDTERE_FALSK_IDENTITET)
+        every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
+
+        // Act
+        val result = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør, setOf(person.aktør))
+
+        // Assert
+        assertThat(result.forelderBarnRelasjon).isEmpty()
+        verify(exactly = 0) { personopplysningGrunnlagRepository.finnSøkerOgBarnPåFagsakerHvorAktørInngår(any()) }
+    }
+
+    @Test
+    fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon skal kaste feil når relasjon med falsk identitet er blant relevante aktører`() {
+        // Arrange
+        val person = lagPerson()
+        val relasjon = lagPerson()
+        val personInfo =
+            PersonInfo(
+                fødselsdato = person.fødselsdato,
+                navn = person.navn,
+                kjønn = person.kjønn,
+                forelderBarnRelasjon = setOf(ForelderBarnRelasjon(aktør = relasjon.aktør, relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR)),
+            )
+        val tilganger =
+            mapOf(
+                relasjon.aktør.aktivFødselsnummer() to Tilgang(personIdent = relasjon.aktør.aktivFødselsnummer(), harTilgang = true),
+            )
+
+        every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } returns personInfo
+        every { pdlRestKlient.hentPerson(relasjon.aktør, PersonInfoQuery.ENKEL) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
+        every { falskIdentitetService.hentFalskIdentitet(relasjon.aktør) } throws FunksjonellFeil(KAN_IKKE_HÅNDTERE_FALSK_IDENTITET)
+        every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
+
+        // Act & Assert
+        val funksjonellFeil =
+            assertThrows<FunksjonellFeil> {
+                personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør, setOf(person.aktør, relasjon.aktør))
+            }
+        assertThat(funksjonellFeil.message).isEqualTo(KAN_IKKE_HÅNDTERE_FALSK_IDENTITET)
+        verify(exactly = 0) { personopplysningGrunnlagRepository.finnSøkerOgBarnPåFagsakerHvorAktørInngår(any()) }
+    }
+
+    @Test
+    fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon skal ignorere relasjon med falsk identitet som ikke er på aktørens fagsaker`() {
+        // Arrange
+        val person = lagPerson()
+        val relasjon = lagPerson()
+        val personInfo =
+            PersonInfo(
+                fødselsdato = person.fødselsdato,
+                navn = person.navn,
+                kjønn = person.kjønn,
+                forelderBarnRelasjon = setOf(ForelderBarnRelasjon(aktør = relasjon.aktør, relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR)),
+            )
+        val tilganger =
+            mapOf(
+                relasjon.aktør.aktivFødselsnummer() to Tilgang(personIdent = relasjon.aktør.aktivFødselsnummer(), harTilgang = true),
+            )
+
+        every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } returns personInfo
+        every { pdlRestKlient.hentPerson(relasjon.aktør, PersonInfoQuery.ENKEL) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
+        every { falskIdentitetService.hentFalskIdentitet(relasjon.aktør) } throws FunksjonellFeil(KAN_IKKE_HÅNDTERE_FALSK_IDENTITET)
+        every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
+        every { personopplysningGrunnlagRepository.finnSøkerOgBarnPåFagsakerHvorAktørInngår(person.aktør) } returns setOf(person.aktør)
+
+        // Act
+        val result = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
+
+        // Assert
+        assertThat(result.forelderBarnRelasjon).isEmpty()
+        verify(exactly = 1) { personopplysningGrunnlagRepository.finnSøkerOgBarnPåFagsakerHvorAktørInngår(person.aktør) }
+    }
+
+    @Test
+    fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon skal kaste feil når relasjon med falsk identitet er på aktørens fagsaker`() {
+        // Arrange
+        val person = lagPerson()
+        val relasjon = lagPerson()
+        val personInfo =
+            PersonInfo(
+                fødselsdato = person.fødselsdato,
+                navn = person.navn,
+                kjønn = person.kjønn,
+                forelderBarnRelasjon = setOf(ForelderBarnRelasjon(aktør = relasjon.aktør, relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR)),
+            )
+        val tilganger =
+            mapOf(
+                relasjon.aktør.aktivFødselsnummer() to Tilgang(personIdent = relasjon.aktør.aktivFødselsnummer(), harTilgang = true),
+            )
+
+        every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } returns personInfo
+        every { pdlRestKlient.hentPerson(relasjon.aktør, PersonInfoQuery.ENKEL) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
+        every { falskIdentitetService.hentFalskIdentitet(relasjon.aktør) } throws FunksjonellFeil(KAN_IKKE_HÅNDTERE_FALSK_IDENTITET)
+        every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
+        every { personopplysningGrunnlagRepository.finnSøkerOgBarnPåFagsakerHvorAktørInngår(person.aktør) } returns setOf(person.aktør, relasjon.aktør)
+
+        // Act & Assert
+        val funksjonellFeil =
+            assertThrows<FunksjonellFeil> {
+                personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
+            }
+        assertThat(funksjonellFeil.message).isEqualTo(KAN_IKKE_HÅNDTERE_FALSK_IDENTITET)
+        verify(exactly = 1) { personopplysningGrunnlagRepository.finnSøkerOgBarnPåFagsakerHvorAktørInngår(person.aktør) }
     }
 
     @Test

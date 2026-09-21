@@ -169,6 +169,7 @@ data class Behandling(
             skalBehandlesAutomatisk && erMånedligValutajustering() -> true
             skalBehandlesAutomatisk && erRegionstillegg() -> true
             skalBehandlesAutomatisk && erSatsendringEøs() -> true
+            skalBehandlesAutomatisk && erAutomatiskSøknad() -> true
             else -> false
         }
 
@@ -214,6 +215,10 @@ data class Behandling(
         )
         return this
     }
+
+    fun erSøknad() = opprettetÅrsak == BehandlingÅrsak.SØKNAD || opprettetÅrsak == BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD
+
+    fun erAutomatiskSøknad() = opprettetÅrsak == BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD
 
     fun erFørstegangsbehandling() = type == BehandlingType.FØRSTEGANGSBEHANDLING
 
@@ -375,6 +380,7 @@ enum class BehandlingÅrsak(
     SVALBARDTILLEGG("Svalbardtillegg"),
     FALSK_IDENTITET("Falsk identitet"),
     SATSENDRING_EØS("Satsendring EØS"),
+    AUTOMATISK_BEHANDLING_AV_SØKNAD("Automatisk behandling av søknad"),
     ;
 
     fun erOmregningsårsak(): Boolean = this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG

@@ -25,7 +25,6 @@ jobs:
       image-tag: ${{ inputs.image }}
       cluster: ${{ inputs.environment }}-gcp
       resource: .nais/app-${{ inputs.environment }}.yaml
-    secrets: inherit
   notify-audit:
     name: Notify if audited deploy
     if: inputs.environment == 'prod'

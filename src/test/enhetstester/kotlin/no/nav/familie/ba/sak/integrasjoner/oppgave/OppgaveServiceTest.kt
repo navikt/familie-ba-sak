@@ -129,7 +129,7 @@ class OppgaveServiceTest {
 
     @ParameterizedTest
     @EnumSource(ManuellOppgaveType::class)
-    fun `Opprett oppgave med manuell oppgavetype skal lage oppgave med behandlesAvApplikasjon satt for småbarnstillegg og åpen behandling, men ikke fødselshendelse`(manuellOppgaveType: ManuellOppgaveType) {
+    fun `Opprett oppgave med manuell oppgavetype skal lage oppgave med behandlesAvApplikasjon satt for småbarnstillegg, søknad, og åpen behandling, men ikke fødselshendelse`(manuellOppgaveType: ManuellOppgaveType) {
         // Arrange
         val arbeidsfordelingPåBehandling =
             lagArbeidsfordelingPåBehandling(
@@ -182,7 +182,11 @@ class OppgaveServiceTest {
         assertThat(opprettOppgaveRequestSlot.captured.beskrivelse).contains("https://barnetrygd.intern.nav.no/fagsak/$FAGSAK_ID")
         assertThat(opprettOppgaveRequestSlot.captured.tilordnetRessurs).isNull()
         when (manuellOppgaveType) {
-            ManuellOppgaveType.SMÅBARNSTILLEGG, ManuellOppgaveType.ÅPEN_BEHANDLING -> assertThat(opprettOppgaveRequestSlot.captured.behandlesAvApplikasjon).isEqualTo("familie-ba-sak")
+            ManuellOppgaveType.SMÅBARNSTILLEGG,
+            ManuellOppgaveType.ÅPEN_BEHANDLING,
+            ManuellOppgaveType.SØKNAD,
+            -> assertThat(opprettOppgaveRequestSlot.captured.behandlesAvApplikasjon).isEqualTo("familie-ba-sak")
+
             ManuellOppgaveType.FØDSELSHENDELSE -> assertThat(opprettOppgaveRequestSlot.captured.behandlesAvApplikasjon).isNull()
         }
         verify(exactly = 0) { mockedArbeidsfordelingPåBehandlingRepository.save(any()) }

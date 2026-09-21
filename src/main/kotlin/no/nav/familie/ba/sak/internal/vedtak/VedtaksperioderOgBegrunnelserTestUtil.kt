@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.UtfyltEndretUtbetalingAndelDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
@@ -408,24 +407,28 @@ private fun hentTekstForEndretUtbetaling(
         """
 
     Og med endrede utbetalinger
-    | AktørId  | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |""" +
-            hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
-            hentEndretUtbetalingRader(endredeUtbetalinger)
+    | AktørId  | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |""" + rader
     }
 }
 
 private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetalingAndel>?): String =
     endredeUtbetalinger
-        ?.map { it.tilIEndretUtbetalingAndel() }
-        ?.filterIsInstance<IUtfyltEndretUtbetalingAndel>()
-        ?.joinToString("") {
-            """
-    | ${it.aktører.joinToString(",") { aktør -> aktør.aktørId }} |${it.behandlingId}|${
-                it.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
-            }|${
-                it.tom.sisteDagIInneværendeMåned().tilddMMyyyy()
-            }|${it.årsak} | ${it.prosent} | ${it.søknadstidspunkt.tilddMMyyyy()} | ${if (it is UtfyltEndretUtbetalingAndelDeltBosted) it.avtaletidspunktDeltBosted else ""} |"""
-        } ?: ""
+        .orEmpty()
+        .mapNotNull { it.tilEndretUtbetalingRad() }
+        .joinToString("")
+
+private fun EndretUtbetalingAndel.tilEndretUtbetalingRad(): String? {
+    val utfylt = tilIEndretUtbetalingAndel() as? IUtfyltEndretUtbetalingAndel ?: return null
+
+    val aktørIder = utfylt.aktører.joinToString(",") { aktør -> aktør.aktørId }
+    val fom = utfylt.fom.førsteDagIInneværendeMåned().tilddMMyyyy()
+    val tom = utfylt.tom.sisteDagIInneværendeMåned().tilddMMyyyy()
+    val søknadstidspunkt = utfylt.søknadstidspunkt.tilddMMyyyy()
+    val avtaletidspunkt = avtaletidspunktDeltBosted?.tilddMMyyyy() ?: ""
+
+    return """
+    | $aktørIder |${utfylt.behandlingId}|$fom|$tom|${utfylt.årsak} | ${utfylt.prosent} | $søknadstidspunkt | $avtaletidspunkt |"""
+}
 
 private fun hentTekstForTilkjentYtelse(
     andeler: List<AndelTilkjentYtelse>,

@@ -22,7 +22,6 @@ jobs:
       coverage-artifact-name: 'enhetstest'
       coverage-artifact-path: 'target/coverage/enhetstest.xml'
       java-version: '25'
-    secrets: inherit
 
   integrasjonstest:
     name: Integrasjonstest
@@ -36,7 +35,6 @@ jobs:
       coverage-artifact-name: 'integrasjonstest'
       coverage-artifact-path: 'target/coverage/integrasjonstest.xml'
       java-version: '25'
-    secrets: inherit
 
   verdikjedetest-feature-toggle-av:
     name: Verdikjedetester feature toggle av
@@ -47,7 +45,6 @@ jobs:
     with:
       profile: 'verdikjedetest-feature-toggle-av'
       java-version: '25'
-    secrets: inherit
 
   verdikjedetest-feature-toggle-paa:
     name: Verdikjedetester feature toggle på
@@ -58,7 +55,6 @@ jobs:
     with:
       profile: 'verdikjedetest-feature-toggle-paa'
       java-version: '25'
-    secrets: inherit
   build:
     name: Build
     permissions:
@@ -71,7 +67,6 @@ jobs:
       byosbom: target/classes/META-INF/sbom/application.cdx.json
       skip-tests: true
       java-version: '25'
-    secrets: inherit
   deploy-with-new-image:
     name: Deploy with new image
     permissions:
@@ -92,4 +87,3 @@ jobs:
       image: ${{ needs.build.outputs.image }}
       cluster: dev-gcp
       resource: .nais/app-dev.yaml
-    secrets: inherit

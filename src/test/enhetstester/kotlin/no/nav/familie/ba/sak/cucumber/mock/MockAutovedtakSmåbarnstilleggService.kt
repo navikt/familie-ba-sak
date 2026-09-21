@@ -45,6 +45,7 @@ fun mockAutovedtakSmåbarnstilleggService(
         autovedtakSatsendringEøsService = mockk(),
         snikeIKøenService = mockk(),
         featureToggleService = mockk(),
+        autovedtakSøknadService = mockk(),
     )
 }
 

@@ -116,6 +116,10 @@ class StegService(
                     listOf(fagsak.aktør.aktivFødselsnummer())
                 }
 
+                nyBehandling.behandlingÅrsak === BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD -> {
+                    emptyList() // TODO : Burde vi hente barn fra søknaden?
+                }
+
                 nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.FØDSELSHENDELSE, BehandlingÅrsak.HELMANUELL_MIGRERING) -> {
                     nyBehandling.barnasIdenter
                 }
@@ -315,14 +319,14 @@ class StegService(
     }
 
     @Transactional
-    fun håndterFiltreringsreglerForFødselshendelser(
+    fun håndterFiltreringsreglerForAutomatiskeBehandlinger(
         behandling: Behandling,
-        nyBehandling: NyBehandlingHendelse,
+        filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,
     ): Behandling {
-        val behandlingSteg: FiltreringFødselshendelserSteg = hentBehandlingSteg(StegType.FILTRERING_FØDSELSHENDELSER) as FiltreringFødselshendelserSteg
+        val behandlingSteg: FiltreringAutomatiskBehandlingSteg = hentBehandlingSteg(StegType.FILTRERING_AUTOMATISK_BEHANDLING) as FiltreringAutomatiskBehandlingSteg
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, nyBehandling)
+            behandlingSteg.utførStegOgAngiNeste(behandling, filtrerAutomatiskBehandlingData)
         }
     }
 

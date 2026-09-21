@@ -34,11 +34,10 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.OSLO
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.STORD
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
@@ -102,6 +101,7 @@ internal class DokumentServiceTest {
     private val persongrunnlagService = mockk<PersongrunnlagService>(relaxed = true)
     private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
     private val integrasjonKlient = mockk<IntegrasjonKlient>(relaxed = true)
+    private val validerBrevmottakerService = mockk<ValiderBrevmottakerService>(relaxed = true)
 
     private val dokumentService: DokumentService =
         spyk(
@@ -114,7 +114,7 @@ internal class DokumentServiceTest {
                 organisasjonService = organisasjonService,
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 brevmottakerService = brevmottakerService,
-                validerBrevmottakerService = mockk(relaxed = true),
+                validerBrevmottakerService = validerBrevmottakerService,
                 saksbehandlerContext = saksbehandlerContext,
                 arbeidsfordelingService = arbeidsfordelingService,
                 pdlRestKlient = pdlRestKlient,
@@ -193,6 +193,67 @@ internal class DokumentServiceTest {
             }
 
             assert(!avsenderMottaker.isCaptured) { "AvsenderMottaker trenger ikke være satt når mottaker er bruker" }
+        }
+
+        @Test
+        fun `skal ikke validere brevmottakere mot manuelt registrerte barn på behandling som mangler ident`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val barnIdent = "12345678910"
+
+            every { fagsakRepository.finnFagsak(any()) } returns behandling.fagsak
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
+
+            // Act
+            runCatching {
+                dokumentService.sendManueltBrev(
+                    ManueltBrevRequest(
+                        brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
+                        enhet = Enhet("enhet", "enhetNavn"),
+                        barnIBrev = listOf(barnIdent, ""),
+                    ),
+                    behandling = behandling,
+                    fagsakId = behandling.fagsak.id,
+                )
+            }
+
+            // Assert
+            verify(exactly = 1) {
+                validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                    behandlingId = behandling.id,
+                    ekstraBarnLagtTilIBrev = listOf(barnIdent),
+                )
+            }
+        }
+
+        @Test
+        fun `skal ikke validere brevmottakere mot manuelt registrerte barn på fagsak som mangler ident`() {
+            // Arrange
+            val fagsak = lagFagsak()
+            val barnIdent = "12345678910"
+
+            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
+
+            // Act
+            runCatching {
+                dokumentService.sendManueltBrev(
+                    ManueltBrevRequest(
+                        brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
+                        enhet = Enhet("enhet", "enhetNavn"),
+                        barnIBrev = listOf(barnIdent, ""),
+                    ),
+                    fagsakId = fagsak.id,
+                )
+            }
+
+            // Assert
+            verify(exactly = 1) {
+                validerBrevmottakerService.validerAtFagsakIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                    fagsakId = fagsak.id,
+                    manuelleBrevmottakere = emptyList(),
+                    barnLagtTilIBrev = listOf(barnIdent),
+                )
+            }
         }
 
         @Test
@@ -838,6 +899,34 @@ internal class DokumentServiceTest {
                 arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
                     fagsak = fagsak,
                     barnIdenter = listOf(barn1Ident, barn2Ident),
+                    behandlingstype = null,
+                )
+            }
+        }
+
+        @Test
+        fun `skal ikke hente arbeidsfordeling for manuelt registrerte barn som ikke er folkeregistrert og derfor mangler ident`() {
+            // Arrange
+            val barnIdent = "12345678910"
+            val manueltBrevDtoMedBarn = manueltBrevRequest.copy(barnIBrev = listOf(barnIdent, ""))
+            val arbeidsfordelingsenhet =
+                Arbeidsfordelingsenhet(
+                    enhetId = OSLO.enhetsnummer,
+                    enhetNavn = OSLO.enhetsnavn,
+                )
+
+            every { integrasjonKlient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns listOf(DRAMMEN, STORD)
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+            every { arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(any(), any(), any()) } returns arbeidsfordelingsenhet
+
+            // Act
+            dokumentService.byggMottakerdataFraFagsak(fagsak, manueltBrevDtoMedBarn)
+
+            // Assert
+            verify(exactly = 1) {
+                arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
+                    fagsak = fagsak,
+                    barnIdenter = listOf(barnIdent),
                     behandlingstype = null,
                 )
             }

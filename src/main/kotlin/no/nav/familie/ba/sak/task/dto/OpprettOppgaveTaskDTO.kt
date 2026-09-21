@@ -17,5 +17,6 @@ enum class ManuellOppgaveType(
 ) {
     SMÅBARNSTILLEGG(true),
     FØDSELSHENDELSE(false),
+    SØKNAD(true),
     ÅPEN_BEHANDLING(true),
 }

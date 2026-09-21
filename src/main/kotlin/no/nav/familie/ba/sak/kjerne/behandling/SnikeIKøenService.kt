@@ -154,6 +154,7 @@ enum class SettPåMaskinellVentÅrsak(
     OMREGNING_6_ELLER_18_ÅR("Omregning 6 eller 18 år"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     FØDSELSHENDELSE("Fødselshendelse"),
+    SØKNAD("Søknad"),
     MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
     OPPDATER_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
     FINNMARKSTILLEGG("Finnmarkstillegg"),
