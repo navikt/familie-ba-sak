@@ -133,6 +133,15 @@ data class AndelTilkjentYtelse(
             "forrigePeriodeOffset = $forrigePeriodeOffset, kildeBehandlingId = $kildeBehandlingId, nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, " +
             "differanseberegnetBeløp = $differanseberegnetPeriodebeløp, beløpUtenEndretUtbetaling = $beløpUtenEndretUtbetaling)"
 
+    // Dersom det legges til nye felter som påvirker utbetalingen må de også legges til her.
+    fun felterHarEndretSegSidenForrigeBehandling(forrigeAndel: AndelTilkjentYtelse): Boolean =
+        this.sats != forrigeAndel.sats ||
+            this.prosent.compareTo(forrigeAndel.prosent) != 0 ||
+            this.kalkulertUtbetalingsbeløp != forrigeAndel.kalkulertUtbetalingsbeløp ||
+            this.nasjonaltPeriodebeløp != forrigeAndel.nasjonaltPeriodebeløp ||
+            this.differanseberegnetPeriodebeløp != forrigeAndel.differanseberegnetPeriodebeløp ||
+            this.beløpUtenEndretUtbetaling != forrigeAndel.beløpUtenEndretUtbetaling
+
     fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
 
     fun erUtvidet() = this.type == YtelseType.UTVIDET_BARNETRYGD
