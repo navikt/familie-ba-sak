@@ -163,6 +163,30 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
             ikkeOppfyltNavn = "UTBETALES_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED",
             ikkeOppfyltBeskrivelse = "Det utbetales barnetrygd for barnet til annen mottaker i inneværende måned",
         ),
+        SØKER_HAR_IKKE_KRYSSET_PÅ_EØS_SPØRSMÅL_I_SØKNADEN(
+            oppfyltNavn = "SØKER_HAR_IKKE_KRYSSET_PÅ_EØS_SPØRSMÅL_I_SØKNADEN",
+            oppfyltBeskrivelse = "Søker har ikke krysset på EØS-spørsmål i søknaden",
+            ikkeOppfyltNavn = "SØKER_HAR_KRYSSET_PÅ_EØS_SPØRSMÅL_I_SØKNADEN",
+            ikkeOppfyltBeskrivelse = "Søker har krysset på EØS-spørsmål i søknaden",
+        ),
+        SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN(
+            oppfyltNavn = "SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN",
+            oppfyltBeskrivelse = "Søker har ikke krysset for delt bosted for noen av barna i søknaden",
+            ikkeOppfyltNavn = "SØKER_HAR_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN",
+            ikkeOppfyltBeskrivelse = "Søker har krysset for delt bosted for minst ett av barna i søknaden",
+        ),
+        SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN(
+            oppfyltNavn = "SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN",
+            oppfyltBeskrivelse = "Søker har ikke krysset for at noen av barna er i fosterhjem eller beredskapshjem i søknaden",
+            ikkeOppfyltNavn = "SØKER_HAR_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN",
+            ikkeOppfyltBeskrivelse = "Søker har krysset for at minst ett av barna er i fosterhjem eller beredskapshjem i søknaden",
+        ),
+        SØKNADEN_INNEHOLDER_IKKE_VEDLEGG(
+            oppfyltNavn = "SØKNADEN_INNEHOLDER_IKKE_VEDLEGG",
+            oppfyltBeskrivelse = "Søknaden inneholder ikke vedlegg",
+            ikkeOppfyltNavn = "SØKNADEN_INNEHOLDER_VEDLEGG",
+            ikkeOppfyltBeskrivelse = "Søknaden inneholder vedlegg",
+        ),
         ;
 
         val oppfylt: EvalueringÅrsak = Utfall(this, oppfyltNavn, oppfyltBeskrivelse)
@@ -254,6 +278,26 @@ private val utbetalesIkkeBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned 
         !it.utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned
     }
 
+private val søkerHarIkkeKryssetPåEøsSpørsmålISøknaden =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKER_HAR_IKKE_KRYSSET_PÅ_EØS_SPØRSMÅL_I_SØKNADEN) {
+        !it.søkerHarKryssetPåEøsSpørsmålISøknaden
+    }
+
+private val søkerHarIkkeKryssetForDeltBostedISøknaden =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN) {
+        !it.søkerHarKryssetForDeltBostedISøknaden
+    }
+
+private val søkerHarIkkeKryssetForFosterhjemEllerBeredskapshjemISøknaden =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN) {
+        !it.søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden
+    }
+
+private val søknadenInneholderIkkeVedlegg =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG) {
+        !it.søknadenInneholderVedlegg
+    }
+
 private val morHarIkkeOppfyltUtvidetVilkårVedFødselsdato =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO) {
         !it.søkerOppfyllerVilkårForUtvidetBarnetrygd
@@ -296,6 +340,10 @@ val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøkn
         søkerMottarIkkeLøpendeUtvidet,
         søkerHarIkkeLøpendeEøsBarnetrygd,
         utbetalesIkkeBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned,
+        søkerHarIkkeKryssetPåEøsSpørsmålISøknaden,
+        søkerHarIkkeKryssetForDeltBostedISøknaden,
+        søkerHarIkkeKryssetForFosterhjemEllerBeredskapshjemISøknaden,
+        søknadenInneholderIkkeVedlegg,
     )
 
 val FILTRERINGSREGLER_FØDSELSHENDELSE: List<Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>> =

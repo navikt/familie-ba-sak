@@ -145,6 +145,45 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
         }
     }
 
+    @Nested
+    inner class NårSøknadenInneholderFaktaSomKreverManuellBehandling {
+        @Test
+        fun `skal avvise når søker har krysset på EØS-spørsmål i søknaden`() {
+            // Act
+            val evalueringer = evaluer(søkerHarKryssetPåEøsSpørsmålISøknaden = true)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_KRYSSET_PÅ_EØS_SPØRSMÅL_I_SØKNADEN)
+        }
+
+        @Test
+        fun `skal avvise når søker har krysset for delt bosted i søknaden`() {
+            // Act
+            val evalueringer = evaluer(søkerHarKryssetForDeltBostedISøknaden = true)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN)
+        }
+
+        @Test
+        fun `skal avvise når søker har krysset for at barn er i fosterhjem eller beredskapshjem i søknaden`() {
+            // Act
+            val evalueringer = evaluer(søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden = true)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN)
+        }
+
+        @Test
+        fun `skal avvise når søknaden inneholder vedlegg`() {
+            // Act
+            val evalueringer = evaluer(søknadenInneholderVedlegg = true)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG)
+        }
+    }
+
     private fun evaluer(
         søker: Person = søker(),
         barna: List<Person> = listOf(barn()),
@@ -154,6 +193,10 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
         søkerMottarLøpendeUtvidet: Boolean = false,
         søkerMottarEøsBarnetrygd: Boolean = false,
         utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned: Boolean = false,
+        søkerHarKryssetPåEøsSpørsmålISøknaden: Boolean = false,
+        søkerHarKryssetForDeltBostedISøknaden: Boolean = false,
+        søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden: Boolean = false,
+        søknadenInneholderVedlegg: Boolean = false,
     ): List<Evaluering> =
         filtreringsregelEvaluator.evaluerFiltreringsregler(
             FILTRERINGSREGLER_SØKNAD,
@@ -167,6 +210,10 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
                 barnaLever = barnaLever,
                 søkerHarVerge = søkerHarVerge,
                 utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned = utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned,
+                søkerHarKryssetPåEøsSpørsmålISøknaden = søkerHarKryssetPåEøsSpørsmålISøknaden,
+                søkerHarKryssetForDeltBostedISøknaden = søkerHarKryssetForDeltBostedISøknaden,
+                søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden = søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden,
+                søknadenInneholderVedlegg = søknadenInneholderVedlegg,
                 søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling = false,
             ),
         )

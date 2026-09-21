@@ -34,11 +34,25 @@ fun lagSøknadDTO(
 fun lagSøknad(
     søkerPlanleggerÅBoINorge12Mnd: Boolean = true,
     barneIdenterTilPlanleggerBoINorge12Mnd: Map<String, Boolean> = mapOf(randomFnr() to true),
+    harKryssetPåEøsSpørsmål: Boolean = false,
+    inneholderVedlegg: Boolean = false,
+    barneIdenterTilErFosterbarn: Map<String, Boolean> = emptyMap(),
+    barneIdenterTilHarKryssetForDeltBosted: Map<String, Boolean> = emptyMap(),
 ): Søknad =
     Søknad(
         søker = Søker(fnr = randomFnr(), planleggerÅBoINorge12Mnd = søkerPlanleggerÅBoINorge12Mnd),
-        barn = barneIdenterTilPlanleggerBoINorge12Mnd.map { (fnr, planleggerÅBoINorge12Mnd) -> Barn(fnr, planleggerÅBoINorge12Mnd) },
+        barn =
+            barneIdenterTilPlanleggerBoINorge12Mnd.map { (fnr, planleggerÅBoINorge12Mnd) ->
+                Barn(
+                    fnr = fnr,
+                    planleggerÅBoINorge12Mnd = planleggerÅBoINorge12Mnd,
+                    erFosterbarn = barneIdenterTilErFosterbarn[fnr] ?: false,
+                    harKryssetForDeltBosted = barneIdenterTilHarKryssetForDeltBosted[fnr] ?: false,
+                )
+            },
         behandlingKategori = BehandlingKategori.NASJONAL,
         behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+        harKryssetPåEøsSpørsmål = harKryssetPåEøsSpørsmål,
+        inneholderVedlegg = inneholderVedlegg,
         målform = Målform.NB,
     )

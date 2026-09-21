@@ -26,7 +26,16 @@ class SøknadMapperV9Test {
             val barn2 = randomFnr()
             val versjonertBarnetrygdSøknadV9 =
                 VersjonertBarnetrygdSøknadV9(
-                    barnetrygdSøknad = lagBarnetrygdSøknadV9(barnFnr = listOf(barn1, barn2), søknadstype = Søknadstype.ORDINÆR, erEøs = true, originalspråk = "nn"),
+                    barnetrygdSøknad =
+                        lagBarnetrygdSøknadV9(
+                            barnFnr = listOf(barn1, barn2),
+                            søknadstype = Søknadstype.ORDINÆR,
+                            erEøs = true,
+                            originalspråk = "nn",
+                            inneholderVedlegg = true,
+                            erFosterbarn = true,
+                            harKryssetForDeltBosted = true,
+                        ),
                 )
 
             // Act
@@ -38,6 +47,10 @@ class SøknadMapperV9Test {
             assertThat(søknad.behandlingKategori).isEqualTo(BehandlingKategori.EØS)
             assertThat(søknad.behandlingUnderkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
             assertThat(søknad.målform).isEqualTo(Målform.NN)
+            assertThat(søknad.harKryssetPåEøsSpørsmål).isTrue()
+            assertThat(søknad.inneholderVedlegg).isTrue()
+            assertThat(søknad.barn.map { it.erFosterbarn }).containsOnly(true)
+            assertThat(søknad.barn.map { it.harKryssetForDeltBosted }).containsOnly(true)
         }
 
         @Test
