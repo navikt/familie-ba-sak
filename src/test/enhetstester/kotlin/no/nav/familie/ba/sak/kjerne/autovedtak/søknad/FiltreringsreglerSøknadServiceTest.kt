@@ -120,8 +120,8 @@ class FiltreringsreglerSøknadServiceTest {
                 barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true),
                 harKryssetPåEøsSpørsmål = true,
                 inneholderVedlegg = true,
-                minstEttBarnErFosterbarn = true,
-                minstEttBarnHarKryssetForDeltBosted = true,
+                barneIdenterTilErFosterbarn = mapOf(barnsIdent to true),
+                barneIdenterTilHarKryssetForDeltBosted = mapOf(barnsIdent to true),
             )
 
         // Act
@@ -167,8 +167,8 @@ class FiltreringsreglerSøknadServiceTest {
         every { søknadService.finnDigitalSøknad(behandling.id) } returns
             lagSøknad(
                 barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(førsteBarnsIdent to true, andreBarnsIdent to true),
-                minstEttBarnErFosterbarn = true,
-                minstEttBarnHarKryssetForDeltBosted = true,
+                barneIdenterTilErFosterbarn = mapOf(andreBarnsIdent to true),
+                barneIdenterTilHarKryssetForDeltBosted = mapOf(andreBarnsIdent to true),
             )
 
         // Act
