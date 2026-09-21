@@ -15,10 +15,10 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåba
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
-import no.nav.familie.ba.sak.kjerne.behandling.Søknad
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -60,7 +60,8 @@ sealed interface AutomatiskBehandlingData {
 }
 
 data class SøknadData(
-    val søknad: Søknad,
+    val nyBehandling: NyBehandling,
+    val søkersIdent: String,
 ) : AutomatiskBehandlingData {
     override val type = Autovedtaktype.SØKNAD
 }
@@ -133,7 +134,7 @@ class AutovedtakStegService(
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun kjørAutomatiskBehandlingSøknad(
         mottakersAktør: Aktør,
-        søknad: Søknad,
+        nyBehandling: NyBehandling,
         førstegangKjørt: LocalDateTime = LocalDateTime.now(),
     ): String {
         if (!featureToggleService.isEnabled(FeatureToggle.SKAL_BEHANDLE_SOKNAD_AUTOMATISK, false)) {
@@ -141,7 +142,11 @@ class AutovedtakStegService(
         }
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
-            automatiskBehandlingData = SøknadData(søknad),
+            automatiskBehandlingData =
+                SøknadData(
+                    nyBehandling = nyBehandling,
+                    søkersIdent = mottakersAktør.aktivFødselsnummer(),
+                ),
             førstegangKjørt = førstegangKjørt,
         )
     }
@@ -301,7 +306,7 @@ class AutovedtakStegService(
             is SmåbarnstilleggData,
             -> null
 
-            is SøknadData -> behandlingsdata.søknad.fagsakId
+            is SøknadData -> behandlingsdata.nyBehandling.fagsakId
         }
 
     private fun håndterÅpenBehandlingOgAvbrytAutovedtak(

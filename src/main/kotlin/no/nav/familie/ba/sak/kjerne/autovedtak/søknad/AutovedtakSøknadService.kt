@@ -28,13 +28,15 @@ class AutovedtakSøknadService(
     override fun kjørBehandling(behandlingsdata: SøknadData): String {
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
-                fagsakId = behandlingsdata.søknad.fagsakId,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
+                nyBehandling =
+                    behandlingsdata.nyBehandling.copy(
+                        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                        behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
+                    ),
                 filtrerAutomatiskBehandlingData =
                     FiltrerAutomatiskBehandlingData(
-                        søkersIdent = behandlingsdata.søknad.søkersIdent,
-                        barnasIdenter = behandlingsdata.søknad.barnasIdenter,
+                        søkersIdent = behandlingsdata.søkersIdent,
+                        barnasIdenter = behandlingsdata.nyBehandling.barnasIdenter,
                     ),
             )
 
@@ -63,7 +65,7 @@ class AutovedtakSøknadService(
                 }
 
                 else -> {
-                    throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} for behandlingsårsak ${BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD} for fagsak=${behandlingsdata.søknad.fagsakId}")
+                    throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} for behandlingsårsak ${BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD} for fagsak=${behandlingsdata.nyBehandling.fagsakId}")
                 }
             }
 

@@ -13,8 +13,10 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.Søknad
+import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.dto.BehandleAutomatiskSøknadTaskDTO
@@ -50,9 +52,17 @@ class BehandleAutomatiskSøknadTaskTest {
     private val nyBehandling =
         NyBehandling(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            kategori = BehandlingKategori.EØS,
+            underkategori = BehandlingUnderkategori.UTVIDET,
             fagsakId = 1L,
             barnasIdenter = listOf(randomFnr()),
             søknadMottattDato = LocalDate.of(2026, 1, 1),
+            søknadsinfo =
+                Søknadsinfo(
+                    journalpostId = "123456789",
+                    brevkode = "NAV 33-00.07",
+                    erDigital = true,
+                ),
         )
 
     @Nested
@@ -73,12 +83,7 @@ class BehandleAutomatiskSøknadTaskTest {
             verify(exactly = 1) {
                 autovedtakStegService.kjørAutomatiskBehandlingSøknad(
                     mottakersAktør = søkersAktør,
-                    søknad =
-                        Søknad(
-                            fagsakId = nyBehandling.fagsakId,
-                            søkersIdent = søkersIdent,
-                            barnasIdenter = nyBehandling.barnasIdenter,
-                        ),
+                    nyBehandling = nyBehandling,
                     førstegangKjørt = any(),
                 )
             }

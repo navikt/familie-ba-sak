@@ -15,8 +15,13 @@ import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SøknadData
-import no.nav.familie.ba.sak.kjerne.behandling.Søknad
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
@@ -27,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 class AutovedtakSøknadServiceTest {
     private val autovedtakService = mockk<AutovedtakService>()
@@ -47,13 +53,24 @@ class AutovedtakSøknadServiceTest {
     private val fagsak = lagFagsak()
     private val behandling = lagBehandling(fagsak = fagsak, førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG, resultat = Behandlingsresultat.INNVILGET)
     private val simulering = listOf(lagØkonomiSimuleringMottaker(behandling = behandling))
-    private val søknad =
-        Søknad(
+    private val søkersIdent = "12345678910"
+    private val nyBehandling =
+        NyBehandling(
+            behandlingType = BehandlingType.REVURDERING,
+            behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+            kategori = BehandlingKategori.EØS,
+            underkategori = BehandlingUnderkategori.UTVIDET,
             fagsakId = fagsak.id,
-            søkersIdent = "12345678910",
             barnasIdenter = listOf("12345678911"),
+            søknadMottattDato = LocalDate.of(2026, 1, 1),
+            søknadsinfo =
+                Søknadsinfo(
+                    journalpostId = "123456789",
+                    brevkode = "NAV 33-00.07",
+                    erDigital = true,
+                ),
         )
-    private val søknadData = SøknadData(søknad = søknad)
+    private val søknadData = SøknadData(nyBehandling = nyBehandling, søkersIdent = søkersIdent)
 
     @Nested
     inner class SkalAutovedtakBehandles {
@@ -73,9 +90,7 @@ class AutovedtakSøknadServiceTest {
         fun setup() {
             every {
                 autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
-                    fagsakId = søknad.fagsakId,
-                    behandlingType = any(),
-                    behandlingÅrsak = any(),
+                    nyBehandling = any(),
                     filtrerAutomatiskBehandlingData = any(),
                 )
             } returns behandling
@@ -95,12 +110,37 @@ class AutovedtakSøknadServiceTest {
 
             // Assert
             verifyOrder {
-                autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(any(), any(), any(), any())
+                autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(any(), any())
                 autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling)
                 simuleringService.oppdaterSimuleringPåBehandling(behandling)
                 autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling)
             }
+        }
+
+        @Test
+        fun `skal videreføre opplysningene om søknaden til den automatiske behandlingen`() {
+            // Arrange
+            val nyBehandlingSlot = slot<NyBehandling>()
+            every {
+                autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
+                    nyBehandling = capture(nyBehandlingSlot),
+                    filtrerAutomatiskBehandlingData = any(),
+                )
+            } returns behandling
+
+            // Act
+            autovedtakSøknadService.kjørBehandling(søknadData)
+
+            // Assert
+            assertThat(nyBehandlingSlot.captured.søknadsinfo).isEqualTo(nyBehandling.søknadsinfo)
+            assertThat(nyBehandlingSlot.captured.søknadMottattDato).isEqualTo(nyBehandling.søknadMottattDato)
+            assertThat(nyBehandlingSlot.captured.barnasIdenter).isEqualTo(nyBehandling.barnasIdenter)
+            assertThat(nyBehandlingSlot.captured.fagsakId).isEqualTo(nyBehandling.fagsakId)
+            assertThat(nyBehandlingSlot.captured.kategori).isEqualTo(BehandlingKategori.EØS)
+            assertThat(nyBehandlingSlot.captured.underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+            assertThat(nyBehandlingSlot.captured.behandlingType).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING)
+            assertThat(nyBehandlingSlot.captured.behandlingÅrsak).isEqualTo(BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD)
         }
 
         @Test
@@ -156,9 +196,7 @@ class AutovedtakSøknadServiceTest {
             val behandlingUtenIverksettelse = lagBehandling(fagsak = fagsak, førsteSteg = StegType.FERDIGSTILLE_BEHANDLING, resultat = Behandlingsresultat.INNVILGET)
             every {
                 autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
-                    fagsakId = søknad.fagsakId,
-                    behandlingType = any(),
-                    behandlingÅrsak = any(),
+                    nyBehandling = any(),
                     filtrerAutomatiskBehandlingData = any(),
                 )
             } returns behandlingUtenIverksettelse

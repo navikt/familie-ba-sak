@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.Søknad
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.dto.BehandleAutomatiskSøknadTaskDTO
@@ -55,12 +54,7 @@ class BehandleAutomatiskSøknadTask(
         try {
             autovedtakStegService.kjørAutomatiskBehandlingSøknad(
                 mottakersAktør = fagsak.aktør,
-                søknad =
-                    Søknad(
-                        fagsakId = fagsakId,
-                        søkersIdent = søkersIdent,
-                        barnasIdenter = nyBehandling.barnasIdenter,
-                    ),
+                nyBehandling = nyBehandling,
             )
         } catch (feil: AutovedtakMåBehandlesManueltFeil) {
             val behandling = stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
