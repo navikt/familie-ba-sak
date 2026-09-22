@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.ENDRE_MIGRERINGSDATO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
@@ -187,7 +188,9 @@ class VilkårsvurderingForNyBehandlingService(
     ): Vilkårsvurdering {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
 
-        validerAtFødselshendelseInneholderMinstEttBarn(behandling, personopplysningGrunnlag)
+        if (behandling.opprettetÅrsak == FØDSELSHENDELSE) {
+            validerAtFødselshendelseInneholderMinstEttBarn(behandling, personopplysningGrunnlag)
+        }
 
         val aktivVilkårsvurdering = hentVilkårsvurdering(behandling.id)
 
