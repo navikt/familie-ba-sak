@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.søknad
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erFosterbarn
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erIBeredskapshjem
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harKryssetForDeltBosted
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.inneholderVedlegg
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.tilBehandlingUnderkategori
@@ -38,6 +39,7 @@ class SøknadMapperV9 : SøknadMapper {
                             fnr = it.fnr,
                             planleggerÅBoINorge12Mnd = it.spørsmål.hentVerdiForSøknadsfelt(SøknadsFeltId.PLANLEGGER_Å_BO_I_NORGE_12_MND_BARN).tilBoolskSvar(),
                             erFosterbarn = it.spørsmål.erFosterbarn(),
+                            erIBeredskapshjem = it.spørsmål.erIBeredskapshjem(),
                             harKryssetForDeltBosted = it.andreForelder.harKryssetForDeltBosted(),
                         )
                     },

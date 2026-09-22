@@ -16,13 +16,14 @@ data class Søknad(
 ) {
     fun harKryssetForDeltBostedForMinstEttBarn(): Boolean = barn.any { it.harKryssetForDeltBosted }
 
-    fun harKryssetForFosterhjemEllerBeredskapshjemForMinstEttBarn(): Boolean = barn.any { it.erFosterbarn }
+    fun harKryssetForFosterhjemEllerBeredskapshjemForMinstEttBarn(): Boolean = barn.any { it.erFosterbarn || it.erIBeredskapshjem }
 }
 
 data class Barn(
     val fnr: String,
     val planleggerÅBoINorge12Mnd: Boolean,
     val erFosterbarn: Boolean,
+    val erIBeredskapshjem: Boolean,
     val harKryssetForDeltBosted: Boolean,
 )
 

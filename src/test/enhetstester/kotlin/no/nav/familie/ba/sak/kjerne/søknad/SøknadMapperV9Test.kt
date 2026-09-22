@@ -34,6 +34,7 @@ class SøknadMapperV9Test {
                             originalspråk = "nn",
                             inneholderVedlegg = true,
                             erFosterbarn = true,
+                            erIBeredskapshjem = true,
                             harKryssetForDeltBosted = true,
                         ),
                 )
@@ -50,6 +51,7 @@ class SøknadMapperV9Test {
             assertThat(søknad.harKryssetPåEøsSpørsmål).isTrue()
             assertThat(søknad.inneholderVedlegg).isTrue()
             assertThat(søknad.barn.map { it.erFosterbarn }).containsOnly(true)
+            assertThat(søknad.barn.map { it.erIBeredskapshjem }).containsOnly(true)
             assertThat(søknad.barn.map { it.harKryssetForDeltBosted }).containsOnly(true)
         }
 
