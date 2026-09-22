@@ -225,7 +225,7 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
-    fun `skal sette fakta for aktiv norsk bostedsadresse for søker og barn`() {
+    fun `skal sette søkerHarAktivNorskBostedsadresse og barnHarAktivNorskBostedsadresse til true`() {
         // Act
         val fakta = kjørFiltreringsregler()
 
@@ -235,7 +235,7 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
-    fun `skal ette fakta til false for aktiv norsk bostedsadresse når søker mangler bostedsadresse`() {
+    fun `skal sette søkerHarAktivNorskBostedsadresse til false når søker mangler bostedsadresse`() {
         // Act
         val fakta =
             kjørFiltreringsregler(
@@ -249,7 +249,7 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
-    fun `skal sette fakta til false for aktiv norsk bostedsaddresse for barn når listen med søknadsbarn for aktiv norsk bostedsadresse er tom`() {
+    fun `skal sette barnHarAktivNorskBostedsadresse til false når listen med søknadsbarn er tom`() {
         // Act
         val fakta = kjørFiltreringsregler(barnasAktører = { emptyList() })
 
@@ -258,7 +258,7 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
-    fun `skal sette fakta når alle søknadsbarn har foreldre barn-relasjon til søker`() {
+    fun `skal sette søkerOgBarnHarForelderBarnRelasjon til true når alle søknadsbarn har foreldre-barn-relasjon til søker`() {
         // Act
         val fakta = kjørFiltreringsregler(barnasAktører = { listOf(it) })
 
@@ -267,7 +267,7 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
-    fun `skal ikke sette fakta til false når listen med søknadsbarn for foreldre barn-relasjon er tom`() {
+    fun `skal sette søkerOgBarnHarForelderBarnRelasjon til false når listen med søknadsbarn er tom`() {
         // Act
         val fakta = kjørFiltreringsregler(barnasAktører = { emptyList() })
 
@@ -276,7 +276,7 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
-    fun `skal ikke sette fakta når søknadsbarn mangler foreldre barn-relasjon til søker`() {
+    fun `skal sette søkerOgBarnHarForelderBarnRelasjon til false når søknadsbarn mangler forelder-barn-relasjon til søker`() {
         // Act
         val fakta = kjørFiltreringsregler(personInfo = lagPersonInfo())
 
@@ -285,7 +285,7 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
-    fun `skal sette fakta når søker har adressebeskyttelse gradering 6 eller 19`() {
+    fun `skal sette søkerHarAdressebeskyttelseGradering6Eller19 til true når søker har gradering 6 eller 19`() {
         // Act
         val fakta =
             kjørFiltreringsregler(
@@ -300,7 +300,7 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
-    fun `skal sette fakta når barn har adressebeskyttelse gradering 6 eller 19`() {
+    fun `skal sette barnHarAdressebeskyttelseGradering6Eller19 til true når barn har gradering 6 eller 19`() {
         // Act
         val fakta =
             kjørFiltreringsregler(
@@ -312,7 +312,7 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
-    fun `skal sette fakta når barn er ukrainsk statsborger`() {
+    fun `skal sette barnHarUkrainskStatsborgerskap til true når barn er ukrainsk statsborger`() {
         // Act
         val fakta =
             kjørFiltreringsregler(
