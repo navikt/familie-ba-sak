@@ -319,7 +319,7 @@ class OpprettTaskService(
             callId: String,
             body: () -> T,
         ): T {
-            val originalCallId = MDC.get(MDCConstants.MDC_CALL_ID) ?: null
+            val originalCallId = MDC.get(MDCConstants.MDC_CALL_ID)
 
             return try {
                 MDC.put(MDCConstants.MDC_CALL_ID, callId)
