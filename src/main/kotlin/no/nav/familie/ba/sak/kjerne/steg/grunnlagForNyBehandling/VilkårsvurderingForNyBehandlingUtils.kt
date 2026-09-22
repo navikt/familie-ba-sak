@@ -40,9 +40,9 @@ data class VilkårsvurderingForNyBehandlingUtils(
                         )
                 }
 
-                !behandling.skalBehandlesAutomatisk -> {
+                !behandling.skalBehandlesAutomatisk || behandling.erAutomatiskSøknad() -> {
                     personResultater =
-                        lagPersonResultaterForManuellVilkårsvurdering(
+                        lagPersonResultaterMedUtledeteVilkår(
                             vilkårsvurdering = this,
                         )
                 }
@@ -146,7 +146,12 @@ data class VilkårsvurderingForNyBehandlingUtils(
             }.toSet()
     }
 
-    private fun lagPersonResultaterForManuellVilkårsvurdering(
+    /**
+     * Lager personresultater for behandlinger hvor vilkårene faktisk skal vurderes i denne behandlingen.
+     * Vilkår som alltid gjelder fra barnets fødselsdato (under 18 år og gift/partnerskap) blir ferdig utledet
+     * fra persongrunnlaget, mens resten står som IKKE_VURDERT og fylles ut manuelt eller via preutfylling.
+     */
+    private fun lagPersonResultaterMedUtledeteVilkår(
         vilkårsvurdering: Vilkårsvurdering,
     ): Set<PersonResultat> =
         personopplysningGrunnlag.søkerOgBarn
@@ -154,6 +159,10 @@ data class VilkårsvurderingForNyBehandlingUtils(
                 genererPersonResultatForPerson(vilkårsvurdering, person)
             }.toSet()
 
+    /**
+     * Lager personresultater uten perioder eller resultat. Brukes for automatiske behandlinger som ikke skal
+     * vurdere vilkår selv, men som får vilkårene kopiert fra forrige vedtatte behandling.
+     */
     private fun lagPersonResultaterForTomVilkårsvurdering(
         vilkårsvurdering: Vilkårsvurdering,
     ): Set<PersonResultat> =

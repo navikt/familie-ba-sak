@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBarnVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagSøkerVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -129,5 +131,70 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
 
         Assertions.assertThat(søkerVilkårResultater.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }).hasSize(1)
         Assertions.assertThat(søkerVilkårResultater.first { it.vilkårType == Vilkår.BOSATT_I_RIKET }.periodeTom).isEqualTo(søker.dødsfall?.dødsfallDato)
+    }
+
+    @Test
+    fun `Skal lage initiell vilkårsvurdering med under 18-vilkåret fra barnets fødselsdato for automatisk behandling av søknad`() {
+        // Arrange
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2024, 2, 4))
+        val behandling =
+            lagBehandling(
+                årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
+                skalBehandlesAutomatisk = true,
+            )
+
+        // Act
+        val vilkårsvurdering =
+            VilkårsvurderingForNyBehandlingUtils(
+                personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(barn, søker)),
+            ).genererInitiellVilkårsvurdering(
+                behandling = behandling,
+                barnaAktørSomAlleredeErVurdert = emptyList(),
+            )
+
+        // Assert
+        val under18Vilkår =
+            vilkårsvurdering.personResultater
+                .single { it.aktør == barn.aktør }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.UNDER_18_ÅR }
+
+        Assertions.assertThat(under18Vilkår).hasSize(1)
+        Assertions.assertThat(under18Vilkår.single().periodeFom).isEqualTo(barn.fødselsdato)
+        Assertions.assertThat(under18Vilkår.single().periodeTom).isEqualTo(barn.fødselsdato.til18ÅrsVilkårsdato())
+        Assertions.assertThat(under18Vilkår.single().resultat).isEqualTo(Resultat.OPPFYLT)
+    }
+
+    @Test
+    fun `Skal lage tom initiell vilkårsvurdering for andre automatiske behandlinger enn automatisk behandling av søknad`() {
+        // Arrange
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2024, 2, 4))
+        val behandling =
+            lagBehandling(
+                årsak = BehandlingÅrsak.SATSENDRING,
+                skalBehandlesAutomatisk = true,
+            )
+
+        // Act
+        val vilkårsvurdering =
+            VilkårsvurderingForNyBehandlingUtils(
+                personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(barn, søker)),
+            ).genererInitiellVilkårsvurdering(
+                behandling = behandling,
+                barnaAktørSomAlleredeErVurdert = emptyList(),
+            )
+
+        // Assert
+        val under18Vilkår =
+            vilkårsvurdering.personResultater
+                .single { it.aktør == barn.aktør }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.UNDER_18_ÅR }
+
+        Assertions.assertThat(under18Vilkår).hasSize(1)
+        Assertions.assertThat(under18Vilkår.single().periodeFom).isNull()
+        Assertions.assertThat(under18Vilkår.single().resultat).isEqualTo(Resultat.IKKE_VURDERT)
     }
 }
