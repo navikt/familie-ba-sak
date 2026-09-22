@@ -5,10 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
 interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGrunnlag, Long> {
-    @Query("SELECT gr FROM PersonopplysningGrunnlag gr WHERE gr.behandlingId = :behandlingId AND gr.aktiv = true")
+    @Query("SELECT gr FROM PersonopplysningGrunnlag gr WHERE gr.behandlingId = :behandlingId")
     fun findByBehandlingAndAktiv(behandlingId: Long): PersonopplysningGrunnlag?
 
-    @Query("SELECT gr FROM PersonopplysningGrunnlag gr WHERE gr.behandlingId in :behandlingIder AND gr.aktiv = true")
+    @Query("SELECT gr FROM PersonopplysningGrunnlag gr WHERE gr.behandlingId in :behandlingIder")
     fun hentAktivForBehandlinger(behandlingIder: Collection<Long>): List<PersonopplysningGrunnlag>
 
     @Query(
@@ -19,7 +19,6 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
         JOIN p.aktør a
         LEFT JOIN p.dødsfall d
         WHERE gr.behandlingId = :behandlingId 
-        AND gr.aktiv = true
         AND p.type IN ('SØKER', 'BARN')
         """,
     )
@@ -34,7 +33,6 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
         JOIN Behandling b ON b.id = gr.behandlingId
         LEFT JOIN p.dødsfall d
         WHERE b.fagsak.id = :fagsakId 
-        AND gr.aktiv = true
         AND p.type IN ('SØKER', 'BARN')
         """,
     )
@@ -46,8 +44,7 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
         FROM Person relevantPerson
         JOIN relevantPerson.personopplysningGrunnlag relevantGrunnlag
         JOIN Behandling relevantBehandling ON relevantBehandling.id = relevantGrunnlag.behandlingId
-        WHERE relevantGrunnlag.aktiv = true
-        AND relevantPerson.type IN ('SØKER', 'BARN')
+        WHERE relevantPerson.type IN ('SØKER', 'BARN')
         AND relevantBehandling.fagsak.arkivert = false
         AND EXISTS (
             SELECT 1
@@ -55,7 +52,6 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
             JOIN person.personopplysningGrunnlag personGrunnlag
             JOIN Behandling behandling ON behandling.id = personGrunnlag.behandlingId
             WHERE person.aktør = :aktør
-            AND personGrunnlag.aktiv = true
             AND behandling.fagsak.id = relevantBehandling.fagsak.id
         )
         """,
