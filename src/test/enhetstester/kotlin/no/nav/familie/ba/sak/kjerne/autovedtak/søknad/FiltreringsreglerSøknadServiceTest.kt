@@ -91,7 +91,7 @@ class FiltreringsreglerSøknadServiceTest {
             )
         } returns true
         every { filtreringsregelEvaluator.evaluerFiltreringsregler(any(), capture(faktaSlot)) } returns emptyList()
-        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad()
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true))
 
         // Act
         filtreringsreglerSøknadService.kjørFiltreringsregler(
@@ -210,10 +210,8 @@ class FiltreringsreglerSøknadServiceTest {
                 søkerPersonIdent = søkersIdent,
                 barnasIdenter = listOf(barnsIdent),
             )
-        val barn = personopplysningGrunnlag.barna.single()
 
         every { personidentService.hentAktør(søkersIdent) } returns personopplysningGrunnlag.søker.aktør
-        every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns listOf(barn.aktør)
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
         every { søknadService.finnDigitalSøknad(behandling.id) } returns null
 
@@ -226,6 +224,45 @@ class FiltreringsreglerSøknadServiceTest {
                 )
             }
         assertThat(feil.message).isEqualTo("Fant ikke digital søknad for behandling ${behandling.id}")
+    }
+
+    @Test
+    fun `skal utlede barna som skal vurderes fra den digitale søknaden selv om barnasIdenter i FiltrerAutomatiskBehandlingData er tom`() {
+        // Arrange
+        val søkersIdent = randomFnr()
+        val barnsIdent = randomFnr()
+        val behandling = lagBehandling()
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkersIdent,
+                barnasIdenter = listOf(barnsIdent),
+            )
+        val barn = personopplysningGrunnlag.barna.single()
+        val faktaSlot = slot<FiltreringsreglerFaktaSøknad>()
+
+        every { personidentService.hentAktør(søkersIdent) } returns personopplysningGrunnlag.søker.aktør
+        every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns listOf(barn.aktør)
+        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
+        every {
+            tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                behandling = behandling,
+                barna = listOf(barn),
+                måned = any(),
+            )
+        } returns false
+        every { filtreringsregelEvaluator.evaluerFiltreringsregler(any(), capture(faktaSlot)) } returns emptyList()
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true))
+
+        // Act
+        filtreringsreglerSøknadService.kjørFiltreringsregler(
+            filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(søkersIdent, emptyList()),
+            behandling = behandling,
+        )
+
+        // Assert
+        assertThat(faktaSlot.captured.barnaSomSkalVurderes).containsExactly(barn)
     }
 
     @Test
@@ -388,7 +425,7 @@ class FiltreringsreglerSøknadServiceTest {
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns grunnlag
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
         every { personopplysningerService.harVerge(grunnlag.søker.aktør) } returns VergeResponse(false)
-        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad()
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true))
         every {
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
                 grunnlag.søker.aktør,
