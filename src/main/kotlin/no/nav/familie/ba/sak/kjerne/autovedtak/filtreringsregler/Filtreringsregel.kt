@@ -100,6 +100,12 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
             ikkeOppfyltNavn = "MOR_OPPFYLLER_VILKÅR_FOR_UTVIDET_BARNETRYGD_VED_FØDSELSDATO",
             ikkeOppfyltBeskrivelse = "Mor oppfyller vilkår for utvidet barnetrygd",
         ),
+        SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO(
+            oppfyltNavn = "SØKER_OPPFYLLER_IKKE_VILKÅR_FOR_UTVIDET_BARNETRYGD_VED_FØDSELSDATO",
+            oppfyltBeskrivelse = "Søker oppfyller ikke vilkår for utvidet barnetrygd",
+            ikkeOppfyltNavn = "SØKER_OPPFYLLER_VILKÅR_FOR_UTVIDET_BARNETRYGD_VED_FØDSELSDATO",
+            ikkeOppfyltBeskrivelse = "Søker oppfyller vilkår for utvidet barnetrygd",
+        ),
         MOR_HAR_IKKE_OPPHØRT_BARNETRYGD(
             oppfyltNavn = "MOR_HAR_IKKE_OPPHØRT_BARNETRYGD",
             oppfyltBeskrivelse = "Mor har ikke opphørt barnetrygd",
@@ -348,6 +354,11 @@ private val morHarIkkeOppfyltUtvidetVilkårVedFødselsdato =
         !it.søkerOppfyllerVilkårForUtvidetBarnetrygd
     }
 
+private val søkerHarIkkeOppfyltUtvidetVilkårVedFødselsdato =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO) {
+        !it.søkerOppfyllerVilkårForUtvidetBarnetrygd
+    }
+
 private val morHarIkkeOpphørtBarnetrygd =
     Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>(Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD) { it.morHarIkkeOpphørtBarnetrygd }
 
@@ -422,6 +433,7 @@ val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøkn
         søkerOgBarnHarForelderBarnRelasjon,
         søkerErIkkeUkrainskStatsborger,
         barnErIkkeUkrainskStatsborger,
+        søkerHarIkkeOppfyltUtvidetVilkårVedFødselsdato,
     )
 
 val FILTRERINGSREGLER_FØDSELSHENDELSE: List<Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>> =
