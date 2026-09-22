@@ -81,17 +81,18 @@ class FiltreringsreglerSøknadService(
         behandling: Behandling,
     ): List<FiltreringResultat> {
         val aktørSøker = personidentService.hentAktør(filtrerAutomatiskBehandlingData.søkersIdent)
-        val aktørBarna = personidentService.hentAktørIder(filtrerAutomatiskBehandlingData.barnasIdenter)
 
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                 ?: throw Feil("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
-        val barnaFraSøknad = personopplysningGrunnlag.barna.filter { aktørBarna.contains(it.aktør) }
-
         val søknad =
             søknadService.finnDigitalSøknad(behandling.id)
                 ?: throw Feil("Fant ikke digital søknad for behandling ${behandling.id}")
+
+        val aktørBarna = personidentService.hentAktørIder(søknad.barn.map { it.fnr })
+
+        val barnaFraSøknad = personopplysningGrunnlag.barna.filter { aktørBarna.contains(it.aktør) }
 
         val personInfo =
             personopplysningerService
