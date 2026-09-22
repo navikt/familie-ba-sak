@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -53,7 +53,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
             )
 
         // Assert
-        Assertions.assertThat(aktørerMedUtvidet).containsExactly(søker.aktør)
+        assertThat(aktørerMedUtvidet).containsExactly(søker.aktør)
     }
 
     @Test
@@ -116,21 +116,21 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
         val søkersVilkårResultater = nyVilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
         val søkersUtvidetVilkår = søkersVilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
-        Assertions.assertThat(søkersUtvidetVilkår).hasSize(2)
+        assertThat(søkersUtvidetVilkår).hasSize(2)
 
         val utvidetVilkårSortert = søkersUtvidetVilkår?.sortedBy { it.periodeTom }
 
-        Assertions.assertThat(utvidetVilkårSortert?.first()?.periodeTom).isEqualTo(tomPåFørsteUtvidetVilkår)
-        Assertions.assertThat(utvidetVilkårSortert?.first()?.periodeFom).isEqualTo(LocalDate.now().minusYears(2))
+        assertThat(utvidetVilkårSortert?.first()?.periodeTom).isEqualTo(tomPåFørsteUtvidetVilkår)
+        assertThat(utvidetVilkårSortert?.first()?.periodeFom).isEqualTo(LocalDate.now().minusYears(2))
 
-        Assertions.assertThat(utvidetVilkårSortert?.last()?.periodeTom).isEqualTo(søker.dødsfall?.dødsfallDato)
-        Assertions.assertThat(utvidetVilkårSortert?.last()?.periodeFom).isEqualTo(tomPåFørsteUtvidetVilkår.plusMonths(1))
+        assertThat(utvidetVilkårSortert?.last()?.periodeTom).isEqualTo(søker.dødsfall?.dødsfallDato)
+        assertThat(utvidetVilkårSortert?.last()?.periodeFom).isEqualTo(tomPåFørsteUtvidetVilkår.plusMonths(1))
 
-        Assertions.assertThat(søkerVilkårResultater.filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }).hasSize(1)
-        Assertions.assertThat(søkerVilkårResultater.first { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }.periodeTom).isEqualTo(søker.dødsfall?.dødsfallDato)
+        assertThat(søkerVilkårResultater.filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }).hasSize(1)
+        assertThat(søkerVilkårResultater.first { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }.periodeTom).isEqualTo(søker.dødsfall?.dødsfallDato)
 
-        Assertions.assertThat(søkerVilkårResultater.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }).hasSize(1)
-        Assertions.assertThat(søkerVilkårResultater.first { it.vilkårType == Vilkår.BOSATT_I_RIKET }.periodeTom).isEqualTo(søker.dødsfall?.dødsfallDato)
+        assertThat(søkerVilkårResultater.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }).hasSize(1)
+        assertThat(søkerVilkårResultater.first { it.vilkårType == Vilkår.BOSATT_I_RIKET }.periodeTom).isEqualTo(søker.dødsfall?.dødsfallDato)
     }
 
     @Test
@@ -160,10 +160,10 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 .vilkårResultater
                 .filter { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
-        Assertions.assertThat(under18Vilkår).hasSize(1)
-        Assertions.assertThat(under18Vilkår.single().periodeFom).isEqualTo(barn.fødselsdato)
-        Assertions.assertThat(under18Vilkår.single().periodeTom).isEqualTo(barn.fødselsdato.til18ÅrsVilkårsdato())
-        Assertions.assertThat(under18Vilkår.single().resultat).isEqualTo(Resultat.OPPFYLT)
+        assertThat(under18Vilkår).hasSize(1)
+        assertThat(under18Vilkår.single().periodeFom).isEqualTo(barn.fødselsdato)
+        assertThat(under18Vilkår.single().periodeTom).isEqualTo(barn.fødselsdato.til18ÅrsVilkårsdato())
+        assertThat(under18Vilkår.single().resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
@@ -193,8 +193,8 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 .vilkårResultater
                 .filter { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
-        Assertions.assertThat(under18Vilkår).hasSize(1)
-        Assertions.assertThat(under18Vilkår.single().periodeFom).isNull()
-        Assertions.assertThat(under18Vilkår.single().resultat).isEqualTo(Resultat.IKKE_VURDERT)
+        assertThat(under18Vilkår).hasSize(1)
+        assertThat(under18Vilkår.single().periodeFom).isNull()
+        assertThat(under18Vilkår.single().resultat).isEqualTo(Resultat.IKKE_VURDERT)
     }
 }
