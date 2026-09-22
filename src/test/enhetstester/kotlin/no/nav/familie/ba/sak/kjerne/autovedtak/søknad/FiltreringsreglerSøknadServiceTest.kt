@@ -4,27 +4,39 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.TestClockProvider
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPersonInfo
 import no.nav.familie.ba.sak.datagenerator.lagSøknad
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsregelEvaluator
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsreglerFaktaSøknad
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 
 class FiltreringsreglerSøknadServiceTest {
+    private val personopplysningerService = mockk<PersonopplysningerService>(relaxed = true)
     private val personidentService = mockk<PersonidentService>()
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
@@ -35,7 +47,7 @@ class FiltreringsreglerSøknadServiceTest {
 
     private val filtreringsreglerSøknadService =
         FiltreringsreglerSøknadService(
-            personopplysningerService = mockk<PersonopplysningerService>(relaxed = true),
+            personopplysningerService = personopplysningerService,
             personidentService = personidentService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             vilkårsvurderingRepository = mockk(relaxed = true),
@@ -210,5 +222,185 @@ class FiltreringsreglerSøknadServiceTest {
                 )
             }
         assertThat(feil.message).isEqualTo("Fant ikke digital søknad for behandling ${behandling.id}")
+    }
+
+    @Test
+    fun `skal sette søkerHarAktivNorskBostedsadresse og barnHarAktivNorskBostedsadresse til true`() {
+        // Act
+        val fakta = kjørFiltreringsregler()
+
+        // Assert
+        assertThat(fakta.søkerHarAktivNorskBostedsadresse).isTrue
+        assertThat(fakta.barnHarAktivNorskBostedsadresse).isTrue
+    }
+
+    @Test
+    fun `skal sette søkerHarAktivNorskBostedsadresse til false når søker mangler bostedsadresse`() {
+        // Act
+        val fakta =
+            kjørFiltreringsregler(
+                tilpassGrunnlag = { grunnlag ->
+                    grunnlag.søker.bostedsadresser.clear()
+                },
+            )
+
+        // Assert
+        assertThat(fakta.søkerHarAktivNorskBostedsadresse).isFalse
+    }
+
+    @Test
+    fun `skal sette barnHarAktivNorskBostedsadresse til false når listen med søknadsbarn er tom`() {
+        // Act
+        val fakta = kjørFiltreringsregler(barnasAktører = { emptyList() })
+
+        // Assert
+        assertThat(fakta.barnHarAktivNorskBostedsadresse).isFalse
+    }
+
+    @Test
+    fun `skal sette søkerOgBarnHarForelderBarnRelasjon til true når alle søknadsbarn har foreldre-barn-relasjon til søker`() {
+        // Act
+        val fakta = kjørFiltreringsregler(barnasAktører = { listOf(it) })
+
+        // Assert
+        assertThat(fakta.søkerOgBarnHarForelderBarnRelasjon).isTrue
+    }
+
+    @Test
+    fun `skal sette søkerOgBarnHarForelderBarnRelasjon til false når listen med søknadsbarn er tom`() {
+        // Act
+        val fakta = kjørFiltreringsregler(barnasAktører = { emptyList() })
+
+        // Assert
+        assertThat(fakta.søkerOgBarnHarForelderBarnRelasjon).isFalse
+    }
+
+    @Test
+    fun `skal sette søkerOgBarnHarForelderBarnRelasjon til false når søknadsbarn mangler forelder-barn-relasjon til søker`() {
+        // Act
+        val fakta = kjørFiltreringsregler(personInfo = lagPersonInfo())
+
+        // Assert
+        assertThat(fakta.søkerOgBarnHarForelderBarnRelasjon).isFalse
+    }
+
+    @Test
+    fun `skal sette søkerHarAdressebeskyttelseGradering6Eller19 til true når søker har gradering 6 eller 19`() {
+        // Act
+        val fakta =
+            kjørFiltreringsregler(
+                personInfo =
+                    lagPersonInfo(
+                        adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
+                    ),
+            )
+
+        // Assert
+        assertThat(fakta.søkerHarAdressebeskyttelseGradering6Eller19).isTrue
+    }
+
+    @Test
+    fun `skal sette barnHarAdressebeskyttelseGradering6Eller19 til true når barn har gradering 6 eller 19`() {
+        // Act
+        val fakta =
+            kjørFiltreringsregler(
+                barnHarAdressebeskyttelseGradering6Eller19 = true,
+            )
+
+        // Assert
+        assertThat(fakta.barnHarAdressebeskyttelseGradering6Eller19).isTrue
+    }
+
+    @Test
+    fun `skal sette barnHarUkrainskStatsborgerskap til true når barn er ukrainsk statsborger`() {
+        // Act
+        val fakta =
+            kjørFiltreringsregler(
+                tilpassGrunnlag = { grunnlag ->
+                    val barn = grunnlag.barna.single()
+                    barn.statsborgerskap =
+                        mutableListOf(
+                            GrStatsborgerskap(
+                                landkode = "UKR",
+                                medlemskap = Medlemskap.TREDJELANDSBORGER,
+                                person = barn,
+                            ),
+                        )
+                },
+            )
+
+        // Assert
+        assertThat(fakta.barnHarUkrainskStatsborgerskap).isTrue
+    }
+
+    private fun kjørFiltreringsregler(
+        tilpassGrunnlag: (PersonopplysningGrunnlag) -> Unit = {},
+        personInfo: PersonInfo? = null,
+        barnHarAdressebeskyttelseGradering6Eller19: Boolean = false,
+        barnasAktører: (Aktør) -> List<Aktør> = { listOf(it) },
+    ): FiltreringsreglerFaktaSøknad {
+        // Arrange
+        val søkersIdent = randomFnr()
+        val barnsIdent = randomFnr()
+        val behandling = lagBehandling()
+        val grunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkersIdent,
+                barnasIdenter = listOf(barnsIdent),
+            )
+        val barn = grunnlag.barna.single()
+        grunnlag.personer.forEach { person ->
+            person.bostedsadresser.forEach {
+                it.periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null)
+            }
+        }
+        tilpassGrunnlag(grunnlag)
+        val aktørBarna = barnasAktører(barn.aktør)
+
+        val faktaSlot = slot<FiltreringsreglerFaktaSøknad>()
+        every { personidentService.hentAktør(søkersIdent) } returns grunnlag.søker.aktør
+        every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns aktørBarna
+        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns grunnlag
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
+        every { personopplysningerService.harVerge(grunnlag.søker.aktør) } returns VergeResponse(false)
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad()
+        every {
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+                grunnlag.søker.aktør,
+                aktørBarna.toSet(),
+            )
+        } returns (
+            personInfo
+                ?: lagPersonInfo(
+                    forelderBarnRelasjon =
+                        setOf(
+                            ForelderBarnRelasjon(
+                                aktør = barn.aktør,
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                adressebeskyttelseGradering =
+                                    ADRESSEBESKYTTELSEGRADERING
+                                        .STRENGT_FORTROLIG
+                                        .takeIf { barnHarAdressebeskyttelseGradering6Eller19 },
+                            ),
+                        ),
+                )
+        )
+        every {
+            tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                behandling = behandling,
+                barna = grunnlag.barna.filter { it.aktør in aktørBarna },
+                måned = inneværendeMåned,
+            )
+        } returns false
+        every { filtreringsregelEvaluator.evaluerFiltreringsregler(any(), capture(faktaSlot)) } returns emptyList()
+
+        // Act
+        filtreringsreglerSøknadService.kjørFiltreringsregler(
+            filtrerAutomatiskBehandlingData = FiltrerAutomatiskBehandlingData(søkersIdent, listOf(barnsIdent)),
+            behandling = behandling,
+        )
+
+        return faktaSlot.captured
     }
 }

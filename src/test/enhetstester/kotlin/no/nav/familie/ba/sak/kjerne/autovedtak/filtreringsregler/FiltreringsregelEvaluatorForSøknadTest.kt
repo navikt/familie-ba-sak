@@ -50,6 +50,36 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     }
 
     @Nested
+    inner class NårSøkerEllerBarnHarAdressebeskyttelseGradering6Eller19 {
+        @Test
+        fun `skal avvise når søker har adressebeskyttelse gradering 6 eller 19`() {
+            // Act
+            val evalueringer = evaluer(søkerHarAdressebeskyttelseGradering6Eller19 = true)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19)
+        }
+
+        @Test
+        fun `skal avvise når barn har adressebeskyttelse gradering 6 eller 19`() {
+            // Act
+            val evalueringer = evaluer(barnHarAdressebeskyttelseGradering6Eller19 = true)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19)
+        }
+    }
+
+    @Test
+    fun `skal avvise når ikke alle søknadsbarna har foreldre barn-relasjon til søker`() {
+        // Act
+        val evalueringer = evaluer(søkerOgBarnHarForelderBarnRelasjon = false)
+
+        // Assert
+        assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON)
+    }
+
+    @Nested
     inner class NårSøkerEllerBarnHarUgyldigFødselsnummer {
         @Test
         fun `skal avvise når søker har ugyldig fødselsnummer`() {
@@ -184,6 +214,48 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
         }
     }
 
+    @Nested
+    inner class NårSøkerEllerBarnIkkeHarAktivNorskBostedsadresse {
+        @Test
+        fun `skal avvise når søker ikke har aktiv norsk bostedsadresse`() {
+            // Act
+            val evalueringer = evaluer(søkerHarAktivNorskBostedsadresse = false)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE)
+        }
+
+        @Test
+        fun `skal avvise når barn ikke har aktiv norsk bostedsadresse`() {
+            // Act
+            val evalueringer = evaluer(barnHarAktivNorskBostedsadresse = false)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE)
+        }
+    }
+
+    @Nested
+    inner class NårSøkerEllerBarnErUkrainskStatsborger {
+        @Test
+        fun `skal avvise når søker er ukrainsk statsborger`() {
+            // Act
+            val evalueringer = evaluer(søkerHarUkrainskStatsborgerskap = true)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_ER_IKKE_UKRAINSK_STATSBORGER)
+        }
+
+        @Test
+        fun `skal avvise når barn er ukrainsk statsborger`() {
+            // Act
+            val evalueringer = evaluer(barnHarUkrainskStatsborgerskap = true)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_ER_IKKE_UKRAINSK_STATSBORGER)
+        }
+    }
+
     private fun evaluer(
         søker: Person = søker(),
         barna: List<Person> = listOf(barn()),
@@ -197,6 +269,13 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
         søkerHarKryssetForDeltBostedISøknaden: Boolean = false,
         søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden: Boolean = false,
         søknadenInneholderVedlegg: Boolean = false,
+        søkerHarAdressebeskyttelseGradering6Eller19: Boolean = false,
+        barnHarAdressebeskyttelseGradering6Eller19: Boolean = false,
+        søkerOgBarnHarForelderBarnRelasjon: Boolean = true,
+        søkerHarAktivNorskBostedsadresse: Boolean = true,
+        barnHarAktivNorskBostedsadresse: Boolean = true,
+        søkerHarUkrainskStatsborgerskap: Boolean = false,
+        barnHarUkrainskStatsborgerskap: Boolean = false,
     ): List<Evaluering> =
         filtreringsregelEvaluator.evaluerFiltreringsregler(
             FILTRERINGSREGLER_SØKNAD,
@@ -215,6 +294,13 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
                 søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden = søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden,
                 søknadenInneholderVedlegg = søknadenInneholderVedlegg,
                 søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling = false,
+                søkerHarAdressebeskyttelseGradering6Eller19 = søkerHarAdressebeskyttelseGradering6Eller19,
+                barnHarAdressebeskyttelseGradering6Eller19 = barnHarAdressebeskyttelseGradering6Eller19,
+                søkerOgBarnHarForelderBarnRelasjon = søkerOgBarnHarForelderBarnRelasjon,
+                søkerHarAktivNorskBostedsadresse = søkerHarAktivNorskBostedsadresse,
+                barnHarAktivNorskBostedsadresse = barnHarAktivNorskBostedsadresse,
+                søkerHarUkrainskStatsborgerskap = søkerHarUkrainskStatsborgerskap,
+                barnHarUkrainskStatsborgerskap = barnHarUkrainskStatsborgerskap,
             ),
         )
 

@@ -144,6 +144,8 @@ internal class FiltreringsregelTest {
         assertThat(identifikatorer).containsExactly(
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_D_NUMMER,
             Filtreringsregel.Identifikator.BARN_HAR_IKKE_D_NUMMER,
+            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19,
+            Filtreringsregel.Identifikator.BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19,
             Filtreringsregel.Identifikator.SØKER_GYLDIG_FNR,
             Filtreringsregel.Identifikator.BARN_GYLDIG_FNR,
             Filtreringsregel.Identifikator.SØKER_LEVER,
@@ -157,6 +159,11 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN,
             Filtreringsregel.Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG,
+            Filtreringsregel.Identifikator.SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE,
+            Filtreringsregel.Identifikator.BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE,
+            Filtreringsregel.Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON,
+            Filtreringsregel.Identifikator.SØKER_ER_IKKE_UKRAINSK_STATSBORGER,
+            Filtreringsregel.Identifikator.BARN_ER_IKKE_UKRAINSK_STATSBORGER,
         )
     }
 
@@ -182,6 +189,8 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_D_NUMMER,
             Filtreringsregel.Identifikator.BARN_HAR_IKKE_D_NUMMER,
+            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19,
+            Filtreringsregel.Identifikator.BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19,
             Filtreringsregel.Identifikator.SØKER_GYLDIG_FNR,
             Filtreringsregel.Identifikator.SØKER_LEVER,
             Filtreringsregel.Identifikator.SØKER_ER_OVER_18_ÅR,
@@ -193,6 +202,11 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN,
             Filtreringsregel.Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG,
+            Filtreringsregel.Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON,
+            Filtreringsregel.Identifikator.SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE,
+            Filtreringsregel.Identifikator.BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE,
+            Filtreringsregel.Identifikator.SØKER_ER_IKKE_UKRAINSK_STATSBORGER,
+            Filtreringsregel.Identifikator.BARN_ER_IKKE_UKRAINSK_STATSBORGER,
         )
     }
 
@@ -233,6 +247,76 @@ internal class FiltreringsregelTest {
                 PersistertUtfall("SØKER_HAR_D_NUMMER", "SØKER_HAR_IKKE_D_NUMMER", "Søker har d-nummer"),
                 PersistertUtfall("BARN_HAR_IKKE_D_NUMMER", "BARN_HAR_IKKE_D_NUMMER", "Barn har ikke d-nummer"),
                 PersistertUtfall("BARN_HAR_D_NUMMER", "BARN_HAR_IKKE_D_NUMMER", "Barn har d-nummer"),
+                PersistertUtfall(
+                    "SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
+                    "SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
+                    "Søker har ikke adressebeskyttelse gradering 6 eller 19",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
+                    "SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
+                    "Søker har adressebeskyttelse gradering 6 eller 19",
+                ),
+                PersistertUtfall(
+                    "BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
+                    "BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
+                    "Barn har ikke adressebeskyttelse gradering 6 eller 19",
+                ),
+                PersistertUtfall(
+                    "BARN_HAR_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
+                    "BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19",
+                    "Barn har adressebeskyttelse gradering 6 eller 19",
+                ),
+                PersistertUtfall(
+                    "SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON",
+                    "SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON",
+                    "Søker og barn har en forelder/barn-relasjon",
+                ),
+                PersistertUtfall(
+                    "SØKER_OG_BARN_HAR_IKKE_FORELDER_BARN_RELASJON",
+                    "SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON",
+                    "Søker og barn har ikke en forelder/barn-relasjon",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "Søker har aktiv norsk bostedsadresse per i dag",
+                ),
+                PersistertUtfall(
+                    "SØKER_HAR_IKKE_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "Søker har ikke aktiv norsk bostedsadresse per i dag",
+                ),
+                PersistertUtfall(
+                    "BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "Barn har aktiv norsk bostedsadresse per i dag",
+                ),
+                PersistertUtfall(
+                    "BARN_HAR_IKKE_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE",
+                    "Barn har ikke aktiv norsk bostedsadresse per i dag",
+                ),
+                PersistertUtfall(
+                    "SØKER_ER_IKKE_UKRAINSK_STATSBORGER",
+                    "SØKER_ER_IKKE_UKRAINSK_STATSBORGER",
+                    "Søker er ikke ukrainsk statsborger",
+                ),
+                PersistertUtfall(
+                    "SØKER_ER_UKRAINSK_STATSBORGER",
+                    "SØKER_ER_IKKE_UKRAINSK_STATSBORGER",
+                    "Søker er ukrainsk statsborger",
+                ),
+                PersistertUtfall(
+                    "BARN_ER_IKKE_UKRAINSK_STATSBORGER",
+                    "BARN_ER_IKKE_UKRAINSK_STATSBORGER",
+                    "Barn er ikke ukrainsk statsborger",
+                ),
+                PersistertUtfall(
+                    "BARN_ER_UKRAINSK_STATSBORGER",
+                    "BARN_ER_IKKE_UKRAINSK_STATSBORGER",
+                    "Barn er ukrainsk statsborger",
+                ),
                 PersistertUtfall("SØKER_LEVER", "SØKER_LEVER", "Det er ikke registrert dødsdato på søker."),
                 PersistertUtfall("SØKER_LEVER_IKKE", "SØKER_LEVER", "Det er registrert dødsdato på søker."),
                 PersistertUtfall("SØKER_ER_OVER_18_ÅR", "SØKER_ER_OVER_18_ÅR", "Søker er over 18 år."),

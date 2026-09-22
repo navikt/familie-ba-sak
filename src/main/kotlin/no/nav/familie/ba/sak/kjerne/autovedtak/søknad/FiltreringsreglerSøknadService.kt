@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.erStrengtFortrolig
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FILTRERINGSREGLER_SØKNAD
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsregelEvaluator
@@ -24,12 +25,16 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iUkraina
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import no.nav.familie.tidslinje.utvidelser.verdiPåTidspunkt
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -65,6 +70,15 @@ class FiltreringsreglerSøknadService(
             søknadService.finnDigitalSøknad(behandling.id)
                 ?: throw Feil("Fant ikke digital søknad for behandling ${behandling.id}")
 
+        val personInfo =
+            personopplysningerService
+                .hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+                    aktør = aktørSøker,
+                    relevanteAktører = aktørBarna.toSet(),
+                )
+        val forelderBarnRelasjonerForSøknadsbarna =
+            personInfo.forelderBarnRelasjon.filter { it.aktør in aktørBarna }
+
         val fakta =
             FiltreringsreglerFaktaSøknad(
                 søker = personopplysningGrunnlag.søker,
@@ -90,6 +104,25 @@ class FiltreringsreglerSøknadService(
                 søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden = søknad.harKryssetForFosterhjemEllerBeredskapshjemForMinstEttBarn(),
                 søknadenInneholderVedlegg = søknad.inneholderVedlegg,
                 søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling = false, // TODO Fix me
+                søkerHarAdressebeskyttelseGradering6Eller19 =
+                    personInfo.adressebeskyttelseGradering.erStrengtFortrolig(),
+                barnHarAdressebeskyttelseGradering6Eller19 =
+                    forelderBarnRelasjonerForSøknadsbarna.any {
+                        it.adressebeskyttelseGradering.erStrengtFortrolig()
+                    },
+                søkerOgBarnHarForelderBarnRelasjon =
+                    barnaFraSøknad.all { barnFraSøknad ->
+                        forelderBarnRelasjonerForSøknadsbarna.any {
+                            it.aktør == barnFraSøknad.aktør
+                        }
+                    } && barnaFraSøknad.isNotEmpty(),
+                søkerHarAktivNorskBostedsadresse = harAktivNorskBostedsadresse(listOf(personopplysningGrunnlag.søker), LocalDate.now(clockProvider.get())),
+                barnHarAktivNorskBostedsadresse = harAktivNorskBostedsadresse(barnaFraSøknad, LocalDate.now(clockProvider.get())),
+                søkerHarUkrainskStatsborgerskap = personopplysningGrunnlag.søker.statsborgerskap.iUkraina(),
+                barnHarUkrainskStatsborgerskap =
+                    barnaFraSøknad.any {
+                        it.statsborgerskap.iUkraina()
+                    },
             )
 
         val evalueringer = filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_SØKNAD, fakta)
@@ -126,6 +159,15 @@ class FiltreringsreglerSøknadService(
             } ?: false
         } ?: false
     }
+
+    private fun harAktivNorskBostedsadresse(
+        personer: List<Person>,
+        tidspunkt: LocalDate,
+    ): Boolean =
+        personer.all { person ->
+            val tidslinje = Adresser.opprettFra(person = person).lagErBosattINorgeTidslinje()
+            tidslinje.verdiPåTidspunkt(tidspunkt) == true
+        } && personer.isNotEmpty()
 
     private fun oppdaterMetrikker(evalueringer: List<Evaluering>) {
         var førsteutfall = true
