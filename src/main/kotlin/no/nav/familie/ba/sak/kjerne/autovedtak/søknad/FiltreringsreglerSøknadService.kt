@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 
 import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
@@ -52,6 +53,28 @@ class FiltreringsreglerSøknadService(
 ) {
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
     val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
+
+    init {
+        FILTRERINGSREGLER_SØKNAD.forEach { regel ->
+            Resultat.entries.forEach { resultat ->
+                filtreringsreglerMetrics["${regel.identifikator.name}_${resultat.name}"] =
+                    Metrics.counter(
+                        "familie.ba.sak.filtreringsregler.soknad.utfall",
+                        "beskrivelse",
+                        regel.identifikator.name,
+                        "resultat",
+                        resultat.name,
+                    )
+            }
+
+            filtreringsreglerFørsteUtfallMetrics[regel.identifikator.name] =
+                Metrics.counter(
+                    "familie.ba.sak.filtreringsregler.soknad.foersteutfall",
+                    "beskrivelse",
+                    regel.identifikator.name,
+                )
+        }
+    }
 
     fun kjørFiltreringsregler(
         filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,

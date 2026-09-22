@@ -15,9 +15,12 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FILTRERINGSREGLER_SØKNAD
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsregelEvaluator
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsreglerFaktaSøknad
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
@@ -32,6 +35,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADE
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 
@@ -333,11 +337,31 @@ class FiltreringsreglerSøknadServiceTest {
         assertThat(fakta.barnHarUkrainskStatsborgerskap).isTrue
     }
 
+    @Test
+    fun `skal ikke kaste feil ved oppdatering av metrikker for alle utfall av filtreringsreglene`() {
+        // Arrange
+        val evalueringer =
+            Resultat.entries.flatMap { resultat ->
+                FILTRERINGSREGLER_SØKNAD.map {
+                    Evaluering(
+                        resultat = resultat,
+                        evalueringÅrsaker = emptyList(),
+                        begrunnelse = "",
+                        identifikator = it.identifikator.name,
+                    )
+                }
+            }
+
+        // Act & Assert
+        assertDoesNotThrow { kjørFiltreringsregler(evalueringer = evalueringer) }
+    }
+
     private fun kjørFiltreringsregler(
         tilpassGrunnlag: (PersonopplysningGrunnlag) -> Unit = {},
         personInfo: PersonInfo? = null,
         barnHarAdressebeskyttelseGradering6Eller19: Boolean = false,
         barnasAktører: (Aktør) -> List<Aktør> = { listOf(it) },
+        evalueringer: List<Evaluering> = emptyList(),
     ): FiltreringsreglerFaktaSøknad {
         // Arrange
         val søkersIdent = randomFnr()
@@ -393,7 +417,7 @@ class FiltreringsreglerSøknadServiceTest {
                 måned = inneværendeMåned,
             )
         } returns false
-        every { filtreringsregelEvaluator.evaluerFiltreringsregler(any(), capture(faktaSlot)) } returns emptyList()
+        every { filtreringsregelEvaluator.evaluerFiltreringsregler(any(), capture(faktaSlot)) } returns evalueringer
 
         // Act
         filtreringsreglerSøknadService.kjørFiltreringsregler(
