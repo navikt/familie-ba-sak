@@ -127,7 +127,7 @@ class FiltreringsregelForFlereBarnTest {
         val personInfo = generePersonInfoMedBarn(setOf(barnAktør0, barnAktør1))
 
         val personopplysningGrunnlag =
-            PersonopplysningGrunnlag(behandlingId = behandling.id, aktiv = true).apply {
+            PersonopplysningGrunnlag(behandlingId = behandling.id).apply {
                 personer.addAll(
                     listOf(
                         genererPerson(
@@ -231,7 +231,7 @@ class FiltreringsregelForFlereBarnTest {
         val personInfo = generePersonInfoMedBarn(setOf(barnAktør0, barnAktør1))
 
         val personopplysningGrunnlag =
-            PersonopplysningGrunnlag(behandlingId = behandling.id, aktiv = true).apply {
+            PersonopplysningGrunnlag(behandlingId = behandling.id).apply {
                 personer.addAll(
                     listOf(
                         genererPerson(

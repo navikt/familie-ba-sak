@@ -133,7 +133,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
             SELECT b.fagsak FROM Behandling b 
             WHERE b.aktiv=true AND b.id IN (
                 SELECT pg.behandlingId FROM PersonopplysningGrunnlag pg
-                WHERE pg.aktiv=true AND pg.id IN (
+                WHERE pg.id IN (
                     SELECT p.personopplysningGrunnlag.id FROM Person p 
                     WHERE p.fødselsdato BETWEEN :fom AND :tom 
                     AND p.type = 'BARN'
@@ -269,7 +269,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                    MAX(p.foedselsdato) AS yngste_foedselsdato
             FROM   siste_vedtatte sv
             INNER JOIN gr_personopplysninger gr
-                   ON  gr.fk_behandling_id = sv.id AND gr.aktiv = TRUE
+                   ON  gr.fk_behandling_id = sv.id
             INNER JOIN po_person p
                    ON  p.fk_gr_personopplysninger_id = gr.id AND p.type = 'BARN'
             GROUP BY sv.fk_fagsak_id
