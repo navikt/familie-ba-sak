@@ -54,13 +54,17 @@ class AutovedtakServiceTest {
             barnasIdenter = emptyList(),
         )
 
-    private val opprettetBehandling =
-        lagBehandling(
-            fagsak = fagsak,
-            årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
-            skalBehandlesAutomatisk = true,
-            førsteSteg = StegType.FILTRERING_AUTOMATISK_BEHANDLING,
-        )
+    private val opprettetBehandling = lagAutomatiskBehandling(steg = StegType.FILTRERING_AUTOMATISK_BEHANDLING)
+
+    private fun lagAutomatiskBehandling(
+        steg: StegType,
+        årsak: BehandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
+    ) = lagBehandling(
+        fagsak = fagsak,
+        årsak = årsak,
+        skalBehandlesAutomatisk = true,
+        førsteSteg = steg,
+    )
 
     @Nested
     inner class OpprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat {
@@ -72,13 +76,7 @@ class AutovedtakServiceTest {
         @Test
         fun `skal ikke kjøre vilkårsvurdering når filtreringsreglene har satt behandlingen til henleggelse`() {
             // Arrange
-            val behandlingSomSkalHenlegges =
-                lagBehandling(
-                    fagsak = fagsak,
-                    årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
-                    skalBehandlesAutomatisk = true,
-                    førsteSteg = StegType.HENLEGG_BEHANDLING,
-                )
+            val behandlingSomSkalHenlegges = lagAutomatiskBehandling(steg = StegType.HENLEGG_BEHANDLING)
 
             every {
                 stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(opprettetBehandling, filtrerAutomatiskBehandlingData)
@@ -99,20 +97,8 @@ class AutovedtakServiceTest {
         @Test
         fun `skal kjøre vilkårsvurdering på behandlingen fra filtreringssteget når filtreringsreglene er oppfylt`() {
             // Arrange
-            val behandlingEtterFiltrering =
-                lagBehandling(
-                    fagsak = fagsak,
-                    årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
-                    skalBehandlesAutomatisk = true,
-                    førsteSteg = StegType.VILKÅRSVURDERING,
-                )
-            val behandlingEtterBehandlingsresultat =
-                lagBehandling(
-                    fagsak = fagsak,
-                    årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
-                    skalBehandlesAutomatisk = true,
-                    førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG,
-                )
+            val behandlingEtterFiltrering = lagAutomatiskBehandling(steg = StegType.VILKÅRSVURDERING)
+            val behandlingEtterBehandlingsresultat = lagAutomatiskBehandling(steg = StegType.IVERKSETT_MOT_OPPDRAG)
 
             every {
                 stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(opprettetBehandling, filtrerAutomatiskBehandlingData)
@@ -135,11 +121,9 @@ class AutovedtakServiceTest {
         fun `skal ikke kjøre filtreringsregler for andre behandlingsårsaker enn automatisk behandling av søknad`() {
             // Arrange
             val behandlingEtterBehandlingsresultat =
-                lagBehandling(
-                    fagsak = fagsak,
+                lagAutomatiskBehandling(
+                    steg = StegType.IVERKSETT_MOT_OPPDRAG,
                     årsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
-                    skalBehandlesAutomatisk = true,
-                    førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG,
                 )
 
             every { stegService.håndterVilkårsvurdering(opprettetBehandling, null) } returns behandlingEtterBehandlingsresultat

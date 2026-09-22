@@ -60,8 +60,7 @@ class AutovedtakService(
     /**
      * Oppretter en ny, automatisk behandling fra [nyBehandling], og kjører den til behandlingsresultat med filtreringsregler.
      *
-     * Dersom filtreringsreglene stopper behandlingen, returneres den på steg [StegType.HENLEGG_BEHANDLING]
-     * uten at vilkårsvurderingen er kjørt. Kallere må håndtere det tilfellet.
+     * Returnerer behandlingen på steg [StegType.HENLEGG_BEHANDLING] dersom filtreringsreglene stoppet den.
      */
     fun opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
         nyBehandling: NyBehandling,
@@ -80,7 +79,7 @@ class AutovedtakService(
             }
 
         if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
-            logger.info("Filtreringsreglene stoppet den automatiske behandlingen ${behandlingEtterFiltrering.id}. Kjører ikke vilkårsvurdering.")
+            logger.info("Filtreringsreglene stoppet den automatiske behandlingen ${behandlingEtterFiltrering.id}")
             return behandlingEtterFiltrering
         }
 

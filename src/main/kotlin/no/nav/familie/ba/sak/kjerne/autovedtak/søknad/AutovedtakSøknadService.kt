@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SøknadData
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -55,67 +54,54 @@ class AutovedtakSøknadService(
         if (automatiskBehandling.steg == StegType.HENLEGG_BEHANDLING) {
             return henleggBehandlingOgOpprettManuellBehandling(
                 automatiskBehandling = automatiskBehandling,
-                nyBehandling = behandlingsdata.nyBehandling,
+                behandlingsdata = behandlingsdata,
                 begrunnelse = filtreringsreglerSøknadService.hentBegrunnelseForIkkeOppfyltFiltreringsregel(behandlingId = automatiskBehandling.id),
             )
         }
 
         return try {
-            vedtaAutomatisk(
-                behandlingEtterBehandlingsresultat = automatiskBehandling,
-                behandlingsdata = behandlingsdata,
-            )
+            vedtaAutomatisk(behandling = automatiskBehandling, behandlingsdata = behandlingsdata)
         } catch (feil: AutovedtakMåBehandlesManueltFeil) {
-            // Vi kaster ikke videre, fordi henleggelsen må committes sammen med resten av transaksjonen.
+            // Kaster ikke videre fordi henleggelsen må committes sammen med resten av transaksjonen.
             henleggBehandlingOgOpprettManuellBehandling(
                 automatiskBehandling = automatiskBehandling,
-                nyBehandling = behandlingsdata.nyBehandling,
+                behandlingsdata = behandlingsdata,
                 begrunnelse = feil.beskrivelse,
             )
         }
     }
 
     private fun vedtaAutomatisk(
-        behandlingEtterBehandlingsresultat: Behandling,
+        behandling: Behandling,
         behandlingsdata: SøknadData,
     ): String {
-        autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandlingEtterBehandlingsresultat)
+        autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling)
 
-        val simulering = simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterBehandlingsresultat)
+        val simulering = simuleringService.oppdaterSimuleringPåBehandling(behandling)
         autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
 
-        if (behandlingEtterBehandlingsresultat.steg == StegType.IVERKSETT_MOT_OPPDRAG) {
-            autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(behandlingEtterBehandlingsresultat)
+        if (behandling.steg != StegType.IVERKSETT_MOT_OPPDRAG) {
+            throw Feil("Ugyldig neste steg ${behandling.steg} for behandlingsårsak ${BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD} for fagsak=${behandlingsdata.nyBehandling.fagsakId}")
         }
 
-        val opprettetVedtak =
-            autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
-                behandlingEtterBehandlingsresultat,
-            )
+        autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(behandling)
 
-        val task =
-            when (behandlingEtterBehandlingsresultat.steg) {
-                StegType.IVERKSETT_MOT_OPPDRAG -> {
-                    IverksettMotOppdragTask.opprettTask(
-                        behandlingEtterBehandlingsresultat,
-                        opprettetVedtak,
-                        SikkerhetContext.hentSaksbehandler(),
-                    )
-                }
+        val opprettetVedtak = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling)
 
-                else -> {
-                    throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} for behandlingsårsak ${BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD} for fagsak=${behandlingsdata.nyBehandling.fagsakId}")
-                }
-            }
-
-        taskService.save(task)
+        taskService.save(
+            IverksettMotOppdragTask.opprettTask(
+                behandling,
+                opprettetVedtak,
+                SikkerhetContext.hentSaksbehandler(),
+            ),
+        )
 
         return AutovedtakStegService.BEHANDLING_FERDIG
     }
 
     private fun henleggBehandlingOgOpprettManuellBehandling(
         automatiskBehandling: Behandling,
-        nyBehandling: NyBehandling,
+        behandlingsdata: SøknadData,
         begrunnelse: String,
     ): String {
         stegService.håndterHenleggBehandling(
@@ -129,7 +115,7 @@ class AutovedtakSøknadService(
 
         val manuellBehandling =
             stegService.håndterNyBehandlingOgSendInfotrygdFeed(
-                nyBehandling.copy(behandlingÅrsak = BehandlingÅrsak.SØKNAD),
+                behandlingsdata.nyBehandling.copy(behandlingÅrsak = BehandlingÅrsak.SØKNAD),
             )
 
         oppgaveService.opprettOppgaveForManuellBehandling(
