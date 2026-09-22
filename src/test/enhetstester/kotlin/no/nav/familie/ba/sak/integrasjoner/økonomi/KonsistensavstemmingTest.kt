@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.mockk.CapturingSlot
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -64,6 +65,7 @@ class KonsistensavstemmingTest {
 
     @BeforeEach
     fun setUp() {
+        clearMocks(taskService, batchRepository, dataChunkRepository, oppdragBackendKlient)
         every { taskService.save(any()) } returns Task(type = "dummy", payload = "")
         konistensavstemmingStartTask = KonsistensavstemMotOppdragStartTask(avstemmingService)
         konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask =

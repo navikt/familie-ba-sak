@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -86,6 +87,7 @@ class AutovedtakSatsendringEøsServiceTest {
 
     @BeforeEach
     fun setUp() {
+        clearMocks(utenlandskPeriodebeløpService, behandlingHentOgPersisterService, simuleringService)
         mockkObject(EøsSatserRegister)
         every { EøsSatserRegister.satser } returns listOf(forrigeSats, gjeldendeSats)
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
