@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
@@ -32,7 +33,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 import java.time.YearMonth
 
 class FiltreringsreglerSøknadServiceTest {
@@ -235,7 +235,7 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
-    fun `skal ikke sette fakta for aktiv norsk bostedsadresse når søker mangler bostedsadresse`() {
+    fun `skal ette fakta til false for aktiv norsk bostedsadresse når søker mangler bostedsadresse`() {
         // Act
         val fakta =
             kjørFiltreringsregler(
@@ -249,12 +249,30 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
+    fun `skal sette fakta til false for aktiv norsk bostedsaddresse for barn når listen med søknadsbarn for aktiv norsk bostedsadresse er tom`() {
+        // Act
+        val fakta = kjørFiltreringsregler(barnasAktører = { emptyList() })
+
+        // Assert
+        assertThat(fakta.barnHarAktivNorskBostedsadresse).isFalse
+    }
+
+    @Test
     fun `skal sette fakta når alle søknadsbarn har foreldre barn-relasjon til søker`() {
         // Act
-        val fakta = kjørFiltreringsregler()
+        val fakta = kjørFiltreringsregler(barnasAktører = { listOf(it) })
 
         // Assert
         assertThat(fakta.søkerOgBarnHarForelderBarnRelasjon).isTrue
+    }
+
+    @Test
+    fun `skal ikke sette fakta til false når listen med søknadsbarn for foreldre barn-relasjon er tom`() {
+        // Act
+        val fakta = kjørFiltreringsregler(barnasAktører = { emptyList() })
+
+        // Assert
+        assertThat(fakta.søkerOgBarnHarForelderBarnRelasjon).isFalse
     }
 
     @Test
@@ -319,6 +337,7 @@ class FiltreringsreglerSøknadServiceTest {
         tilpassGrunnlag: (PersonopplysningGrunnlag) -> Unit = {},
         personInfo: PersonInfo? = null,
         barnHarAdressebeskyttelseGradering6Eller19: Boolean = false,
+        barnasAktører: (Aktør) -> List<Aktør> = { listOf(it) },
     ): FiltreringsreglerFaktaSøknad {
         // Arrange
         val søkersIdent = randomFnr()
@@ -333,14 +352,15 @@ class FiltreringsreglerSøknadServiceTest {
         val barn = grunnlag.barna.single()
         grunnlag.personer.forEach { person ->
             person.bostedsadresser.forEach {
-                it.periode = DatoIntervallEntitet(LocalDate.now().minusDays(1), null)
+                it.periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null)
             }
         }
         tilpassGrunnlag(grunnlag)
+        val aktørBarna = barnasAktører(barn.aktør)
 
         val faktaSlot = slot<FiltreringsreglerFaktaSøknad>()
         every { personidentService.hentAktør(søkersIdent) } returns grunnlag.søker.aktør
-        every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns listOf(barn.aktør)
+        every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns aktørBarna
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns grunnlag
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
         every { personopplysningerService.harVerge(grunnlag.søker.aktør) } returns VergeResponse(false)
@@ -348,7 +368,7 @@ class FiltreringsreglerSøknadServiceTest {
         every {
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
                 grunnlag.søker.aktør,
-                setOf(barn.aktør),
+                aktørBarna.toSet(),
             )
         } returns (
             personInfo
@@ -369,7 +389,7 @@ class FiltreringsreglerSøknadServiceTest {
         every {
             tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
                 behandling = behandling,
-                barna = listOf(barn),
+                barna = grunnlag.barna.filter { it.aktør in aktørBarna },
                 måned = inneværendeMåned,
             )
         } returns false

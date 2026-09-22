@@ -119,9 +119,9 @@ class FiltreringsreglerSøknadService(
                         forelderBarnRelasjonerForSøknadsbarna.any {
                             it.aktør == barnFraSøknad.aktør
                         }
-                    },
-                søkerHarAktivNorskBostedsadresse = harAktivNorskBostedsadresse(listOf(personopplysningGrunnlag.søker), LocalDate.now()),
-                barnHarAktivNorskBostedsadresse = harAktivNorskBostedsadresse(barnaFraSøknad, LocalDate.now()),
+                    } && barnaFraSøknad.isNotEmpty(),
+                søkerHarAktivNorskBostedsadresse = harAktivNorskBostedsadresse(listOf(personopplysningGrunnlag.søker), LocalDate.now(clockProvider.get())),
+                barnHarAktivNorskBostedsadresse = harAktivNorskBostedsadresse(barnaFraSøknad, LocalDate.now(clockProvider.get())),
                 søkerHarUkrainskStatsborgerskap = personopplysningGrunnlag.søker.statsborgerskap.iUkraina(),
                 barnHarUkrainskStatsborgerskap =
                     barnaFraSøknad.any {
@@ -171,7 +171,7 @@ class FiltreringsreglerSøknadService(
         personer.all { person ->
             val tidslinje = Adresser.opprettFra(person = person).lagErBosattINorgeTidslinje()
             tidslinje.verdiPåTidspunkt(tidspunkt) == true
-        }
+        } && personer.isNotEmpty()
 
     private fun oppdaterMetrikker(evalueringer: List<Evaluering>) {
         var førsteutfall = true
