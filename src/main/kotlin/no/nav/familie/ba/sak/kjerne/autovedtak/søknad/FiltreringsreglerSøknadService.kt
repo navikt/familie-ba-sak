@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.erStrengtFortrolig
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FILTRERINGSREGLER_SØKNAD
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsregelEvaluator
@@ -31,15 +32,10 @@ import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.tidslinje.utvidelser.verdiPåTidspunkt
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
-
-private fun ADRESSEBESKYTTELSEGRADERING?.erGradering6Eller19(): Boolean =
-    this == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
-        this == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
 
 @Service
 class FiltreringsreglerSøknadService(
@@ -109,10 +105,10 @@ class FiltreringsreglerSøknadService(
                 søknadenInneholderVedlegg = søknad.inneholderVedlegg,
                 søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling = false, // TODO Fix me
                 søkerHarAdressebeskyttelseGradering6Eller19 =
-                    personInfo.adressebeskyttelseGradering.erGradering6Eller19(),
+                    personInfo.adressebeskyttelseGradering.erStrengtFortrolig(),
                 barnHarAdressebeskyttelseGradering6Eller19 =
                     forelderBarnRelasjonerForSøknadsbarna.any {
-                        it.adressebeskyttelseGradering.erGradering6Eller19()
+                        it.adressebeskyttelseGradering.erStrengtFortrolig()
                     },
                 søkerOgBarnHarForelderBarnRelasjon =
                     barnaFraSøknad.all { barnFraSøknad ->
