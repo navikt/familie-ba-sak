@@ -8,7 +8,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -49,7 +48,6 @@ class VilkårsvurderingForNyBehandlingServiceTest {
     private val endretUtbetalingAndelService = mockk<EndretUtbetalingAndelService>()
     private val vilkårsvurderingMetrics = mockk<VilkårsvurderingMetrics>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
-    private val featureToggleService = mockk<FeatureToggleService>()
     private val preutfyllVilkårService = mockk<PreutfyllVilkårService>()
     private val oppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService = mockk<OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService>()
 
@@ -550,6 +548,80 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                         assertThat(it.periodeTom).isNull()
                     }
                 }
+            }
+        }
+
+        @Nested
+        inner class AutomatiskBehandlingAvSøknad {
+            @Test
+            fun `skal opprette og lagre initiell vilkårsvurdering`() {
+                // Arrange
+                val søker = lagPerson(type = PersonType.SØKER)
+                val barn = lagPerson(type = PersonType.BARN)
+                val fagsak = lagFagsak(aktør = søker.aktør)
+                val behandling =
+                    lagBehandling(
+                        fagsak = fagsak,
+                        årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
+                        skalBehandlesAutomatisk = true,
+                    )
+
+                every {
+                    persongrunnlagService.hentAktivThrows(behandling.id)
+                } returns lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
+                every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns null
+                every { preutfyllVilkårService.preutfyllVilkår(any()) } just runs
+                every { behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsak.id) } returns null
+
+                val vilkårsvurderingSlot = slot<Vilkårsvurdering>()
+                every { vilkårsvurderingService.lagreInitielt(capture(vilkårsvurderingSlot)) } returnsArgument 0
+
+                // Act
+                vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
+                    behandling = behandling,
+                    forrigeBehandlingSomErVedtatt = null,
+                )
+
+                // Assert
+                verify(exactly = 1) { preutfyllVilkårService.preutfyllVilkår(any()) }
+                verify(exactly = 1) { vilkårsvurderingService.lagreInitielt(any()) }
+                verify(exactly = 0) { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) }
+                val vilkårsvurdering = vilkårsvurderingSlot.captured
+                assertThat(vilkårsvurdering.behandling).isEqualTo(behandling)
+            }
+
+            @Test
+            fun `skal kaste exception dersom preutfylling feiler`() {
+                // Arrange
+                val søker = lagPerson(type = PersonType.SØKER)
+                val barn = lagPerson(type = PersonType.BARN)
+                val fagsak = lagFagsak(aktør = søker.aktør)
+                val behandling =
+                    lagBehandling(
+                        fagsak = fagsak,
+                        årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
+                        skalBehandlesAutomatisk = true,
+                    )
+
+                every {
+                    persongrunnlagService.hentAktivThrows(behandling.id)
+                } returns lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
+                every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns null
+                every { preutfyllVilkårService.preutfyllVilkår(any()) } throws IllegalStateException("En feil oppstod")
+                every { behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsak.id) } returns null
+
+                // Act & Assert
+                val exception =
+                    assertThrows<IllegalStateException> {
+                        vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
+                            behandling = behandling,
+                            forrigeBehandlingSomErVedtatt = null,
+                        )
+                    }
+
+                assertThat(exception.message).isEqualTo("En feil oppstod")
+                verify(exactly = 1) { preutfyllVilkårService.preutfyllVilkår(any()) }
+                verify(exactly = 0) { vilkårsvurderingService.lagreInitielt(any()) }
             }
         }
     }

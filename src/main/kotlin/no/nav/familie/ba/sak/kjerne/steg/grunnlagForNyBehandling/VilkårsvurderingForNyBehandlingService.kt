@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.ENDRE_MIGRERINGSDATO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
@@ -27,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.ExceptionStrategi
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -90,7 +90,7 @@ class VilkårsvurderingForNyBehandlingService(
                 )
             }
 
-            !in listOf(SØKNAD, AUTOMATISK_BEHANDLING_AV_SØKNAD, FØDSELSHENDELSE) -> {
+            !in listOf(SØKNAD, FØDSELSHENDELSE) -> {
                 initierVilkårsvurderingForBehandling(
                     behandling = behandling,
                     bekreftEndringerViaFrontend = true,
@@ -267,11 +267,13 @@ class VilkårsvurderingForNyBehandlingService(
                 ).also {
                     preutfyllVilkårService.preutfyllVilkår(vilkårsvurdering = it)
                 }
-        } catch (e: Exception) {
-            logger.warn(
-                "Preutfylling av vilkår feilet for behandling ${behandling.id}, fortsetter uten preutfylling",
-                e,
-            )
+        } catch (exception: Exception) {
+            val strategi = ExceptionStrategi.fraBehandlingÅrsak(behandling.opprettetÅrsak)
+            if (strategi == ExceptionStrategi.THROW) {
+                logger.error("Preutfylling av vilkår feilet for behandling=${behandling.id} på fagsak=${behandling.fagsak.id}", exception)
+                throw exception
+            }
+            logger.warn("Preutfylling av vilkår feilet for behandling=${behandling.id} på fagsak=${behandling.fagsak.id}, fortsetter uten preutfylling", exception)
             VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = personopplysningGrunnlag).genererInitiellVilkårsvurdering(
                 behandling = behandling,
                 barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert,
