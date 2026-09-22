@@ -64,7 +64,7 @@ class BehandleAutomatiskSøknadTask(
                 manuellOppgaveType = ManuellOppgaveType.SØKNAD,
                 oppgavetype = Oppgavetype.BehandleSak,
             )
-            logger.info("Henlegger automatisk behandling og oppretter oppgave: ${feil.message}")
+            logger.info("Oppretter manuell behandling og oppgave: ${feil.message}")
         }
     }
 
