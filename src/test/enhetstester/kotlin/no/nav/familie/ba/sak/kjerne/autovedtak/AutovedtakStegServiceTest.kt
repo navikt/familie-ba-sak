@@ -21,11 +21,13 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåba
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
-import no.nav.familie.ba.sak.kjerne.behandling.Søknad
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -70,10 +72,13 @@ class AutovedtakStegServiceTest {
     private val fagsak = defaultFagsak()
     private val mottakersAktør = lagAktør(randomFnr())
 
-    private val søknad =
-        Søknad(
+    private val søkersIdent = mottakersAktør.aktivFødselsnummer()
+
+    private val nyBehandling =
+        NyBehandling(
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
             fagsakId = fagsak.id,
-            søkersIdent = mottakersAktør.aktivFødselsnummer(),
             barnasIdenter = listOf(randomFnr()),
         )
 
@@ -88,10 +93,10 @@ class AutovedtakStegServiceTest {
         @BeforeEach
         fun setUp() {
             every { featureToggleService.isEnabled(FeatureToggle.SKAL_BEHANDLE_SOKNAD_AUTOMATISK, false) } returns true
-            every { autovedtakSøknadService.skalAutovedtakBehandles(SøknadData(søknad)) } returns true
+            every { autovedtakSøknadService.skalAutovedtakBehandles(SøknadData(nyBehandling, søkersIdent)) } returns true
             every { fagsakService.hentPåFagsakId(fagsak.id) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
-            every { autovedtakSøknadService.kjørBehandling(SøknadData(søknad)) } returns "Søknad: Behandling ferdig"
+            every { autovedtakSøknadService.kjørBehandling(SøknadData(nyBehandling, søkersIdent)) } returns "Søknad: Behandling ferdig"
         }
 
         @Test
@@ -101,7 +106,7 @@ class AutovedtakStegServiceTest {
 
             // Act & Assert
             assertThrows<Feil> {
-                autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, søknad)
+                autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, nyBehandling)
             }
             verify(exactly = 0) { fagsakService.hentPåFagsakId(any()) }
             verify(exactly = 0) { autovedtakSøknadService.kjørBehandling(any()) }
@@ -110,10 +115,10 @@ class AutovedtakStegServiceTest {
         @Test
         fun `skal returnere tidlig uten å hente fagsak når autovedtak ikke skal behandles`() {
             // Arrange
-            every { autovedtakSøknadService.skalAutovedtakBehandles(SøknadData(søknad)) } returns false
+            every { autovedtakSøknadService.skalAutovedtakBehandles(SøknadData(nyBehandling, søkersIdent)) } returns false
 
             // Act
-            val resultat = autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, søknad)
+            val resultat = autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, nyBehandling)
 
             // Assert
             assertThat(resultat).isEqualTo("Søknad: Skal ikke behandles")
@@ -124,11 +129,11 @@ class AutovedtakStegServiceTest {
         @Test
         fun `skal kjøre behandling og returnere resultat når det ikke finnes noen åpen behandling`() {
             // Act
-            val resultat = autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, søknad)
+            val resultat = autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, nyBehandling)
 
             // Assert
             assertThat(resultat).isEqualTo("Søknad: Behandling ferdig")
-            verify(exactly = 1) { autovedtakSøknadService.kjørBehandling(SøknadData(søknad)) }
+            verify(exactly = 1) { autovedtakSøknadService.kjørBehandling(SøknadData(nyBehandling, søkersIdent)) }
         }
 
         @Test
@@ -140,13 +145,13 @@ class AutovedtakStegServiceTest {
             every { snikeIKøenService.settAktivBehandlingPåMaskinellVent(any(), any()) } just Runs
 
             // Act
-            val resultat = autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, søknad)
+            val resultat = autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, nyBehandling)
 
             // Assert
             assertThat(resultat).isEqualTo("Søknad: Behandling ferdig")
             verify(exactly = 1) {
                 snikeIKøenService.settAktivBehandlingPåMaskinellVent(åpenBehandling.id, SettPåMaskinellVentÅrsak.SØKNAD)
-                autovedtakSøknadService.kjørBehandling(SøknadData(søknad))
+                autovedtakSøknadService.kjørBehandling(SøknadData(nyBehandling, søkersIdent))
             }
         }
 
@@ -158,7 +163,7 @@ class AutovedtakStegServiceTest {
             every { snikeIKøenService.kanSnikeForbi(åpenBehandling) } returns false
 
             // Act
-            val resultat = autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, søknad)
+            val resultat = autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, nyBehandling)
 
             // Assert
             assertThat(resultat).isEqualTo("Søknad: Bruker har åpen behandling")
@@ -183,7 +188,7 @@ class AutovedtakStegServiceTest {
             assertThrows<RekjørSenereException> {
                 autovedtakStegService.kjørAutomatiskBehandlingSøknad(
                     mottakersAktør,
-                    søknad,
+                    nyBehandling,
                     førstegangKjørt = LocalDateTime.now(),
                 )
             }
@@ -200,7 +205,7 @@ class AutovedtakStegServiceTest {
             val resultat =
                 autovedtakStegService.kjørAutomatiskBehandlingSøknad(
                     mottakersAktør,
-                    søknad,
+                    nyBehandling,
                     førstegangKjørt = LocalDateTime.now().minusDays(7),
                 )
 
@@ -225,7 +230,7 @@ class AutovedtakStegServiceTest {
 
             // Act & Assert
             assertThrows<RekjørSenereException> {
-                autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, søknad)
+                autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, nyBehandling)
             }
             verify(exactly = 0) { autovedtakSøknadService.kjørBehandling(any()) }
         }
@@ -238,7 +243,7 @@ class AutovedtakStegServiceTest {
 
             // Act & Assert
             assertThrows<Feil> {
-                autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, søknad)
+                autovedtakStegService.kjørAutomatiskBehandlingSøknad(mottakersAktør, nyBehandling)
             }
             verify(exactly = 0) { autovedtakSøknadService.kjørBehandling(any()) }
         }

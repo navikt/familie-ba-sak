@@ -865,6 +865,110 @@ class BehandlingStegTest {
         }
 
         @Nested
+        inner class AutomatiskBehandlingAvSøknad {
+            @ParameterizedTest(name = "Henter neste steg for {0}")
+            @CsvSource(
+                "REGISTRERE_PERSONGRUNNLAG, REGISTRERE_SØKNAD",
+                "REGISTRERE_SØKNAD, FILTRERING_AUTOMATISK_BEHANDLING",
+                "FILTRERING_AUTOMATISK_BEHANDLING, VILKÅRSVURDERING",
+                "VILKÅRSVURDERING, BEHANDLINGSRESULTAT",
+                "BEHANDLINGSRESULTAT, IVERKSETT_MOT_OPPDRAG",
+                "IVERKSETT_MOT_OPPDRAG, VENTE_PÅ_STATUS_FRA_ØKONOMI",
+                "VENTE_PÅ_STATUS_FRA_ØKONOMI, JOURNALFØR_VEDTAKSBREV",
+                "JOURNALFØR_VEDTAKSBREV, DISTRIBUER_VEDTAKSBREV",
+                "DISTRIBUER_VEDTAKSBREV, FERDIGSTILLE_BEHANDLING",
+                "FERDIGSTILLE_BEHANDLING, BEHANDLING_AVSLUTTET",
+                "BEHANDLING_AVSLUTTET, BEHANDLING_AVSLUTTET",
+            )
+            fun `skal hente neste steg med endringer i utbetaling`(
+                nåværendeSteg: StegType,
+                forventetResultat: StegType,
+            ) {
+                // Arrange
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD)
+
+                // Act
+                val nesteSteg =
+                    hentNesteSteg(
+                        behandling = behandling,
+                        utførendeStegType = nåværendeSteg,
+                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                    )
+
+                // Assert
+                assertThat(nesteSteg).isEqualTo(forventetResultat)
+            }
+
+            @Test
+            fun `skal hente JOURNALFØR_VEDTAKSBREV etter BEHANDLINGSRESULTAT når det ikke er endringer i utbetaling`() {
+                // Arrange
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD)
+
+                // Act
+                val nesteSteg =
+                    hentNesteSteg(
+                        behandling = behandling,
+                        utførendeStegType = StegType.BEHANDLINGSRESULTAT,
+                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
+                    )
+
+                // Assert
+                assertThat(nesteSteg).isEqualTo(StegType.JOURNALFØR_VEDTAKSBREV)
+            }
+
+            @Test
+            fun `skal støtte FØRSTE_STEG slik at behandlingen kan starte`() {
+                // Arrange
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD)
+
+                // Act
+                val nesteSteg =
+                    hentNesteSteg(
+                        behandling = behandling,
+                        utførendeStegType = FØRSTE_STEG,
+                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT,
+                    )
+
+                // Assert
+                assertThat(nesteSteg).isEqualTo(StegType.REGISTRERE_SØKNAD)
+            }
+
+            @Test
+            fun `skal hente neste steg for REGISTRERE_PERSONGRUNNLAG når fagsak er av typen institusjon`() {
+                // Arrange
+                val fagsak = lagFagsak(type = FagsakType.INSTITUSJON)
+                val behandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD)
+
+                // Act
+                val nesteSteg =
+                    hentNesteSteg(
+                        behandling = behandling,
+                        utførendeStegType = StegType.REGISTRERE_PERSONGRUNNLAG,
+                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                    )
+
+                // Assert
+                assertThat(nesteSteg).isEqualTo(StegType.REGISTRERE_INSTITUSJON)
+            }
+
+            @Test
+            fun `skal kaste feil for REGISTRERE_INSTITUSJON siden institusjonssaker ikke skal behandles automatisk`() {
+                // Arrange
+                val fagsak = lagFagsak(type = FagsakType.INSTITUSJON)
+                val behandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD)
+
+                // Act & Assert
+                assertThrows<Feil> {
+                    hentNesteSteg(
+                        behandling = behandling,
+                        utførendeStegType = StegType.REGISTRERE_INSTITUSJON,
+                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                    )
+                }
+            }
+        }
+
+        @Nested
         inner class SmåbarnstilleggEndringFramITid {
             @ParameterizedTest(name = "Henter neste steg for {0}")
             @CsvSource(

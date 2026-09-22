@@ -58,29 +58,22 @@ class AutovedtakService(
     }
 
     /**
-     * Oppretter en ny, automatisk behandling med gitt type og årsak, og kjører den til behandlingsresultat med filtreringsregler.
+     * Oppretter en ny, automatisk behandling fra [nyBehandling], og kjører den til behandlingsresultat med filtreringsregler.
      */
     fun opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
-        behandlingType: BehandlingType,
-        behandlingÅrsak: BehandlingÅrsak,
-        fagsakId: Long,
+        nyBehandling: NyBehandling,
         filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,
     ): Behandling {
-        val nyBehandling =
+        val behandling =
             stegService.håndterNyBehandling(
-                NyBehandling(
-                    behandlingType = behandlingType,
-                    behandlingÅrsak = behandlingÅrsak,
-                    skalBehandlesAutomatisk = true,
-                    fagsakId = fagsakId,
-                ),
+                nyBehandling.copy(skalBehandlesAutomatisk = true),
             )
 
-        if (behandlingÅrsak === BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD) {
-            stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(nyBehandling, filtrerAutomatiskBehandlingData)
+        if (nyBehandling.behandlingÅrsak == BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD) {
+            stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(behandling, filtrerAutomatiskBehandlingData)
         }
 
-        val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(nyBehandling)
+        val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(behandling)
         return behandlingEtterBehandlingsresultat
     }
 
