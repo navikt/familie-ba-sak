@@ -313,6 +313,23 @@ class AutovedtakSøknadServiceTest {
         }
 
         @Test
+        fun `skal opprette den manuelle behandlingen med årsak SØKNAD selv om den automatiske behandlingen ble bestilt med årsak AUTOMATISK_BEHANDLING_AV_SØKNAD`() {
+            // Arrange
+            val søknadDataFraMottak =
+                søknadData.copy(
+                    nyBehandling = nyBehandling.copy(behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD),
+                )
+            val nyBehandlingSlot = slot<NyBehandling>()
+            every { stegService.håndterNyBehandlingOgSendInfotrygdFeed(capture(nyBehandlingSlot)) } returns manuellBehandling
+
+            // Act
+            autovedtakSøknadService.kjørBehandling(søknadDataFraMottak)
+
+            // Assert
+            assertThat(nyBehandlingSlot.captured.behandlingÅrsak).isEqualTo(BehandlingÅrsak.SØKNAD)
+        }
+
+        @Test
         fun `skal ikke validere, simulere eller opprette vedtak når filtreringsreglene stopper behandlingen`() {
             // Act
             autovedtakSøknadService.kjørBehandling(søknadData)

@@ -127,7 +127,10 @@ class AutovedtakSøknadService(
                 ),
         )
 
-        val manuellBehandling = stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
+        val manuellBehandling =
+            stegService.håndterNyBehandlingOgSendInfotrygdFeed(
+                nyBehandling.copy(behandlingÅrsak = BehandlingÅrsak.SØKNAD),
+            )
 
         oppgaveService.opprettOppgaveForManuellBehandling(
             behandlingId = manuellBehandling.id,

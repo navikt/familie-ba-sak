@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
@@ -17,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.dto.BehandleAutomatiskSøknadTaskDTO
@@ -125,6 +127,29 @@ class BehandleAutomatiskSøknadTaskTest {
                     oppgavetype = Oppgavetype.BehandleSak,
                 )
             }
+        }
+
+        @Test
+        fun `skal opprette den manuelle behandlingen med årsak SØKNAD når søknaden ble bestilt med årsak AUTOMATISK_BEHANDLING_AV_SØKNAD`() {
+            // Arrange
+            val nyBehandlingFraMottak = nyBehandling.copy(behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD)
+            val task = BehandleAutomatiskSøknadTask.opprettTask(BehandleAutomatiskSøknadTaskDTO(nyBehandlingFraMottak))
+            val behandling = lagBehandling()
+            val nyBehandlingSlot = slot<NyBehandling>()
+
+            every { fagsakService.hentPåFagsakId(nyBehandlingFraMottak.fagsakId) } returns fagsak
+            every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(nyBehandlingFraMottak.fagsakId) } returns false
+            every {
+                autovedtakStegService.kjørAutomatiskBehandlingSøknad(any(), any(), any())
+            } throws AutovedtakMåBehandlesManueltFeil("Ikke kandidat for automatisk behandling")
+            every { stegService.håndterNyBehandlingOgSendInfotrygdFeed(capture(nyBehandlingSlot)) } returns behandling
+            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) } returns "oppgaveId"
+
+            // Act
+            behandleAutomatiskSøknadTask.doTask(task)
+
+            // Assert
+            assertThat(nyBehandlingSlot.captured.behandlingÅrsak).isEqualTo(BehandlingÅrsak.SØKNAD)
         }
 
         @Test
