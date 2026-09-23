@@ -164,7 +164,7 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON,
             Filtreringsregel.Identifikator.SØKER_ER_IKKE_UKRAINSK_STATSBORGER,
             Filtreringsregel.Identifikator.BARN_ER_IKKE_UKRAINSK_STATSBORGER,
-            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR,
         )
     }
 
@@ -187,7 +187,7 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
             Filtreringsregel.Identifikator.LØPER_IKKE_BARNETRYGD_FOR_BARNET,
             Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
-            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
+            Filtreringsregel.Identifikator.SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR,
             Filtreringsregel.Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_D_NUMMER,
             Filtreringsregel.Identifikator.BARN_HAR_IKKE_D_NUMMER,
@@ -404,16 +404,6 @@ internal class FiltreringsregelTest {
                     "SØKNADEN_INNEHOLDER_VEDLEGG",
                     "SØKNADEN_INNEHOLDER_IKKE_VEDLEGG",
                     "Søknaden inneholder vedlegg",
-                ),
-                PersistertUtfall(
-                    "SØKER_OPPFYLLER_IKKE_VILKÅR_FOR_UTVIDET_BARNETRYGD_VED_FØDSELSDATO",
-                    "SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO",
-                    "Søker oppfyller ikke vilkår for utvidet barnetrygd",
-                ),
-                PersistertUtfall(
-                    "SØKER_OPPFYLLER_VILKÅR_FOR_UTVIDET_BARNETRYGD_VED_FØDSELSDATO",
-                    "SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO",
-                    "Søker oppfyller vilkår for utvidet barnetrygd",
                 ),
             )
 
