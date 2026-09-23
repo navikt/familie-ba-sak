@@ -348,6 +348,11 @@ private val morHarIkkeOppfyltUtvidetVilkårVedFødselsdato =
         !it.søkerOppfyllerVilkårForUtvidetBarnetrygd
     }
 
+private val søkerHarIkkeOppfyltUtvidetVilkår =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR) {
+        !it.søkerOppfyllerVilkårForUtvidetBarnetrygd
+    }
+
 private val morHarIkkeOpphørtBarnetrygd =
     Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>(Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD) { it.morHarIkkeOpphørtBarnetrygd }
 
@@ -422,6 +427,7 @@ val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøkn
         søkerOgBarnHarForelderBarnRelasjon,
         søkerErIkkeUkrainskStatsborger,
         barnErIkkeUkrainskStatsborger,
+        søkerHarIkkeOppfyltUtvidetVilkår,
     )
 
 val FILTRERINGSREGLER_FØDSELSHENDELSE: List<Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>> =

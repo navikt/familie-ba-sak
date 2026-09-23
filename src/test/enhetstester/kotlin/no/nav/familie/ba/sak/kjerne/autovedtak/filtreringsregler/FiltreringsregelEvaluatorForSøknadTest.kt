@@ -236,6 +236,18 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     }
 
     @Nested
+    inner class SøkerHarIkkeOppfyltUtvidetVilkår {
+        @Test
+        fun `skal avvise når søker ikke oppfyller vilkår for utvidet barnetrygd`() {
+            // Act
+            val evalueringer = evaluer(søkerOppfyllerVilkårForUtvidetBarnetrygd = true)
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR)
+        }
+    }
+
+    @Nested
     inner class NårSøkerEllerBarnErUkrainskStatsborger {
         @Test
         fun `skal avvise når søker er ukrainsk statsborger`() {
@@ -276,13 +288,14 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
         barnHarAktivNorskBostedsadresse: Boolean = true,
         søkerHarUkrainskStatsborgerskap: Boolean = false,
         barnHarUkrainskStatsborgerskap: Boolean = false,
+        søkerOppfyllerVilkårForUtvidetBarnetrygd: Boolean = false,
     ): List<Evaluering> =
         filtreringsregelEvaluator.evaluerFiltreringsregler(
             FILTRERINGSREGLER_SØKNAD,
             FiltreringsreglerFaktaSøknad(
                 søker = søker,
                 søkerMottarLøpendeUtvidet = søkerMottarLøpendeUtvidet,
-                søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
+                søkerOppfyllerVilkårForUtvidetBarnetrygd = søkerOppfyllerVilkårForUtvidetBarnetrygd,
                 søkerMottarEøsBarnetrygd = søkerMottarEøsBarnetrygd,
                 barnaSomSkalVurderes = barna,
                 søkerLever = søkerLever,

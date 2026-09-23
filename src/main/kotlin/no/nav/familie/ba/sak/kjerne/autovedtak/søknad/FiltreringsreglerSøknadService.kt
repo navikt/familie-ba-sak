@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerFødselshendelseService.Companion.logger
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -31,8 +30,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.tidslinje.utvidelser.verdiPåTidspunkt
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -43,13 +40,12 @@ class FiltreringsreglerSøknadService(
     private val personopplysningerService: PersonopplysningerService,
     private val personidentService: PersonidentService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val filtreringResultatRepository: FiltreringResultatRepository,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val filtreringsregelEvaluator: FiltreringsregelEvaluator,
     private val søknadService: SøknadService,
     private val clockProvider: ClockProvider,
+    private val vilkårvurderer: Vilkårvurderer,
 ) {
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
     val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
@@ -107,11 +103,7 @@ class FiltreringsreglerSøknadService(
             FiltreringsreglerFaktaSøknad(
                 søker = personopplysningGrunnlag.søker,
                 søkerMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
-                søkerOppfyllerVilkårForUtvidetBarnetrygd =
-                    søkerOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
-                        behandling,
-                        barnaFraSøknad,
-                    ),
+                søkerOppfyllerVilkårForUtvidetBarnetrygd = vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(behandling, barnaFraSøknad),
                 søkerMottarEøsBarnetrygd = behandling.kategori == BehandlingKategori.EØS,
                 barnaSomSkalVurderes = barnaFraSøknad,
                 søkerLever = !personopplysningGrunnlag.søker.erDød(),
@@ -162,26 +154,6 @@ class FiltreringsreglerSøknadService(
             behandlingId = behandling.id,
             fakta = fakta,
         )
-    }
-
-    private fun søkerOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
-        behandling: Behandling,
-        barnaFraHendelse: List<Person>,
-    ): Boolean {
-        val forrigeVedtatteBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
-        return forrigeVedtatteBehandling?.let { vedtattBehandling ->
-            vilkårsvurderingRepository.findByBehandlingAndAktiv(vedtattBehandling.id)?.let { vilkårsvurdering ->
-                vilkårsvurdering.personResultater.single { personResultat -> personResultat.erSøkersResultater() }.vilkårResultater.any { vilkårResultat ->
-                    vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
-                        vilkårResultat.erOppfylt() &&
-                        barnaFraHendelse.any { barnFraHendelse ->
-                            vilkårResultat.periodeTom?.isAfter(barnFraHendelse.fødselsdato) ?: true &&
-                                vilkårResultat.periodeFom!!.isBefore(barnFraHendelse.fødselsdato.plusYears(18))
-                        }
-                }
-            } ?: false
-        } ?: false
     }
 
     private fun harAktivNorskBostedsadresse(
