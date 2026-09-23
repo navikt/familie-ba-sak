@@ -58,6 +58,8 @@ class BeregningService(
 
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
 
+    fun hentAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(behandlingIder)
+
     fun hentTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
 
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)

@@ -296,6 +296,139 @@ class AutovedtakSøknadValideringTest {
     }
 
     @Nested
+    inner class ValiderAtInnvilgedePerioderIkkeOverlapperTidligereUtbetalingsperioder {
+        private fun lagAndel(
+            aktør: Aktør,
+            fom: YearMonth,
+            tom: YearMonth,
+            behandling: Behandling = this@AutovedtakSøknadValideringTest.behandling,
+            beløp: Int = 1054,
+            ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+        ) = lagAndelTilkjentYtelse(
+            fom = fom,
+            tom = tom,
+            aktør = aktør,
+            behandling = behandling,
+            beløp = beløp,
+            ytelseType = ytelseType,
+        )
+
+        private fun valider(
+            andelerDenneBehandlingen: List<AndelTilkjentYtelse>,
+            andelerFraTidligereIverksatteBehandlinger: List<AndelTilkjentYtelse> = emptyList(),
+        ) = AutovedtakSøknadValidering.validerAtInnvilgedePerioderIkkeOverlapperTidligereUtbetalingsperioder(
+            behandlingId = behandling.id,
+            andelerDenneBehandlingen = andelerDenneBehandlingen,
+            andelerFraTidligereIverksatteBehandlinger = andelerFraTidligereIverksatteBehandlinger,
+        )
+
+        @Test
+        fun `skal ikke kaste feil når søker ikke har tidligere utbetalingsperioder`() {
+            // Arrange
+            val andelerDenneBehandlingen = listOf(lagAndel(barnFremstiltKravFor, fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12)))
+
+            // Act & Assert
+            assertDoesNotThrow { valider(andelerDenneBehandlingen) }
+        }
+
+        @Test
+        fun `skal ikke kaste feil når innvilgede perioder ikke overlapper med tidligere utbetalingsperioder`() {
+            // Arrange
+            val andelerDenneBehandlingen = listOf(lagAndel(barnFremstiltKravFor, fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12)))
+            val andelerFraTidligereIverksatteBehandlinger =
+                listOf(lagAndel(barnUtenKrav, behandling = forrigeBehandling, fom = YearMonth.of(2020, 1), tom = YearMonth.of(2024, 12)))
+
+            // Act & Assert
+            assertDoesNotThrow { valider(andelerDenneBehandlingen, andelerFraTidligereIverksatteBehandlinger) }
+        }
+
+        @Test
+        fun `skal kaste feil når en innvilget periode overlapper med en tidligere utbetalingsperiode for en annen person`() {
+            // Arrange
+            val andelerDenneBehandlingen = listOf(lagAndel(barnFremstiltKravFor, fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12)))
+            val andelerFraTidligereIverksatteBehandlinger =
+                listOf(lagAndel(barnUtenKrav, behandling = forrigeBehandling, fom = YearMonth.of(2020, 1), tom = YearMonth.of(2025, 1)))
+
+            // Act & Assert
+            val feil = assertThrows<AutovedtakMåBehandlesManueltFeil> { valider(andelerDenneBehandlingen, andelerFraTidligereIverksatteBehandlinger) }
+            assertThat(feil.message).isEqualTo("Automatisk behandling av søknad innvilger 1 periode(r) som overlapper med tidligere utbetalingsperioder til søker.\nBehandling av søknad må håndteres manuelt.")
+        }
+
+        @Test
+        fun `skal kaste feil når en innvilget periode overlapper med en tidligere utvidet utbetalingsperiode til søker`() {
+            // Arrange
+            val andelerDenneBehandlingen = listOf(lagAndel(barnFremstiltKravFor, fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12)))
+            val andelerFraTidligereIverksatteBehandlinger =
+                listOf(
+                    lagAndel(
+                        søker,
+                        behandling = forrigeBehandling,
+                        fom = YearMonth.of(2026, 1),
+                        tom = YearMonth.of(2026, 6),
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    ),
+                )
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> { valider(andelerDenneBehandlingen, andelerFraTidligereIverksatteBehandlinger) }
+        }
+
+        @Test
+        fun `skal telle overlappende periode kun én gang selv om flere barn har samme periode`() {
+            // Arrange
+            val andelerDenneBehandlingen =
+                listOf(
+                    lagAndel(barnFremstiltKravFor, fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12)),
+                    lagAndel(barnUtenKrav, fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12)),
+                )
+            val andelerFraTidligereIverksatteBehandlinger =
+                listOf(lagAndel(barnUtenKrav, behandling = forrigeBehandling, fom = YearMonth.of(2020, 1), tom = YearMonth.of(2025, 1)))
+
+            // Act & Assert
+            val feil = assertThrows<AutovedtakMåBehandlesManueltFeil> { valider(andelerDenneBehandlingen, andelerFraTidligereIverksatteBehandlinger) }
+            assertThat(feil.message).isEqualTo("Automatisk behandling av søknad innvilger 1 periode(r) som overlapper med tidligere utbetalingsperioder til søker.\nBehandling av søknad må håndteres manuelt.")
+        }
+
+        @Test
+        fun `skal telle hver overlappende periode når flere innvilgede perioder overlapper`() {
+            // Arrange
+            val andelerDenneBehandlingen =
+                listOf(
+                    lagAndel(barnFremstiltKravFor, fom = YearMonth.of(2025, 1), tom = YearMonth.of(2025, 6)),
+                    lagAndel(barnFremstiltKravFor, fom = YearMonth.of(2026, 1), tom = YearMonth.of(2026, 6)),
+                )
+            val andelerFraTidligereIverksatteBehandlinger =
+                listOf(lagAndel(barnUtenKrav, behandling = forrigeBehandling, fom = YearMonth.of(2020, 1), tom = YearMonth.of(2030, 12)))
+
+            // Act & Assert
+            val feil = assertThrows<AutovedtakMåBehandlesManueltFeil> { valider(andelerDenneBehandlingen, andelerFraTidligereIverksatteBehandlinger) }
+            assertThat(feil.message).isEqualTo("Automatisk behandling av søknad innvilger 2 periode(r) som overlapper med tidligere utbetalingsperioder til søker.\nBehandling av søknad må håndteres manuelt.")
+        }
+
+        @Test
+        fun `skal ikke kaste feil når den overlappende tidligere andelen ikke ga utbetaling`() {
+            // Arrange
+            val andelerDenneBehandlingen = listOf(lagAndel(barnFremstiltKravFor, fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12)))
+            val andelerFraTidligereIverksatteBehandlinger =
+                listOf(lagAndel(barnUtenKrav, behandling = forrigeBehandling, fom = YearMonth.of(2025, 1), tom = YearMonth.of(2025, 12), beløp = 0))
+
+            // Act & Assert
+            assertDoesNotThrow { valider(andelerDenneBehandlingen, andelerFraTidligereIverksatteBehandlinger) }
+        }
+
+        @Test
+        fun `skal ikke kaste feil når den overlappende andelen i denne behandlingen ikke gir utbetaling`() {
+            // Arrange
+            val andelerDenneBehandlingen = listOf(lagAndel(barnFremstiltKravFor, fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12), beløp = 0))
+            val andelerFraTidligereIverksatteBehandlinger =
+                listOf(lagAndel(barnUtenKrav, behandling = forrigeBehandling, fom = YearMonth.of(2025, 1), tom = YearMonth.of(2025, 12)))
+
+            // Act & Assert
+            assertDoesNotThrow { valider(andelerDenneBehandlingen, andelerFraTidligereIverksatteBehandlinger) }
+        }
+    }
+
+    @Nested
     inner class ValiderAtSimuleringGirUtbetaling {
         @Test
         fun `skal ikke kaste feil når simuleringen gir utbetaling`() {

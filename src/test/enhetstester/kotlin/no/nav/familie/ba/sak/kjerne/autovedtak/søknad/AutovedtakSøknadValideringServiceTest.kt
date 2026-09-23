@@ -60,6 +60,7 @@ class AutovedtakSøknadValideringServiceTest {
                 listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12), aktør = barnFremstiltKravFor, behandling = behandling))
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
             every { søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null) } returns listOf(barnFremstiltKravFor)
+            every { behandlingHentOgPersisterService.hentIverksatteBehandlinger(fagsakId = behandling.fagsak.id) } returns emptyList()
         }
 
         @Test
@@ -135,6 +136,28 @@ class AutovedtakSøknadValideringServiceTest {
                 behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
                 søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = forrigeBehandling)
             }
+        }
+
+        @Test
+        fun `skal kaste feil når en innvilget periode overlapper med en tidligere utbetalingsperiode til søker`() {
+            // Arrange
+            val tidligereIverksattBehandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD, resultat = Behandlingsresultat.INNVILGET)
+            every { behandlingHentOgPersisterService.hentIverksatteBehandlinger(fagsakId = behandling.fagsak.id) } returns listOf(tidligereIverksattBehandling)
+            every { beregningService.hentAndelerTilkjentYtelseForBehandlinger(listOf(tidligereIverksattBehandling.id)) } returns
+                listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 1), tom = YearMonth.of(2025, 6), aktør = barnUtenKrav, behandling = tidligereIverksattBehandling))
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling) }
+        }
+
+        @Test
+        fun `skal ikke hente andeler når det ikke finnes tidligere iverksatte behandlinger`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentIverksatteBehandlinger(fagsakId = behandling.fagsak.id) } returns listOf(behandling)
+
+            // Act & Assert
+            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling) }
+            verify(exactly = 0) { beregningService.hentAndelerTilkjentYtelseForBehandlinger(any()) }
         }
     }
 
