@@ -49,6 +49,10 @@ class BehandlingsresultatSteg(
 
         behandlingsresultatstegValideringService.validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(behandling = behandling)
 
+        if (behandling.erAutomatiskSøknad()) {
+            behandlingsresultatstegValideringService.validerAutomatiskSøknadFørBehandlingsresultat(behandling)
+        }
+
         if (behandling.erSatsendringNasjonal()) {
             behandlingsresultatstegValideringService.validerSatsendring(tilkjentYtelse)
         }
@@ -131,6 +135,9 @@ class BehandlingsresultatSteg(
 
     override fun postValiderSteg(behandling: Behandling) {
         BehandlingsresultatValideringUtils.validerBehandlingsresultat(behandling)
+        if (behandling.erAutomatiskSøknad()) {
+            behandlingsresultatstegValideringService.validerAutomatiskSøknadEtterBehandlingsresultat(behandling)
+        }
     }
 
     override fun stegType(): StegType = StegType.BEHANDLINGSRESULTAT

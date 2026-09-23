@@ -107,7 +107,6 @@ class AutovedtakSøknadServiceTest {
                 )
             } returns behandling
 
-            justRun { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(any()) }
             every { simuleringService.oppdaterSimuleringPåBehandling(behandling) } returns simulering
             justRun { autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(any()) }
             justRun { autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(any()) }
@@ -126,7 +125,6 @@ class AutovedtakSøknadServiceTest {
             // Assert
             verifyOrder {
                 autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(any(), any())
-                autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling)
                 simuleringService.oppdaterSimuleringPåBehandling(behandling)
                 autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling)
@@ -162,8 +160,6 @@ class AutovedtakSøknadServiceTest {
         fun `skal henlegge og opprette manuell behandling i stedet for å simulere og vedta når behandlingen må behandles manuelt`() {
             // Arrange
             val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
-            every { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling) } throws
-                AutovedtakMåBehandlesManueltFeil("Behandling av søknad må håndteres manuelt.")
 
             // Act
             val resultat = autovedtakSøknadService.kjørBehandling(søknadData)

@@ -46,7 +46,7 @@ object BehandlingsresultatSøknadUtils {
             )
 
         val erFødselshendelseMedAvslag =
-            if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+            if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE || behandlingÅrsak == BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD) {
                 nåværendePersonResultater.any { personResultat ->
                     personResultat.vilkårResultater
                         .any { it.resultat == Resultat.IKKE_OPPFYLT || it.resultat == Resultat.IKKE_VURDERT }

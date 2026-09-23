@@ -75,8 +75,7 @@ class AutovedtakSøknadService(
         behandling: Behandling,
         behandlingsdata: SøknadData,
     ): String {
-        autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling)
-
+        // Vi kjører ikke simuleringssteget så må gjøre det manuelt her
         val simulering = simuleringService.oppdaterSimuleringPåBehandling(behandling)
         autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
 

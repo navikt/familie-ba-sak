@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsKjøringService
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadValideringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -73,6 +74,7 @@ class BehandlingsresultatStegValideringService(
     private val persongrunnlagService: PersongrunnlagService,
     private val clockProvider: ClockProvider,
     private val satsendringEøsKjøringService: SatsendringEøsKjøringService,
+    private val autovedtakSøknadValideringService: AutovedtakSøknadValideringService,
 ) {
     fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
         if (behandling.status == BehandlingStatus.AVSLUTTET) return
@@ -450,4 +452,13 @@ class BehandlingsresultatStegValideringService(
                         )
                     }.tilTidslinje()
             }.kombiner { it.any() }
+
+    fun validerAutomatiskSøknadFørBehandlingsresultat(behandling: Behandling) {
+        autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(behandling)
+    }
+
+    fun validerAutomatiskSøknadEtterBehandlingsresultat(behandling: Behandling) {
+        autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandling)
+        autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling)
+    }
 }

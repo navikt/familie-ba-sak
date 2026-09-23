@@ -15,17 +15,20 @@ class AutovedtakSøknadValideringService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
-    fun validerAtBehandlingKanVedtasAutomatisk(behandling: Behandling) {
+    fun validerAtVilkårsvurderingErOppfylt(behandling: Behandling) {
         AutovedtakSøknadValidering.validerAtVilkårsvurderingErOppfylt(
             vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id),
         )
+    }
 
+    fun validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandling: Behandling) {
         AutovedtakSøknadValidering.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(
             behandlingsresultat = behandling.resultat,
         )
+    }
 
+    fun validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling: Behandling) {
         val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-
         AutovedtakSøknadValidering.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(
             behandlingId = behandling.id,
             andelerDenneBehandlingen = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id),
