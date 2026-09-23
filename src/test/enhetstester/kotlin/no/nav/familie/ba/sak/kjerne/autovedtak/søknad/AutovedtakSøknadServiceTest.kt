@@ -46,7 +46,6 @@ class AutovedtakSøknadServiceTest {
     private val taskService = mockk<TaskService>()
     private val autovedtakSøknadBegrunnelseService = mockk<AutovedtakSøknadBegrunnelseService>()
     private val autovedtakSøknadValideringService = mockk<AutovedtakSøknadValideringService>()
-    private val filtreringsreglerSøknadService = mockk<FiltreringsreglerSøknadService>()
     private val stegService = mockk<StegService>()
     private val oppgaveService = mockk<OppgaveService>()
 
@@ -57,12 +56,25 @@ class AutovedtakSøknadServiceTest {
             taskService = taskService,
             autovedtakSøknadBegrunnelseService = autovedtakSøknadBegrunnelseService,
             autovedtakSøknadValideringService = autovedtakSøknadValideringService,
-            filtreringsreglerSøknadService = filtreringsreglerSøknadService,
             stegService = stegService,
             oppgaveService = oppgaveService,
         )
 
     private val fagsak = lagFagsak()
+    private val automatiskBehandling =
+        lagBehandling(
+            fagsak = fagsak,
+            årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
+            skalBehandlesAutomatisk = true,
+            førsteSteg = StegType.VILKÅRSVURDERING,
+        )
+    private val behandlingEtterVilkårsvurdering =
+        lagBehandling(
+            fagsak = fagsak,
+            årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
+            skalBehandlesAutomatisk = true,
+            førsteSteg = StegType.BEHANDLINGSRESULTAT,
+        )
     private val behandling = lagBehandling(fagsak = fagsak, førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG, resultat = Behandlingsresultat.INNVILGET)
     private val simulering = listOf(lagØkonomiSimuleringMottaker(behandling = behandling))
     private val søkersIdent = "12345678910"
@@ -100,13 +112,11 @@ class AutovedtakSøknadServiceTest {
     inner class KjørBehandling {
         @BeforeEach
         fun setup() {
-            every {
-                autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
-                    nyBehandling = any(),
-                    filtrerAutomatiskBehandlingData = any(),
-                )
-            } returns behandling
-
+            every { stegService.håndterNyBehandling(any()) } returns automatiskBehandling
+            every { stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(any(), any()) } returns automatiskBehandling
+            every { stegService.håndterVilkårsvurdering(automatiskBehandling) } returns behandlingEtterVilkårsvurdering
+            justRun { autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(any()) }
+            every { stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering) } returns behandling
             justRun { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(any()) }
             every { simuleringService.oppdaterSimuleringPåBehandling(behandling) } returns simulering
             justRun { autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(any()) }
@@ -119,13 +129,17 @@ class AutovedtakSøknadServiceTest {
         }
 
         @Test
-        fun `skal validere behandlingen etter behandlingsresultat og simuleringen før vedtak`() {
+        fun `skal validere vilkårsvurderingen før behandlingsresultat, og behandlingen og simuleringen før vedtak`() {
             // Act
             autovedtakSøknadService.kjørBehandling(søknadData)
 
             // Assert
             verifyOrder {
-                autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(any(), any())
+                stegService.håndterNyBehandling(any())
+                stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(automatiskBehandling, any())
+                stegService.håndterVilkårsvurdering(automatiskBehandling)
+                autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(behandlingEtterVilkårsvurdering)
+                stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
                 autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling)
                 simuleringService.oppdaterSimuleringPåBehandling(behandling)
                 autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
@@ -137,12 +151,7 @@ class AutovedtakSøknadServiceTest {
         fun `skal videreføre opplysningene om søknaden til den automatiske behandlingen`() {
             // Arrange
             val nyBehandlingSlot = slot<NyBehandling>()
-            every {
-                autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
-                    nyBehandling = capture(nyBehandlingSlot),
-                    filtrerAutomatiskBehandlingData = any(),
-                )
-            } returns behandling
+            every { stegService.håndterNyBehandling(capture(nyBehandlingSlot)) } returns automatiskBehandling
 
             // Act
             autovedtakSøknadService.kjørBehandling(søknadData)
@@ -156,6 +165,28 @@ class AutovedtakSøknadServiceTest {
             assertThat(nyBehandlingSlot.captured.underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
             assertThat(nyBehandlingSlot.captured.behandlingType).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING)
             assertThat(nyBehandlingSlot.captured.behandlingÅrsak).isEqualTo(BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD)
+            assertThat(nyBehandlingSlot.captured.skalBehandlesAutomatisk).isTrue()
+        }
+
+        @Test
+        fun `skal henlegge og opprette manuell behandling uten å kjøre behandlingsresultatsteget når vilkårsvurderingen ikke er oppfylt`() {
+            // Arrange
+            val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
+            every { autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(behandlingEtterVilkårsvurdering) } throws
+                AutovedtakMåBehandlesManueltFeil("Vilkårsvurderingen har vilkår som ikke er oppfylt.")
+
+            // Act
+            autovedtakSøknadService.kjørBehandling(søknadData)
+
+            // Assert
+            verify(exactly = 1) { stegService.håndterHenleggBehandling(automatiskBehandling, capture(henleggBehandlingInfoSlot)) }
+            assertThat(henleggBehandlingInfoSlot.captured.årsak).isEqualTo(HenleggÅrsak.AUTOMATISK_HENLAGT)
+            assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Vilkårsvurderingen har vilkår som ikke er oppfylt.")
+            verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling) }
+            verify(exactly = 0) {
+                stegService.håndterBehandlingsresultat(any())
+                autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(any())
+            }
         }
 
         @Test
@@ -170,17 +201,15 @@ class AutovedtakSøknadServiceTest {
 
             // Assert
             assertThat(resultat).isEqualTo("Automatisk behandling av søknad er henlagt og sendt til manuell behandling: Behandling av søknad må håndteres manuelt.")
-            verify(exactly = 1) { stegService.håndterHenleggBehandling(behandling, capture(henleggBehandlingInfoSlot)) }
+            verify(exactly = 1) { stegService.håndterHenleggBehandling(automatiskBehandling, capture(henleggBehandlingInfoSlot)) }
             assertThat(henleggBehandlingInfoSlot.captured.årsak).isEqualTo(HenleggÅrsak.AUTOMATISK_HENLAGT)
             assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Behandling av søknad må håndteres manuelt.")
             verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling) }
             verify(exactly = 1) {
                 oppgaveService.opprettOppgaveForManuellBehandling(
-                    any(),
-                    "Behandling av søknad må håndteres manuelt.",
-                    any(),
-                    ManuellOppgaveType.SØKNAD,
-                    Oppgavetype.BehandleSak,
+                    behandlingId = any(),
+                    manuellOppgaveType = ManuellOppgaveType.SØKNAD,
+                    oppgavetype = Oppgavetype.BehandleSak,
                 )
             }
             verify(exactly = 0) {
@@ -201,7 +230,7 @@ class AutovedtakSøknadServiceTest {
             autovedtakSøknadService.kjørBehandling(søknadData)
 
             // Assert
-            verify(exactly = 1) { stegService.håndterHenleggBehandling(behandling, capture(henleggBehandlingInfoSlot)) }
+            verify(exactly = 1) { stegService.håndterHenleggBehandling(automatiskBehandling, capture(henleggBehandlingInfoSlot)) }
             assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Behandling av søknad må håndteres manuelt.")
             verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling) }
             verify(exactly = 0) {
@@ -232,12 +261,7 @@ class AutovedtakSøknadServiceTest {
         fun `skal kaste Feil når behandlingsteg etter behandlingsresultat ikke er IVERKSETT_MOT_OPPDRAG`() {
             // Arrange
             val behandlingUtenIverksettelse = lagBehandling(fagsak = fagsak, førsteSteg = StegType.FERDIGSTILLE_BEHANDLING, resultat = Behandlingsresultat.INNVILGET)
-            every {
-                autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
-                    nyBehandling = any(),
-                    filtrerAutomatiskBehandlingData = any(),
-                )
-            } returns behandlingUtenIverksettelse
+            every { stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering) } returns behandlingUtenIverksettelse
             every { simuleringService.oppdaterSimuleringPåBehandling(behandlingUtenIverksettelse) } returns simulering
             every {
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandlingUtenIverksettelse)
@@ -263,22 +287,14 @@ class AutovedtakSøknadServiceTest {
 
             @BeforeEach
             fun setup() {
-                every {
-                    autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
-                        nyBehandling = any(),
-                        filtrerAutomatiskBehandlingData = any(),
-                    )
-                } returns behandlingStoppetAvFiltrering
-
-                every { filtreringsreglerSøknadService.hentBegrunnelseForIkkeOppfyltFiltreringsregel(behandlingStoppetAvFiltrering.id) } returns "Barnet er dødt"
-
+                every { stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(any(), any()) } returns behandlingStoppetAvFiltrering
                 every { stegService.håndterHenleggBehandling(any(), any()) } returns behandlingStoppetAvFiltrering
                 every { stegService.håndterNyBehandlingOgSendInfotrygdFeed(any()) } returns manuellBehandling
                 every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) } returns "Oppgave opprettet"
             }
 
             @Test
-            fun `skal henlegge den automatiske behandlingen med begrunnelsen fra filtreringsregelen som ikke er oppfylt`() {
+            fun `skal henlegge den automatiske behandlingen med begrunnelse om at filtreringsreglene ikke er oppfylt`() {
                 // Arrange
                 val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
 
@@ -288,7 +304,7 @@ class AutovedtakSøknadServiceTest {
                 // Assert
                 verify(exactly = 1) { stegService.håndterHenleggBehandling(behandlingStoppetAvFiltrering, capture(henleggBehandlingInfoSlot)) }
                 assertThat(henleggBehandlingInfoSlot.captured.årsak).isEqualTo(HenleggÅrsak.AUTOMATISK_HENLAGT)
-                assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Barnet er dødt")
+                assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Søknaden oppfyller ikke filtreringsreglene for automatisk behandling.")
             }
 
             @Test
@@ -297,16 +313,14 @@ class AutovedtakSøknadServiceTest {
                 val resultat = autovedtakSøknadService.kjørBehandling(søknadData)
 
                 // Assert
-                assertThat(resultat).isEqualTo("Automatisk behandling av søknad er henlagt og sendt til manuell behandling: Barnet er dødt")
+                assertThat(resultat).isEqualTo("Automatisk behandling av søknad er henlagt og sendt til manuell behandling: Søknaden oppfyller ikke filtreringsreglene for automatisk behandling.")
                 verifyOrder {
                     stegService.håndterHenleggBehandling(behandlingStoppetAvFiltrering, any())
                     stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
                     oppgaveService.opprettOppgaveForManuellBehandling(
-                        manuellBehandling.id,
-                        "Barnet er dødt",
-                        any(),
-                        ManuellOppgaveType.SØKNAD,
-                        Oppgavetype.BehandleSak,
+                        behandlingId = manuellBehandling.id,
+                        manuellOppgaveType = ManuellOppgaveType.SØKNAD,
+                        oppgavetype = Oppgavetype.BehandleSak,
                     )
                 }
             }
@@ -329,12 +343,15 @@ class AutovedtakSøknadServiceTest {
             }
 
             @Test
-            fun `skal ikke validere, simulere eller opprette vedtak når filtreringsreglene stopper behandlingen`() {
+            fun `skal ikke kjøre vilkårsvurdering eller behandlingsresultat, validere, simulere eller opprette vedtak når filtreringsreglene stopper behandlingen`() {
                 // Act
                 autovedtakSøknadService.kjørBehandling(søknadData)
 
                 // Assert
                 verify(exactly = 0) {
+                    stegService.håndterVilkårsvurdering(any(), any())
+                    autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(any())
+                    stegService.håndterBehandlingsresultat(any())
                     autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(any())
                     simuleringService.oppdaterSimuleringPåBehandling(any())
                     autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())

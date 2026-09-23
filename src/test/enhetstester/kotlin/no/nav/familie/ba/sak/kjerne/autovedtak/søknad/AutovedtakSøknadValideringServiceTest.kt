@@ -52,20 +52,14 @@ class AutovedtakSøknadValideringServiceTest {
     private val barnUtenKrav = lagPerson(type = PersonType.BARN).aktør
 
     @Nested
-    inner class ValiderAtBehandlingKanVedtasAutomatisk {
-        @BeforeEach
-        fun setup() {
-            every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id) } returns lagVilkårsvurdering(behandling = behandling)
-            every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
-                listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12), aktør = barnFremstiltKravFor, behandling = behandling))
-            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
-            every { søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null) } returns listOf(barnFremstiltKravFor)
-        }
-
+    inner class ValiderAtVilkårsvurderingErOppfylt {
         @Test
-        fun `skal ikke kaste feil når behandlingen kan vedtas automatisk`() {
+        fun `skal ikke kaste feil når vilkårsvurderingen er oppfylt`() {
+            // Arrange
+            every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id) } returns lagVilkårsvurdering(behandling = behandling)
+
             // Act & Assert
-            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling) }
+            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(behandling) }
         }
 
         @Test
@@ -88,7 +82,24 @@ class AutovedtakSøknadValideringServiceTest {
                 )
 
             // Act & Assert
-            assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling) }
+            assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(behandling) }
+        }
+    }
+
+    @Nested
+    inner class ValiderAtBehandlingKanVedtasAutomatisk {
+        @BeforeEach
+        fun setup() {
+            every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12), aktør = barnFremstiltKravFor, behandling = behandling))
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+            every { søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null) } returns listOf(barnFremstiltKravFor)
+        }
+
+        @Test
+        fun `skal ikke kaste feil når behandlingen kan vedtas automatisk`() {
+            // Act & Assert
+            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling) }
         }
 
         @Test
@@ -100,7 +111,6 @@ class AutovedtakSøknadValideringServiceTest {
                     skalBehandlesAutomatisk = true,
                     resultat = Behandlingsresultat.AVSLÅTT,
                 )
-            every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingMedAvslag.id) } returns lagVilkårsvurdering(behandling = behandlingMedAvslag)
 
             // Act & Assert
             assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandlingMedAvslag) }

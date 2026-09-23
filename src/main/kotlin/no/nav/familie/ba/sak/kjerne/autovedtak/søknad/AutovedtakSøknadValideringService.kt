@@ -15,11 +15,13 @@ class AutovedtakSøknadValideringService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
-    fun validerAtBehandlingKanVedtasAutomatisk(behandling: Behandling) {
+    fun validerAtVilkårsvurderingErOppfylt(behandling: Behandling) {
         AutovedtakSøknadValidering.validerAtVilkårsvurderingErOppfylt(
             vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id),
         )
+    }
 
+    fun validerAtBehandlingKanVedtasAutomatisk(behandling: Behandling) {
         AutovedtakSøknadValidering.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(
             behandlingsresultat = behandling.resultat,
         )
