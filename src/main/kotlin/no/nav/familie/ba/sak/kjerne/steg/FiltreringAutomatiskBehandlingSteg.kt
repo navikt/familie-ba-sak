@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.FiltreringsreglerSøknadS
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service
 class FiltreringAutomatiskBehandlingSteg(
     private val filtreringsreglerFødselshendelseService: FiltreringsreglerFødselshendelseService,
     private val filtreringsreglerSøknadService: FiltreringsreglerSøknadService,
+    private val loggService: LoggService,
 ) : BehandlingSteg<FiltrerAutomatiskBehandlingData> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -29,6 +31,8 @@ class FiltreringAutomatiskBehandlingSteg(
                         behandling,
                     )
 
+                loggService.opprettFiltreringsreglerLogg(behandling = behandling, filtreringResultater = fødselshendelsefiltreringResultat)
+
                 if (!fødselshendelsefiltreringResultat.erOppfylt()) {
                     StegType.HENLEGG_BEHANDLING
                 } else {
@@ -42,6 +46,8 @@ class FiltreringAutomatiskBehandlingSteg(
                         data,
                         behandling,
                     )
+
+                loggService.opprettFiltreringsreglerLogg(behandling = behandling, filtreringResultater = søknadfiltreringResultat)
 
                 if (!søknadfiltreringResultat.erOppfylt()) {
                     StegType.HENLEGG_BEHANDLING

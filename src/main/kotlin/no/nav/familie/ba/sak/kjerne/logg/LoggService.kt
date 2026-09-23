@@ -13,6 +13,9 @@ import no.nav.familie.ba.sak.config.BehandlerRolle.SYSTEM
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.erOppfylt
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -177,6 +180,28 @@ class LoggService(
                 type = LoggType.AUTOVEDTAK_TIL_MANUELL_BEHANDLING,
                 rolle = hentRolletilgangFraSikkerhetscontext(SAKSBEHANDLER),
                 tekst = tekst,
+            ),
+        )
+    }
+
+    fun opprettFiltreringsreglerLogg(
+        behandling: Behandling,
+        filtreringResultater: List<FiltreringResultat>,
+    ): Logg {
+        val erOppfylt = filtreringResultater.erOppfylt()
+
+        return lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.FILTRERINGSREGLER_VURDERT,
+                tittel = if (erOppfylt) "Filtreringsregler gjennomført" else "Filtreringsregler feilet",
+                rolle = hentRolletilgangFraSikkerhetscontext(SAKSBEHANDLER),
+                tekst =
+                    if (erOppfylt) {
+                        "Alle filtreringsreglene er oppfylt. Behandlingen fortsetter automatisk."
+                    } else {
+                        "Behandlingen stoppet i filtreringsreglene: ${filtreringResultater.first { it.resultat != Resultat.OPPFYLT }.begrunnelse}"
+                    },
             ),
         )
     }
