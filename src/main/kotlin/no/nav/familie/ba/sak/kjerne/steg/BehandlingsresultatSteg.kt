@@ -35,7 +35,7 @@ class BehandlingsresultatSteg(
         behandling: Behandling,
         stegService: StegService?,
     ) {
-        if (!behandling.erSatsendringMånedligValutajusteringEllerRegionstillegg() && behandling.skalBehandlesAutomatisk) {
+        if (!behandling.erSatsendringMånedligValutajusteringEllerRegionstillegg() && !behandling.erAutomatiskSøknad() && behandling.skalBehandlesAutomatisk) {
             return
         }
 

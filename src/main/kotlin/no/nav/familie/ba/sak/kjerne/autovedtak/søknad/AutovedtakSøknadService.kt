@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService.Companion.logger
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SøknadData
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
@@ -30,41 +31,27 @@ class AutovedtakSøknadService(
     private val taskService: TaskService,
     private val autovedtakSøknadBegrunnelseService: AutovedtakSøknadBegrunnelseService,
     private val autovedtakSøknadValideringService: AutovedtakSøknadValideringService,
-    private val filtreringsreglerSøknadService: FiltreringsreglerSøknadService,
     private val stegService: StegService,
     private val oppgaveService: OppgaveService,
 ) : AutovedtakBehandlingService<SøknadData> {
     override fun skalAutovedtakBehandles(behandlingsdata: SøknadData): Boolean = true
 
     override fun kjørBehandling(behandlingsdata: SøknadData): String {
-        val automatiskBehandling =
-            autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
-                nyBehandling =
-                    behandlingsdata.nyBehandling.copy(
-                        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                        behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
-                    ),
-                filtrerAutomatiskBehandlingData =
-                    FiltrerAutomatiskBehandlingData(
-                        søkersIdent = behandlingsdata.søkersIdent,
-                        barnasIdenter = behandlingsdata.nyBehandling.barnasIdenter,
-                    ),
+        val behandling =
+            stegService.håndterNyBehandling(
+                behandlingsdata.nyBehandling.copy(
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
+                    skalBehandlesAutomatisk = true
+                ),
             )
-
-        if (automatiskBehandling.steg == StegType.HENLEGG_BEHANDLING) {
-            return henleggBehandlingOgOpprettManuellBehandling(
-                automatiskBehandling = automatiskBehandling,
-                behandlingsdata = behandlingsdata,
-                begrunnelse = filtreringsreglerSøknadService.hentBegrunnelseForIkkeOppfyltFiltreringsregel(behandlingId = automatiskBehandling.id),
-            )
-        }
 
         return try {
-            vedtaAutomatisk(behandling = automatiskBehandling, behandlingsdata = behandlingsdata)
+            vedtaAutomatisk(behandling = behandling, behandlingsdata = behandlingsdata)
         } catch (feil: AutovedtakMåBehandlesManueltFeil) {
             // Kaster ikke videre fordi henleggelsen må committes sammen med resten av transaksjonen.
             henleggBehandlingOgOpprettManuellBehandling(
-                automatiskBehandling = automatiskBehandling,
+                automatiskBehandling = behandling,
                 behandlingsdata = behandlingsdata,
                 begrunnelse = feil.beskrivelse,
             )
@@ -75,21 +62,39 @@ class AutovedtakSøknadService(
         behandling: Behandling,
         behandlingsdata: SøknadData,
     ): String {
-        // Vi kjører ikke simuleringssteget så må gjøre det manuelt her
-        val simulering = simuleringService.oppdaterSimuleringPåBehandling(behandling)
-        autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
+        val behandlingEtterFiltrering =
+            stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(
+                behandling,
+                FiltrerAutomatiskBehandlingData(
+                    søkersIdent = behandlingsdata.søkersIdent,
+                    barnasIdenter = behandlingsdata.nyBehandling.barnasIdenter,
+                ),
+            )
 
-        if (behandling.steg != StegType.IVERKSETT_MOT_OPPDRAG) {
-            throw Feil("Ugyldig neste steg ${behandling.steg} for behandlingsårsak ${BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD} for fagsak=${behandlingsdata.nyBehandling.fagsakId}")
+        if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
+            logger.info("Filtreringsreglene stoppet den automatiske behandlingen ${behandlingEtterFiltrering.id}")
+            throw AutovedtakMåBehandlesManueltFeil("Filtreringsreglene stoppet den automatiske behandlingen ${behandlingEtterFiltrering.id}")
         }
 
-        autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(behandling)
+        val automatiskBehandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandlingEtterFiltrering)
 
-        val opprettetVedtak = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling)
+        val automatiskBehandlingEtterBehandlingsresultat = stegService.håndterBehandlingsresultat(automatiskBehandlingEtterVilkårsvurdering)
+
+        // Vi kjører ikke simuleringssteget så må gjøre det manuelt her
+        val simulering = simuleringService.oppdaterSimuleringPåBehandling(automatiskBehandlingEtterBehandlingsresultat)
+        autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
+
+        if (automatiskBehandlingEtterBehandlingsresultat.steg != StegType.IVERKSETT_MOT_OPPDRAG) {
+            throw Feil("Ugyldig neste steg ${automatiskBehandlingEtterBehandlingsresultat.steg} for behandlingsårsak ${BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD} for fagsak=${behandlingsdata.nyBehandling.fagsakId}")
+        }
+
+        autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(automatiskBehandlingEtterBehandlingsresultat)
+
+        val opprettetVedtak = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(automatiskBehandlingEtterBehandlingsresultat)
 
         taskService.save(
             IverksettMotOppdragTask.opprettTask(
-                behandling,
+                automatiskBehandlingEtterBehandlingsresultat,
                 opprettetVedtak,
                 SikkerhetContext.hentSaksbehandler(),
             ),

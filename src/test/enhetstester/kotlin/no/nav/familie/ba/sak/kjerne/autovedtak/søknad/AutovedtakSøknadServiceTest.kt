@@ -57,7 +57,6 @@ class AutovedtakSøknadServiceTest {
             taskService = taskService,
             autovedtakSøknadBegrunnelseService = autovedtakSøknadBegrunnelseService,
             autovedtakSøknadValideringService = autovedtakSøknadValideringService,
-            filtreringsreglerSøknadService = filtreringsreglerSøknadService,
             stegService = stegService,
             oppgaveService = oppgaveService,
         )

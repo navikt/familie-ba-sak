@@ -342,7 +342,7 @@ class StegService(
                 behandlingSteg.utførStegOgAngiNeste(behandling, barnSomSkalVurderesIFødselshendelse)
             }
 
-        return if (behandlingEtterVilkårsvurdering.skalBehandlesAutomatisk) {
+        return if (behandlingEtterVilkårsvurdering.skalBehandlesAutomatisk && !behandling.erAutomatiskSøknad()) {
             håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
         } else {
             behandlingEtterVilkårsvurdering
