@@ -15,7 +15,7 @@ class Vilkårvurderer(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
-    fun oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(
+    fun oppfyllerSøkerVilkårForUtvidetBarnetrygd(
         behandling: Behandling,
         barnaFraSøknad: List<Person>,
     ): Boolean {

@@ -80,7 +80,7 @@ class FiltreringsreglerSøknadServiceTest {
         every { personidentService.hentAktør(søkersIdent) } returns personopplysningGrunnlag.søker.aktør
         every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns listOf(barn.aktør)
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(behandling, any()) } returns false
+        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(behandling, any()) } returns false
         every {
             tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
                 behandling = behandling,
@@ -120,7 +120,7 @@ class FiltreringsreglerSøknadServiceTest {
         every { personidentService.hentAktør(søkersIdent) } returns personopplysningGrunnlag.søker.aktør
         every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns listOf(barn.aktør)
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(behandling, any()) } returns false
+        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(behandling, any()) } returns false
         every {
             tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
                 behandling = behandling,
@@ -169,7 +169,7 @@ class FiltreringsreglerSøknadServiceTest {
         every { personidentService.hentAktør(søkersIdent) } returns personopplysningGrunnlag.søker.aktør
         every { personidentService.hentAktørIder(listOf(førsteBarnsIdent, andreBarnsIdent)) } returns personopplysningGrunnlag.barna.map { it.aktør }
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(behandling, any()) } returns false
+        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(behandling, any()) } returns false
         every {
             tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
                 behandling = behandling,
@@ -242,7 +242,7 @@ class FiltreringsreglerSøknadServiceTest {
         every { personidentService.hentAktør(søkersIdent) } returns personopplysningGrunnlag.søker.aktør
         every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns listOf(barn.aktør)
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(any(), any()) } returns false
+        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(any(), any()) } returns false
         every {
             tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
                 behandling = behandling,
@@ -421,7 +421,7 @@ class FiltreringsreglerSøknadServiceTest {
         every { personidentService.hentAktør(søkersIdent) } returns grunnlag.søker.aktør
         every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns aktørBarna
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns grunnlag
-        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(behandling, any()) } returns false
+        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(behandling, any()) } returns false
         every { personopplysningerService.harVerge(grunnlag.søker.aktør) } returns VergeResponse(false)
         every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true))
         every {

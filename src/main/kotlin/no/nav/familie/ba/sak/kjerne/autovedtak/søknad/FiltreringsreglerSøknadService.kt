@@ -103,7 +103,7 @@ class FiltreringsreglerSøknadService(
             FiltreringsreglerFaktaSøknad(
                 søker = personopplysningGrunnlag.søker,
                 søkerMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
-                søkerOppfyllerVilkårForUtvidetBarnetrygd = vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(behandling, barnaFraSøknad),
+                søkerOppfyllerVilkårForUtvidetBarnetrygd = vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(behandling, barnaFraSøknad),
                 søkerMottarEøsBarnetrygd = behandling.kategori == BehandlingKategori.EØS,
                 barnaSomSkalVurderes = barnaFraSøknad,
                 søkerLever = !personopplysningGrunnlag.søker.erDød(),

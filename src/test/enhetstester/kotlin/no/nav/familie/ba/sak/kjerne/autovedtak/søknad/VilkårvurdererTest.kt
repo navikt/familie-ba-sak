@@ -39,7 +39,7 @@ class VilkårvurdererTest {
 
         // Act
         val resultat =
-            vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(
+            vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(
                 behandling = behandling,
                 barnaFraSøknad = listOf(tilfeldigPerson(fødselsdato = LocalDate.now(), personType = PersonType.BARN)),
             )
@@ -57,7 +57,7 @@ class VilkårvurdererTest {
 
         // Act
         val resultat =
-            vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(
+            vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(
                 behandling = behandling,
                 barnaFraSøknad = listOf(tilfeldigPerson(fødselsdato = LocalDate.now(), personType = PersonType.BARN)),
             )
@@ -103,7 +103,7 @@ class VilkårvurdererTest {
 
         // Act
         val resultat =
-            vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(
+            vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(
                 behandling = behandling,
                 barnaFraSøknad = listOf(barn),
             )
@@ -149,7 +149,7 @@ class VilkårvurdererTest {
 
         // Act
         val resultat =
-            vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(
+            vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(
                 behandling = behandling,
                 barnaFraSøknad = listOf(barn),
             )
@@ -195,7 +195,7 @@ class VilkårvurdererTest {
 
         // Act
         val resultat =
-            vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(
+            vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(
                 behandling = behandling,
                 barnaFraSøknad = listOf(barn),
             )
@@ -241,7 +241,7 @@ class VilkårvurdererTest {
 
         // Act
         val resultat =
-            vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(
+            vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(
                 behandling = behandling,
                 barnaFraSøknad = listOf(barn),
             )
@@ -288,7 +288,7 @@ class VilkårvurdererTest {
         // Act & Assert
         val exception =
             assertThrows<Feil> {
-                vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygdVedFødselsdato(
+                vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(
                     behandling = behandling,
                     barnaFraSøknad = listOf(barn),
                 )
