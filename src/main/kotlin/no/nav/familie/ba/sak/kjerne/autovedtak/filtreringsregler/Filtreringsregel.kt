@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler
 
+import no.nav.familie.ba.sak.common.erBostNummer
+import no.nav.familie.ba.sak.common.erDnummer
+import no.nav.familie.ba.sak.common.erFDatnummer
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel.Identifikator
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.EvalueringÅrsak
@@ -345,23 +348,24 @@ private val morHarIkkeOppfyltUtvidetVilkårVedFødselsdato =
         !it.søkerOppfyllerVilkårForUtvidetBarnetrygd
     }
 
+private val søkerHarIkkeOppfyltUtvidetVilkår =
+    Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR) {
+        !it.søkerOppfyllerVilkårForUtvidetBarnetrygd
+    }
+
 private val morHarIkkeOpphørtBarnetrygd =
     Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>(Identifikator.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD) { it.morHarIkkeOpphørtBarnetrygd }
 
 private fun erGyldigFnr(personIdent: String): Boolean = !erBostNummer(personIdent) && !erFDatnummer(personIdent)
 
-private fun erFDatnummer(personIdent: String): Boolean = personIdent.substring(6).toInt() == 0
-
-private fun erIkkeDNummer(personIdent: String): Boolean = personIdent.substring(0, 1).toInt() != 4
-
 private val søkerHarIkkeDNummer =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_HAR_IKKE_D_NUMMER) {
-        erIkkeDNummer(it.søker.aktør.aktivFødselsnummer())
+        !erDnummer(it.søker.aktør.aktivFødselsnummer())
     }
 
 private val barnHarIkkeDNummer =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.BARN_HAR_IKKE_D_NUMMER) { fakta ->
-        fakta.barnaSomSkalVurderes.all { erIkkeDNummer(it.aktør.aktivFødselsnummer()) }
+        fakta.barnaSomSkalVurderes.all { !erDnummer(it.aktør.aktivFødselsnummer()) }
     }
 
 private val søkerHarIkkeAdressebeskyttelseGradering6Eller19 =
@@ -399,11 +403,6 @@ private val barnErIkkeUkrainskStatsborger =
         !it.barnHarUkrainskStatsborgerskap
     }
 
-/**
- * BOST-nr har måned mellom 21 og 32
- */
-private fun erBostNummer(personIdent: String): Boolean = personIdent.substring(2, 4).toInt() in 21..32
-
 val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøknad>> =
     listOf(
         søkerHarIkkeDNummer,
@@ -428,6 +427,7 @@ val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøkn
         søkerOgBarnHarForelderBarnRelasjon,
         søkerErIkkeUkrainskStatsborger,
         barnErIkkeUkrainskStatsborger,
+        søkerHarIkkeOppfyltUtvidetVilkår,
     )
 
 val FILTRERINGSREGLER_FØDSELSHENDELSE: List<Filtreringsregel<FiltreringsreglerFaktaFødselshendelse>> =

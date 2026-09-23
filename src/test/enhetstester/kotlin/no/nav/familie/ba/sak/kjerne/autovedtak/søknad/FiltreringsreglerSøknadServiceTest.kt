@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregl
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -46,7 +45,7 @@ class FiltreringsreglerSøknadServiceTest {
     private val personopplysningerService = mockk<PersonopplysningerService>(relaxed = true)
     private val personidentService = mockk<PersonidentService>()
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
-    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val vilkårvurderer = mockk<Vilkårvurderer>()
     private val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService>()
     private val filtreringsregelEvaluator = mockk<FiltreringsregelEvaluator>()
     private val søknadService = mockk<SøknadService>()
@@ -58,13 +57,12 @@ class FiltreringsreglerSøknadServiceTest {
             personopplysningerService = personopplysningerService,
             personidentService = personidentService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-            vilkårsvurderingRepository = mockk(relaxed = true),
             filtreringResultatRepository = filtreringResultatRepository,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             filtreringsregelEvaluator = filtreringsregelEvaluator,
             søknadService = søknadService,
             clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(inneværendeMåned),
+            vilkårvurderer = vilkårvurderer,
         )
 
     @Test
@@ -86,7 +84,7 @@ class FiltreringsreglerSøknadServiceTest {
         every { personidentService.hentAktør(søkersIdent) } returns personopplysningGrunnlag.søker.aktør
         every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns listOf(barn.aktør)
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
+        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(behandling, any()) } returns false
         every {
             tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
                 behandling = behandling,
@@ -126,7 +124,7 @@ class FiltreringsreglerSøknadServiceTest {
         every { personidentService.hentAktør(søkersIdent) } returns personopplysningGrunnlag.søker.aktør
         every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns listOf(barn.aktør)
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
+        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(behandling, any()) } returns false
         every {
             tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
                 behandling = behandling,
@@ -175,7 +173,7 @@ class FiltreringsreglerSøknadServiceTest {
         every { personidentService.hentAktør(søkersIdent) } returns personopplysningGrunnlag.søker.aktør
         every { personidentService.hentAktørIder(listOf(førsteBarnsIdent, andreBarnsIdent)) } returns personopplysningGrunnlag.barna.map { it.aktør }
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
+        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(behandling, any()) } returns false
         every {
             tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
                 behandling = behandling,
@@ -248,7 +246,7 @@ class FiltreringsreglerSøknadServiceTest {
         every { personidentService.hentAktør(søkersIdent) } returns personopplysningGrunnlag.søker.aktør
         every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns listOf(barn.aktør)
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
+        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(any(), any()) } returns false
         every {
             tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
                 behandling = behandling,
@@ -471,7 +469,7 @@ class FiltreringsreglerSøknadServiceTest {
         every { personidentService.hentAktør(søkersIdent) } returns grunnlag.søker.aktør
         every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns aktørBarna
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns grunnlag
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
+        every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(behandling, any()) } returns false
         every { personopplysningerService.harVerge(grunnlag.søker.aktør) } returns VergeResponse(false)
         every { søknadService.finnDigitalSøknad(behandling.id) } returns lagSøknad(barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true))
         every {
