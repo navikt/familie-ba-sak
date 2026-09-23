@@ -33,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnma
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardtillegg.AutovedtakSvalbardtilleggBegrunnelseService
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadValideringService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.EksternBehandlingRelasjonService
@@ -432,6 +433,14 @@ class CucumberMock(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         )
 
+    val autovedtakSøknadValideringService =
+        AutovedtakSøknadValideringService(
+            vilkårsvurderingService = vilkårsvurderingService,
+            beregningService = beregningService,
+            søknadGrunnlagService = søknadGrunnlagService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+        )
+
     val behandlingsresultatStegValideringService =
         BehandlingsresultatStegValideringService(
             beregningService = beregningService,
@@ -446,6 +455,7 @@ class CucumberMock(
             strengtFortroligService = mockk(relaxed = true),
             persongrunnlagService = persongrunnlagService,
             satsendringEøsKjøringService = mockk(relaxed = true),
+            autovedtakSøknadValideringService = autovedtakSøknadValideringService,
         )
 
     val behandlingsresultatSteg =

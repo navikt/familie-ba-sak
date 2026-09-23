@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsKjøringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.domene.SatsendringEøsKjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadValideringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
@@ -71,6 +72,7 @@ class BehandlingsresultatStegValideringServiceTest {
     private val persongrunnlagService = mockk<no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService>()
     private val clockProvider = lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 10, 10))
     private val satsendringEøsKjøringService: SatsendringEøsKjøringService = mockk()
+    private val autovedtakSøknadValideringService: AutovedtakSøknadValideringService = mockk()
 
     private val behandlingsresultatStegValideringService =
         BehandlingsresultatStegValideringService(
@@ -86,6 +88,7 @@ class BehandlingsresultatStegValideringServiceTest {
             persongrunnlagService = persongrunnlagService,
             clockProvider = clockProvider,
             satsendringEøsKjøringService = satsendringEøsKjøringService,
+            autovedtakSøknadValideringService = autovedtakSøknadValideringService,
         )
 
     private val barn = lagPerson(type = PersonType.BARN)
