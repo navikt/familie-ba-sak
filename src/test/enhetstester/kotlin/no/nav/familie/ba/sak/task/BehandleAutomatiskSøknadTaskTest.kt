@@ -130,7 +130,7 @@ class BehandleAutomatiskSøknadTaskTest {
         }
 
         @Test
-        fun `skal opprette den manuelle behandlingen med årsak SØKNAD når søknaden ble bestilt med årsak AUTOMATISK_BEHANDLING_AV_SØKNAD`() {
+        fun `skal opprette den manuelle behandlingen med årsak SØKNAD når baks-mottak sendte årsak AUTOMATISK_BEHANDLING_AV_SØKNAD`() {
             // Arrange
             val nyBehandlingFraMottak = nyBehandling.copy(behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD)
             val task = BehandleAutomatiskSøknadTask.opprettTask(BehandleAutomatiskSøknadTaskDTO(nyBehandlingFraMottak))

@@ -249,97 +249,97 @@ class AutovedtakSøknadServiceTest {
                 autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(any())
             }
         }
-    }
 
-    @Nested
-    inner class KjørBehandlingStoppetAvFiltreringsregler {
-        private val behandlingStoppetAvFiltrering =
-            lagBehandling(
-                fagsak = fagsak,
-                årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
-                skalBehandlesAutomatisk = true,
-                førsteSteg = StegType.HENLEGG_BEHANDLING,
-            )
-        private val manuellBehandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
-
-        @BeforeEach
-        fun setup() {
-            every {
-                autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
-                    nyBehandling = any(),
-                    filtrerAutomatiskBehandlingData = any(),
+        @Nested
+        inner class StoppetAvFiltreringsregler {
+            private val behandlingStoppetAvFiltrering =
+                lagBehandling(
+                    fagsak = fagsak,
+                    årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
+                    skalBehandlesAutomatisk = true,
+                    førsteSteg = StegType.HENLEGG_BEHANDLING,
                 )
-            } returns behandlingStoppetAvFiltrering
+            private val manuellBehandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
 
-            every { filtreringsreglerSøknadService.hentBegrunnelseForIkkeOppfyltFiltreringsregel(behandlingStoppetAvFiltrering.id) } returns "Barnet er dødt"
+            @BeforeEach
+            fun setup() {
+                every {
+                    autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
+                        nyBehandling = any(),
+                        filtrerAutomatiskBehandlingData = any(),
+                    )
+                } returns behandlingStoppetAvFiltrering
 
-            every { stegService.håndterHenleggBehandling(any(), any()) } returns behandlingStoppetAvFiltrering
-            every { stegService.håndterNyBehandlingOgSendInfotrygdFeed(any()) } returns manuellBehandling
-            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) } returns "Oppgave opprettet"
-        }
+                every { filtreringsreglerSøknadService.hentBegrunnelseForIkkeOppfyltFiltreringsregel(behandlingStoppetAvFiltrering.id) } returns "Barnet er dødt"
 
-        @Test
-        fun `skal henlegge den automatiske behandlingen med begrunnelsen fra filtreringsregelen som ikke er oppfylt`() {
-            // Arrange
-            val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
-
-            // Act
-            autovedtakSøknadService.kjørBehandling(søknadData)
-
-            // Assert
-            verify(exactly = 1) { stegService.håndterHenleggBehandling(behandlingStoppetAvFiltrering, capture(henleggBehandlingInfoSlot)) }
-            assertThat(henleggBehandlingInfoSlot.captured.årsak).isEqualTo(HenleggÅrsak.AUTOMATISK_HENLAGT)
-            assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Barnet er dødt")
-        }
-
-        @Test
-        fun `skal opprette manuell behandling med BehandleSak-oppgave etter henleggelsen`() {
-            // Act
-            val resultat = autovedtakSøknadService.kjørBehandling(søknadData)
-
-            // Assert
-            assertThat(resultat).isEqualTo("Automatisk behandling av søknad er henlagt og sendt til manuell behandling: Barnet er dødt")
-            verifyOrder {
-                stegService.håndterHenleggBehandling(behandlingStoppetAvFiltrering, any())
-                stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
-                oppgaveService.opprettOppgaveForManuellBehandling(
-                    manuellBehandling.id,
-                    "Barnet er dødt",
-                    any(),
-                    ManuellOppgaveType.SØKNAD,
-                    Oppgavetype.BehandleSak,
-                )
+                every { stegService.håndterHenleggBehandling(any(), any()) } returns behandlingStoppetAvFiltrering
+                every { stegService.håndterNyBehandlingOgSendInfotrygdFeed(any()) } returns manuellBehandling
+                every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) } returns "Oppgave opprettet"
             }
-        }
 
-        @Test
-        fun `skal opprette den manuelle behandlingen med årsak SØKNAD selv om den automatiske behandlingen ble bestilt med årsak AUTOMATISK_BEHANDLING_AV_SØKNAD`() {
-            // Arrange
-            val søknadDataFraMottak =
-                søknadData.copy(
-                    nyBehandling = nyBehandling.copy(behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD),
-                )
-            val nyBehandlingSlot = slot<NyBehandling>()
-            every { stegService.håndterNyBehandlingOgSendInfotrygdFeed(capture(nyBehandlingSlot)) } returns manuellBehandling
+            @Test
+            fun `skal henlegge den automatiske behandlingen med begrunnelsen fra filtreringsregelen som ikke er oppfylt`() {
+                // Arrange
+                val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
 
-            // Act
-            autovedtakSøknadService.kjørBehandling(søknadDataFraMottak)
+                // Act
+                autovedtakSøknadService.kjørBehandling(søknadData)
 
-            // Assert
-            assertThat(nyBehandlingSlot.captured.behandlingÅrsak).isEqualTo(BehandlingÅrsak.SØKNAD)
-        }
+                // Assert
+                verify(exactly = 1) { stegService.håndterHenleggBehandling(behandlingStoppetAvFiltrering, capture(henleggBehandlingInfoSlot)) }
+                assertThat(henleggBehandlingInfoSlot.captured.årsak).isEqualTo(HenleggÅrsak.AUTOMATISK_HENLAGT)
+                assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Barnet er dødt")
+            }
 
-        @Test
-        fun `skal ikke validere, simulere eller opprette vedtak når filtreringsreglene stopper behandlingen`() {
-            // Act
-            autovedtakSøknadService.kjørBehandling(søknadData)
+            @Test
+            fun `skal opprette manuell behandling med BehandleSak-oppgave etter henleggelsen`() {
+                // Act
+                val resultat = autovedtakSøknadService.kjørBehandling(søknadData)
 
-            // Assert
-            verify(exactly = 0) {
-                autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(any())
-                simuleringService.oppdaterSimuleringPåBehandling(any())
-                autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
-                taskService.save(any())
+                // Assert
+                assertThat(resultat).isEqualTo("Automatisk behandling av søknad er henlagt og sendt til manuell behandling: Barnet er dødt")
+                verifyOrder {
+                    stegService.håndterHenleggBehandling(behandlingStoppetAvFiltrering, any())
+                    stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
+                    oppgaveService.opprettOppgaveForManuellBehandling(
+                        manuellBehandling.id,
+                        "Barnet er dødt",
+                        any(),
+                        ManuellOppgaveType.SØKNAD,
+                        Oppgavetype.BehandleSak,
+                    )
+                }
+            }
+
+            @Test
+            fun `skal opprette den manuelle behandlingen med årsak SØKNAD selv om baks-mottak sendte årsak AUTOMATISK_BEHANDLING_AV_SØKNAD`() {
+                // Arrange
+                val søknadDataFraMottak =
+                    søknadData.copy(
+                        nyBehandling = nyBehandling.copy(behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD),
+                    )
+                val nyBehandlingSlot = slot<NyBehandling>()
+                every { stegService.håndterNyBehandlingOgSendInfotrygdFeed(capture(nyBehandlingSlot)) } returns manuellBehandling
+
+                // Act
+                autovedtakSøknadService.kjørBehandling(søknadDataFraMottak)
+
+                // Assert
+                assertThat(nyBehandlingSlot.captured.behandlingÅrsak).isEqualTo(BehandlingÅrsak.SØKNAD)
+            }
+
+            @Test
+            fun `skal ikke validere, simulere eller opprette vedtak når filtreringsreglene stopper behandlingen`() {
+                // Act
+                autovedtakSøknadService.kjørBehandling(søknadData)
+
+                // Assert
+                verify(exactly = 0) {
+                    autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(any())
+                    simuleringService.oppdaterSimuleringPåBehandling(any())
+                    autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
+                    taskService.save(any())
+                }
             }
         }
     }
