@@ -339,7 +339,7 @@ enum class Behandlingsresultat(
     HENLAGT_SØKNAD_TRUKKET(displayName = "Henlagt søknad trukket"),
     HENLAGT_AUTOMATISK_FØDSELSHENDELSE(displayName = "Henlagt avslått i automatisk vilkårsvurdering (fødselshendelse)"),
     HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG(displayName = "Henlagt avslått i automatisk vilkårsvurdering (småbarnstillegg)"),
-    HENLAGT_AUTOMATISK_SØKNAD(displayName = "Henlagt stanset i automatisk behandling (søknad)"),
+    HENLAGT_AUTOMATISK_SØKNAD(displayName = "Henlagt etter stans i automatisk behandling (søknad)"),
     HENLAGT_TEKNISK_VEDLIKEHOLD(displayName = "Henlagt teknisk vedlikehold"),
 
     IKKE_VURDERT(displayName = "Ikke vurdert"),
