@@ -1,19 +1,13 @@
 package no.nav.familie.ba.sak.task
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.dto.BehandleAutomatiskSøknadTaskDTO
-import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.jsonMapper
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -30,8 +24,6 @@ import java.util.Properties
 )
 class BehandleAutomatiskSøknadTask(
     private val autovedtakStegService: AutovedtakStegService,
-    private val oppgaveService: OppgaveService,
-    private val stegService: StegService,
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AsyncTaskStep {
@@ -52,21 +44,10 @@ class BehandleAutomatiskSøknadTask(
             throw Feil("Det er ikke mulig å behandle en søknad automatisk hvis fagsak=$fagsakId har en åpen behandling.")
         }
 
-        try {
-            autovedtakStegService.kjørAutomatiskBehandlingSøknad(
-                mottakersAktør = fagsak.aktør,
-                nyBehandling = nyBehandling,
-            )
-        } catch (feil: AutovedtakMåBehandlesManueltFeil) {
-            val behandling = stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling.copy(behandlingÅrsak = BehandlingÅrsak.SØKNAD))
-            oppgaveService.opprettOppgaveForManuellBehandling(
-                behandlingId = behandling.id,
-                begrunnelse = "Ikke kandidat for automatisk behandling. Må behandles manuelt.",
-                manuellOppgaveType = ManuellOppgaveType.SØKNAD,
-                oppgavetype = Oppgavetype.BehandleSak,
-            )
-            logger.info("Oppretter manuell behandling og oppgave: ${feil.message}")
-        }
+        autovedtakStegService.kjørAutomatiskBehandlingSøknad(
+            mottakersAktør = fagsak.aktør,
+            nyBehandling = nyBehandling,
+        )
     }
 
     companion object {
