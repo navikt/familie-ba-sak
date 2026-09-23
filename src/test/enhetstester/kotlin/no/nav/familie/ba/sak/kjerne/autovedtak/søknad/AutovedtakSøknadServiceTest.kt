@@ -331,7 +331,7 @@ class AutovedtakSøknadServiceTest {
 
                 // Assert
                 verify(exactly = 0) {
-                    autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(any())
+                    autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(any())
                     simuleringService.oppdaterSimuleringPåBehandling(any())
                     autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
                     taskService.save(any())
