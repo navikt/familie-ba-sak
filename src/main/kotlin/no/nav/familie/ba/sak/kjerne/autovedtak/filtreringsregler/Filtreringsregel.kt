@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler
 
+import no.nav.familie.ba.sak.common.erBostNummer
+import no.nav.familie.ba.sak.common.erDnummer
+import no.nav.familie.ba.sak.common.erFDatnummer
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel.Identifikator
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.EvalueringÅrsak
@@ -350,18 +353,14 @@ private val morHarIkkeOpphørtBarnetrygd =
 
 private fun erGyldigFnr(personIdent: String): Boolean = !erBostNummer(personIdent) && !erFDatnummer(personIdent)
 
-private fun erFDatnummer(personIdent: String): Boolean = personIdent.substring(6).toInt() == 0
-
-private fun erIkkeDNummer(personIdent: String): Boolean = personIdent.substring(0, 1).toInt() != 4
-
 private val søkerHarIkkeDNummer =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.SØKER_HAR_IKKE_D_NUMMER) {
-        erIkkeDNummer(it.søker.aktør.aktivFødselsnummer())
+        !erDnummer(it.søker.aktør.aktivFødselsnummer())
     }
 
 private val barnHarIkkeDNummer =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.BARN_HAR_IKKE_D_NUMMER) { fakta ->
-        fakta.barnaSomSkalVurderes.all { erIkkeDNummer(it.aktør.aktivFødselsnummer()) }
+        fakta.barnaSomSkalVurderes.all { !erDnummer(it.aktør.aktivFødselsnummer()) }
     }
 
 private val søkerHarIkkeAdressebeskyttelseGradering6Eller19 =
@@ -398,11 +397,6 @@ private val barnErIkkeUkrainskStatsborger =
     Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.BARN_ER_IKKE_UKRAINSK_STATSBORGER) {
         !it.barnHarUkrainskStatsborgerskap
     }
-
-/**
- * BOST-nr har måned mellom 21 og 32
- */
-private fun erBostNummer(personIdent: String): Boolean = personIdent.substring(2, 4).toInt() in 21..32
 
 val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøknad>> =
     listOf(
