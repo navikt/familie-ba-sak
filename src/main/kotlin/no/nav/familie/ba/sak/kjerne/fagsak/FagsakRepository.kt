@@ -225,6 +225,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                                                              'HENLAGT_SØKNAD_TRUKKET',
                                                              'HENLAGT_AUTOMATISK_FØDSELSHENDELSE',
                                                              'HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG',
+                                                             'HENLAGT_AUTOMATISK_SØKNAD',
                                                              'HENLAGT_TEKNISK_VEDLIKEHOLD'
                                         )
                                       AND b.status = 'AVSLUTTET'
@@ -242,7 +243,8 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                                  'HENLAGT_FEILAKTIG_OPPRETTET',
                                  'HENLAGT_SØKNAD_TRUKKET',
                                  'HENLAGT_AUTOMATISK_FØDSELSHENDELSE',
-                                 'HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG'
+                                 'HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG',
+                                 'HENLAGT_AUTOMATISK_SØKNAD',
                                  'HENLAGT_TEKNISK_VEDLIKEHOLD'
             )
           AND vedtaksdato > :month

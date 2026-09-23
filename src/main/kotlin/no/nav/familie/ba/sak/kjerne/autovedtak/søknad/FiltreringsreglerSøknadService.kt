@@ -72,6 +72,13 @@ class FiltreringsreglerSøknadService(
         }
     }
 
+    fun hentBegrunnelseForIkkeOppfyltFiltreringsregel(behandlingId: Long): String =
+        filtreringResultatRepository
+            .finnFiltreringResultater(behandlingId = behandlingId)
+            .firstOrNull { it.resultat == Resultat.IKKE_OPPFYLT }
+            ?.begrunnelse
+            ?: "Søknaden er ikke kandidat for automatisk behandling."
+
     fun kjørFiltreringsregler(
         filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,
         behandling: Behandling,

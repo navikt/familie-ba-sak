@@ -59,6 +59,8 @@ class AutovedtakService(
 
     /**
      * Oppretter en ny, automatisk behandling fra [nyBehandling], og kjører den til behandlingsresultat med filtreringsregler.
+     *
+     * Returnerer behandlingen på steg [StegType.HENLEGG_BEHANDLING] dersom filtreringsreglene stoppet den.
      */
     fun opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
         nyBehandling: NyBehandling,
@@ -69,12 +71,19 @@ class AutovedtakService(
                 nyBehandling.copy(skalBehandlesAutomatisk = true),
             )
 
-        if (nyBehandling.behandlingÅrsak == BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD) {
-            stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(behandling, filtrerAutomatiskBehandlingData)
+        val behandlingEtterFiltrering =
+            if (nyBehandling.behandlingÅrsak == BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD) {
+                stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(behandling, filtrerAutomatiskBehandlingData)
+            } else {
+                behandling
+            }
+
+        if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
+            logger.info("Filtreringsreglene stoppet den automatiske behandlingen ${behandlingEtterFiltrering.id}")
+            return behandlingEtterFiltrering
         }
 
-        val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(behandling)
-        return behandlingEtterBehandlingsresultat
+        return stegService.håndterVilkårsvurdering(behandlingEtterFiltrering)
     }
 
     fun opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling: Behandling): Vedtak {

@@ -267,6 +267,7 @@ enum class HenleggÅrsak(
             AUTOMATISK_HENLAGT -> {
                 when (opprettetÅrsak) {
                     BehandlingÅrsak.SMÅBARNSTILLEGG, BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG
+                    BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD -> Behandlingsresultat.HENLAGT_AUTOMATISK_SØKNAD
                     else -> Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
                 }
             }
