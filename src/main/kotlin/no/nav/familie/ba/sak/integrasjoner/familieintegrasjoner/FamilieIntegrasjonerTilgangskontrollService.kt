@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.tilAdressebeskyttelse
 import no.nav.familie.ba.sak.integrasjoner.tilgangsmaskin.TilgangsmaskinSkyggeService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.erStrengtFortrolig
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
@@ -47,8 +47,7 @@ class FamilieIntegrasjonerTilgangskontrollService(
         return adresseBeskyttelseBolk
             .filter { (_, person) ->
                 person.adressebeskyttelse.any { adressebeskyttelse ->
-                    adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
-                        adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
+                    adressebeskyttelse.gradering.erStrengtFortrolig()
                 }
             }.map { it.key }
     }

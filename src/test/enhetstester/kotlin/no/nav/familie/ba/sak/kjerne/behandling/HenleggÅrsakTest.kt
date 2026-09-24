@@ -18,6 +18,15 @@ class HenleggÅrsakTest {
     }
 
     @Test
+    fun `Skal returnere HENLAGT_AUTOMATISK_SØKNAD for AUTOMATISK_HENLAGT når årsaken er automatisk behandling av søknad`() {
+        // Act
+        val resultat = HenleggÅrsak.AUTOMATISK_HENLAGT.tilBehandlingsresultat(BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD)
+
+        // Assert
+        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_SØKNAD, resultat)
+    }
+
+    @Test
     fun `Skal returnere riktig behandlingsresultat for FEILAKTIG_OPPRETTET`() {
         // Act
         val resultat = HenleggÅrsak.FEILAKTIG_OPPRETTET.tilBehandlingsresultat(BehandlingÅrsak.FØDSELSHENDELSE)
