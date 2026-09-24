@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.internal.FagsakMedFlereMigreringer
+import no.nav.familie.ba.sak.internal.forvalter.FagsakMedFlereMigreringer
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
