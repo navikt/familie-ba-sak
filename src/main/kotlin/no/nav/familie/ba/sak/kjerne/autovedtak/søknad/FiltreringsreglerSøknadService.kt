@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsrege
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsreglerFaktaSøknad
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerFødselshendelseService.Companion.logger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -43,13 +42,6 @@ class FiltreringsreglerSøknadService(
     private val vilkårvurderer: Vilkårvurderer,
     private val metrikker: Metrikker,
 ) {
-    fun hentBegrunnelseForIkkeOppfyltFiltreringsregel(behandlingId: Long): String =
-        filtreringResultatRepository
-            .finnFiltreringResultater(behandlingId = behandlingId)
-            .firstOrNull { it.resultat == Resultat.IKKE_OPPFYLT }
-            ?.begrunnelse
-            ?: "Søknaden er ikke kandidat for automatisk behandling."
-
     fun kjørFiltreringsregler(
         filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,
         behandling: Behandling,

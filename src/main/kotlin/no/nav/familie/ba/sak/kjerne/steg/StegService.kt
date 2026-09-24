@@ -342,7 +342,8 @@ class StegService(
                 behandlingSteg.utførStegOgAngiNeste(behandling, barnSomSkalVurderesIFødselshendelse)
             }
 
-        return if (behandlingEtterVilkårsvurdering.skalBehandlesAutomatisk) {
+        // Automatisk behandling av søknad kjører behandlingsresultatsteget selv, slik at vilkårsvurderingen kan valideres mellom stegene.
+        return if (behandlingEtterVilkårsvurdering.skalBehandlesAutomatisk && !behandlingEtterVilkårsvurdering.erAutomatiskSøknad()) {
             håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
         } else {
             behandlingEtterVilkårsvurdering

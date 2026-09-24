@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.datagenerator.lagFiltreringResultat
 import no.nav.familie.ba.sak.datagenerator.lagPersonInfo
 import no.nav.familie.ba.sak.datagenerator.lagSøknad
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -19,7 +18,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FILTRERINGSREGLER_SØKNAD
-import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsregelEvaluator
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsreglerFaktaSøknad
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
@@ -403,50 +401,6 @@ class FiltreringsreglerSøknadServiceTest {
 
         // Act & Assert
         assertDoesNotThrow { kjørFiltreringsregler(evalueringer = evalueringer) }
-    }
-
-    @Nested
-    inner class HentBegrunnelseForIkkeOppfyltFiltreringsregel {
-        @Test
-        fun `skal hente begrunnelsen fra den første filtreringsregelen som ikke er oppfylt`() {
-            // Arrange
-            val behandlingId = 42L
-            every { filtreringResultatRepository.finnFiltreringResultater(behandlingId = behandlingId) } returns
-                listOf(
-                    lagFiltreringResultat(behandlingId = behandlingId, resultat = Resultat.OPPFYLT, begrunnelse = "Mor lever"),
-                    lagFiltreringResultat(
-                        behandlingId = behandlingId,
-                        filtreringsregel = Filtreringsregel.Identifikator.BARN_LEVER,
-                        resultat = Resultat.IKKE_OPPFYLT,
-                        begrunnelse = "Barnet er dødt",
-                    ),
-                    lagFiltreringResultat(
-                        behandlingId = behandlingId,
-                        filtreringsregel = Filtreringsregel.Identifikator.MOR_ER_OVER_18_ÅR,
-                        resultat = Resultat.IKKE_OPPFYLT,
-                        begrunnelse = "Mor er under 18 år",
-                    ),
-                )
-
-            // Act
-            val begrunnelse = filtreringsreglerSøknadService.hentBegrunnelseForIkkeOppfyltFiltreringsregel(behandlingId = behandlingId)
-
-            // Assert
-            assertThat(begrunnelse).isEqualTo("Barnet er dødt")
-        }
-
-        @Test
-        fun `skal gi en generisk begrunnelse dersom ingen filtreringsregler er lagret for behandlingen`() {
-            // Arrange
-            val behandlingId = 42L
-            every { filtreringResultatRepository.finnFiltreringResultater(behandlingId = behandlingId) } returns emptyList()
-
-            // Act
-            val begrunnelse = filtreringsreglerSøknadService.hentBegrunnelseForIkkeOppfyltFiltreringsregel(behandlingId = behandlingId)
-
-            // Assert
-            assertThat(begrunnelse).isEqualTo("Søknaden er ikke kandidat for automatisk behandling.")
-        }
     }
 
     private fun kjørFiltreringsregler(
