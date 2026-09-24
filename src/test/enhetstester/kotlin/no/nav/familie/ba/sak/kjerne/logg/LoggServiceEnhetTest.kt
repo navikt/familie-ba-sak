@@ -86,7 +86,7 @@ internal class LoggServiceEnhetTest {
     }
 
     @Test
-    fun `opprettFiltreringsreglerLogg skal lagre logg med begrunnelsen til første filtreringsregel som ikke er oppfylt`() {
+    fun `opprettFiltreringsreglerLogg skal lagre logg med begrunnelsene til alle filtreringsregler som ikke er oppfylt`() {
         // Arrange
         val behandling = lagBehandling(id = 1)
         val filtreringResultater =
@@ -115,7 +115,9 @@ internal class LoggServiceEnhetTest {
         assertThat(opprettetLogg.type).isEqualTo(LoggType.FILTRERINGSREGLER_VURDERT)
         assertThat(opprettetLogg.behandlingId).isEqualTo(behandling.id)
         assertThat(opprettetLogg.tittel).isEqualTo("Filtreringsregler feilet")
-        assertThat(opprettetLogg.tekst).isEqualTo("Behandlingen stoppet i filtreringsreglene: Det er registrert dødsdato på barnet.")
+        assertThat(opprettetLogg.tekst).isEqualTo(
+            "Behandlingen stoppet i filtreringsreglene: Det er registrert dødsdato på barnet. og Ikke vurdert",
+        )
     }
 
     @Test
