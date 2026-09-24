@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.TestClockProvider
@@ -33,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -48,6 +51,7 @@ class FiltreringsreglerSøknadServiceTest {
     private val filtreringsregelEvaluator = mockk<FiltreringsregelEvaluator>()
     private val søknadService = mockk<SøknadService>()
     private val filtreringResultatRepository = mockk<FiltreringResultatRepository>(relaxed = true)
+    private val metrikker = mockk<Metrikker>()
     private val inneværendeMåned = YearMonth.of(2024, 5)
 
     private val filtreringsreglerSøknadService =
@@ -61,7 +65,13 @@ class FiltreringsreglerSøknadServiceTest {
             søknadService = søknadService,
             clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(inneværendeMåned),
             vilkårvurderer = vilkårvurderer,
+            metrikker = metrikker,
         )
+
+    @BeforeEach
+    fun setup() {
+        every { metrikker.oppdaterMetrikker(any()) } just Runs
+    }
 
     @Test
     fun `skal slå opp barnetrygd til annen mottaker for inneværende måned og legge resultatet i fakta`() {

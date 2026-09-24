@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 
-import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
@@ -9,14 +7,10 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.erStrengtFortrolig
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FILTRERINGSREGLER_SØKNAD
-import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsregelEvaluator
-import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsreglerFakta
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsreglerFaktaSøknad
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerFødselshendelseService.Companion.logger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -46,32 +40,8 @@ class FiltreringsreglerSøknadService(
     private val søknadService: SøknadService,
     private val clockProvider: ClockProvider,
     private val vilkårvurderer: Vilkårvurderer,
+    private val metrikker: Metrikker,
 ) {
-    val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
-    val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
-
-    init {
-        FILTRERINGSREGLER_SØKNAD.forEach { regel ->
-            Resultat.entries.forEach { resultat ->
-                filtreringsreglerMetrics["${regel.identifikator.name}_${resultat.name}"] =
-                    Metrics.counter(
-                        "familie.ba.sak.filtreringsregler.soknad.utfall",
-                        "beskrivelse",
-                        regel.identifikator.name,
-                        "resultat",
-                        resultat.name,
-                    )
-            }
-
-            filtreringsreglerFørsteUtfallMetrics[regel.identifikator.name] =
-                Metrics.counter(
-                    "familie.ba.sak.filtreringsregler.soknad.foersteutfall",
-                    "beskrivelse",
-                    regel.identifikator.name,
-                )
-        }
-    }
-
     fun kjørFiltreringsregler(
         filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,
         behandling: Behandling,
@@ -142,18 +112,17 @@ class FiltreringsreglerSøknadService(
             )
 
         val evalueringer = filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_SØKNAD, fakta)
-        oppdaterMetrikker(evalueringer)
+
+        metrikker.oppdaterMetrikker(evalueringer)
 
         logger.info("Resultater fra filtreringsregler på behandling $behandling: ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")
         if (!evalueringer.erOppfylt()) {
             secureLogger.info("Resultater fra filtreringsregler på behandling $behandling: (Fakta: ${fakta.convertDataClassToJson()}): ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")
         }
 
-        return lagreFiltreringsregler(
-            evalueringer = evalueringer,
-            behandlingId = behandling.id,
-            fakta = fakta,
-        )
+        val filtreringsresultater = evalueringer.map { FiltreringResultat.opprett(behandling.id, fakta, it) }
+
+        return filtreringResultatRepository.saveAll(filtreringsresultater)
     }
 
     private fun harAktivNorskBostedsadresse(
@@ -164,41 +133,4 @@ class FiltreringsreglerSøknadService(
             val tidslinje = Adresser.opprettFra(person = person).lagErBosattINorgeTidslinje()
             tidslinje.verdiPåTidspunkt(tidspunkt) == true
         } && personer.isNotEmpty()
-
-    private fun oppdaterMetrikker(evalueringer: List<Evaluering>) {
-        var førsteutfall = true
-        evalueringer.forEach {
-            filtreringsreglerMetrics["${it.identifikator}_${it.resultat.name}"]!!.increment()
-            førsteutfall = økTellereForFørsteUtfall(it, førsteutfall)
-        }
-    }
-
-    private fun økTellereForFørsteUtfall(
-        evaluering: Evaluering,
-        førsteutfall: Boolean,
-    ): Boolean {
-        if (evaluering.resultat == Resultat.IKKE_OPPFYLT && førsteutfall) {
-            filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]!!.increment()
-            return false
-        }
-        return førsteutfall
-    }
-
-    fun lagreFiltreringsregler(
-        evalueringer: List<Evaluering>,
-        behandlingId: Long,
-        fakta: FiltreringsreglerFakta,
-    ): List<FiltreringResultat> =
-        filtreringResultatRepository.saveAll(
-            evalueringer.map {
-                FiltreringResultat(
-                    behandlingId = behandlingId,
-                    filtreringsregel = Filtreringsregel.Identifikator.valueOf(it.identifikator),
-                    resultat = it.resultat,
-                    begrunnelse = it.begrunnelse,
-                    evalueringsårsaker = it.evalueringÅrsaker.map { evalueringÅrsak -> evalueringÅrsak.hentNavn() },
-                    regelInput = fakta.convertDataClassToJson(),
-                )
-            },
-        )
 }
