@@ -201,7 +201,7 @@ class LoggService(
                         "Alle filtreringsreglene er oppfylt. Behandlingen fortsetter automatisk."
                     } else {
                         "Behandlingen stoppet i filtreringsreglene: ${
-                            filtreringResultater.filter { it.resultat != Resultat.OPPFYLT }.map { it.begrunnelse }.slåSammen()
+                            filtreringResultater.filter { it.resultat == Resultat.IKKE_OPPFYLT }.map { it.begrunnelse }.slåSammen()
                         }"
                     },
             ),

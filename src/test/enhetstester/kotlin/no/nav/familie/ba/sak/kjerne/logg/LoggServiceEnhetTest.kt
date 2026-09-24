@@ -86,7 +86,7 @@ internal class LoggServiceEnhetTest {
     }
 
     @Test
-    fun `opprettFiltreringsreglerLogg skal lagre logg med begrunnelsene til alle filtreringsregler som ikke er oppfylt`() {
+    fun `opprettFiltreringsreglerLogg skal lagre logg med begrunnelsene til filtreringsregler som ikke er oppfylt og utelate ikke vurderte`() {
         // Arrange
         val behandling = lagBehandling(id = 1)
         val filtreringResultater =
@@ -116,32 +116,7 @@ internal class LoggServiceEnhetTest {
         assertThat(opprettetLogg.behandlingId).isEqualTo(behandling.id)
         assertThat(opprettetLogg.tittel).isEqualTo("Filtreringsregler feilet")
         assertThat(opprettetLogg.tekst).isEqualTo(
-            "Behandlingen stoppet i filtreringsreglene: Det er registrert dødsdato på barnet. og Ikke vurdert",
+            "Behandlingen stoppet i filtreringsreglene: Det er registrert dødsdato på barnet.",
         )
-    }
-
-    @Test
-    fun `opprettFiltreringsreglerLogg skal lagre logg om at filtreringsreglene feilet når en regel ikke er vurdert`() {
-        // Arrange
-        val behandling = lagBehandling(id = 1)
-        val filtreringResultater =
-            listOf(
-                lagFiltreringResultat(behandlingId = behandling.id, resultat = Resultat.OPPFYLT),
-                lagFiltreringResultat(
-                    behandlingId = behandling.id,
-                    filtreringsregel = Filtreringsregel.Identifikator.BARN_LEVER,
-                    resultat = Resultat.IKKE_VURDERT,
-                    begrunnelse = "Ikke vurdert",
-                ),
-            )
-
-        every { loggRepository.save(any()) } returnsArgument 0
-
-        // Act
-        val opprettetLogg = loggService.opprettFiltreringsreglerLogg(behandling, filtreringResultater)
-
-        // Assert
-        assertThat(opprettetLogg.tittel).isEqualTo("Filtreringsregler feilet")
-        assertThat(opprettetLogg.tekst).isEqualTo("Behandlingen stoppet i filtreringsreglene: Ikke vurdert")
     }
 }
