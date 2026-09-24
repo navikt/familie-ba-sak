@@ -36,9 +36,10 @@ class UtbetalingsoppdragGeneratorTest {
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk()
-    private val featureToggleService: FeatureToggleService = mockk {
-        every { isEnabled(FeatureToggle.SIMULER_KUN_ENDREDE_PERIODER, any<Long>()) } returns true
-    }
+    private val featureToggleService: FeatureToggleService =
+        mockk {
+            every { isEnabled(FeatureToggle.SIMULER_KUN_ENDREDE_PERIODER, any<Long>()) } returns true
+        }
     private val utbetalingsoppdragGenerator =
         UtbetalingsoppdragGenerator(
             utbetalingsgenerator = Utbetalingsgenerator(),
