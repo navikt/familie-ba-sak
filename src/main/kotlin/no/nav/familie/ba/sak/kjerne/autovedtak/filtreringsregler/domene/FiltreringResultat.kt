@@ -13,7 +13,10 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.StringListConverter
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsreglerFakta
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
@@ -52,6 +55,22 @@ class FiltreringResultat(
             "resultat=$resultat, " +
             "evalueringÅrsaker=$evalueringsårsaker" +
             ")"
+
+    companion object {
+        fun opprett(
+            behandlingId: Long,
+            fakta: FiltreringsreglerFakta,
+            evaluering: Evaluering,
+        ): FiltreringResultat =
+            FiltreringResultat(
+                behandlingId = behandlingId,
+                filtreringsregel = Filtreringsregel.Identifikator.valueOf(evaluering.identifikator),
+                resultat = evaluering.resultat,
+                begrunnelse = evaluering.begrunnelse,
+                evalueringsårsaker = evaluering.evalueringÅrsaker.map { evalueringÅrsak -> evalueringÅrsak.hentNavn() },
+                regelInput = fakta.convertDataClassToJson(),
+            )
+    }
 }
 
 fun List<FiltreringResultat>.erOppfylt() = this.all { it.resultat == Resultat.OPPFYLT }
