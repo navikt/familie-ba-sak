@@ -87,19 +87,11 @@ class AutovedtakSøknadValideringServiceTest {
     }
 
     @Nested
-    inner class ValiderAtBehandlingKanVedtasAutomatisk {
-        @BeforeEach
-        fun setup() {
-            every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
-                listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12), aktør = barnFremstiltKravFor, behandling = behandling))
-            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
-            every { søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null) } returns listOf(barnFremstiltKravFor)
-        }
-
+    inner class ValiderAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget {
         @Test
-        fun `skal ikke kaste feil når behandlingen kan vedtas automatisk`() {
+        fun `skal ikke kaste feil når behandlingsresultatet er innvilget`() {
             // Act & Assert
-            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling) }
+            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandling) }
         }
 
         @Test
@@ -113,7 +105,24 @@ class AutovedtakSøknadValideringServiceTest {
                 )
 
             // Act & Assert
-            assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandlingMedAvslag) }
+            assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandlingMedAvslag) }
+        }
+    }
+
+    @Nested
+    inner class ValiderAtKunPersonerFremstiltKravForHarEndringIAndeler {
+        @BeforeEach
+        fun setup() {
+            every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12), aktør = barnFremstiltKravFor, behandling = behandling))
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+            every { søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null) } returns listOf(barnFremstiltKravFor)
+        }
+
+        @Test
+        fun `skal ikke kaste feil når kun personer det er fremstilt krav for har endring i andeler`() {
+            // Act & Assert
+            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling) }
         }
 
         @Test
@@ -126,7 +135,7 @@ class AutovedtakSøknadValideringServiceTest {
             every { søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = forrigeBehandling) } returns listOf(barnFremstiltKravFor)
 
             // Act & Assert
-            assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling) }
+            assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling) }
         }
 
         @Test
@@ -138,7 +147,7 @@ class AutovedtakSøknadValideringServiceTest {
             every { søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = forrigeBehandling) } returns listOf(barnFremstiltKravFor)
 
             // Act
-            autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling)
+            autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling)
 
             // Assert
             verify(exactly = 1) {

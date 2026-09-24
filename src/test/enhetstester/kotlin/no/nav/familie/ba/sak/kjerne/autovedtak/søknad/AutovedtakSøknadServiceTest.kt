@@ -117,7 +117,8 @@ class AutovedtakSøknadServiceTest {
             every { stegService.håndterVilkårsvurdering(automatiskBehandling) } returns behandlingEtterVilkårsvurdering
             justRun { autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(any()) }
             every { stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering) } returns behandling
-            justRun { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(any()) }
+            justRun { autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(any()) }
+            justRun { autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(any()) }
             every { simuleringService.oppdaterSimuleringPåBehandling(behandling) } returns simulering
             justRun { autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(any()) }
             justRun { autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(any()) }
@@ -140,7 +141,8 @@ class AutovedtakSøknadServiceTest {
                 stegService.håndterVilkårsvurdering(automatiskBehandling)
                 autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(behandlingEtterVilkårsvurdering)
                 stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
-                autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling)
+                autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandling)
+                autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling)
                 simuleringService.oppdaterSimuleringPåBehandling(behandling)
                 autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling)
@@ -185,7 +187,8 @@ class AutovedtakSøknadServiceTest {
             verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling) }
             verify(exactly = 0) {
                 stegService.håndterBehandlingsresultat(any())
-                autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(any())
+                autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(any())
+                autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(any())
             }
         }
 
@@ -193,7 +196,7 @@ class AutovedtakSøknadServiceTest {
         fun `skal henlegge og opprette manuell behandling i stedet for å simulere og vedta når behandlingen må behandles manuelt`() {
             // Arrange
             val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
-            every { autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling) } throws
+            every { autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandling) } throws
                 AutovedtakMåBehandlesManueltFeil("Behandling av søknad må håndteres manuelt.")
 
             // Act
@@ -212,6 +215,27 @@ class AutovedtakSøknadServiceTest {
                     oppgavetype = Oppgavetype.BehandleSak,
                 )
             }
+            verify(exactly = 0) {
+                simuleringService.oppdaterSimuleringPåBehandling(any())
+                autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
+                taskService.save(any())
+            }
+        }
+
+        @Test
+        fun `skal henlegge og opprette manuell behandling i stedet for å simulere og vedta når personer uten krav har endring i andeler`() {
+            // Arrange
+            val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
+            every { autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling) } throws
+                AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad gir endring i andeler for 1 person(er) det ikke er fremstilt krav for.")
+
+            // Act
+            autovedtakSøknadService.kjørBehandling(søknadData)
+
+            // Assert
+            verify(exactly = 1) { stegService.håndterHenleggBehandling(automatiskBehandling, capture(henleggBehandlingInfoSlot)) }
+            assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Automatisk behandling av søknad gir endring i andeler for 1 person(er) det ikke er fremstilt krav for.")
+            verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling) }
             verify(exactly = 0) {
                 simuleringService.oppdaterSimuleringPåBehandling(any())
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
@@ -352,7 +376,8 @@ class AutovedtakSøknadServiceTest {
                     stegService.håndterVilkårsvurdering(any(), any())
                     autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(any())
                     stegService.håndterBehandlingsresultat(any())
-                    autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(any())
+                    autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(any())
+                    autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(any())
                     simuleringService.oppdaterSimuleringPåBehandling(any())
                     autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
                     taskService.save(any())

@@ -47,16 +47,7 @@ class AutovedtakSøknadService(
         }
 
         return try {
-            val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(automatiskBehandling)
-            autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(behandlingEtterVilkårsvurdering)
-
-            val behandlingEtterBehandlingsresultat = stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
-            autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandlingEtterBehandlingsresultat)
-
-            val simulering = simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterBehandlingsresultat)
-            autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
-
-            vedtaAutomatisk(behandling = behandlingEtterBehandlingsresultat, behandlingsdata = behandlingsdata)
+            vedtaAutomatisk(behandling = automatiskBehandling, behandlingsdata = behandlingsdata)
         } catch (feil: AutovedtakMåBehandlesManueltFeil) {
             // Kaster ikke videre fordi henleggelsen må committes sammen med resten av transaksjonen.
             henleggBehandlingOgOpprettManuellBehandling(
@@ -91,17 +82,27 @@ class AutovedtakSøknadService(
         behandling: Behandling,
         behandlingsdata: SøknadData,
     ): String {
-        if (behandling.steg != StegType.IVERKSETT_MOT_OPPDRAG) {
-            throw Feil("Ugyldig neste steg ${behandling.steg} for behandlingsårsak ${BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD} for fagsak=${behandlingsdata.nyBehandling.fagsakId}")
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+        autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(behandlingEtterVilkårsvurdering)
+
+        val behandlingEtterBehandlingsresultat = stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+        autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandlingEtterBehandlingsresultat)
+        autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandlingEtterBehandlingsresultat)
+
+        val simulering = simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterBehandlingsresultat)
+        autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
+
+        if (behandlingEtterBehandlingsresultat.steg != StegType.IVERKSETT_MOT_OPPDRAG) {
+            throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} for behandlingsårsak ${BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD} for fagsak=${behandlingsdata.nyBehandling.fagsakId}")
         }
 
-        autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(behandling)
+        autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(behandlingEtterBehandlingsresultat)
 
-        val opprettetVedtak = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling)
+        val opprettetVedtak = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandlingEtterBehandlingsresultat)
 
         taskService.save(
             IverksettMotOppdragTask.opprettTask(
-                behandling,
+                behandlingEtterBehandlingsresultat,
                 opprettetVedtak,
                 SikkerhetContext.hentSaksbehandler(),
             ),

@@ -21,11 +21,13 @@ class AutovedtakSøknadValideringService(
         )
     }
 
-    fun validerAtBehandlingKanVedtasAutomatisk(behandling: Behandling) {
+    fun validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandling: Behandling) {
         AutovedtakSøknadValidering.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(
             behandlingsresultat = behandling.resultat,
         )
+    }
 
+    fun validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling: Behandling) {
         val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
         AutovedtakSøknadValidering.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(
