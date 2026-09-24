@@ -499,6 +499,7 @@ class CucumberMock(
                     clockProvider,
                 ),
             utbetalingsgenerator = Utbetalingsgenerator(),
+            featureToggleService = featureToggleService,
         )
 
     val oppdaterTilkjentYtelseService =
