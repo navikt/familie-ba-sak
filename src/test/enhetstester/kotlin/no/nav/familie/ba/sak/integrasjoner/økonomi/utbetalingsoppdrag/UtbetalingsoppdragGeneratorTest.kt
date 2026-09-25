@@ -2,10 +2,13 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -23,6 +26,7 @@ import no.nav.familie.felles.utbetalingsgenerator.domain.Behandlingsinformasjon
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 
@@ -32,6 +36,10 @@ class UtbetalingsoppdragGeneratorTest {
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk()
+    private val featureToggleService: FeatureToggleService =
+        mockk {
+            every { isEnabled(FeatureToggle.SIMULER_KUN_ENDREDE_PERIODER, any<Long>()) } returns true
+        }
     private val utbetalingsoppdragGenerator =
         UtbetalingsoppdragGenerator(
             utbetalingsgenerator = Utbetalingsgenerator(),
@@ -40,6 +48,7 @@ class UtbetalingsoppdragGeneratorTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
+            featureToggleService = featureToggleService,
         )
 
     @ParameterizedTest
@@ -267,5 +276,85 @@ class UtbetalingsoppdragGeneratorTest {
                 .single()
                 .vedtakdatoTom,
         ).isEqualTo(LocalDate.now().plusMonths(2).sisteDagIMåned())
+    }
+
+    @ParameterizedTest(name = "erSimulering={0}, featureToggleErPå={1} => forventetErSimulering={2}")
+    @CsvSource(
+        "true, true, false",
+        "true, false, true",
+        "false, true, false",
+        "false, false, false",
+    )
+    fun `skal sette erSimulering til behandlingsinformasjonUtleder basert på erSimulering og feature toggle`(
+        erSimulering: Boolean,
+        featureToggleErPå: Boolean,
+        forventetErSimulering: Boolean,
+    ) {
+        // Arrange
+        val saksbehandlerId = "123abc"
+        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val vedtak = lagVedtak(behandling = behandling)
+        val barn = lagPerson()
+        val tilkjentYtelse =
+            lagTilkjentYtelse(
+                behandling = behandling,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            behandling = behandling,
+                            fom = LocalDate.now().toYearMonth(),
+                            tom = LocalDate.now().toYearMonth(),
+                            person = barn,
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                            kildeBehandlingId = null,
+                            kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                        ),
+                    )
+                },
+            )
+
+        every {
+            featureToggleService.isEnabled(FeatureToggle.SIMULER_KUN_ENDREDE_PERIODER, behandling.id)
+        } returns featureToggleErPå
+        every {
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)
+        } returns null
+        every {
+            andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(fagsakId = behandling.fagsak.id)
+        } returns emptyList()
+
+        val erSimuleringSlot = slot<Boolean>()
+        every {
+            behandlingsinformasjonUtleder.utled(any(), any(), any(), any(), capture(erSimuleringSlot))
+        } returns
+            Behandlingsinformasjon(
+                saksbehandlerId = saksbehandlerId,
+                behandlingId = behandling.id.toString(),
+                eksternBehandlingId = behandling.id,
+                eksternFagsakId = behandling.fagsak.id,
+                fagsystem = FagsystemBA.BARNETRYGD,
+                personIdent = barn.aktør.aktivFødselsnummer(),
+                vedtaksdato = LocalDate.now(),
+                opphørAlleKjederFra = null,
+            )
+        every {
+            klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
+                beregnetUtbetalingsoppdrag = any(),
+                behandling = vedtak.behandling,
+            )
+        } answers {
+            firstArg()
+        }
+
+        // Act
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+            saksbehandlerId = saksbehandlerId,
+            vedtak = vedtak,
+            tilkjentYtelse = tilkjentYtelse,
+            erSimulering = erSimulering,
+        )
+
+        // Assert
+        assertThat(erSimuleringSlot.captured).isEqualTo(forventetErSimulering)
     }
 }
