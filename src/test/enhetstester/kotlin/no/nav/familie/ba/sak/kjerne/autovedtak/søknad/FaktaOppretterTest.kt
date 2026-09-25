@@ -46,6 +46,7 @@ class FaktaOppretterTest {
     private val vilkårvurderer = mockk<Vilkårvurderer>()
     private val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService>()
     private val søknadService = mockk<SøknadService>()
+
     private val inneværendeMåned = YearMonth.of(2024, 5)
 
     private val faktaOppretter =
@@ -70,13 +71,35 @@ class FaktaOppretterTest {
                     type = PersonType.SØKER,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     aktør = lagAktør(søkersIdent),
-                    bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                    bostedsadresser = {
+                        listOf(
+                            lagGrVegadresse(
+                                person = it,
+                                periode =
+                                    DatoIntervallEntitet(
+                                        inneværendeMåned.atDay(1).minusDays(1),
+                                        null,
+                                    ),
+                            ),
+                        )
+                    },
                 ),
                 lagPerson(
                     type = PersonType.BARN,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     aktør = lagAktør(barnsIdent),
-                    bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                    bostedsadresser = {
+                        listOf(
+                            lagGrVegadresse(
+                                person = it,
+                                periode =
+                                    DatoIntervallEntitet(
+                                        inneværendeMåned.atDay(1).minusDays(1),
+                                        null,
+                                    ),
+                            ),
+                        )
+                    },
                 ),
             )
         }
@@ -148,8 +171,13 @@ class FaktaOppretterTest {
             val utvidetBehandling = lagBehandling(id = behandling.id, underkategori = BehandlingUnderkategori.UTVIDET)
 
             every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(utvidetBehandling, any()) } returns false
+
             every {
-                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(behandling = utvidetBehandling, barna = any(), måned = any())
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = utvidetBehandling,
+                    barna = any(),
+                    måned = any(),
+                )
             } returns false
 
             // Act
@@ -183,8 +211,13 @@ class FaktaOppretterTest {
             val eøsBehandling = lagBehandling(id = behandling.id, behandlingKategori = BehandlingKategori.EØS)
 
             every { vilkårvurderer.oppfyllerSøkerVilkårForUtvidetBarnetrygd(eøsBehandling, any()) } returns false
+
             every {
-                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(behandling = eøsBehandling, barna = any(), måned = any())
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = eøsBehandling,
+                    barna = any(),
+                    måned = any(),
+                )
             } returns false
 
             // Act
@@ -207,19 +240,52 @@ class FaktaOppretterTest {
                             type = PersonType.SØKER,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = søker.aktør,
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(barnsIdent),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(randomFnr()),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                     )
                 }
@@ -254,7 +320,53 @@ class FaktaOppretterTest {
         @Test
         fun `skal sette søkerLever til false når søker er død`() {
             // Arrange
-            søker.dødsfall = lagDødsfall(person = søker, dødsfallDato = inneværendeMåned.atDay(1))
+            val nyttGrunnlag =
+                lagPersonopplysningGrunnlag(behandlingId = behandling.id) { personopplysningGrunnlag ->
+                    setOf(
+                        lagPerson(
+                            type = PersonType.SØKER,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = søker.aktør,
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                            dødsfall = {
+                                lagDødsfall(
+                                    person = it,
+                                    dødsfallDato = inneværendeMåned.atDay(1),
+                                )
+                            },
+                        ),
+                        lagPerson(
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = barn.aktør,
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns nyttGrunnlag
 
             // Act
             val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
@@ -269,7 +381,42 @@ class FaktaOppretterTest {
         @Test
         fun `skal sette barnaLever til false når søknadsbarnet er dødt`() {
             // Arrange
-            barn.dødsfall = lagDødsfall(person = barn, dødsfallDato = inneværendeMåned.atDay(1))
+            val nyttGrunnlag =
+                lagPersonopplysningGrunnlag(behandlingId = behandling.id) { personopplysningGrunnlag ->
+                    setOf(
+                        lagPerson(
+                            type = PersonType.SØKER,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = søker.aktør,
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                        ),
+                        lagPerson(
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = barn.aktør,
+                            bostedsadresser = { listOf(lagGrVegadresse(person = it, periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null))) },
+                            dødsfall = {
+                                lagDødsfall(
+                                    person = it,
+                                    dødsfallDato = inneværendeMåned.atDay(1),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns nyttGrunnlag
 
             // Act
             val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
@@ -288,25 +435,62 @@ class FaktaOppretterTest {
                             type = PersonType.SØKER,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = søker.aktør,
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(barnsIdent),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(randomFnr()),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                            dødsfall = {
+                                lagDødsfall(
+                                    person = it,
+                                    dødsfallDato = inneværendeMåned.atDay(1),
+                                )
+                            },
                         ),
                     )
                 }
             val søknadsbarn = grunnlagMedToBarn.barna.first()
-            val dødtBarn = grunnlagMedToBarn.barna.last()
-            dødtBarn.dødsfall = lagDødsfall(person = dødtBarn, dødsfallDato = inneværendeMåned.atDay(1))
 
             every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns grunnlagMedToBarn
             every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns listOf(søknadsbarn.aktør)
@@ -340,7 +524,11 @@ class FaktaOppretterTest {
         fun `skal slå opp barnetrygd til annen mottaker for søknadsbarna i inneværende måned`() {
             // Arrange
             every {
-                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(behandling = behandling, barna = listOf(barn), måned = inneværendeMåned)
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = behandling,
+                    barna = listOf(barn),
+                    måned = inneværendeMåned,
+                )
             } returns true
 
             // Act
@@ -349,7 +537,11 @@ class FaktaOppretterTest {
             // Assert
             assertThat(fakta.utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned).isTrue()
             verify(exactly = 1) {
-                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(behandling = behandling, barna = listOf(barn), måned = inneværendeMåned)
+                tilkjentYtelseValideringService.barnetrygdUtbetalesForBarnIAnnenFagsakIMåned(
+                    behandling = behandling,
+                    barna = listOf(barn),
+                    måned = inneværendeMåned,
+                )
             }
         }
     }
@@ -359,7 +551,9 @@ class FaktaOppretterTest {
         @Test
         fun `skal sette søkerHarKryssetPåEøsSpørsmålISøknaden til true når søker har krysset på EØS-spørsmål i søknaden`() {
             // Arrange
-            every { søknadService.finnDigitalSøknad(behandling.id) } returns
+            every {
+                søknadService.finnDigitalSøknad(behandling.id)
+            } returns
                 lagSøknad(
                     barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true),
                     harKryssetPåEøsSpørsmål = true,
@@ -378,7 +572,9 @@ class FaktaOppretterTest {
         @Test
         fun `skal sette søkerHarKryssetForDeltBostedISøknaden til true når søker har krysset for delt bosted for søknadsbarnet`() {
             // Arrange
-            every { søknadService.finnDigitalSøknad(behandling.id) } returns
+            every {
+                søknadService.finnDigitalSøknad(behandling.id)
+            } returns
                 lagSøknad(
                     barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true),
                     barneIdenterTilHarKryssetForDeltBosted = mapOf(barnsIdent to true),
@@ -395,6 +591,7 @@ class FaktaOppretterTest {
         fun `skal sette søkerHarKryssetForDeltBostedISøknaden til true når kun ett av flere søknadsbarn er krysset av for delt bosted`() {
             // Arrange
             val andreBarnsIdent = randomFnr()
+
             val grunnlagMedToBarn =
                 lagPersonopplysningGrunnlag(behandlingId = behandling.id) { personopplysningGrunnlag ->
                     setOf(
@@ -402,26 +599,63 @@ class FaktaOppretterTest {
                             type = PersonType.SØKER,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = søker.aktør,
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(barnsIdent),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(andreBarnsIdent),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                     )
                 }
 
             every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns grunnlagMedToBarn
+
             every { personidentService.hentAktørIder(listOf(barnsIdent, andreBarnsIdent)) } returns grunnlagMedToBarn.barna.map { it.aktør }
-            every { søknadService.finnDigitalSøknad(behandling.id) } returns
+
+            every {
+                søknadService.finnDigitalSøknad(behandling.id)
+            } returns
                 lagSøknad(
                     barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true, andreBarnsIdent to true),
                     barneIdenterTilHarKryssetForDeltBosted = mapOf(andreBarnsIdent to true),
@@ -440,7 +674,9 @@ class FaktaOppretterTest {
         @Test
         fun `skal sette søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden til true når søker har krysset for fosterbarn for søknadsbarnet`() {
             // Arrange
-            every { søknadService.finnDigitalSøknad(behandling.id) } returns
+            every {
+                søknadService.finnDigitalSøknad(behandling.id)
+            } returns
                 lagSøknad(
                     barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true),
                     barneIdenterTilErFosterbarn = mapOf(barnsIdent to true),
@@ -457,6 +693,7 @@ class FaktaOppretterTest {
         fun `skal sette søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden til true når kun ett av flere søknadsbarn er krysset av som fosterbarn`() {
             // Arrange
             val andreBarnsIdent = randomFnr()
+
             val grunnlagMedToBarn =
                 lagPersonopplysningGrunnlag(behandlingId = behandling.id) { personopplysningGrunnlag ->
                     setOf(
@@ -464,26 +701,63 @@ class FaktaOppretterTest {
                             type = PersonType.SØKER,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = søker.aktør,
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(barnsIdent),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(andreBarnsIdent),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                     )
                 }
 
             every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns grunnlagMedToBarn
+
             every { personidentService.hentAktørIder(listOf(barnsIdent, andreBarnsIdent)) } returns grunnlagMedToBarn.barna.map { it.aktør }
-            every { søknadService.finnDigitalSøknad(behandling.id) } returns
+
+            every {
+                søknadService.finnDigitalSøknad(behandling.id)
+            } returns
                 lagSøknad(
                     barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true, andreBarnsIdent to true),
                     barneIdenterTilErFosterbarn = mapOf(andreBarnsIdent to true),
@@ -502,7 +776,9 @@ class FaktaOppretterTest {
         @Test
         fun `skal sette søknadenInneholderVedlegg til true når søknaden inneholder vedlegg`() {
             // Arrange
-            every { søknadService.finnDigitalSøknad(behandling.id) } returns
+            every {
+                søknadService.finnDigitalSøknad(behandling.id)
+            } returns
                 lagSøknad(
                     barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true),
                     inneholderVedlegg = true,
@@ -536,7 +812,11 @@ class FaktaOppretterTest {
             // Arrange
             every {
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør = søker.aktør, relevanteAktører = any())
-            } returns lagPersonInfo(adressebeskyttelseGradering = gradering, forelderBarnRelasjon = setOf(lagForelderBarnRelasjon(aktør = barn.aktør)))
+            } returns
+                lagPersonInfo(
+                    adressebeskyttelseGradering = gradering,
+                    forelderBarnRelasjon = setOf(lagForelderBarnRelasjon(aktør = barn.aktør)),
+                )
 
             // Act
             val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
@@ -551,7 +831,11 @@ class FaktaOppretterTest {
             // Arrange
             every {
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør = søker.aktør, relevanteAktører = any())
-            } returns lagPersonInfo(adressebeskyttelseGradering = gradering, forelderBarnRelasjon = setOf(lagForelderBarnRelasjon(aktør = barn.aktør)))
+            } returns
+                lagPersonInfo(
+                    adressebeskyttelseGradering = gradering,
+                    forelderBarnRelasjon = setOf(lagForelderBarnRelasjon(aktør = barn.aktør)),
+                )
 
             // Act
             val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
@@ -569,7 +853,16 @@ class FaktaOppretterTest {
             // Arrange
             every {
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør = søker.aktør, relevanteAktører = any())
-            } returns lagPersonInfo(forelderBarnRelasjon = setOf(lagForelderBarnRelasjon(aktør = barn.aktør, adressebeskyttelseGradering = gradering)))
+            } returns
+                lagPersonInfo(
+                    forelderBarnRelasjon =
+                        setOf(
+                            lagForelderBarnRelasjon(
+                                aktør = barn.aktør,
+                                adressebeskyttelseGradering = gradering,
+                            ),
+                        ),
+                )
 
             // Act
             val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
@@ -588,19 +881,52 @@ class FaktaOppretterTest {
                             type = PersonType.SØKER,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = søker.aktør,
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(barnsIdent),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(randomFnr()),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                     )
                 }
@@ -608,15 +934,22 @@ class FaktaOppretterTest {
             val strengtFortroligBarn = grunnlagMedToBarn.barna.last()
 
             every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns grunnlagMedToBarn
+
             every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns listOf(søknadsbarn.aktør)
+
             every {
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør = søker.aktør, relevanteAktører = any())
             } returns
                 lagPersonInfo(
                     forelderBarnRelasjon =
                         setOf(
-                            lagForelderBarnRelasjon(aktør = søknadsbarn.aktør),
-                            lagForelderBarnRelasjon(aktør = strengtFortroligBarn.aktør, adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG),
+                            lagForelderBarnRelasjon(
+                                aktør = søknadsbarn.aktør,
+                            ),
+                            lagForelderBarnRelasjon(
+                                aktør = strengtFortroligBarn.aktør,
+                                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
+                            ),
                         ),
                 )
 
@@ -634,7 +967,10 @@ class FaktaOppretterTest {
         fun `skal sette søkerOgBarnHarForelderBarnRelasjon til false når søknadsbarnet mangler forelder-barn-relasjon til søker`() {
             // Arrange
             every {
-                personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør = søker.aktør, relevanteAktører = any())
+                personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+                    aktør = søker.aktør,
+                    relevanteAktører = any(),
+                )
             } returns lagPersonInfo(forelderBarnRelasjon = emptySet())
 
             // Act
@@ -648,6 +984,7 @@ class FaktaOppretterTest {
         fun `skal sette søkerOgBarnHarForelderBarnRelasjon til false når kun ett av flere søknadsbarn har forelder-barn-relasjon til søker`() {
             // Arrange
             val andreBarnsIdent = randomFnr()
+
             val grunnlagMedToBarn =
                 lagPersonopplysningGrunnlag(behandlingId = behandling.id) { personopplysningGrunnlag ->
                     setOf(
@@ -655,27 +992,64 @@ class FaktaOppretterTest {
                             type = PersonType.SØKER,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = søker.aktør,
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(barnsIdent),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(andreBarnsIdent),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                     )
                 }
 
             every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns grunnlagMedToBarn
+
             every { personidentService.hentAktørIder(listOf(barnsIdent, andreBarnsIdent)) } returns grunnlagMedToBarn.barna.map { it.aktør }
-            every { søknadService.finnDigitalSøknad(behandling.id) } returns
-                lagSøknad(barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true, andreBarnsIdent to true))
+
+            every {
+                søknadService.finnDigitalSøknad(behandling.id)
+            } returns lagSøknad(barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true, andreBarnsIdent to true))
+
             every {
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør = søker.aktør, relevanteAktører = any())
             } returns lagPersonInfo(forelderBarnRelasjon = setOf(lagForelderBarnRelasjon(aktør = grunnlagMedToBarn.barna.first().aktør)))
@@ -706,7 +1080,35 @@ class FaktaOppretterTest {
         @Test
         fun `skal sette søkerHarAktivNorskBostedsadresse til false når søker mangler bostedsadresse`() {
             // Arrange
-            søker.bostedsadresser.clear()
+            val nyttGrunnlag =
+                lagPersonopplysningGrunnlag(behandlingId = behandling.id) { personopplysningGrunnlag ->
+                    setOf(
+                        lagPerson(
+                            type = PersonType.SØKER,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = søker.aktør,
+                        ),
+                        lagPerson(
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = barn.aktør,
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns nyttGrunnlag
 
             // Act
             val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
@@ -718,7 +1120,47 @@ class FaktaOppretterTest {
         @Test
         fun `skal sette søkerHarAktivNorskBostedsadresse til false når søkers bostedsadresse ikke er aktiv i dag`() {
             // Arrange
-            søker.bostedsadresser.forEach { it.periode = DatoIntervallEntitet(inneværendeMåned.atDay(2), null) }
+            val nyttGrunnlag =
+                lagPersonopplysningGrunnlag(behandlingId = behandling.id) { personopplysningGrunnlag ->
+                    setOf(
+                        lagPerson(
+                            type = PersonType.SØKER,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = søker.aktør,
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(2),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                        ),
+                        lagPerson(
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = barn.aktør,
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns nyttGrunnlag
 
             // Act
             val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
@@ -733,7 +1175,35 @@ class FaktaOppretterTest {
         @Test
         fun `skal sette barnHarAktivNorskBostedsadresse til false når søknadsbarnet mangler bostedsadresse`() {
             // Arrange
-            barn.bostedsadresser.clear()
+            val nyttGrunnlag =
+                lagPersonopplysningGrunnlag(behandlingId = behandling.id) { personopplysningGrunnlag ->
+                    setOf(
+                        lagPerson(
+                            type = PersonType.SØKER,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = søker.aktør,
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                        ),
+                        lagPerson(
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = barn.aktør,
+                        ),
+                    )
+                }
+
+            every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns nyttGrunnlag
 
             // Act
             val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
@@ -761,7 +1231,56 @@ class FaktaOppretterTest {
         @Test
         fun `skal sette søkerHarUkrainskStatsborgerskap til true når søker er ukrainsk statsborger`() {
             // Arrange
-            søker.statsborgerskap = mutableListOf(lagGrStatsborgerskap(person = søker, landkode = "UKR", medlemskap = Medlemskap.TREDJELANDSBORGER))
+            val nyttGrunnlag =
+                lagPersonopplysningGrunnlag(behandlingId = behandling.id) { personopplysningGrunnlag ->
+                    setOf(
+                        lagPerson(
+                            type = PersonType.SØKER,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = søker.aktør,
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                            statsborgerskap = {
+                                listOf(
+                                    lagGrStatsborgerskap(
+                                        person = it,
+                                        landkode = "UKR",
+                                        medlemskap = Medlemskap.TREDJELANDSBORGER,
+                                    ),
+                                )
+                            },
+                        ),
+                        lagPerson(
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = barn.aktør,
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns nyttGrunnlag
 
             // Act
             val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
@@ -776,7 +1295,56 @@ class FaktaOppretterTest {
         @Test
         fun `skal sette barnHarUkrainskStatsborgerskap til true når søknadsbarnet er ukrainsk statsborger`() {
             // Arrange
-            barn.statsborgerskap = mutableListOf(lagGrStatsborgerskap(person = barn, landkode = "UKR", medlemskap = Medlemskap.TREDJELANDSBORGER))
+            val nyttGrunnlag =
+                lagPersonopplysningGrunnlag(behandlingId = behandling.id) { personopplysningGrunnlag ->
+                    setOf(
+                        lagPerson(
+                            type = PersonType.SØKER,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = søker.aktør,
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                        ),
+                        lagPerson(
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            aktør = barn.aktør,
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                            statsborgerskap = {
+                                listOf(
+                                    lagGrStatsborgerskap(
+                                        person = it,
+                                        landkode = "UKR",
+                                        medlemskap = Medlemskap.TREDJELANDSBORGER,
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns nyttGrunnlag
 
             // Act
             val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
@@ -795,25 +1363,65 @@ class FaktaOppretterTest {
                             type = PersonType.SØKER,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = søker.aktør,
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(barnsIdent),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
                         ),
                         lagPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = personopplysningGrunnlag,
                             aktør = lagAktør(randomFnr()),
-                            bostedsadresser = { listOf(lagGrVegadresse(person = it).apply { periode = DatoIntervallEntitet(inneværendeMåned.atDay(1).minusDays(1), null) }) },
+                            bostedsadresser = {
+                                listOf(
+                                    lagGrVegadresse(
+                                        person = it,
+                                        periode =
+                                            DatoIntervallEntitet(
+                                                inneværendeMåned.atDay(1).minusDays(1),
+                                                null,
+                                            ),
+                                    ),
+                                )
+                            },
+                            statsborgerskap = {
+                                listOf(
+                                    lagGrStatsborgerskap(
+                                        person = it,
+                                        landkode = "UKR",
+                                        medlemskap = Medlemskap.TREDJELANDSBORGER,
+                                    ),
+                                )
+                            },
                         ),
                     )
                 }
             val søknadsbarn = grunnlagMedToBarn.barna.first()
-            val ukrainskBarn = grunnlagMedToBarn.barna.last()
-            ukrainskBarn.statsborgerskap = mutableListOf(lagGrStatsborgerskap(person = ukrainskBarn, landkode = "UKR", medlemskap = Medlemskap.TREDJELANDSBORGER))
 
             every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns grunnlagMedToBarn
             every { personidentService.hentAktørIder(listOf(barnsIdent)) } returns listOf(søknadsbarn.aktør)

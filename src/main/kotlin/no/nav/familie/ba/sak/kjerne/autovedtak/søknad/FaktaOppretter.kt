@@ -82,9 +82,14 @@ class FaktaOppretter(
     private fun harAktivNorskBostedsadresse(
         personer: List<Person>,
         tidspunkt: LocalDate,
-    ): Boolean =
-        personer.all { person ->
-            val tidslinje = Adresser.opprettFra(person = person).lagErBosattINorgeTidslinje()
-            tidslinje.verdiPåTidspunkt(tidspunkt) == true
-        } && personer.isNotEmpty()
+    ): Boolean {
+        if (personer.isEmpty()) {
+            return false
+        }
+        return personer.all { person ->
+            val adresser = Adresser.opprettFra(person = person)
+            val erBosattINorgeTidslinje = adresser.lagErBosattINorgeTidslinje()
+            erBosattINorgeTidslinje.verdiPåTidspunkt(tidspunkt) == true
+        }
+    }
 }

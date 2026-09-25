@@ -27,12 +27,12 @@ class FiltreringsreglerSøknadService(
 
         val evalueringer = filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_SØKNAD, fakta)
 
-        metrikker.oppdaterMetrikker(evalueringer)
-
         logger.info("Resultater fra filtreringsregler på behandling $behandling: ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")
         if (!evalueringer.erOppfylt()) {
             secureLogger.info("Resultater fra filtreringsregler på behandling $behandling: (Fakta: ${fakta.convertDataClassToJson()}): ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")
         }
+
+        metrikker.oppdaterMetrikker(evalueringer)
 
         val filtreringsresultater = evalueringer.map { FiltreringResultat.opprett(behandling.id, fakta, it) }
 
