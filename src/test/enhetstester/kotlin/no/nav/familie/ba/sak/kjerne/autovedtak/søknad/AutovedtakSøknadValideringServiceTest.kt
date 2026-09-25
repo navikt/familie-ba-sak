@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -20,7 +21,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
+import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -33,6 +37,7 @@ class AutovedtakSøknadValideringServiceTest {
     private val beregningService = mockk<BeregningService>()
     private val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val infotrygdService = mockk<InfotrygdService>()
 
     private val autovedtakSøknadValideringService =
         AutovedtakSøknadValideringService(
@@ -40,6 +45,7 @@ class AutovedtakSøknadValideringServiceTest {
             beregningService = beregningService,
             søknadGrunnlagService = søknadGrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            infotrygdService = infotrygdService,
         )
 
     private val behandling =
@@ -83,6 +89,50 @@ class AutovedtakSøknadValideringServiceTest {
 
             // Act & Assert
             assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(behandling) }
+        }
+    }
+
+    @Nested
+    inner class ValiderAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger {
+        @BeforeEach
+        fun setup() {
+            every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 1), tom = YearMonth.of(2030, 12), aktør = barnFremstiltKravFor, behandling = behandling))
+            every { infotrygdService.hentInfotrygdstønaderForSøker(behandling.fagsak.aktør.aktivFødselsnummer(), historikk = true) } returns
+                InfotrygdSøkResponse(bruker = emptyList(), barn = emptyList())
+        }
+
+        @Test
+        fun `skal ikke kaste feil når det ikke finnes forrige vedtatte behandling`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+
+            // Act & Assert
+            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(behandling) }
+        }
+
+        @Test
+        fun `skal kaste feil når innvilget periode overlapper med utbetaling i forrige vedtatte behandling`() {
+            // Arrange
+            val forrigeBehandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD, resultat = Behandlingsresultat.INNVILGET)
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
+            every { beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 1), tom = YearMonth.of(2025, 6), aktør = barnUtenKrav, behandling = forrigeBehandling))
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(behandling) }
+        }
+
+        @Test
+        fun `skal kaste feil når innvilget periode overlapper med stønad til søker i Infotrygd`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+            every { infotrygdService.hentInfotrygdstønaderForSøker(behandling.fagsak.aktør.aktivFødselsnummer(), historikk = true) } returns
+                InfotrygdSøkResponse(bruker = listOf(Stønad(virkningFom = "${999999 - 202401}", opphørtFom = "072025")), barn = emptyList())
+
+            // Act & Assert
+            val feil = assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(behandling) }
+            assertThat(feil.message).contains("Infotrygd")
         }
     }
 
