@@ -12,7 +12,6 @@ interface PersonRepository : JpaRepository<Person, Long> {
             FROM Person p
             JOIN p.personopplysningGrunnlag gr
             WHERE p.aktør = :aktør
-              AND gr.aktiv = true
             ORDER BY gr.opprettetTidspunkt DESC, p.id DESC
         """,
     )
@@ -26,7 +25,6 @@ interface PersonRepository : JpaRepository<Person, Long> {
                      JOIN Behandling b ON b.id = po.behandlingId
                      JOIN Fagsak f ON f.id = b.fagsak.id
             WHERE p.aktør = :aktør
-              AND po.aktiv = true
               AND f.arkivert = false
         """,
     )

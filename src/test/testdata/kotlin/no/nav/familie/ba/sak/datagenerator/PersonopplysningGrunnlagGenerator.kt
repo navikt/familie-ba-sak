@@ -16,10 +16,9 @@ import java.time.LocalDate
 fun lagPersonopplysningGrunnlag(
     id: Long = 0L,
     behandlingId: Long = 0L,
-    aktiv: Boolean = true,
     lagPersoner: (grunnlag: PersonopplysningGrunnlag) -> Set<Person> = { emptySet() },
 ): PersonopplysningGrunnlag {
-    val personopplysningGrunnlag = PersonopplysningGrunnlag(id = id, behandlingId = behandlingId, aktiv = aktiv)
+    val personopplysningGrunnlag = PersonopplysningGrunnlag(id = id, behandlingId = behandlingId)
     val personer = lagPersoner(personopplysningGrunnlag)
     personopplysningGrunnlag.personer.addAll(personer)
     return personopplysningGrunnlag
@@ -30,8 +29,7 @@ fun lagPersonopplysningGrunnlag(
  */
 fun lagPersonopplysningGrunnlagUtenId(
     behandlingId: Long,
-    aktiv: Boolean = true,
-): PersonopplysningGrunnlag = lagPersonopplysningGrunnlag(id = 0L, behandlingId = behandlingId, aktiv = aktiv)
+): PersonopplysningGrunnlag = lagPersonopplysningGrunnlag(id = 0L, behandlingId = behandlingId)
 
 fun lagTestPersonopplysningGrunnlag(
     behandlingId: Long,
