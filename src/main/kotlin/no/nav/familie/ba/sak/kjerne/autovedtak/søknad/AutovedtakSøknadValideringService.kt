@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -14,10 +15,21 @@ class AutovedtakSøknadValideringService(
     private val beregningService: BeregningService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val infotrygdService: InfotrygdService,
 ) {
     fun validerAtVilkårsvurderingErOppfylt(behandling: Behandling) {
         AutovedtakSøknadValidering.validerAtVilkårsvurderingErOppfylt(
             vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id),
+        )
+    }
+
+    fun validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(behandling: Behandling) {
+        val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+
+        AutovedtakSøknadValidering.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(
+            andelerDenneBehandlingen = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id),
+            andelerForrigeBehandling = forrigeVedtatteBehandling?.let { beregningService.hentAndelerTilkjentYtelseForBehandling(it.id) } ?: emptyList(),
+            infotrygdstønaderTilSøker = infotrygdService.hentInfotrygdstønaderForSøker(ident = behandling.fagsak.aktør.aktivFødselsnummer(), historikk = true).bruker,
         )
     }
 
