@@ -12,8 +12,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgiver
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRequest
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
@@ -26,6 +24,7 @@ import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
+import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
 import no.nav.familie.kontrakter.felles.dokdistkanal.DokdistkanalRequest
@@ -189,15 +188,12 @@ class FakeIntegrasjonKlient : IntegrasjonKlient(URI("integrasjoner-url"), mockk<
         journalpostId: String,
     ): OppdaterJournalpostResponse = OppdaterJournalpostResponse("1234567")
 
-    override fun leggTilLogiskVedlegg(
-        request: LogiskVedleggRequest,
-        dokumentinfoId: String,
-    ): LogiskVedleggResponse = LogiskVedleggResponse(12345678L)
-
-    override fun slettLogiskVedlegg(
-        logiskVedleggId: String,
-        dokumentinfoId: String,
-    ): LogiskVedleggResponse = LogiskVedleggResponse(12345678L)
+    override fun oppdaterLogiskeVedlegg(
+        dokumentInfoId: String,
+        request: BulkOppdaterLogiskVedleggRequest,
+    ) {
+        return
+    }
 
     override fun hentDokument(
         dokumentInfoId: String,

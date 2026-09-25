@@ -11,8 +11,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsforholdRequest
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Skyggesak
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRequest
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.integrasjoner.retryVedException
@@ -28,6 +26,7 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsluttSakRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.GjenåpneSakRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokdist.AdresseType
@@ -67,10 +66,10 @@ const val DEFAULT_JOURNALFØRENDE_ENHET = "9999"
 
 @Component
 class IntegrasjonKlient(
-    @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
-    @Qualifier("integrasjonerRestClient") private val restClient: RestClient,
+    @param:Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
+    @param:Qualifier("integrasjonerRestClient") private val restClient: RestClient,
     private val featureToggleService: FeatureToggleService,
-    @Value("$RETRY_BACKOFF_5000MS") private val retryBackoffDelay: Long,
+    @param:Value(RETRY_BACKOFF_5000MS) private val retryBackoffDelay: Long,
 ) {
     @Cacheable("alle-eøs-land", cacheManager = "dailyCache")
     fun hentAlleEØSLand(): KodeverkDto {
@@ -637,39 +636,21 @@ class IntegrasjonKlient(
         }
     }
 
-    fun leggTilLogiskVedlegg(
-        request: LogiskVedleggRequest,
-        dokumentinfoId: String,
-    ): LogiskVedleggResponse {
-        val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg")
+    fun oppdaterLogiskeVedlegg(
+        dokumentInfoId: String,
+        request: BulkOppdaterLogiskVedleggRequest,
+    ) {
+        val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentInfoId/logiskVedlegg")
 
-        return kallEksternTjenesteRessurs(
+        kallEksternTjenesteRessurs<String>(
             tjeneste = "dokarkiv",
             uri = uri,
-            formål = "Legg til logisk vedlegg på dokument $dokumentinfoId",
+            formål = "Oppdater logiske vedlegg på dokument $dokumentInfoId",
         ) {
             restClient
-                .post()
+                .put()
                 .uri(uri)
                 .body(request)
-                .retrieve()
-                .body()!!
-        }
-    }
-
-    fun slettLogiskVedlegg(
-        logiskVedleggId: String,
-        dokumentinfoId: String,
-    ): LogiskVedleggResponse {
-        val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg/$logiskVedleggId")
-        return kallEksternTjenesteRessurs(
-            tjeneste = "dokarkiv",
-            uri = uri,
-            formål = "Slett logisk vedlegg på dokument $dokumentinfoId",
-        ) {
-            restClient
-                .delete()
-                .uri(uri)
                 .retrieve()
                 .body()!!
         }

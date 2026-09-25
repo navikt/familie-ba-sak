@@ -6,11 +6,11 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.restDomene.FerdigstillOppgaveKnyttJournalpostDto
 import no.nav.familie.ba.sak.ekstern.restDomene.JournalføringDto
+import no.nav.familie.ba.sak.ekstern.restDomene.JournalpostDokumentDto
 import no.nav.familie.ba.sak.ekstern.restDomene.TilknyttetBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.FagsakSystem
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggRequest
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
@@ -66,25 +67,31 @@ class InnkommendeJournalføringService(
                 ),
             )
 
-    private fun oppdaterLogiskeVedlegg(request: JournalføringDto) {
+    private fun oppdaterLogiskeVedlegg(
+        request: JournalføringDto,
+        journalpost: Journalpost,
+    ) {
         request.dokumenter.forEach { dokument ->
-            val fjernedeVedlegg =
-                (dokument.eksisterendeLogiskeVedlegg ?: emptyList())
-                    .partition { (dokument.logiskeVedlegg ?: emptyList()).contains(it) }
-                    .second
-            val nyeVedlegg =
-                (dokument.logiskeVedlegg ?: emptyList())
-                    .partition {
-                        (dokument.eksisterendeLogiskeVedlegg ?: emptyList()).contains(it)
-                    }.second
-            fjernedeVedlegg.forEach {
-                integrasjonKlient.slettLogiskVedlegg(it.logiskVedleggId, dokument.dokumentInfoId)
-            }
-            nyeVedlegg.forEach {
-                integrasjonKlient.leggTilLogiskVedlegg(LogiskVedleggRequest(it.tittel), dokument.dokumentInfoId)
+            val nyeTitler = dokument.hentTitlerPåLogiskeVedlegg() ?: return@forEach
+            val eksisterendeTitler = journalpost.hentTitlerPåLogiskeVedlegg(dokument.dokumentInfoId)
+
+            if (nyeTitler != eksisterendeTitler) {
+                integrasjonKlient.oppdaterLogiskeVedlegg(
+                    dokumentInfoId = dokument.dokumentInfoId,
+                    request = BulkOppdaterLogiskVedleggRequest(titler = nyeTitler),
+                )
             }
         }
     }
+
+    private fun JournalpostDokumentDto.hentTitlerPåLogiskeVedlegg(): List<String>? = logiskeVedlegg?.map { it.tittel }
+
+    private fun Journalpost.hentTitlerPåLogiskeVedlegg(dokumentInfoId: String): List<String> =
+        dokumenter
+            ?.find { it.dokumentInfoId == dokumentInfoId }
+            ?.logiskeVedlegg
+            .orEmpty()
+            .map { it.tittel }
 
     private fun opprettBehandlingForJournalføring(
         navIdent: String,
@@ -168,7 +175,7 @@ class InnkommendeJournalføringService(
             }
         }
 
-        oppdaterLogiskeVedlegg(request)
+        oppdaterLogiskeVedlegg(request, journalpost)
 
         val sak =
             Sak(

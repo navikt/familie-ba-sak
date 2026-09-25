@@ -24,7 +24,6 @@ data class JournalpostDokumentDto(
     val dokumentInfoId: String,
     val brevkode: String?,
     val logiskeVedlegg: List<LogiskVedlegg>?,
-    val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>?,
 )
 
 data class TilknyttetBehandling(
