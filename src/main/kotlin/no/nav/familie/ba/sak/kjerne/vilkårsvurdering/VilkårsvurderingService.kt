@@ -33,13 +33,14 @@ class VilkårsvurderingService(
         return vilkårsvurderingRepository.saveAndFlush(vilkårsvurdering)
     }
 
-    fun lagreNyOgDeaktiverGammel(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
+    @Transactional
+    fun lagreNyOgSlettGammel(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vilkårsvurdering $vilkårsvurdering")
 
         val aktivVilkårsvurdering = hentAktivForBehandling(vilkårsvurdering.behandling.id)
 
         if (aktivVilkårsvurdering != null) {
-            vilkårsvurderingRepository.saveAndFlush(aktivVilkårsvurdering.also { it.aktiv = false })
+            vilkårsvurderingRepository.delete(aktivVilkårsvurdering)
         }
 
         return vilkårsvurderingRepository.save(vilkårsvurdering)

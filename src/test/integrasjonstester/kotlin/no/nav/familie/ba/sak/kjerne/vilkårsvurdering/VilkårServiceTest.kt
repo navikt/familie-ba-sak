@@ -99,7 +99,7 @@ class VilkårServiceTest(
         @Test
         fun `skal returnere vilkårsvurdering når den finnes`() {
             // Arrange
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(lagVilkårsvurdering(behandling = behandling))
+            vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
 
             // Act
             val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandling.id)
@@ -124,7 +124,7 @@ class VilkårServiceTest(
         @Test
         fun `skal returnere vilkårsvurdering når den finnes`() {
             // Arrange
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(lagVilkårsvurdering(behandling = behandling))
+            vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
 
             // Act
             val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
@@ -153,7 +153,7 @@ class VilkårServiceTest(
         fun `skal kaste Feil når vilkår med gitt id ikke finnes`() {
             // Arrange
             val vilkårsvurdering =
-                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                vilkårsvurderingService.lagreNyOgSlettGammel(
                     lagVilkårsvurdering(behandling = behandling) {
                         setOf(
                             lagPersonResultat(
@@ -189,7 +189,7 @@ class VilkårServiceTest(
         fun `skal returnere uendret liste når vilkår ikke er endret`() {
             // Arrange
             val vilkårsvurdering =
-                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                vilkårsvurderingService.lagreNyOgSlettGammel(
                     lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
                         setOf(
                             lagPersonResultat(
@@ -232,7 +232,7 @@ class VilkårServiceTest(
         ) {
             // Arrange
             val vilkårsvurdering =
-                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                vilkårsvurderingService.lagreNyOgSlettGammel(
                     lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
                         setOf(
                             lagPersonResultat(
@@ -285,7 +285,7 @@ class VilkårServiceTest(
         fun `skal tillate endring av kun begrunnelse`() {
             // Arrange
             val vilkårsvurdering =
-                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                vilkårsvurderingService.lagreNyOgSlettGammel(
                     lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
                         setOf(
                             lagPersonResultat(
@@ -346,7 +346,7 @@ class VilkårServiceTest(
         fun `skal oppdatere preutfylt vilkår når begrunnelse er endret`() {
             // Arrange
             val vilkårsvurdering =
-                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                vilkårsvurderingService.lagreNyOgSlettGammel(
                     lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
                         setOf(
                             lagPersonResultat(
@@ -408,7 +408,7 @@ class VilkårServiceTest(
         fun `skal lagre logg når preutfylt vilkår endres`() {
             // Arrange
             val vilkårsvurdering =
-                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                vilkårsvurderingService.lagreNyOgSlettGammel(
                     lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
                         setOf(
                             lagPersonResultat(
@@ -478,7 +478,7 @@ class VilkårServiceTest(
             // Arrange
             val tidligereBehandlingId = behandling.id + 1
             val vilkårsvurdering =
-                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                vilkårsvurderingService.lagreNyOgSlettGammel(
                     lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
                         setOf(
                             lagPersonResultat(
@@ -533,7 +533,7 @@ class VilkårServiceTest(
         fun `skal oppdatere eksisterende logg i stedet for å opprette ny ved gjentatt endring av preutfylt vilkår`() {
             // Arrange
             val vilkårsvurdering =
-                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                vilkårsvurderingService.lagreNyOgSlettGammel(
                     lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
                         setOf(
                             lagPersonResultat(
@@ -615,7 +615,7 @@ class VilkårServiceTest(
         fun `skal opprette ny logg når det allerede eksisterer flere logginnslag for samme vilkår`() {
             // Arrange
             val vilkårsvurdering =
-                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                vilkårsvurderingService.lagreNyOgSlettGammel(
                     lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
                         setOf(
                             lagPersonResultat(
@@ -699,7 +699,7 @@ class VilkårServiceTest(
         fun `skal nullstille vilkårsperiode hvis vilkår har én periode`() {
             // Arrange
             val vilkårsvurdering =
-                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                vilkårsvurderingService.lagreNyOgSlettGammel(
                     lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
                         setOf(
                             lagPersonResultat(
@@ -753,7 +753,7 @@ class VilkårServiceTest(
         fun `skal slette vilkårsperiode hvis vilkår har mer enn én periode`() {
             // Arrange
             val vilkårsvurdering =
-                vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+                vilkårsvurderingService.lagreNyOgSlettGammel(
                     lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
                         setOf(
                             lagPersonResultat(
@@ -819,7 +819,7 @@ class VilkårServiceTest(
         @Test
         fun `skal kaste FunksjonellFeil når man prøver å slette vilkår som ikke er UTVIDET_BARNETRYGD`() {
             // Arrange
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+            vilkårsvurderingService.lagreNyOgSlettGammel(
                 lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
                     setOf(
                         lagPersonResultat(
@@ -858,7 +858,7 @@ class VilkårServiceTest(
                 ),
             )
 
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+            vilkårsvurderingService.lagreNyOgSlettGammel(
                 lagVilkårsvurdering(behandling = behandling) { vilkårsvurdering ->
                     setOf(
                         lagPersonResultat(
@@ -910,7 +910,7 @@ class VilkårServiceTest(
             // Arrange
             behandlingHentOgPersisterService.lagreOgFlush(behandling.copy(opprettetÅrsak = behandlingÅrsak))
 
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(lagVilkårsvurdering(behandling = behandling))
+            vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
 
             val nyttVilkårDto =
                 NyttVilkårDto(
@@ -938,7 +938,7 @@ class VilkårServiceTest(
             // Arrange
             behandlingHentOgPersisterService.lagreOgFlush(behandling.copy(opprettetÅrsak = TEKNISK_ENDRING))
 
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(lagVilkårsvurdering(behandling = behandling))
+            vilkårsvurderingService.lagreNyOgSlettGammel(lagVilkårsvurdering(behandling = behandling))
 
             val nyttVilkårDto =
                 NyttVilkårDto(
@@ -968,7 +968,7 @@ class VilkårServiceTest(
                 ),
             )
 
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+            vilkårsvurderingService.lagreNyOgSlettGammel(
                 lagVilkårsvurdering(behandling = behandling) {
                     setOf(
                         lagPersonResultat(
@@ -1003,7 +1003,7 @@ class VilkårServiceTest(
         @Test
         fun `skal legge til vilkår når input er gyldig`() {
             // Arrange
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+            vilkårsvurderingService.lagreNyOgSlettGammel(
                 lagVilkårsvurdering(behandling = behandling) {
                     setOf(
                         lagPersonResultat(
