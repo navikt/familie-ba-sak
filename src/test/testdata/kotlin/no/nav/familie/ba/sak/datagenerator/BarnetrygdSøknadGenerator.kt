@@ -25,12 +25,13 @@ fun lagBarnetrygdSøknadV10(
     originalspråk: String = "nb",
     inneholderVedlegg: Boolean = false,
     erFosterbarn: Boolean = false,
+    erIBeredskapshjem: Boolean = false,
     harKryssetForDeltBosted: Boolean = false,
 ): BarnetrygdSøknadV10 =
     BarnetrygdSøknadV10(
         kontraktVersjon = 10,
         søker = lagSøkerV10(søkerFnr),
-        barn = barnFnr.map { lagBarnV10(it, erFosterbarn = erFosterbarn, harKryssetForDeltBosted = harKryssetForDeltBosted) },
+        barn = barnFnr.map { lagBarnV10(it, erFosterbarn = erFosterbarn, erIBeredskapshjem = erIBeredskapshjem, harKryssetForDeltBosted = harKryssetForDeltBosted) },
         antallEøsSteg = if (erEøs) 1 else 0,
         dokumentasjon = lagSøknaddokumentasjon(inneholderVedlegg = inneholderVedlegg),
         originalSpråk = originalspråk,
@@ -48,12 +49,13 @@ fun lagBarnetrygdSøknadV9(
     originalspråk: String = "nb",
     inneholderVedlegg: Boolean = false,
     erFosterbarn: Boolean = false,
+    erIBeredskapshjem: Boolean = false,
     harKryssetForDeltBosted: Boolean = false,
 ): BarnetrygdSøknadV9 =
     BarnetrygdSøknadV9(
         kontraktVersjon = 9,
         søker = lagSøkerV8(søkerFnr),
-        barn = barnFnr.map { lagBarnV8(it, erFosterbarn = erFosterbarn, harKryssetForDeltBosted = harKryssetForDeltBosted) },
+        barn = barnFnr.map { lagBarnV8(it, erFosterbarn = erFosterbarn, erIBeredskapshjem = erIBeredskapshjem, harKryssetForDeltBosted = harKryssetForDeltBosted) },
         antallEøsSteg = if (erEøs) 1 else 0,
         dokumentasjon = lagSøknaddokumentasjon(inneholderVedlegg = inneholderVedlegg),
         originalSpråk = originalspråk,
@@ -97,6 +99,7 @@ fun lagSøkerV10(fnr: String): SøkerV10 =
 fun lagBarnV10(
     fnr: String,
     erFosterbarn: Boolean = false,
+    erIBeredskapshjem: Boolean = false,
     harKryssetForDeltBosted: Boolean = false,
 ): BarnV10 =
     BarnV10(
@@ -109,7 +112,7 @@ fun lagBarnV10(
         utenlandsperioder = emptyList(),
         omsorgsperson = null,
         idNummer = emptyList(),
-        spørsmål = lagBarnSpørsmål(erFosterbarn = erFosterbarn),
+        spørsmål = lagBarnSpørsmål(erFosterbarn = erFosterbarn, erIBeredskapshjem = erIBeredskapshjem),
         eøsBarnetrygdsperioder = emptyList(),
     )
 
@@ -147,6 +150,7 @@ fun lagSøkerV8(fnr: String): SøkerV8 =
 fun lagBarnV8(
     fnr: String,
     erFosterbarn: Boolean = false,
+    erIBeredskapshjem: Boolean = false,
     harKryssetForDeltBosted: Boolean = false,
 ): BarnV8 =
     BarnV8(
@@ -159,11 +163,18 @@ fun lagBarnV8(
         utenlandsperioder = emptyList(),
         omsorgsperson = null,
         idNummer = emptyList(),
-        spørsmål = lagBarnSpørsmål(erFosterbarn = erFosterbarn),
+        spørsmål = lagBarnSpørsmål(erFosterbarn = erFosterbarn, erIBeredskapshjem = erIBeredskapshjem),
         eøsBarnetrygdsperioder = emptyList(),
     )
 
-private fun lagBarnSpørsmål(erFosterbarn: Boolean): Map<String, Søknadsfelt<Any>> = mapOf("erFosterbarn" to lagStringSøknadsfelt<Any>(erFosterbarn.tilSøknadssvar()))
+private fun lagBarnSpørsmål(
+    erFosterbarn: Boolean,
+    erIBeredskapshjem: Boolean,
+): Map<String, Søknadsfelt<Any>> =
+    mapOf(
+        "erFosterbarn" to lagStringSøknadsfelt<Any>(erFosterbarn.tilSøknadssvar()),
+        "erIBeredskapshjem" to lagStringSøknadsfelt<Any>(erIBeredskapshjem.tilSøknadssvar()),
+    )
 
 private fun lagAndreForelder(): AndreForelder =
     AndreForelder(

@@ -19,6 +19,7 @@ interface SøknadMapper {
     companion object {
         // SøknadsFeltId i kontrakten har ingen verdi for fosterbarn, så feltet slås opp på nøkkelen sin
         private const val ER_FOSTERBARN = "erFosterbarn"
+        private const val ER_I_BEREDSKAPSHJEM = "erIBeredskapshjem"
 
         fun Søknadstype.tilBehandlingUnderkategori(): BehandlingUnderkategori =
             when (this) {
@@ -28,6 +29,8 @@ interface SøknadMapper {
             }
 
         fun Map<String, Søknadsfelt<Any>>.erFosterbarn(): Boolean = this[ER_FOSTERBARN]?.bokmålsverdi().tilBoolskSvar()
+
+        fun Map<String, Søknadsfelt<Any>>.erIBeredskapshjem(): Boolean = this[ER_I_BEREDSKAPSHJEM]?.bokmålsverdi().tilBoolskSvar()
 
         fun AndreForelder?.harKryssetForDeltBosted(): Boolean = this?.skriftligAvtaleOmDeltBosted?.bokmålsverdi().tilBoolskSvar()
 

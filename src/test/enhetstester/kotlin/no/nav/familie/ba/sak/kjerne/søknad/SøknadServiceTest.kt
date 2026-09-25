@@ -48,6 +48,7 @@ class SøknadServiceTest {
                             originalspråk = "nn",
                             inneholderVedlegg = true,
                             erFosterbarn = true,
+                            erIBeredskapshjem = true,
                             harKryssetForDeltBosted = true,
                         ),
                 )
@@ -69,6 +70,7 @@ class SøknadServiceTest {
             assertThat(søknad?.harKryssetPåEøsSpørsmål).isTrue()
             assertThat(søknad?.inneholderVedlegg).isTrue()
             assertThat(søknad?.barn?.map { it.erFosterbarn }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.erIBeredskapshjem }).containsOnly(true)
             assertThat(søknad?.barn?.map { it.harKryssetForDeltBosted }).containsOnly(true)
         }
 
@@ -89,6 +91,7 @@ class SøknadServiceTest {
                             originalspråk = "nn",
                             inneholderVedlegg = true,
                             erFosterbarn = true,
+                            erIBeredskapshjem = true,
                             harKryssetForDeltBosted = true,
                         ),
                 )
@@ -110,6 +113,7 @@ class SøknadServiceTest {
             assertThat(søknad?.harKryssetPåEøsSpørsmål).isTrue()
             assertThat(søknad?.inneholderVedlegg).isTrue()
             assertThat(søknad?.barn?.map { it.erFosterbarn }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.erIBeredskapshjem }).containsOnly(true)
             assertThat(søknad?.barn?.map { it.harKryssetForDeltBosted }).containsOnly(true)
         }
 
@@ -134,6 +138,7 @@ class SøknadServiceTest {
             assertThat(søknad?.harKryssetPåEøsSpørsmål).isFalse()
             assertThat(søknad?.inneholderVedlegg).isFalse()
             assertThat(søknad?.barn?.map { it.erFosterbarn }).containsOnly(false)
+            assertThat(søknad?.barn?.map { it.erIBeredskapshjem }).containsOnly(false)
             assertThat(søknad?.barn?.map { it.harKryssetForDeltBosted }).containsOnly(false)
         }
 
