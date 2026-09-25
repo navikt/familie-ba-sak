@@ -9,6 +9,8 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -35,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -55,10 +58,11 @@ class FiltreringsreglerFødselshendelseServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private var clockProvider = TestClockProvider()
 
-    private val filtreringsregelEvaluator = spyk(FiltreringsregelEvaluator())
+    private val filtreringsregelEvaluator = spyk(FiltreringsregelEvaluator(featureToggleService))
 
     private val filtreringsreglerFødselshendelseService =
         FiltreringsreglerFødselshendelseService(
@@ -74,6 +78,10 @@ class FiltreringsreglerFødselshendelseServiceTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             filtreringsregelEvaluator = filtreringsregelEvaluator,
         )
+
+    init {
+        every { featureToggleService.isEnabled(FeatureToggle.VURDER_ALLE_FILTRERINGSREGLER) } returns false
+    }
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når mors vilkår om utvidet barnetrygd er oppfylt i tidsrommet barnet er mellom 0 og 18`() {
@@ -486,6 +494,61 @@ class FiltreringsreglerFødselshendelseServiceTest {
         assertThat(fødselshendelsefiltreringResultat.erOppfylt()).isTrue
     }
 
+    @Test
+    fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når det er registrert dødsfall på minst ett barn`() {
+        // Arrange
+        val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1991, 1, 1))
+        val barnMedDødsfall =
+            tilfeldigPerson(fødselsdato = LocalDate.now().minusMonths(1)).also {
+                it.dødsfall = lagDødsfall(person = it, dødsfallDato = LocalDate.now())
+            }
+        val barnUtenDødsfall = tilfeldigPerson(fødselsdato = LocalDate.now().minusMonths(1))
+        val behandling = lagBehandling()
+        val sisteVedtatteBehandling = lagBehandling()
+        val filtrerAutomatiskBehandlingData =
+            FiltrerAutomatiskBehandlingData(
+                mor.aktør.aktørId,
+                listOf(barnMedDødsfall.aktør.aktørId, barnUtenDødsfall.aktør.aktørId),
+            )
+
+        settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(
+            mor,
+            listOf(barnMedDødsfall, barnUtenDødsfall),
+            behandling,
+            sisteVedtatteBehandling,
+        )
+
+        // Act
+        val fødselshendelsefiltreringResultater =
+            filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
+
+        // Assert
+        assertThat(fødselshendelsefiltreringResultater.erOppfylt()).isFalse
+        assertThat(fødselshendelsefiltreringResultater.single { it.resultat == Resultat.IKKE_OPPFYLT }.filtreringsregel)
+            .isEqualTo(Filtreringsregel.Identifikator.BARN_LEVER)
+    }
+
+    @Test
+    fun `kjørFiltreringsregler - skal gi resultat oppfylt når alle filtreringsregler er oppfylt for flere barn`() {
+        // Arrange
+        val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1991, 1, 1))
+        val barn1 = tilfeldigPerson(fødselsdato = LocalDate.now().minusMonths(1))
+        val barn2 = tilfeldigPerson(fødselsdato = LocalDate.now().minusMonths(1))
+        val behandling = lagBehandling()
+        val sisteVedtatteBehandling = lagBehandling()
+        val filtrerAutomatiskBehandlingData =
+            FiltrerAutomatiskBehandlingData(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
+
+        settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn1, barn2), behandling, sisteVedtatteBehandling)
+
+        // Act
+        val fødselshendelsefiltreringResultater =
+            filtreringsreglerFødselshendelseService.kjørFiltreringsregler(filtrerAutomatiskBehandlingData, behandling)
+
+        // Assert
+        assertThat(fødselshendelsefiltreringResultater.erOppfylt()).isTrue
+    }
+
     private fun settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(
         mor: Person,
         barna: List<Person>,
@@ -561,7 +624,7 @@ class FiltreringsreglerFødselshendelseServiceTest {
                     filtreringResultatSlot,
                 ),
             )
-        } returns mockk()
+        } answers { filtreringResultatSlot.captured }
         return filtreringResultatSlot
     }
 }

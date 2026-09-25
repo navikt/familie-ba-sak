@@ -1,6 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler
 
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAktør
+import no.nav.familie.ba.sak.datagenerator.lagFiltreringsreglerFaktaSøknad
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigSøker
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel.Identifikator
@@ -14,14 +19,23 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class FiltreringsregelEvaluatorForSøknadTest {
-    private val filtreringsregelEvaluator = FiltreringsregelEvaluator()
+    private val featureToggleService = mockk<FeatureToggleService>()
+    private val filtreringsregelEvaluator = FiltreringsregelEvaluator(featureToggleService)
+
+    init {
+        every { featureToggleService.isEnabled(FeatureToggle.VURDER_ALLE_FILTRERINGSREGLER) } returns false
+    }
 
     @Nested
     inner class NårSøknadenOppfyllerAlleRegler {
         @Test
         fun `skal gi oppfylt`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad()
+
             // Act
-            val evalueringer = evaluer()
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_SØKNAD, fakta)
 
             // Assert
             assertThat(evalueringer.erOppfylt()).isTrue
@@ -32,8 +46,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     inner class NårSøkerEllerBarnHarDNummer {
         @Test
         fun `skal avvise når søker har d-nummer`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søker = søker(ident = "44086226621"))
+
             // Act
-            val evalueringer = evaluer(søker = søker(ident = "44086226621"))
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_D_NUMMER)
@@ -41,8 +62,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
 
         @Test
         fun `skal avvise når barn har d-nummer`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(barnaSomSkalVurderes = listOf(barn(ident = "41111777001")))
+
             // Act
-            val evalueringer = evaluer(barna = listOf(barn(ident = "41111777001")))
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_HAR_IKKE_D_NUMMER)
@@ -53,8 +81,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     inner class NårSøkerEllerBarnHarAdressebeskyttelseGradering6Eller19 {
         @Test
         fun `skal avvise når søker har adressebeskyttelse gradering 6 eller 19`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerHarAdressebeskyttelseGradering6Eller19 = true)
+
             // Act
-            val evalueringer = evaluer(søkerHarAdressebeskyttelseGradering6Eller19 = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19)
@@ -62,8 +97,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
 
         @Test
         fun `skal avvise når barn har adressebeskyttelse gradering 6 eller 19`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(barnHarAdressebeskyttelseGradering6Eller19 = true)
+
             // Act
-            val evalueringer = evaluer(barnHarAdressebeskyttelseGradering6Eller19 = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19)
@@ -72,8 +114,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
 
     @Test
     fun `skal avvise når ikke alle søknadsbarna har foreldre barn-relasjon til søker`() {
+        // Arrange
+        val fakta = lagFiltreringsreglerFaktaSøknad(søkerOgBarnHarForelderBarnRelasjon = false)
+
         // Act
-        val evalueringer = evaluer(søkerOgBarnHarForelderBarnRelasjon = false)
+        val evalueringer =
+            filtreringsregelEvaluator.evaluerFiltreringsregler(
+                FILTRERINGSREGLER_SØKNAD,
+                fakta,
+            )
 
         // Assert
         assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON)
@@ -83,8 +132,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     inner class NårSøkerEllerBarnHarUgyldigFødselsnummer {
         @Test
         fun `skal avvise når søker har ugyldig fødselsnummer`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søker = søker(ident = "04086200000"))
+
             // Act
-            val evalueringer = evaluer(søker = søker(ident = "04086200000"))
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_GYLDIG_FNR)
@@ -92,8 +148,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
 
         @Test
         fun `skal avvise når barn har ugyldig fødselsnummer`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(barnaSomSkalVurderes = listOf(barn(ident = "21111700000")))
+
             // Act
-            val evalueringer = evaluer(barna = listOf(barn(ident = "21111700000")))
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_GYLDIG_FNR)
@@ -104,8 +167,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     inner class NårSøkerEllerBarnIkkeLever {
         @Test
         fun `skal avvise når søker ikke lever`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerLever = false)
+
             // Act
-            val evalueringer = evaluer(søkerLever = false)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_LEVER)
@@ -113,8 +183,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
 
         @Test
         fun `skal avvise når barn ikke lever`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(barnaLever = false)
+
             // Act
-            val evalueringer = evaluer(barnaLever = false)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_LEVER)
@@ -125,8 +202,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     inner class NårSøkerIkkeErMyndigEllerHarVerge {
         @Test
         fun `skal avvise når søker er under 18 år`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søker = søker(fødselsdato = LocalDate.now().minusYears(17)))
+
             // Act
-            val evalueringer = evaluer(søker = søker(fødselsdato = LocalDate.now().minusYears(17)))
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_ER_OVER_18_ÅR)
@@ -134,8 +218,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
 
         @Test
         fun `skal avvise når søker har verge`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerHarVerge = true)
+
             // Act
-            val evalueringer = evaluer(søkerHarVerge = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_VERGE)
@@ -146,8 +237,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     inner class NårSøkerMottarUtvidetEllerEøsBarnetrygd {
         @Test
         fun `skal avvise når søker mottar løpende utvidet barnetrygd`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerMottarLøpendeUtvidet = true)
+
             // Act
-            val evalueringer = evaluer(søkerMottarLøpendeUtvidet = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_MOTTAR_IKKE_LØPENDE_UTVIDET)
@@ -155,8 +253,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
 
         @Test
         fun `skal avvise når søker mottar løpende EØS-barnetrygd`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerMottarEøsBarnetrygd = true)
+
             // Act
-            val evalueringer = evaluer(søkerMottarEøsBarnetrygd = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD)
@@ -167,8 +272,18 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     inner class NårDetUtbetalesBarnetrygdForBarnetTilAnnenMottaker {
         @Test
         fun `skal avvise når det utbetales barnetrygd for barnet til annen mottaker i inneværende måned`() {
+            // Arrange
+            val fakta =
+                lagFiltreringsreglerFaktaSøknad(
+                    utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned = true,
+                )
+
             // Act
-            val evalueringer = evaluer(utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.UTBETALES_IKKE_BARNETRYGD_FOR_BARNET_TIL_ANNEN_MOTTAKER_INNEVÆRENDE_MÅNED)
@@ -179,8 +294,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     inner class NårSøknadenInneholderFaktaSomKreverManuellBehandling {
         @Test
         fun `skal avvise når søker har krysset på EØS-spørsmål i søknaden`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerHarKryssetPåEøsSpørsmålISøknaden = true)
+
             // Act
-            val evalueringer = evaluer(søkerHarKryssetPåEøsSpørsmålISøknaden = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_KRYSSET_PÅ_EØS_SPØRSMÅL_I_SØKNADEN)
@@ -188,8 +310,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
 
         @Test
         fun `skal avvise når søker har krysset for delt bosted i søknaden`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerHarKryssetForDeltBostedISøknaden = true)
+
             // Act
-            val evalueringer = evaluer(søkerHarKryssetForDeltBostedISøknaden = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_DELT_BOSTED_I_SØKNADEN)
@@ -197,8 +326,18 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
 
         @Test
         fun `skal avvise når søker har krysset for at barn er i fosterhjem eller beredskapshjem i søknaden`() {
+            // Arrange
+            val fakta =
+                lagFiltreringsreglerFaktaSøknad(
+                    søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden = true,
+                )
+
             // Act
-            val evalueringer = evaluer(søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN)
@@ -206,8 +345,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
 
         @Test
         fun `skal avvise når søknaden inneholder vedlegg`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søknadenInneholderVedlegg = true)
+
             // Act
-            val evalueringer = evaluer(søknadenInneholderVedlegg = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG)
@@ -218,8 +364,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     inner class NårSøkerEllerBarnIkkeHarAktivNorskBostedsadresse {
         @Test
         fun `skal avvise når søker ikke har aktiv norsk bostedsadresse`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerHarAktivNorskBostedsadresse = false)
+
             // Act
-            val evalueringer = evaluer(søkerHarAktivNorskBostedsadresse = false)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE)
@@ -227,8 +380,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
 
         @Test
         fun `skal avvise når barn ikke har aktiv norsk bostedsadresse`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(barnHarAktivNorskBostedsadresse = false)
+
             // Act
-            val evalueringer = evaluer(barnHarAktivNorskBostedsadresse = false)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE)
@@ -239,8 +399,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     inner class SøkerHarIkkeOppfyltUtvidetVilkår {
         @Test
         fun `skal avvise når søker ikke oppfyller vilkår for utvidet barnetrygd`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerOppfyllerVilkårForUtvidetBarnetrygd = true)
+
             // Act
-            val evalueringer = evaluer(søkerOppfyllerVilkårForUtvidetBarnetrygd = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR)
@@ -251,8 +418,15 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
     inner class NårSøkerEllerBarnErUkrainskStatsborger {
         @Test
         fun `skal avvise når søker er ukrainsk statsborger`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerHarUkrainskStatsborgerskap = true)
+
             // Act
-            val evalueringer = evaluer(søkerHarUkrainskStatsborgerskap = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_ER_IKKE_UKRAINSK_STATSBORGER)
@@ -260,62 +434,20 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
 
         @Test
         fun `skal avvise når barn er ukrainsk statsborger`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(barnHarUkrainskStatsborgerskap = true)
+
             // Act
-            val evalueringer = evaluer(barnHarUkrainskStatsborgerskap = true)
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
 
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.BARN_ER_IKKE_UKRAINSK_STATSBORGER)
         }
     }
-
-    private fun evaluer(
-        søker: Person = søker(),
-        barna: List<Person> = listOf(barn()),
-        søkerLever: Boolean = true,
-        barnaLever: Boolean = true,
-        søkerHarVerge: Boolean = false,
-        søkerMottarLøpendeUtvidet: Boolean = false,
-        søkerMottarEøsBarnetrygd: Boolean = false,
-        utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned: Boolean = false,
-        søkerHarKryssetPåEøsSpørsmålISøknaden: Boolean = false,
-        søkerHarKryssetForDeltBostedISøknaden: Boolean = false,
-        søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden: Boolean = false,
-        søknadenInneholderVedlegg: Boolean = false,
-        søkerHarAdressebeskyttelseGradering6Eller19: Boolean = false,
-        barnHarAdressebeskyttelseGradering6Eller19: Boolean = false,
-        søkerOgBarnHarForelderBarnRelasjon: Boolean = true,
-        søkerHarAktivNorskBostedsadresse: Boolean = true,
-        barnHarAktivNorskBostedsadresse: Boolean = true,
-        søkerHarUkrainskStatsborgerskap: Boolean = false,
-        barnHarUkrainskStatsborgerskap: Boolean = false,
-        søkerOppfyllerVilkårForUtvidetBarnetrygd: Boolean = false,
-    ): List<Evaluering> =
-        filtreringsregelEvaluator.evaluerFiltreringsregler(
-            FILTRERINGSREGLER_SØKNAD,
-            FiltreringsreglerFaktaSøknad(
-                søker = søker,
-                søkerMottarLøpendeUtvidet = søkerMottarLøpendeUtvidet,
-                søkerOppfyllerVilkårForUtvidetBarnetrygd = søkerOppfyllerVilkårForUtvidetBarnetrygd,
-                søkerMottarEøsBarnetrygd = søkerMottarEøsBarnetrygd,
-                barnaSomSkalVurderes = barna,
-                søkerLever = søkerLever,
-                barnaLever = barnaLever,
-                søkerHarVerge = søkerHarVerge,
-                utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned = utbetalesBarnetrygdForBarnetTilAnnenMottakerIInneværendeMåned,
-                søkerHarKryssetPåEøsSpørsmålISøknaden = søkerHarKryssetPåEøsSpørsmålISøknaden,
-                søkerHarKryssetForDeltBostedISøknaden = søkerHarKryssetForDeltBostedISøknaden,
-                søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden = søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden,
-                søknadenInneholderVedlegg = søknadenInneholderVedlegg,
-                søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling = false,
-                søkerHarAdressebeskyttelseGradering6Eller19 = søkerHarAdressebeskyttelseGradering6Eller19,
-                barnHarAdressebeskyttelseGradering6Eller19 = barnHarAdressebeskyttelseGradering6Eller19,
-                søkerOgBarnHarForelderBarnRelasjon = søkerOgBarnHarForelderBarnRelasjon,
-                søkerHarAktivNorskBostedsadresse = søkerHarAktivNorskBostedsadresse,
-                barnHarAktivNorskBostedsadresse = barnHarAktivNorskBostedsadresse,
-                søkerHarUkrainskStatsborgerskap = søkerHarUkrainskStatsborgerskap,
-                barnHarUkrainskStatsborgerskap = barnHarUkrainskStatsborgerskap,
-            ),
-        )
 
     private fun søker(
         ident: String = "04086226621",
