@@ -7,8 +7,12 @@ import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.SlettInaktivePersonopplysningsgrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.SlettetBatch
 import no.nav.familie.ba.sak.task.SlettInaktivePersonopplysningsgrunnlagScheduler.Companion.BATCH_STØRRELSE
 import no.nav.familie.ba.sak.task.SlettInaktivePersonopplysningsgrunnlagScheduler.Companion.MAKS_ANTALL_BATCHER_PER_KJØRING
+import no.nav.familie.ba.sak.task.SlettInaktivePersonopplysningsgrunnlagScheduler.Companion.summerAntallSlettedeRaderPerTabell
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.entry
 import org.junit.jupiter.api.Test
 
 class SlettInaktivePersonopplysningsgrunnlagSchedulerTest {
@@ -50,11 +54,11 @@ class SlettInaktivePersonopplysningsgrunnlagSchedulerTest {
         every { featureToggleService.isEnabled(FeatureToggle.SKAL_SLETTE_INAKTIVE_PERSONOPPLYSNINGSGRUNNLAG) } returns true
         every { slettInaktivePersonopplysningsgrunnlagService.tellInaktiveGrunnlagUtenAktivtGrunnlagPåSammeBehandling() } returns 0L
 
-        val førsteBatch = (1L..100L).toList()
-        val andreBatch = (101L..150L).toList()
+        val førsteBatch = lagSlettetBatch((1L..100L).toList())
+        val andreBatch = lagSlettetBatch((101L..150L).toList())
         every {
             slettInaktivePersonopplysningsgrunnlagService.slettBatchMedInaktiveGrunnlag(any(), any())
-        } returnsMany listOf(førsteBatch, andreBatch, emptyList())
+        } returnsMany listOf(førsteBatch, andreBatch, lagSlettetBatch(emptyList()))
 
         // Act
         scheduler.slettInaktivePersonopplysningsgrunnlag()
@@ -74,7 +78,7 @@ class SlettInaktivePersonopplysningsgrunnlagSchedulerTest {
         every { featureToggleService.isEnabled(FeatureToggle.SKAL_SLETTE_INAKTIVE_PERSONOPPLYSNINGSGRUNNLAG) } returns true
         every { slettInaktivePersonopplysningsgrunnlagService.tellInaktiveGrunnlagUtenAktivtGrunnlagPåSammeBehandling() } returns 0L
         // Returnerer alltid en full batch -> ville løpt uendelig uten maksgrense
-        every { slettInaktivePersonopplysningsgrunnlagService.slettBatchMedInaktiveGrunnlag(any(), any()) } returns (1L..200L).toList()
+        every { slettInaktivePersonopplysningsgrunnlagService.slettBatchMedInaktiveGrunnlag(any(), any()) } returns lagSlettetBatch((1L..200L).toList())
 
         // Act
         scheduler.slettInaktivePersonopplysningsgrunnlag()
@@ -88,7 +92,7 @@ class SlettInaktivePersonopplysningsgrunnlagSchedulerTest {
         // Arrange
         every { leaderClientService.isLeader() } returns true
         every { featureToggleService.isEnabled(FeatureToggle.SKAL_SLETTE_INAKTIVE_PERSONOPPLYSNINGSGRUNNLAG) } returns true
-        every { slettInaktivePersonopplysningsgrunnlagService.slettBatchMedInaktiveGrunnlag(any(), any()) } returns emptyList()
+        every { slettInaktivePersonopplysningsgrunnlagService.slettBatchMedInaktiveGrunnlag(any(), any()) } returns lagSlettetBatch(emptyList())
         every { slettInaktivePersonopplysningsgrunnlagService.tellInaktiveGrunnlagUtenAktivtGrunnlagPåSammeBehandling() } returns 3L
 
         // Act
@@ -97,4 +101,44 @@ class SlettInaktivePersonopplysningsgrunnlagSchedulerTest {
         // Assert
         verify(exactly = 1) { slettInaktivePersonopplysningsgrunnlagService.tellInaktiveGrunnlagUtenAktivtGrunnlagPåSammeBehandling() }
     }
+
+    @Test
+    fun `skal summere antall slettede rader per tabell over alle batcher og bevare rekkefølgen på tabellene`() {
+        // Arrange
+        val førsteBatch =
+            SlettetBatch(
+                grunnlagIder = listOf(1L, 2L),
+                antallSlettedeRaderPerTabell = linkedMapOf("gr_personopplysninger" to 2L, "po_person" to 5L, "po_statsborgerskap" to 7L),
+            )
+        val andreBatch =
+            SlettetBatch(
+                grunnlagIder = listOf(3L),
+                antallSlettedeRaderPerTabell = linkedMapOf("gr_personopplysninger" to 1L, "po_person" to 3L, "po_statsborgerskap" to 0L),
+            )
+
+        // Act
+        val summert = summerAntallSlettedeRaderPerTabell(listOf(førsteBatch, andreBatch))
+
+        // Assert
+        assertThat(summert).containsExactly(
+            entry("gr_personopplysninger", 3L),
+            entry("po_person", 8L),
+            entry("po_statsborgerskap", 7L),
+        )
+    }
+
+    @Test
+    fun `skal returnere tomt resultat når det ikke er noen batcher å summere`() {
+        // Act
+        val summert = summerAntallSlettedeRaderPerTabell(emptyList())
+
+        // Assert
+        assertThat(summert).isEmpty()
+    }
+
+    private fun lagSlettetBatch(grunnlagIder: List<Long>) =
+        SlettetBatch(
+            grunnlagIder = grunnlagIder,
+            antallSlettedeRaderPerTabell = if (grunnlagIder.isEmpty()) emptyMap() else mapOf("gr_personopplysninger" to grunnlagIder.size.toLong()),
+        )
 }

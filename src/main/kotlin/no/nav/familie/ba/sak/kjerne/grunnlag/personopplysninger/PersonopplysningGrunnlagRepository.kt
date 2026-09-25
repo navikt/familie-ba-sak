@@ -110,4 +110,30 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
     @Modifying
     @Query("DELETE FROM PersonopplysningGrunnlag gr WHERE gr.id IN :grunnlagIder")
     fun slettPersonopplysningsgrunnlag(grunnlagIder: List<Long>): Int
+
+    /**
+     * Teller radene som slettes av ON DELETE CASCADE når grunnlagene i [grunnlagIder] slettes.
+     * Må kjøres i samme transaksjon som, og før, [slettPersonopplysningsgrunnlag].
+     */
+    @Query(
+        value = """
+        WITH person AS (SELECT id FROM po_person WHERE fk_gr_personopplysninger_id IN (:grunnlagIder))
+        SELECT 'po_person' AS tabell, count(*) AS antall FROM person
+        UNION ALL SELECT 'po_statsborgerskap', count(*) FROM po_statsborgerskap WHERE fk_po_person_id IN (SELECT id FROM person)
+        UNION ALL SELECT 'po_opphold', count(*) FROM po_opphold WHERE fk_po_person_id IN (SELECT id FROM person)
+        UNION ALL SELECT 'po_arbeidsforhold', count(*) FROM po_arbeidsforhold WHERE fk_po_person_id IN (SELECT id FROM person)
+        UNION ALL SELECT 'po_sivilstand', count(*) FROM po_sivilstand WHERE fk_po_person_id IN (SELECT id FROM person)
+        UNION ALL SELECT 'po_bostedsadresse', count(*) FROM po_bostedsadresse WHERE fk_po_person_id IN (SELECT id FROM person)
+        UNION ALL SELECT 'po_doedsfall', count(*) FROM po_doedsfall WHERE fk_po_person_id IN (SELECT id FROM person)
+        UNION ALL SELECT 'po_oppholdsadresse', count(*) FROM po_oppholdsadresse WHERE fk_po_person_id IN (SELECT id FROM person)
+        UNION ALL SELECT 'po_delt_bosted', count(*) FROM po_delt_bosted WHERE fk_po_person_id IN (SELECT id FROM person)
+        """,
+        nativeQuery = true,
+    )
+    fun tellRaderSomSlettesMedGrunnlag(grunnlagIder: List<Long>): List<AntallRaderITabell>
+}
+
+interface AntallRaderITabell {
+    val tabell: String
+    val antall: Long
 }
