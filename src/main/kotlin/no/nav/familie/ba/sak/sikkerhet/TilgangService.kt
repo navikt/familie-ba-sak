@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -14,7 +13,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.harInnloggetBrukerForval
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentSaksbehandler
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentSaksbehandlerNavn
-import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.stereotype.Service
 
 @Service
@@ -22,7 +20,7 @@ class TilgangService(
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+    private val personTilgangService: PersonTilgangService,
     private val auditLogger: AuditLogger,
     private val strengtFortroligService: StrengtFortroligService,
 ) {
@@ -70,10 +68,10 @@ class TilgangService(
     }
 
     /**
-     * sjekkTilgangTilPersoner er cachet i [familieIntegrasjonerTilgangskontrollService]
+     * sjekkTilgangTilPersoner er cachet i [personTilgangService]
      */
-    private fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> =
-        familieIntegrasjonerTilgangskontrollService
+    private fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<PersonTilgang> =
+        personTilgangService
             .sjekkTilgangTilPersoner(personIdenter)
             .map { it.value }
 
@@ -171,10 +169,9 @@ class TilgangService(
         validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
     }
 
-    private fun List<Tilgang>.tilBegrunnelserForManglendeTilgang(): String =
+    private fun List<PersonTilgang>.tilBegrunnelserForManglendeTilgang(): String =
         this
-            .filter { !it.harTilgang }
-            .mapNotNull { it.begrunnelse }
+            .mapNotNull { it.avvisning?.begrunnelse }
             .toSet()
             .toList()
             .slåSammen()

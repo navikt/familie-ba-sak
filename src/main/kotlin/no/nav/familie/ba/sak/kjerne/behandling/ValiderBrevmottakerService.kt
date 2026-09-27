@@ -2,19 +2,19 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import org.springframework.stereotype.Service
 
 @Service
 class ValiderBrevmottakerService(
     private val brevmottakerRepository: BrevmottakerRepository,
     private val persongrunnlagService: PersongrunnlagService,
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+    private val personTilgangService: PersonTilgangService,
     private val fagsakRepository: FagsakRepository,
 ) {
     fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
@@ -35,7 +35,7 @@ class ValiderBrevmottakerService(
                 ?.map { it.aktør.aktivFødselsnummer() }
                 ?: return
         val strengtFortroligePersonIdenter =
-            familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
+            personTilgangService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
                 (personIdenter + ekstraBarnLagtTilIBrev).toSet().toList(),
             )
         if (strengtFortroligePersonIdenter.isNotEmpty()) {
@@ -56,7 +56,7 @@ class ValiderBrevmottakerService(
 
         val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: throw Feil("Fant ikke fagsak $fagsakId")
         val strengtFortroligePersonIdenter =
-            familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(listOf(fagsak.aktør.aktivFødselsnummer()) + barnLagtTilIBrev)
+            personTilgangService.hentIdenterMedStrengtFortroligAdressebeskyttelse(listOf(fagsak.aktør.aktivFødselsnummer()) + barnLagtTilIBrev)
 
         if (strengtFortroligePersonIdenter.isNotEmpty()) {
             val melding =

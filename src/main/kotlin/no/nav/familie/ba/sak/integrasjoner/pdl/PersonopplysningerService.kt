@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
@@ -15,6 +14,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.VergeData
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
@@ -28,7 +28,7 @@ import kotlin.collections.getOrDefault
 class PersonopplysningerService(
     private val pdlRestKlient: PdlRestKlient,
     private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+    private val personTilgangService: PersonTilgangService,
     private val integrasjonKlient: IntegrasjonKlient,
     private val falskIdentitetService: FalskIdentitetService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
@@ -65,7 +65,7 @@ class PersonopplysningerService(
     ): PersonInfo {
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
         val relasjonsidenter = this.forelderBarnRelasjon.map { it.aktør.aktivFødselsnummer() }
-        val tilgangPerIdent = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(relasjonsidenter)
+        val tilgangPerIdent = personTilgangService.sjekkTilgangTilPersoner(relasjonsidenter)
         val egenAnsattPerIdent = integrasjonKlient.sjekkErEgenAnsattBulk(listOf(aktør.aktivFødselsnummer()) + relasjonsidenter)
         val forelderBarnRelasjon =
             this.forelderBarnRelasjon
