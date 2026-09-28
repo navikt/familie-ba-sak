@@ -119,6 +119,7 @@ class AutovedtakSøknadServiceTest {
             every { stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering) } returns behandling
             justRun { autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(any()) }
             justRun { autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(any()) }
+            justRun { autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(any()) }
             every { simuleringService.oppdaterSimuleringPåBehandling(behandling) } returns simulering
             justRun { autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(any()) }
             justRun { autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(any()) }
@@ -143,6 +144,7 @@ class AutovedtakSøknadServiceTest {
                 stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
                 autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandling)
                 autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling)
+                autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(behandling)
                 simuleringService.oppdaterSimuleringPåBehandling(behandling)
                 autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling)
@@ -189,6 +191,36 @@ class AutovedtakSøknadServiceTest {
                 stegService.håndterBehandlingsresultat(any())
                 autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(any())
                 autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(any())
+                autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(any())
+            }
+        }
+
+        @Test
+        fun `skal henlegge og opprette manuell behandling i stedet for å simulere og vedta når innvilget periode overlapper med tidligere utbetaling`() {
+            // Arrange
+            val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
+            every { autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(behandling) } throws
+                AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.")
+
+            // Act
+            autovedtakSøknadService.kjørBehandling(søknadData)
+
+            // Assert
+            verify(exactly = 1) { stegService.håndterHenleggBehandling(automatiskBehandling, capture(henleggBehandlingInfoSlot)) }
+            assertThat(henleggBehandlingInfoSlot.captured.årsak).isEqualTo(HenleggÅrsak.AUTOMATISK_HENLAGT)
+            assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.")
+            verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling) }
+            verify(exactly = 1) {
+                oppgaveService.opprettOppgaveForManuellBehandling(
+                    behandlingId = any(),
+                    manuellOppgaveType = ManuellOppgaveType.SØKNAD,
+                    oppgavetype = Oppgavetype.BehandleSak,
+                )
+            }
+            verify(exactly = 0) {
+                simuleringService.oppdaterSimuleringPåBehandling(any())
+                autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
+                taskService.save(any())
             }
         }
 
@@ -378,6 +410,7 @@ class AutovedtakSøknadServiceTest {
                     stegService.håndterBehandlingsresultat(any())
                     autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(any())
                     autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(any())
+                    autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(any())
                     simuleringService.oppdaterSimuleringPåBehandling(any())
                     autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
                     taskService.save(any())
