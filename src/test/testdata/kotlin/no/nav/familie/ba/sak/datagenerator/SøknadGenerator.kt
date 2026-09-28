@@ -37,6 +37,7 @@ fun lagSøknad(
     harKryssetPåEøsSpørsmål: Boolean = false,
     inneholderVedlegg: Boolean = false,
     barneIdenterTilErFosterbarn: Map<String, Boolean> = emptyMap(),
+    barneIdenterTilErIBeredskapshjem: Map<String, Boolean> = emptyMap(),
     barneIdenterTilHarKryssetForDeltBosted: Map<String, Boolean> = emptyMap(),
 ): Søknad =
     Søknad(
@@ -47,6 +48,7 @@ fun lagSøknad(
                     fnr = fnr,
                     planleggerÅBoINorge12Mnd = planleggerÅBoINorge12Mnd,
                     erFosterbarn = barneIdenterTilErFosterbarn[fnr] ?: false,
+                    erIBeredskapshjem = barneIdenterTilErIBeredskapshjem[fnr] ?: false,
                     harKryssetForDeltBosted = barneIdenterTilHarKryssetForDeltBosted[fnr] ?: false,
                 )
             },
