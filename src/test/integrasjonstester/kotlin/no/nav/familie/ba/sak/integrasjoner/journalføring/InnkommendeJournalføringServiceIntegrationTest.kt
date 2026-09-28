@@ -14,8 +14,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
+import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,6 +35,50 @@ class InnkommendeJournalføringServiceIntegrationTest(
     @Autowired
     private val integrasjonsKlient: FakeIntegrasjonKlient,
 ) : AbstractSpringIntegrationTest() {
+    @BeforeEach
+    fun setUp() {
+        integrasjonsKlient.nullstillOppdaterteLogiskeVedlegg()
+    }
+
+    @Test
+    fun `journalfør skal bulk-oppdatere logiske vedlegg kun for dokumenter der titlene er endret`() {
+        // Arrange
+        val journalføringDto = lagMockJournalføringDto(bruker = NavnOgIdent("Mock", randomFnr()))
+        val request =
+            journalføringDto.copy(
+                dokumenter =
+                    listOf(
+                        journalføringDto.dokumenter[0].copy(
+                            logiskeVedlegg =
+                                listOf(
+                                    LogiskVedlegg(logiskVedleggId = "0", tittel = "Oppholdstillatelse"),
+                                    LogiskVedlegg(logiskVedleggId = "0", tittel = "Vigselsattest"),
+                                ),
+                        ),
+                        journalføringDto.dokumenter[1],
+                    ),
+            )
+
+        // Act
+        innkommendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
+
+        // Assert
+        assertThat(integrasjonsKlient.hentOppdaterteLogiskeVedlegg())
+            .containsExactlyEntriesOf(mapOf("1" to listOf("Oppholdstillatelse", "Vigselsattest")))
+    }
+
+    @Test
+    fun `journalfør skal ikke oppdatere logiske vedlegg når titlene er uendret`() {
+        // Arrange
+        val request = lagMockJournalføringDto(bruker = NavnOgIdent("Mock", randomFnr()))
+
+        // Act
+        innkommendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
+
+        // Assert
+        assertThat(integrasjonsKlient.hentOppdaterteLogiskeVedlegg()).isEmpty()
+    }
+
     @Test
     fun `journalfør skal opprette en førstegangsbehandling fra journalføring og lagre ned søknadsinfo`() {
         // Arrange

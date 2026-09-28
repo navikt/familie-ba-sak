@@ -62,6 +62,7 @@ class FakeIntegrasjonKlient : IntegrasjonKlient(URI("integrasjoner-url"), mockk<
     private val behandlendeEnhetForIdent = mutableMapOf<String, List<Arbeidsfordelingsenhet>>()
     private val versjonerteBarnetrygdSøknader = mutableMapOf<String, VersjonertBarnetrygdSøknad>()
     private val journalførteDokumenter = mutableListOf<ArkiverDokumentRequest>()
+    private val oppdaterteLogiskeVedlegg = mutableMapOf<String, List<String>>()
 
     override fun hentAlleEØSLand(): KodeverkDto = lagKodeverkLand()
 
@@ -192,7 +193,13 @@ class FakeIntegrasjonKlient : IntegrasjonKlient(URI("integrasjoner-url"), mockk<
         dokumentInfoId: String,
         request: BulkOppdaterLogiskVedleggRequest,
     ) {
-        return
+        oppdaterteLogiskeVedlegg[dokumentInfoId] = request.titler
+    }
+
+    fun hentOppdaterteLogiskeVedlegg(): Map<String, List<String>> = oppdaterteLogiskeVedlegg.toMap()
+
+    fun nullstillOppdaterteLogiskeVedlegg() {
+        oppdaterteLogiskeVedlegg.clear()
     }
 
     override fun hentDokument(

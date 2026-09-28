@@ -13,6 +13,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.patch
 import com.github.tomakehurst.wiremock.client.WireMock.patchRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.put
+import com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.status
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.mockk.every
@@ -55,6 +57,7 @@ import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
+import no.nav.familie.kontrakter.felles.dokarkiv.BulkOppdaterLogiskVedleggRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
@@ -510,6 +513,107 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
         assertThat(dokument).isNotNull
         assertThat(dokument.decodeToString()).isEqualTo("Test")
         wireMockServer.verify(getRequestedFor(urlEqualTo("/api/journalpost/hentdokument/tilgangsstyrt/baks/$journalpostId/$dokumentId")))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `oppdaterLogiskeVedlegg skal sende PUT med titlene til familie-integrasjoner`() {
+        // Arrange
+        val dokumentInfoId = "5678"
+        MDC.put("callId", "oppdaterLogiskeVedlegg")
+        wireMockServer.stubFor(
+            put(urlEqualTo("/api/arkiv/dokument/$dokumentInfoId/logiskVedlegg"))
+                .willReturn(okJson(jsonMapper.writeValueAsString(success(dokumentInfoId)))),
+        )
+
+        // Act
+        integrasjonKlient.oppdaterLogiskeVedlegg(
+            dokumentInfoId = dokumentInfoId,
+            request = BulkOppdaterLogiskVedleggRequest(titler = listOf("Vigselsattest", "Pass")),
+        )
+
+        // Assert
+        wireMockServer.verify(
+            putRequestedFor(urlEqualTo("/api/arkiv/dokument/$dokumentInfoId/logiskVedlegg"))
+                .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("oppdaterLogiskeVedlegg"))
+                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
+                .withRequestBody(equalToJson("""{"titler": ["Vigselsattest", "Pass"]}""")),
+        )
+    }
+
+    @Test
+    @Tag("integration")
+    fun `oppdaterLogiskeVedlegg skal sende tom liste for å fjerne alle logiske vedlegg`() {
+        // Arrange
+        val dokumentInfoId = "5678"
+        wireMockServer.stubFor(
+            put(urlEqualTo("/api/arkiv/dokument/$dokumentInfoId/logiskVedlegg"))
+                .willReturn(okJson(jsonMapper.writeValueAsString(success(dokumentInfoId)))),
+        )
+
+        // Act
+        integrasjonKlient.oppdaterLogiskeVedlegg(
+            dokumentInfoId = dokumentInfoId,
+            request = BulkOppdaterLogiskVedleggRequest(titler = emptyList()),
+        )
+
+        // Assert
+        wireMockServer.verify(
+            putRequestedFor(urlEqualTo("/api/arkiv/dokument/$dokumentInfoId/logiskVedlegg"))
+                .withRequestBody(equalToJson("""{"titler": []}""")),
+        )
+    }
+
+    @Test
+    @Tag("integration")
+    fun `oppdaterLogiskeVedlegg skal kaste IntegrasjonException når familie-integrasjoner svarer med feil`() {
+        // Arrange
+        val dokumentInfoId = "5678"
+        wireMockServer.stubFor(
+            put(urlEqualTo("/api/arkiv/dokument/$dokumentInfoId/logiskVedlegg"))
+                .willReturn(
+                    aResponse()
+                        .withStatus(500)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(jsonMapper.writeValueAsString(failure<String>("Kan ikke bulk oppdatere logiske vedlegg"))),
+                ),
+        )
+
+        // Act & Assert
+        val feil =
+            assertThrows<IntegrasjonException> {
+                integrasjonKlient.oppdaterLogiskeVedlegg(
+                    dokumentInfoId = dokumentInfoId,
+                    request = BulkOppdaterLogiskVedleggRequest(titler = listOf("Vigselsattest")),
+                )
+            }
+        assertThat(feil.message).contains("dokarkiv", "Kan ikke bulk oppdatere logiske vedlegg")
+    }
+
+    @Test
+    @Tag("integration")
+    fun `oppdaterLogiskeVedlegg skal kaste HttpClientErrorException når dokarkiv avviser forespørselen`() {
+        // Arrange
+        val dokumentInfoId = "5678"
+        wireMockServer.stubFor(
+            put(urlEqualTo("/api/arkiv/dokument/$dokumentInfoId/logiskVedlegg"))
+                .willReturn(
+                    aResponse()
+                        .withStatus(400)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(jsonMapper.writeValueAsString(failure<String>("Tittel er lengre enn 550 tegn"))),
+                ),
+        )
+
+        // Act & Assert
+        val feil =
+            assertThrows<HttpClientErrorException> {
+                integrasjonKlient.oppdaterLogiskeVedlegg(
+                    dokumentInfoId = dokumentInfoId,
+                    request = BulkOppdaterLogiskVedleggRequest(titler = listOf("A".repeat(551))),
+                )
+            }
+        assertThat(feil.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 
     @Test

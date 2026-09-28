@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.slot
 import io.mockk.verify
 import io.mockk.verifyOrder
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.JournalføringDto
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
@@ -32,6 +34,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class InnkommendeJournalføringServiceTest {
     private val mockedIntegrasjonKlient: IntegrasjonKlient = mockk()
@@ -172,6 +175,101 @@ class InnkommendeJournalføringServiceTest {
                 mockedIntegrasjonKlient.oppdaterJournalpost(any(), journalpostId)
                 mockedIntegrasjonKlient.ferdigstillJournalpost(journalpostId, "4820")
             }
+        }
+
+        @Test
+        fun `skal ikke oppdatere logiske vedlegg når kun logiskVedleggId avviker fra eksisterende`() {
+            // Arrange
+            val request =
+                lagJournalføringDto(
+                    logiskeVedleggDokument1 = listOf(LogiskVedlegg(logiskVedleggId = "0", tittel = "Oppholdstillatelse")),
+                    logiskeVedleggDokument2 = listOf(LogiskVedlegg(logiskVedleggId = "0", tittel = "Pass")),
+                )
+
+            // Act
+            innkommendeJournalføringService.journalfør(request, journalpostId, "4820", "1")
+
+            // Assert
+            verify(exactly = 0) { mockedIntegrasjonKlient.oppdaterLogiskeVedlegg(any(), any()) }
+        }
+
+        @Test
+        fun `skal bulk-oppdatere logiske vedlegg for alle dokumenter der titlene er endret`() {
+            // Arrange
+            val request =
+                lagJournalføringDto(
+                    logiskeVedleggDokument1 = listOf(LogiskVedlegg(logiskVedleggId = "0", tittel = "Vigselsattest")),
+                    logiskeVedleggDokument2 = listOf(LogiskVedlegg(logiskVedleggId = "0", tittel = "Fødselsattest")),
+                )
+
+            // Act
+            innkommendeJournalføringService.journalfør(request, journalpostId, "4820", "1")
+
+            // Assert
+            verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterLogiskeVedlegg("1", BulkOppdaterLogiskVedleggRequest(titler = listOf("Vigselsattest"))) }
+            verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterLogiskeVedlegg("2", BulkOppdaterLogiskVedleggRequest(titler = listOf("Fødselsattest"))) }
+        }
+
+        @Test
+        fun `skal bulk-oppdatere logiske vedlegg for dokument som ikke har logiske vedlegg fra før`() {
+            // Arrange
+            every { mockedIntegrasjonKlient.hentJournalpost(journalpostId) } returns
+                journalpost.copy(dokumenter = journalpost.dokumenter!!.map { it.copy(logiskeVedlegg = null) })
+
+            val titler = (1..50).map { "Vedlegg nummer $it" }
+            val request =
+                lagJournalføringDto(
+                    logiskeVedleggDokument1 = titler.map { LogiskVedlegg(logiskVedleggId = "0", tittel = it) },
+                    logiskeVedleggDokument2 = emptyList(),
+                )
+
+            // Act
+            innkommendeJournalføringService.journalfør(request, journalpostId, "4820", "1")
+
+            // Assert
+            verify(exactly = 1) { mockedIntegrasjonKlient.oppdaterLogiskeVedlegg("1", BulkOppdaterLogiskVedleggRequest(titler = titler)) }
+            verify(exactly = 0) { mockedIntegrasjonKlient.oppdaterLogiskeVedlegg("2", any()) }
+        }
+
+        @Test
+        fun `skal ikke endre dokumenttittel eller sende logiske vedlegg ved oppdatering av journalpost`() {
+            // Arrange
+            val oppdaterJournalpostRequest = slot<OppdaterJournalpostRequest>()
+            every { mockedIntegrasjonKlient.oppdaterJournalpost(capture(oppdaterJournalpostRequest), any()) } returns
+                OppdaterJournalpostResponse(journalpostId)
+
+            val request =
+                lagJournalføringDto(
+                    logiskeVedleggDokument1 = (1..50).map { LogiskVedlegg(logiskVedleggId = "0", tittel = "Vedlegg nummer $it") },
+                    logiskeVedleggDokument2 = listOf(LogiskVedlegg(logiskVedleggId = "0", tittel = "Vigselsattest")),
+                )
+
+            // Act
+            innkommendeJournalføringService.journalfør(request, journalpostId, "4820", "1")
+
+            // Assert
+            val dokumenter = oppdaterJournalpostRequest.captured.dokumenter!!
+            assertThat(dokumenter.map { it.tittel }).containsExactly("Søknad om barnetrygd", "Ekstra vedlegg")
+            assertThat(dokumenter.map { it.logiskeVedlegg }).containsOnlyNulls()
+        }
+
+        @Test
+        fun `skal ikke oppdatere eller ferdigstille journalposten når oppdatering av logiske vedlegg feiler`() {
+            // Arrange
+            every { mockedIntegrasjonKlient.oppdaterLogiskeVedlegg(any(), any()) } throws RuntimeException("Dokarkiv er nede")
+
+            val request =
+                lagJournalføringDto(
+                    logiskeVedleggDokument1 = listOf(LogiskVedlegg(logiskVedleggId = "0", tittel = "Vigselsattest")),
+                    logiskeVedleggDokument2 = null,
+                )
+
+            // Act & Assert
+            val feil = assertThrows<RuntimeException> { innkommendeJournalføringService.journalfør(request, journalpostId, "4820", "1") }
+            assertThat(feil.message).isEqualTo("Dokarkiv er nede")
+            verify(exactly = 0) { mockedIntegrasjonKlient.oppdaterJournalpost(any(), any()) }
+            verify(exactly = 0) { mockedIntegrasjonKlient.ferdigstillJournalpost(any(), any()) }
+            verify(exactly = 0) { mockedIntegrasjonKlient.ferdigstillOppgave(any()) }
         }
 
         private fun lagJournalføringDto(
