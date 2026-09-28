@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
@@ -55,35 +54,6 @@ class AutovedtakService(
 
         val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(nyBehandling)
         return behandlingEtterBehandlingsresultat
-    }
-
-    /**
-     * Oppretter en ny, automatisk behandling fra [nyBehandling], og kjører den til behandlingsresultat med filtreringsregler.
-     *
-     * Returnerer behandlingen på steg [StegType.HENLEGG_BEHANDLING] dersom filtreringsreglene stoppet den.
-     */
-    fun opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
-        nyBehandling: NyBehandling,
-        filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,
-    ): Behandling {
-        val behandling =
-            stegService.håndterNyBehandling(
-                nyBehandling.copy(skalBehandlesAutomatisk = true),
-            )
-
-        val behandlingEtterFiltrering =
-            if (nyBehandling.behandlingÅrsak == BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD) {
-                stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(behandling, filtrerAutomatiskBehandlingData)
-            } else {
-                behandling
-            }
-
-        if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
-            logger.info("Filtreringsreglene stoppet den automatiske behandlingen ${behandlingEtterFiltrering.id}")
-            return behandlingEtterFiltrering
-        }
-
-        return stegService.håndterVilkårsvurdering(behandlingEtterFiltrering)
     }
 
     fun opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling: Behandling): Vedtak {

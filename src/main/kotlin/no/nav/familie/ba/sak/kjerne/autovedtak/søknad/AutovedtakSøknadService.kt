@@ -30,32 +30,19 @@ class AutovedtakSøknadService(
     private val taskService: TaskService,
     private val autovedtakSøknadBegrunnelseService: AutovedtakSøknadBegrunnelseService,
     private val autovedtakSøknadValideringService: AutovedtakSøknadValideringService,
-    private val filtreringsreglerSøknadService: FiltreringsreglerSøknadService,
     private val stegService: StegService,
     private val oppgaveService: OppgaveService,
 ) : AutovedtakBehandlingService<SøknadData> {
     override fun skalAutovedtakBehandles(behandlingsdata: SøknadData): Boolean = true
 
     override fun kjørBehandling(behandlingsdata: SøknadData): String {
-        val automatiskBehandling =
-            autovedtakService.opprettAutomatiskBehandlingMedFiltreringOgKjørTilBehandlingsresultat(
-                nyBehandling =
-                    behandlingsdata.nyBehandling.copy(
-                        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                        behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
-                    ),
-                filtrerAutomatiskBehandlingData =
-                    FiltrerAutomatiskBehandlingData(
-                        søkersIdent = behandlingsdata.søkersIdent,
-                        barnasIdenter = behandlingsdata.nyBehandling.barnasIdenter,
-                    ),
-            )
+        val automatiskBehandling = opprettAutomatiskBehandlingOgKjørFiltreringsregler(behandlingsdata)
 
         if (automatiskBehandling.steg == StegType.HENLEGG_BEHANDLING) {
             return henleggBehandlingOgOpprettManuellBehandling(
                 automatiskBehandling = automatiskBehandling,
                 behandlingsdata = behandlingsdata,
-                begrunnelse = filtreringsreglerSøknadService.hentBegrunnelseForIkkeOppfyltFiltreringsregel(behandlingId = automatiskBehandling.id),
+                begrunnelse = "Søknaden oppfyller ikke filtreringsreglene for automatisk behandling.",
             )
         }
 
@@ -71,26 +58,51 @@ class AutovedtakSøknadService(
         }
     }
 
+    private fun opprettAutomatiskBehandlingOgKjørFiltreringsregler(behandlingsdata: SøknadData): Behandling {
+        val behandling =
+            stegService.håndterNyBehandling(
+                behandlingsdata.nyBehandling.copy(
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    behandlingÅrsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD,
+                    skalBehandlesAutomatisk = true,
+                ),
+            )
+
+        return stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(
+            behandling = behandling,
+            filtrerAutomatiskBehandlingData =
+                FiltrerAutomatiskBehandlingData(
+                    søkersIdent = behandlingsdata.søkersIdent,
+                    barnasIdenter = behandlingsdata.nyBehandling.barnasIdenter,
+                ),
+        )
+    }
+
     private fun vedtaAutomatisk(
         behandling: Behandling,
         behandlingsdata: SøknadData,
     ): String {
-        autovedtakSøknadValideringService.validerAtBehandlingKanVedtasAutomatisk(behandling)
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+        autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(behandlingEtterVilkårsvurdering)
 
-        val simulering = simuleringService.oppdaterSimuleringPåBehandling(behandling)
+        val behandlingEtterBehandlingsresultat = stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+        autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandlingEtterBehandlingsresultat)
+        autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandlingEtterBehandlingsresultat)
+
+        val simulering = simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterBehandlingsresultat)
         autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
 
-        if (behandling.steg != StegType.IVERKSETT_MOT_OPPDRAG) {
-            throw Feil("Ugyldig neste steg ${behandling.steg} for behandlingsårsak ${BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD} for fagsak=${behandlingsdata.nyBehandling.fagsakId}")
+        if (behandlingEtterBehandlingsresultat.steg != StegType.IVERKSETT_MOT_OPPDRAG) {
+            throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} for behandlingsårsak ${BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD} for fagsak=${behandlingsdata.nyBehandling.fagsakId}")
         }
 
-        autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(behandling)
+        autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(behandlingEtterBehandlingsresultat)
 
-        val opprettetVedtak = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling)
+        val opprettetVedtak = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandlingEtterBehandlingsresultat)
 
         taskService.save(
             IverksettMotOppdragTask.opprettTask(
-                behandling,
+                behandlingEtterBehandlingsresultat,
                 opprettetVedtak,
                 SikkerhetContext.hentSaksbehandler(),
             ),
@@ -120,7 +132,6 @@ class AutovedtakSøknadService(
 
         oppgaveService.opprettOppgaveForManuellBehandling(
             behandlingId = manuellBehandling.id,
-            begrunnelse = begrunnelse,
             manuellOppgaveType = ManuellOppgaveType.SØKNAD,
             oppgavetype = Oppgavetype.BehandleSak,
         )

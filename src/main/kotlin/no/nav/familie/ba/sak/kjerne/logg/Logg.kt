@@ -57,6 +57,7 @@ enum class LoggType(
     val tittel: String = visningsnavn,
 ) {
     AUTOVEDTAK_TIL_MANUELL_BEHANDLING("Autovedtak til manuell behandling", "Automatisk behandling stoppet"),
+    FILTRERINGSREGLER_VURDERT("Filtreringsregler vurdert"),
     INSTITUSJON_REGISTRERT("Institusjon ble registrert"),
     FØDSELSHENDELSE("Fødselshendelse"), // Deprecated, bruk livshendelse
     LIVSHENDELSE("Livshendelse"),

@@ -52,13 +52,15 @@ class StegServiceTest {
     private val featureToggleService: FeatureToggleService = mockk()
     private val tilgangService: TilgangService = mockk()
     private val mocketRegistrerPersongrunnlag: RegistrerPersongrunnlag = mockk<RegistrerPersongrunnlag>(relaxed = true)
+    private val mocketVilkårsvurderingSteg: VilkårsvurderingSteg = mockk<VilkårsvurderingSteg>(relaxed = true)
+    private val mocketBehandlingsresultatSteg: BehandlingsresultatSteg = mockk<BehandlingsresultatSteg>(relaxed = true)
     private val strengtFortroligService: StrengtFortroligService = mockk()
     private val beregningService: BeregningService = mockk()
     private val personopplysningerService: PersonopplysningerService = mockk()
 
     private val stegService =
         StegService(
-            steg = listOf(mocketRegistrerPersongrunnlag),
+            steg = listOf(mocketRegistrerPersongrunnlag, mocketVilkårsvurderingSteg, mocketBehandlingsresultatSteg),
             fagsakService = mockk(),
             behandlingService = behandlingService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -364,6 +366,56 @@ class StegServiceTest {
             val exception = assertThrows<FunksjonellFeil> { stegService.håndterPersongrunnlag(behandling, grunnlag) }
             assertThat(exception.message).isEqualTo("System prøver å utføre steg REGISTRERE_PERSONGRUNNLAG på behandling ${behandling.id} som er på vent.")
         }
+    }
+
+    @Nested
+    inner class HåndterVilkårsvurderingTest {
+        private val behandlingId = 1L
+
+        @BeforeEach
+        fun setup() {
+            every { mocketRegistrerPersongrunnlag.stegType() } returns StegType.REGISTRERE_PERSONGRUNNLAG
+            every { mocketVilkårsvurderingSteg.stegType() } returns StegType.VILKÅRSVURDERING
+            every { mocketVilkårsvurderingSteg.utførStegOgAngiNeste(any(), any()) } returns StegType.BEHANDLINGSRESULTAT
+            every { mocketBehandlingsresultatSteg.stegType() } returns StegType.BEHANDLINGSRESULTAT
+            every { mocketBehandlingsresultatSteg.utførStegOgAngiNeste(any(), any()) } returns StegType.VURDER_TILBAKEKREVING
+        }
+
+        @Test
+        fun `skal kjøre behandlingsresultatsteget etter vilkårsvurderingssteget for andre automatiske behandlinger enn søknad`() {
+            // Arrange
+            val behandling = lagAutomatiskBehandling(årsak = BehandlingÅrsak.SATSENDRING, steg = StegType.VILKÅRSVURDERING)
+            val behandlingEtterVilkårsvurdering = lagAutomatiskBehandling(årsak = BehandlingÅrsak.SATSENDRING, steg = StegType.BEHANDLINGSRESULTAT)
+            every { behandlingHentOgPersisterService.hent(behandlingId) } returns behandling
+            every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId, any()) } returns behandlingEtterVilkårsvurdering
+
+            // Act
+            stegService.håndterVilkårsvurdering(behandling)
+
+            // Assert
+            verify(exactly = 1) { mocketBehandlingsresultatSteg.utførStegOgAngiNeste(behandlingEtterVilkårsvurdering, any()) }
+        }
+
+        @Test
+        fun `skal ikke kjøre behandlingsresultatsteget etter vilkårsvurderingssteget for automatisk behandling av søknad`() {
+            // Arrange
+            val behandling = lagAutomatiskBehandling(årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD, steg = StegType.VILKÅRSVURDERING)
+            val behandlingEtterVilkårsvurdering = lagAutomatiskBehandling(årsak = BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD, steg = StegType.BEHANDLINGSRESULTAT)
+            every { behandlingHentOgPersisterService.hent(behandlingId) } returns behandling
+            every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId, StegType.BEHANDLINGSRESULTAT) } returns behandlingEtterVilkårsvurdering
+
+            // Act
+            val behandlingEtterHåndtering = stegService.håndterVilkårsvurdering(behandling)
+
+            // Assert
+            assertThat(behandlingEtterHåndtering).isEqualTo(behandlingEtterVilkårsvurdering)
+            verify(exactly = 0) { mocketBehandlingsresultatSteg.utførStegOgAngiNeste(any(), any()) }
+        }
+
+        private fun lagAutomatiskBehandling(
+            årsak: BehandlingÅrsak,
+            steg: StegType,
+        ) = lagBehandling(id = behandlingId, årsak = årsak, skalBehandlesAutomatisk = true, førsteSteg = steg)
     }
 
     @Nested

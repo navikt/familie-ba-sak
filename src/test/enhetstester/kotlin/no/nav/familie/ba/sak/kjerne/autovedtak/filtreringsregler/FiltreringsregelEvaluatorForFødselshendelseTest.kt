@@ -1,5 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler
 
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -14,14 +18,95 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class FiltreringsregelEvaluatorForFødselshendelseTest {
-    private val gyldigAktørId = randomAktør()
-    private val filtreringsregelEvaluator = FiltreringsregelEvaluator()
+    private val morAktør = randomAktør()
+    private val barnAktør1 = randomAktør()
+    private val barnAktør2 = randomAktør()
+
+    private val featureToggleService = mockk<FeatureToggleService>()
+
+    private val filtreringsregelEvaluator = FiltreringsregelEvaluator(featureToggleService)
+
+    init {
+        every { featureToggleService.isEnabled(FeatureToggle.VURDER_ALLE_FILTRERINGSREGLER) } returns false
+    }
+
+    @Test
+    fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
+        // Arrange
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = morAktør)
+
+        val barn =
+            listOf(
+                tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(aktør = barnAktør1),
+                tilfeldigPerson(LocalDate.now().minusMonths(3)).copy(aktør = barnAktør2),
+            )
+
+        val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(7)))
+
+        val fakta =
+            FiltreringsreglerFaktaFødselshendelse(
+                søker = mor,
+                barnaSomSkalVurderes = barn,
+                restenAvBarna = restenAvBarna,
+                søkerLever = true,
+                barnaLever = true,
+                søkerHarVerge = false,
+                dagensDato = LocalDate.now(),
+                erFagsakenMigrertEtterBarnFødt = false,
+                løperBarnetrygdForBarnetPåAnnenForelder = false,
+                søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
+                morHarIkkeOpphørtBarnetrygd = true,
+            )
+
+        // Act
+        val evalueringer = filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, fakta)
+
+        // Assert
+        assertThat(evalueringer.erOppfylt()).isFalse
+        assertThat(evalueringer.single { it.resultat == Resultat.IKKE_OPPFYLT }.identifikator)
+            .isEqualTo(Filtreringsregel.Identifikator.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name)
+    }
+
+    @Test
+    fun `Regelevaluering skal resultere i JA når det har ikke gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
+        // Arrange
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = morAktør)
+
+        val barn =
+            listOf(
+                tilfeldigPerson(LocalDate.now()).copy(aktør = barnAktør1),
+                tilfeldigPerson(LocalDate.now()).copy(aktør = barnAktør2),
+            )
+
+        val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusDays(5)))
+
+        val fakta =
+            FiltreringsreglerFaktaFødselshendelse(
+                søker = mor,
+                barnaSomSkalVurderes = barn,
+                restenAvBarna = restenAvBarna,
+                søkerLever = true,
+                barnaLever = true,
+                søkerHarVerge = false,
+                dagensDato = LocalDate.now(),
+                erFagsakenMigrertEtterBarnFødt = false,
+                løperBarnetrygdForBarnetPåAnnenForelder = false,
+                søkerOppfyllerVilkårForUtvidetBarnetrygd = false,
+                morHarIkkeOpphørtBarnetrygd = true,
+            )
+
+        // Act
+        val evalueringer = filtreringsregelEvaluator.evaluerFiltreringsregler(FILTRERINGSREGLER_FØDSELSHENDELSE, fakta)
+
+        // Assert
+        assertThat(evalueringer.erOppfylt()).isTrue
+    }
 
     @Test
     fun `Regelevaluering skal resultere i Ja`() {
         // Arrange
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = morAktør)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = this@FiltreringsregelEvaluatorForFødselshendelseTest.morAktør)
         val restenAvBarna: List<PersonInfo> = listOf()
 
         // Act
@@ -49,8 +134,8 @@ internal class FiltreringsregelEvaluatorForFødselshendelseTest {
     @Test
     fun `Regelevaluering skal resultere i NEI når mor mottar utvidet barnetrygd`() {
         // Arrange
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = morAktør)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = this@FiltreringsregelEvaluatorForFødselshendelseTest.morAktør)
         val restenAvBarna: List<PersonInfo> = listOf()
 
         // Act
@@ -80,8 +165,8 @@ internal class FiltreringsregelEvaluatorForFødselshendelseTest {
     @Test
     fun `Regelevaluering skal gi resultat IKKE_OPPFYLT når mor har løpende EØS-barnetrygd`() {
         // Arrange
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = morAktør)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = this@FiltreringsregelEvaluatorForFødselshendelseTest.morAktør)
         val restenAvBarna: List<PersonInfo> = listOf()
 
         // Act
@@ -112,8 +197,8 @@ internal class FiltreringsregelEvaluatorForFødselshendelseTest {
     @Test
     fun `Regelevaluering skal resultere i NEI når mor er under 18 år`() {
         // Arrange
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(17)).copy(aktør = gyldigAktørId)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(17)).copy(aktør = morAktør)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = this@FiltreringsregelEvaluatorForFødselshendelseTest.morAktør)
         val restenAvBarna: List<PersonInfo> = listOf()
 
         // Act
@@ -142,8 +227,8 @@ internal class FiltreringsregelEvaluatorForFødselshendelseTest {
     @Test
     fun `Regelevaluering skal resultere i NEI når det er registrert dødsfall på mor`() {
         // Arrange
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = morAktør)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = this@FiltreringsregelEvaluatorForFødselshendelseTest.morAktør)
         val restenAvBarna: List<PersonInfo> = listOf()
 
         // Act
@@ -172,8 +257,8 @@ internal class FiltreringsregelEvaluatorForFødselshendelseTest {
     @Test
     fun `Regelevaluering skal resultere i NEI når det er registrert dødsfall på barnet`() {
         // Arrange
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = morAktør)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = this@FiltreringsregelEvaluatorForFødselshendelseTest.morAktør)
         val restenAvBarna: List<PersonInfo> = listOf()
 
         // Act
@@ -202,8 +287,8 @@ internal class FiltreringsregelEvaluatorForFødselshendelseTest {
     @Test
     fun `Regelevaluering skal resultere i NEI når mor har verge`() {
         // Arrange
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = morAktør)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = this@FiltreringsregelEvaluatorForFødselshendelseTest.morAktør)
         val restenAvBarna: List<PersonInfo> = listOf()
 
         // Act

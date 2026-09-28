@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.SlettInaktivePersonopplysningsgrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.SlettetBatch
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -20,7 +21,8 @@ import org.springframework.stereotype.Component
  *
  * Når jobben logger at det ikke er flere igjen, kan følgende fjernes (del 3):
  * - denne jobben, togglen SKAL_SLETTE_INAKTIVE_PERSONOPPLYSNINGSGRUNNLAG,
- *   SlettInaktivePersonopplysningsgrunnlagService og de tre spørringene i repositoryet
+ *   SlettInaktivePersonopplysningsgrunnlagService (inkl. SlettetBatch), de fire spørringene i repositoryet
+ *   og AntallRaderITabell
  * - kolonnen gr_personopplysninger.aktiv, `aktiv` i PersonopplysningGrunnlag (inkl. toString),
  *   `AND gr.aktiv = true` i de fire spørringene i PersonopplysningGrunnlagRepository,
  *   `AND gr.aktiv = true` i PersonRepository:15 og PersonRepository:29,
@@ -43,20 +45,28 @@ class SlettInaktivePersonopplysningsgrunnlagScheduler(
 
         var totaltSlettet = 0
         var sisteSlettedeId = 0L
+        val slettedeBatcher = mutableListOf<SlettetBatch>()
         for (batch in 0 until MAKS_ANTALL_BATCHER_PER_KJØRING) {
-            val slettedeIder =
+            val slettetBatch =
                 slettInaktivePersonopplysningsgrunnlagService.slettBatchMedInaktiveGrunnlag(
                     etterId = sisteSlettedeId,
                     batchStørrelse = BATCH_STØRRELSE,
                 )
+            val slettedeIder = slettetBatch.grunnlagIder
             if (slettedeIder.isEmpty()) break
 
+            slettedeBatcher.add(slettetBatch)
             totaltSlettet += slettedeIder.size
             sisteSlettedeId = slettedeIder.last()
         }
 
         if (totaltSlettet > 0) {
-            logger.info("Slettet $totaltSlettet inaktive personopplysningsgrunnlag med tilhørende personer og registeropplysninger")
+            val antallSlettedeRaderPerTabell = summerAntallSlettedeRaderPerTabell(slettedeBatcher)
+            logger.info(
+                "Slettet $totaltSlettet inaktive personopplysningsgrunnlag med tilhørende personer og registeropplysninger. " +
+                    "Totalt ${antallSlettedeRaderPerTabell.values.sum()} rader slettet: " +
+                    antallSlettedeRaderPerTabell.entries.joinToString { (tabell, antall) -> "$tabell=$antall" },
+            )
         } else {
             val antallInaktiveGrunnlagUtenAktivtGrunnlagPåSammeBehandling = slettInaktivePersonopplysningsgrunnlagService.tellInaktiveGrunnlagUtenAktivtGrunnlagPåSammeBehandling()
             if (antallInaktiveGrunnlagUtenAktivtGrunnlagPåSammeBehandling > 0) {
@@ -77,5 +87,12 @@ class SlettInaktivePersonopplysningsgrunnlagScheduler(
         private val logger = LoggerFactory.getLogger(SlettInaktivePersonopplysningsgrunnlagScheduler::class.java)
         internal const val BATCH_STØRRELSE = 200
         internal const val MAKS_ANTALL_BATCHER_PER_KJØRING = 50
+
+        internal fun summerAntallSlettedeRaderPerTabell(slettedeBatcher: List<SlettetBatch>): Map<String, Long> =
+            buildMap {
+                slettedeBatcher.forEach { batch ->
+                    batch.antallSlettedeRaderPerTabell.forEach { (tabell, antall) -> merge(tabell, antall, Long::plus) }
+                }
+            }
     }
 }
