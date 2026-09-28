@@ -229,6 +229,7 @@ class OppdragSteg {
                 andelTilkjentYtelseRepository,
                 behandlingHentOgPersisterService,
                 tilkjentYtelseRepository,
+                featureToggleService,
             )
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",

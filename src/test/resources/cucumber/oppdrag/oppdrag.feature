@@ -70,6 +70,11 @@ Egenskap: Utbetalingsoppdrag: Vedtak for førstegangsbehandling
       | 2            | 03.2021  | 03.2021  | 700   |
       | 2            | 04.2021  | 04.2021  | 800   |
 
+    Gitt følgende feature toggles
+      | BehandlingId | FeatureToggleId                             | Er togglet på |
+      | 1            | familie-ba-sak.simuler-kun-endrede-perioder | Nei           |
+      | 2            | familie-ba-sak.simuler-kun-endrede-perioder | Nei           |
+
     Når beregner utbetalingsoppdrag
 
     Så forvent følgende utbetalingsoppdrag

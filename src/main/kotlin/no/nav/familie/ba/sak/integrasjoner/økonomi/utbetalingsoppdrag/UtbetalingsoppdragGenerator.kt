@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -21,6 +23,7 @@ class UtbetalingsoppdragGenerator(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun lagUtbetalingsoppdrag(
         saksbehandlerId: String,
@@ -31,13 +34,16 @@ class UtbetalingsoppdragGenerator(
         val forrigeTilkjentYtelse = hentForrigeTilkjentYtelse(vedtak.behandling)
         val sisteAndelPerKjede = hentSisteAndelTilkjentYtelse(vedtak.behandling)
 
+        val skalKunSimulereEndredePerioder =
+            featureToggleService.isEnabled(FeatureToggle.SIMULER_KUN_ENDREDE_PERIODER, vedtak.behandling.id)
+
         val behandlingsinformasjon =
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId,
                 vedtak,
                 forrigeTilkjentYtelse,
                 sisteAndelPerKjede,
-                erSimulering,
+                erSimulering = erSimulering && !skalKunSimulereEndredePerioder,
             )
 
         val forrigeAndeler =
