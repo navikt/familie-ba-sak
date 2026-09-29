@@ -134,6 +134,10 @@ class InnkommendeJournalføringService(
         val journalpost = integrasjonKlient.hentJournalpost(journalpostId)
         val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
 
+        // Oppdateres før klage eller behandling opprettes, slik at en feil her ikke etterlater en klagebehandling i familie-klage.
+        // Trygt å gjenta ved nytt forsøk, siden vi sammenligner med journalposten i Joark og erstatter hele listen.
+        oppdaterLogiskeVedlegg(request, journalpost)
+
         if (request.opprettOgKnyttTilNyBehandling) {
             if (request.nyBehandlingstype == Journalføringsbehandlingstype.KLAGE) {
                 val klageMottattDato = request.datoMottatt?.toLocalDate() ?: throw Feil("Dato mottatt ikke satt ved journalføring for journalpostId $journalpostId og oppgaveId $oppgaveId. for fagsak ${fagsak.id}")
@@ -174,8 +178,6 @@ class InnkommendeJournalføringService(
                 lagreNedSøknadsinfoKnyttetTilBehandling(journalpost, brevkode, tidligereBehandling)
             }
         }
-
-        oppdaterLogiskeVedlegg(request, journalpost)
 
         val sak =
             Sak(

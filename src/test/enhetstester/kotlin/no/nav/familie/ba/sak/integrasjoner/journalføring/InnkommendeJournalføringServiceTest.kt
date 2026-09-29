@@ -15,10 +15,12 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.JournalføringDto
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.klage.KlageService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -35,6 +37,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import java.util.UUID
 
 class InnkommendeJournalføringServiceTest {
     private val mockedIntegrasjonKlient: IntegrasjonKlient = mockk()
@@ -107,6 +111,7 @@ class InnkommendeJournalføringServiceTest {
             every { mockedIntegrasjonKlient.oppdaterJournalpost(any(), any()) } returns OppdaterJournalpostResponse(journalpostId)
             every { mockedIntegrasjonKlient.ferdigstillJournalpost(any(), any()) } just runs
             every { mockedIntegrasjonKlient.ferdigstillOppgave(any()) } just runs
+            every { klageService.opprettKlage(any<Fagsak>(), any<LocalDate>()) } returns UUID.randomUUID()
             every { mockedJournalføringMetrikk.tellManuellJournalføringsmetrikker(any(), any()) } just runs
         }
 
@@ -271,6 +276,45 @@ class InnkommendeJournalføringServiceTest {
             verify(exactly = 0) { mockedIntegrasjonKlient.ferdigstillJournalpost(any(), any()) }
             verify(exactly = 0) { mockedIntegrasjonKlient.ferdigstillOppgave(any()) }
         }
+
+        @Test
+        fun `skal oppdatere logiske vedlegg før klagebehandling opprettes`() {
+            // Arrange
+            val request = lagJournalføringDtoForNyKlage()
+
+            // Act
+            innkommendeJournalføringService.journalfør(request, journalpostId, "4820", "1")
+
+            // Assert
+            verifyOrder {
+                mockedIntegrasjonKlient.oppdaterLogiskeVedlegg("1", BulkOppdaterLogiskVedleggRequest(titler = listOf("Vigselsattest")))
+                klageService.opprettKlage(any<Fagsak>(), any<LocalDate>())
+                mockedIntegrasjonKlient.oppdaterJournalpost(any(), journalpostId)
+            }
+        }
+
+        @Test
+        fun `skal ikke opprette klagebehandling når oppdatering av logiske vedlegg feiler`() {
+            // Arrange
+            every { mockedIntegrasjonKlient.oppdaterLogiskeVedlegg(any(), any()) } throws RuntimeException("Dokarkiv er nede")
+
+            val request = lagJournalføringDtoForNyKlage()
+
+            // Act & Assert
+            val feil = assertThrows<RuntimeException> { innkommendeJournalføringService.journalfør(request, journalpostId, "4820", "1") }
+            assertThat(feil.message).isEqualTo("Dokarkiv er nede")
+            verify(exactly = 0) { klageService.opprettKlage(any<Fagsak>(), any<LocalDate>()) }
+            verify(exactly = 0) { mockedIntegrasjonKlient.oppdaterJournalpost(any(), any()) }
+        }
+
+        private fun lagJournalføringDtoForNyKlage(): JournalføringDto =
+            lagJournalføringDto(
+                logiskeVedleggDokument1 = listOf(LogiskVedlegg(logiskVedleggId = "0", tittel = "Vigselsattest")),
+                logiskeVedleggDokument2 = null,
+            ).copy(
+                opprettOgKnyttTilNyBehandling = true,
+                nyBehandlingstype = Journalføringsbehandlingstype.KLAGE,
+            )
 
         private fun lagJournalføringDto(
             logiskeVedleggDokument1: List<LogiskVedlegg>?,

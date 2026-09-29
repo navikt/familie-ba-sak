@@ -592,28 +592,32 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
 
     @Test
     @Tag("integration")
-    fun `oppdaterLogiskeVedlegg skal kaste HttpClientErrorException når dokarkiv avviser forespørselen`() {
+    fun `oppdaterLogiskeVedlegg skal kaste IntegrasjonException når dokarkiv avviser en tittel som er for lang`() {
         // Arrange
+        // familie-integrasjoner gjør alle feil fra dokarkiv, også 400 ved tittel over 550 tegn, om til 500.
         val dokumentInfoId = "5678"
+        val feilmeldingFraFamilieIntegrasjoner =
+            "[dokarkiv.logiskVedlegg.oppdater][Kan ikke bulk oppdatere logiske vedlegg for dokumentinfo $dokumentInfoId " +
+                "Tittel er lengre enn 550 tegn][org.springframework.web.client.HttpClientErrorException\$BadRequest]"
         wireMockServer.stubFor(
             put(urlEqualTo("/api/arkiv/dokument/$dokumentInfoId/logiskVedlegg"))
                 .willReturn(
                     aResponse()
-                        .withStatus(400)
+                        .withStatus(500)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(jsonMapper.writeValueAsString(failure<String>("Tittel er lengre enn 550 tegn"))),
+                        .withBody(jsonMapper.writeValueAsString(failure<String>(feilmeldingFraFamilieIntegrasjoner))),
                 ),
         )
 
         // Act & Assert
         val feil =
-            assertThrows<HttpClientErrorException> {
+            assertThrows<IntegrasjonException> {
                 integrasjonKlient.oppdaterLogiskeVedlegg(
                     dokumentInfoId = dokumentInfoId,
                     request = BulkOppdaterLogiskVedleggRequest(titler = listOf("A".repeat(551))),
                 )
             }
-        assertThat(feil.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        assertThat(feil.message).contains("dokarkiv", "Tittel er lengre enn 550 tegn")
     }
 
     @Test
