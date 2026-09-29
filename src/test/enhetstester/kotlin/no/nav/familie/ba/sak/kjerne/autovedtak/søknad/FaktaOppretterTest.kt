@@ -793,18 +793,6 @@ class FaktaOppretterTest {
     }
 
     @Nested
-    inner class SøkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling {
-        @Test
-        fun `skal sette søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling til false`() {
-            // Act
-            val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
-
-            // Assert
-            assertThat(fakta.søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling).isFalse()
-        }
-    }
-
-    @Nested
     inner class SøkerHarAdressebeskyttelseGradering6Eller19 {
         @ParameterizedTest
         @EnumSource(value = ADRESSEBESKYTTELSEGRADERING::class, names = ["STRENGT_FORTROLIG", "STRENGT_FORTROLIG_UTLAND"])

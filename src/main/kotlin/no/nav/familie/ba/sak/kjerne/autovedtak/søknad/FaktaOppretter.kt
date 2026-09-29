@@ -68,7 +68,6 @@ class FaktaOppretter(
             søkerHarKryssetForDeltBostedISøknaden = søknad.harKryssetForDeltBostedForMinstEttBarn(),
             søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden = søknad.harKryssetForFosterhjemEllerBeredskapshjemForMinstEttBarn(),
             søknadenInneholderVedlegg = søknad.inneholderVedlegg,
-            søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling = false, // TODO Fix me
             søkerHarAdressebeskyttelseGradering6Eller19 = personInfo.adressebeskyttelseGradering.erStrengtFortrolig(),
             barnHarAdressebeskyttelseGradering6Eller19 = forelderBarnRelasjonerForSøknadsbarna.any { it.adressebeskyttelseGradering.erStrengtFortrolig() },
             søkerOgBarnHarForelderBarnRelasjon = barnaFraSøknad.all { barnFraSøknad -> forelderBarnRelasjonerForSøknadsbarna.any { it.aktør == barnFraSøknad.aktør } } && barnaFraSøknad.isNotEmpty(),
