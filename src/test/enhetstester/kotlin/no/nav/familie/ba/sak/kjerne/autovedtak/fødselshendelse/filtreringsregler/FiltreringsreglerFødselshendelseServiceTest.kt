@@ -8,11 +8,13 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.TestClockProvider
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFiltreringResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
@@ -44,7 +46,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -81,6 +85,83 @@ class FiltreringsreglerFødselshendelseServiceTest {
 
     init {
         every { featureToggleService.isEnabled(FeatureToggle.VURDER_ALLE_FILTRERINGSREGLER) } returns false
+    }
+
+    @Nested
+    inner class FinnBegrunnelseForHenleggingAvBehandling {
+        @Test
+        fun `skal nummerere begrunnelser når flere regler ikke er oppfylt`() {
+            // Arrange
+            val behandlingId = 123L
+
+            every { filtreringResultatRepository.finnFiltreringResultater(behandlingId) } returns
+                listOf(
+                    lagFiltreringResultat(
+                        behandlingId = behandlingId,
+                        resultat = Resultat.IKKE_OPPFYLT,
+                        begrunnelse = "Første begrunnelse.",
+                    ),
+                    lagFiltreringResultat(
+                        behandlingId = behandlingId,
+                        resultat = Resultat.OPPFYLT,
+                        begrunnelse = "Skal ikke med.",
+                    ),
+                    lagFiltreringResultat(
+                        behandlingId = behandlingId,
+                        resultat = Resultat.IKKE_OPPFYLT,
+                        begrunnelse = "Andre begrunnelse.",
+                    ),
+                )
+
+            // Act
+            val begrunnelse = filtreringsreglerFødselshendelseService.finnBegrunnelseForHenleggingAvBehandling(behandlingId)
+
+            // Assert
+            assertThat(begrunnelse).isEqualTo("1) Første begrunnelse. 2) Andre begrunnelse.")
+        }
+
+        @Test
+        fun `skal la en begrunnelse være unummerert`() {
+            // Arrange
+            val behandlingId = 123L
+
+            every { filtreringResultatRepository.finnFiltreringResultater(behandlingId) } returns
+                listOf(
+                    lagFiltreringResultat(
+                        behandlingId = behandlingId,
+                        resultat = Resultat.IKKE_OPPFYLT,
+                        begrunnelse = "Begrunnelse.",
+                    ),
+                )
+
+            // Act
+            val begrunnelse = filtreringsreglerFødselshendelseService.finnBegrunnelseForHenleggingAvBehandling(behandlingId)
+
+            // Assert
+            assertThat(begrunnelse).isEqualTo("Begrunnelse.")
+        }
+
+        @Test
+        fun `skal kaste feil når ingen regler er ikke oppfylt`() {
+            // Arrange
+            val behandlingId = 123L
+
+            every { filtreringResultatRepository.finnFiltreringResultater(behandlingId) } returns
+                listOf(
+                    lagFiltreringResultat(
+                        behandlingId = behandlingId,
+                        resultat = Resultat.OPPFYLT,
+                        begrunnelse = "Oppfylt.",
+                    ),
+                )
+
+            // Act & Assert
+            val exception =
+                assertThrows<Feil> {
+                    filtreringsreglerFødselshendelseService.finnBegrunnelseForHenleggingAvBehandling(behandlingId)
+                }
+            assertThat(exception).hasMessage("Fant ingen ikke oppfylte filtreringsregler for behandling $behandlingId")
+        }
     }
 
     @Test
