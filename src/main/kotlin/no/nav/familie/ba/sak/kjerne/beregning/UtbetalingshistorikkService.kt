@@ -7,13 +7,13 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import org.springframework.stereotype.Service
 
 @Service
-class TilkjentYtelseService(
+class UtbetalingshistorikkService(
     private val behandlingRepository: BehandlingRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val fagsakService: FagsakService,
     private val infotrygdService: InfotrygdService,
 ) {
-    fun søkerHarHattUtbetaling(fagsakId: Long): Boolean {
+    fun harSøkerHattUtbetaling(fagsakId: Long): Boolean {
         val behandlingIder =
             behandlingRepository
                 .finnBehandlinger(fagsakId)

@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/tilkjentytelse")
-class TilkjentytelseController(
+class TilkjentYtelseController(
     private val tilgangService: TilgangService,
-    private val tilkjentytelseService: TilkjentytelseService,
+    private val utbetalingshistorikkService: UtbetalingshistorikkService,
 ) {
     @Operation(
         summary = "Sjekker om søker har hatt utbetaling",
@@ -27,13 +27,13 @@ class TilkjentytelseController(
     )
     @ApiResponse(responseCode = "200", description = "Resultatet returneres som Ressurs<Boolean>.")
     @GetMapping(path = ["/fagsak/{fagsakId}/soker-har-hatt-utbetaling"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun søkerHarHattUtbetaling(
+    fun harSøkerHattUtbetaling(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<Boolean>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SYSTEM,
             handling = "svarer om det har vært utbetaling til aktør på fagsak",
         )
-        return ResponseEntity.ok(Ressurs.success(tilkjentytelseService.søkerHarHattUtbetaling(fagsakId)))
+        return ResponseEntity.ok(Ressurs.success(utbetalingshistorikkService.harSøkerHattUtbetaling(fagsakId)))
     }
 }

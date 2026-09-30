@@ -15,8 +15,8 @@ import org.springframework.http.HttpStatus
 
 class TilkjentYtelseControllerTest {
     private val tilgangService = mockk<TilgangService>()
-    private val tilkjentytelseService = mockk<TilkjentYtelseService>()
-    private val controller = TilkjentYtelseController(tilgangService, tilkjentytelseService)
+    private val utbetalingshistorikkService = mockk<UtbetalingshistorikkService>()
+    private val controller = TilkjentYtelseController(tilgangService, utbetalingshistorikkService)
     private val handling = "svarer om det har vært utbetaling til aktør på fagsak"
 
     @Test
@@ -24,17 +24,17 @@ class TilkjentYtelseControllerTest {
         // Arrange
         val fagsakId = 1L
         justRun { tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SYSTEM, handling) }
-        every { tilkjentytelseService.søkerHarHattUtbetaling(fagsakId) } returns true
+        every { utbetalingshistorikkService.harSøkerHattUtbetaling(fagsakId) } returns true
 
         // Act
-        val response = controller.søkerHarHattUtbetaling(fagsakId)
+        val response = controller.harSøkerHattUtbetaling(fagsakId)
 
         // Assert
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(response.body?.data).isTrue()
         verify(exactly = 1) { tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SYSTEM, handling) }
-        verify(exactly = 1) { tilkjentytelseService.søkerHarHattUtbetaling(fagsakId) }
+        verify(exactly = 1) { utbetalingshistorikkService.harSøkerHattUtbetaling(fagsakId) }
     }
 
     @Test
@@ -42,10 +42,10 @@ class TilkjentYtelseControllerTest {
         // Arrange
         val fagsakId = 1L
         justRun { tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SYSTEM, handling) }
-        every { tilkjentytelseService.søkerHarHattUtbetaling(fagsakId) } returns false
+        every { utbetalingshistorikkService.harSøkerHattUtbetaling(fagsakId) } returns false
 
         // Act
-        val response = controller.søkerHarHattUtbetaling(fagsakId)
+        val response = controller.harSøkerHattUtbetaling(fagsakId)
 
         // Assert
         assertThat(response.body?.data).isFalse()
@@ -58,7 +58,7 @@ class TilkjentYtelseControllerTest {
         every { tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SYSTEM, handling) } throws RolleTilgangskontrollFeil("Ikke tilgang")
 
         // Act & Assert
-        assertThrows<RolleTilgangskontrollFeil> { controller.søkerHarHattUtbetaling(fagsakId) }
-        verify(exactly = 0) { tilkjentytelseService.søkerHarHattUtbetaling(any()) }
+        assertThrows<RolleTilgangskontrollFeil> { controller.harSøkerHattUtbetaling(fagsakId) }
+        verify(exactly = 0) { utbetalingshistorikkService.harSøkerHattUtbetaling(any()) }
     }
 }

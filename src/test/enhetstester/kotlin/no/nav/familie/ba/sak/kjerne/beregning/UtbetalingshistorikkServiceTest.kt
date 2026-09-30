@@ -17,12 +17,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-class TilkjentYtelseServiceTest {
+class UtbetalingshistorikkServiceTest {
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val fagsakService = mockk<FagsakService>()
     private val infotrygdService = mockk<InfotrygdService>()
-    private val service = TilkjentYtelseService(behandlingRepository, andelTilkjentYtelseRepository, fagsakService, infotrygdService)
+    private val service = UtbetalingshistorikkService(behandlingRepository, andelTilkjentYtelseRepository, fagsakService, infotrygdService)
     private val fagsak = lagFagsak()
     private val søkerIdent = fagsak.aktør.aktivFødselsnummer()
 
@@ -36,7 +36,7 @@ class TilkjentYtelseServiceTest {
             listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 1), tom = YearMonth.of(2025, 12), behandling = behandling))
 
         // Act
-        val resultat = service.søkerHarHattUtbetaling(fagsak.id)
+        val resultat = service.harSøkerHattUtbetaling(fagsak.id)
 
         // Assert
         assertThat(resultat).isTrue()
@@ -54,7 +54,7 @@ class TilkjentYtelseServiceTest {
             InfotrygdSøkResponse(bruker = listOf(Stønad()), barn = emptyList())
 
         // Act
-        val resultat = service.søkerHarHattUtbetaling(fagsak.id)
+        val resultat = service.harSøkerHattUtbetaling(fagsak.id)
 
         // Assert
         assertThat(resultat).isTrue()
@@ -72,7 +72,7 @@ class TilkjentYtelseServiceTest {
             InfotrygdSøkResponse(bruker = emptyList(), barn = emptyList())
 
         // Act
-        val resultat = service.søkerHarHattUtbetaling(fagsak.id)
+        val resultat = service.harSøkerHattUtbetaling(fagsak.id)
 
         // Assert
         assertThat(resultat).isFalse()

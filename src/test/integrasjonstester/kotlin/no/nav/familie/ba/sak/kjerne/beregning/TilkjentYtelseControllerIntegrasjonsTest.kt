@@ -23,7 +23,7 @@ import org.springframework.web.client.toEntity
 import java.time.YearMonth
 
 @ActiveProfiles("postgres", "integrasjonstest", "testcontainers")
-class TilkjentytelseControllerIntegrasjonsTest(
+class TilkjentYtelseControllerIntegrasjonsTest(
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
