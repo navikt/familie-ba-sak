@@ -17,12 +17,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-class TilkjentytelseServiceTest {
+class TilkjentYtelseServiceTest {
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val fagsakService = mockk<FagsakService>()
     private val infotrygdService = mockk<InfotrygdService>()
-    private val service = TilkjentytelseService(behandlingRepository, andelTilkjentYtelseRepository, fagsakService, infotrygdService)
+    private val service = TilkjentYtelseService(behandlingRepository, andelTilkjentYtelseRepository, fagsakService, infotrygdService)
     private val fagsak = lagFagsak()
     private val søkerIdent = fagsak.aktør.aktivFødselsnummer()
 

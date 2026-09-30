@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import org.springframework.stereotype.Service
 
 @Service
-class TilkjentytelseService(
+class TilkjentYtelseService(
     private val behandlingRepository: BehandlingRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val fagsakService: FagsakService,
