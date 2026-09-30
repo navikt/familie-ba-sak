@@ -5,7 +5,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -24,6 +26,7 @@ class TilkjentytelseController(
                 "Returnerer false når ingen av delene finnes.",
     )
     @ApiResponse(responseCode = "200", description = "Resultatet returneres som Ressurs<Boolean>.")
+    @GetMapping(path = ["/fagsak/{fagsakId}/soker-har-hatt-utbetaling"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun søkerHarHattUtbetaling(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<Boolean>> {
