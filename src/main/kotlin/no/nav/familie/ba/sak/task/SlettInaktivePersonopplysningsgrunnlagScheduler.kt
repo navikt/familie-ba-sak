@@ -38,7 +38,7 @@ class SlettInaktivePersonopplysningsgrunnlagScheduler(
     private val featureToggleService: FeatureToggleService,
     private val leaderClientService: LeaderClientService,
 ) {
-    @Scheduled(cron = "0 0 3 * * *")
+    @Scheduled(cron = "0 0 0-6 * * 1-5")
     fun slettInaktivePersonopplysningsgrunnlag() {
         if (!leaderClientService.isLeader()) return
         if (!featureToggleService.isEnabled(FeatureToggle.SKAL_SLETTE_INAKTIVE_PERSONOPPLYSNINGSGRUNNLAG)) return
