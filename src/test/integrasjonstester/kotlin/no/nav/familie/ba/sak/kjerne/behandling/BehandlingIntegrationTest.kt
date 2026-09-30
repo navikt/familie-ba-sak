@@ -517,7 +517,7 @@ class BehandlingIntegrationTest(
                 januar2021.minusMonths(1).toLocalDate(),
                 stønadTom.toLocalDate(),
             )
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering2)
+        vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering = vilkårsvurdering2)
 
         // Act
         val satsEndringDatoSeptember2021 =
