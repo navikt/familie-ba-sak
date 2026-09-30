@@ -5,6 +5,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.fake.FakeFeatureToggleService
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.tilPayload
@@ -287,11 +288,18 @@ class FødselshendelseHenleggelseTest(
         val lagredeTaskerAvType =
             fakeTaskRepositoryWrapper.hentLagredeTaskerAvType(OpprettOppgaveTask.TASK_STEP_TYPE).tilPayload<OpprettOppgaveTaskDTO>()
 
+        val forventetBeskrivelse =
+            if (featureToggleService.isEnabled(FeatureToggle.VURDER_ALLE_FILTRERINGSREGLER)) {
+                "Fødselshendelse: 1) Mor mottar utvidet barnetrygd. 2) Mor oppfyller vilkår for utvidet barnetrygd"
+            } else {
+                "Fødselshendelse: Mor mottar utvidet barnetrygd."
+            }
+
         val lagretTask =
             lagredeTaskerAvType
                 .singleOrNull {
                     it.behandlingId == revurdering!!.id &&
-                        it.beskrivelse == "Fødselshendelse: Mor mottar utvidet barnetrygd." &&
+                        it.beskrivelse == forventetBeskrivelse &&
                         it.manuellOppgaveType == ManuellOppgaveType.FØDSELSHENDELSE
                 }
 

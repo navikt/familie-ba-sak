@@ -129,14 +129,10 @@ class AutovedtakFødselshendelseService(
 
         return if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
             stansetIAutomatiskFiltreringCounter.increment()
-
+            val begrunnelse = filtreringsreglerFødselshendelseService.finnBegrunnelseForHenleggingAvBehandling(behandling.id)
             henleggBehandlingOgOpprettManuellOppgave(
                 behandling = behandlingEtterFiltrering,
-                begrunnelse =
-                    filtreringsreglerFødselshendelseService
-                        .hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
-                        .first { it.resultat == Resultat.IKKE_OPPFYLT }
-                        .begrunnelse,
+                begrunnelse = begrunnelse,
             )
         } else {
             vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = barnSomSkalBehandlesForMor)
