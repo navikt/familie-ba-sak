@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.familie.ba.sak.internal.ForvalterService
+import no.nav.familie.ba.sak.internal.forvalter.ForvalterService
 import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
