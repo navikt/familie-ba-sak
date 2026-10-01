@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 
-class TilkjentYtelseControllerTest {
+class BarnetrygdHistorikkControllerTest {
     private val tilgangService = mockk<TilgangService>()
     private val barnetrygdHistorikkService = mockk<BarnetrygdHistorikkService>()
-    private val controller = TilkjentYtelseController(tilgangService, barnetrygdHistorikkService)
+    private val controller = BarnetrygdHistorikkController(tilgangService, barnetrygdHistorikkService)
     private val handling = "svarer om det har vært utbetaling til aktør på fagsak"
 
     @Test

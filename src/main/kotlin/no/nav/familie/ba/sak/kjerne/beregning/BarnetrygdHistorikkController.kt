@@ -14,16 +14,16 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/tilkjentytelse")
-class TilkjentYtelseController(
+class BarnetrygdHistorikkController(
     private val tilgangService: TilgangService,
     private val barnetrygdHistorikkService: BarnetrygdHistorikkService,
 ) {
     @Operation(
         summary = "Sjekker om søker har hatt utbetaling",
         description =
-            "Returnerer true dersom fagsaken har andeler på behandlinger som ikke er henlagt, " +
+            "Returnerer true dersom fagsaken har andeler på vedtatte behandlinger, " +
                 "eller dersom søker har stønader i Infotrygd. Andeler med 0 kroner i utbetaling teller også. " +
-                "Returnerer false når ingen av delene finnes.",
+                "Pågående og henlagte behandlinger teller ikke. Returnerer false når ingen av delene finnes.",
     )
     @ApiResponse(responseCode = "200", description = "Resultatet returneres som Ressurs<Boolean>.")
     @GetMapping(path = ["/fagsak/{fagsakId}/soker-har-hatt-utbetaling"], produces = [MediaType.APPLICATION_JSON_VALUE])
