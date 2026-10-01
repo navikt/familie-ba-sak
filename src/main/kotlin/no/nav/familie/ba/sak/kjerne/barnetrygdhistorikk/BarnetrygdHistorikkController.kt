@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.beregning
+package no.nav.familie.ba.sak.kjerne.barnetrygdhistorikk
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse

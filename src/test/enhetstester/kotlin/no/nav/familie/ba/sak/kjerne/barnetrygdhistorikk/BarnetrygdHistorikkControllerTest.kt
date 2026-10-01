@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.beregning
+package no.nav.familie.ba.sak.kjerne.barnetrygdhistorikk
 
 import io.mockk.every
 import io.mockk.justRun

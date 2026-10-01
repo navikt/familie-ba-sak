@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.beregning
+package no.nav.familie.ba.sak.kjerne.barnetrygdhistorikk
 
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
