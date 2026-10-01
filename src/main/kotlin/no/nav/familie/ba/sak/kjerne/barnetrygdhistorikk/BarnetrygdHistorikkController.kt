@@ -26,7 +26,7 @@ class BarnetrygdHistorikkController(
                 "Pågående og henlagte behandlinger teller ikke. Returnerer false når ingen av delene finnes.",
     )
     @ApiResponse(responseCode = "200", description = "Resultatet returneres som Ressurs<Boolean>.")
-    @GetMapping(path = ["/fagsak/{fagsakId}/soker-har-hatt-invilget_barnetrygd"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping(path = ["/fagsak/{fagsakId}/soker-har-hatt-innvilget_barnetrygd"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun harSøkerHattUtbetaling(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<Boolean>> {
