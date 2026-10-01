@@ -15,8 +15,8 @@ import org.springframework.http.HttpStatus
 
 class TilkjentYtelseControllerTest {
     private val tilgangService = mockk<TilgangService>()
-    private val utbetalingshistorikkService = mockk<UtbetalingshistorikkService>()
-    private val controller = TilkjentYtelseController(tilgangService, utbetalingshistorikkService)
+    private val barnetrygdHistorikkService = mockk<BarnetrygdHistorikkService>()
+    private val controller = TilkjentYtelseController(tilgangService, barnetrygdHistorikkService)
     private val handling = "svarer om det har vært utbetaling til aktør på fagsak"
 
     @Test
@@ -24,7 +24,7 @@ class TilkjentYtelseControllerTest {
         // Arrange
         val fagsakId = 1L
         justRun { tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SYSTEM, handling) }
-        every { utbetalingshistorikkService.harSøkerHattUtbetaling(fagsakId) } returns true
+        every { barnetrygdHistorikkService.harSøkerHattInnvilgetBarnetrygd(fagsakId) } returns true
 
         // Act
         val response = controller.harSøkerHattUtbetaling(fagsakId)
@@ -34,7 +34,7 @@ class TilkjentYtelseControllerTest {
         assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(response.body?.data).isTrue()
         verify(exactly = 1) { tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SYSTEM, handling) }
-        verify(exactly = 1) { utbetalingshistorikkService.harSøkerHattUtbetaling(fagsakId) }
+        verify(exactly = 1) { barnetrygdHistorikkService.harSøkerHattInnvilgetBarnetrygd(fagsakId) }
     }
 
     @Test
@@ -42,7 +42,7 @@ class TilkjentYtelseControllerTest {
         // Arrange
         val fagsakId = 1L
         justRun { tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SYSTEM, handling) }
-        every { utbetalingshistorikkService.harSøkerHattUtbetaling(fagsakId) } returns false
+        every { barnetrygdHistorikkService.harSøkerHattInnvilgetBarnetrygd(fagsakId) } returns false
 
         // Act
         val response = controller.harSøkerHattUtbetaling(fagsakId)
@@ -59,6 +59,6 @@ class TilkjentYtelseControllerTest {
 
         // Act & Assert
         assertThrows<RolleTilgangskontrollFeil> { controller.harSøkerHattUtbetaling(fagsakId) }
-        verify(exactly = 0) { utbetalingshistorikkService.harSøkerHattUtbetaling(any()) }
+        verify(exactly = 0) { barnetrygdHistorikkService.harSøkerHattInnvilgetBarnetrygd(any()) }
     }
 }

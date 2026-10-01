@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/tilkjentytelse")
 class TilkjentYtelseController(
     private val tilgangService: TilgangService,
-    private val utbetalingshistorikkService: UtbetalingshistorikkService,
+    private val barnetrygdHistorikkService: BarnetrygdHistorikkService,
 ) {
     @Operation(
         summary = "Sjekker om søker har hatt utbetaling",
@@ -34,6 +34,6 @@ class TilkjentYtelseController(
             minimumBehandlerRolle = BehandlerRolle.SYSTEM,
             handling = "svarer om det har vært utbetaling til aktør på fagsak",
         )
-        return ResponseEntity.ok(Ressurs.success(utbetalingshistorikkService.harSøkerHattUtbetaling(fagsakId)))
+        return ResponseEntity.ok(Ressurs.success(barnetrygdHistorikkService.harSøkerHattInnvilgetBarnetrygd(fagsakId)))
     }
 }

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -35,7 +36,7 @@ class TilkjentYtelseControllerIntegrasjonsTest(
         // Arrange
         val aktør = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
-        val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
+        val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET))
         val tilkjentYtelse = tilkjentYtelseRepository.save(lagInitiellTilkjentYtelse(behandling = behandling))
         andelTilkjentYtelseRepository.save(
             lagAndelTilkjentYtelse(

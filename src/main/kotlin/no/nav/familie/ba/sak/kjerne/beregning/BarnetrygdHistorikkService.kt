@@ -1,23 +1,22 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import org.springframework.stereotype.Service
 
 @Service
-class UtbetalingshistorikkService(
-    private val behandlingRepository: BehandlingRepository,
+class BarnetrygdHistorikkService(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val fagsakService: FagsakService,
     private val infotrygdService: InfotrygdService,
 ) {
-    fun harSøkerHattUtbetaling(fagsakId: Long): Boolean {
+    fun harSøkerHattInnvilgetBarnetrygd(fagsakId: Long): Boolean {
         val behandlingIder =
-            behandlingRepository
-                .finnBehandlinger(fagsakId)
-                .filter { !it.erHenlagt() }
+            behandlingHentOgPersisterService
+                .hentFerdigstilteBehandlinger(fagsakId)
                 .map { it.id }
 
         if (behandlingIder.isNotEmpty() &&
