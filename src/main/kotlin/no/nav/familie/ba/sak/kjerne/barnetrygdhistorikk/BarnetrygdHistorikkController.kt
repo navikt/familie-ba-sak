@@ -19,7 +19,7 @@ class BarnetrygdHistorikkController(
     private val barnetrygdHistorikkService: BarnetrygdHistorikkService,
 ) {
     @Operation(
-        summary = "Sjekker om søker har hatt utbetaling",
+        summary = "Sjekker om søker har hatt invilget barntrygd",
         description =
             "Returnerer true dersom fagsaken har andeler på vedtatte behandlinger, " +
                 "eller dersom søker har stønader i Infotrygd. Andeler med 0 kroner i utbetaling teller også. " +

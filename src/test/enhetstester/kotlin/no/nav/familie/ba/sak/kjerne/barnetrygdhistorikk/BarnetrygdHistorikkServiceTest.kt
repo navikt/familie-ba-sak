@@ -43,7 +43,7 @@ class BarnetrygdHistorikkServiceTest {
     }
 
     @Test
-    fun `skal bruke Infotrygd når ingen ikke henlagte behandlinger finnes`() {
+    fun `skal bruke Infotrygd når ingen ingen vedtatt behandlinger finnes`() {
         // Arrange
         every { behandlingHentOgPersisterService.hentFerdigstilteBehandlinger(fagsakId = fagsak.id) } returns emptyList()
         every { fagsakService.hentPåFagsakId(fagsak.id) } returns fagsak
