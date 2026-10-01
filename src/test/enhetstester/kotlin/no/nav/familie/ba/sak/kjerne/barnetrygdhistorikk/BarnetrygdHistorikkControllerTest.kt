@@ -17,7 +17,7 @@ class BarnetrygdHistorikkControllerTest {
     private val tilgangService = mockk<TilgangService>()
     private val barnetrygdHistorikkService = mockk<BarnetrygdHistorikkService>()
     private val controller = BarnetrygdHistorikkController(tilgangService, barnetrygdHistorikkService)
-    private val handling = "svarer om det har vært utbetaling til aktør på fagsak"
+    private val handling = "svarer om det har vært innvilget barnetrygd på aktør på fagsak"
 
     @Test
     fun `skal returnere resultat fra service i ressurs for fagsak med tilgang`() {
@@ -27,7 +27,7 @@ class BarnetrygdHistorikkControllerTest {
         every { barnetrygdHistorikkService.harSøkerHattInnvilgetBarnetrygd(fagsakId) } returns true
 
         // Act
-        val response = controller.harSøkerHattUtbetaling(fagsakId)
+        val response = controller.søkerHarHattInnvilgetBarnetrygd(fagsakId)
 
         // Assert
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
@@ -45,7 +45,7 @@ class BarnetrygdHistorikkControllerTest {
         every { barnetrygdHistorikkService.harSøkerHattInnvilgetBarnetrygd(fagsakId) } returns false
 
         // Act
-        val response = controller.harSøkerHattUtbetaling(fagsakId)
+        val response = controller.søkerHarHattInnvilgetBarnetrygd(fagsakId)
 
         // Assert
         assertThat(response.body?.data).isFalse()
@@ -58,7 +58,7 @@ class BarnetrygdHistorikkControllerTest {
         every { tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SYSTEM, handling) } throws RolleTilgangskontrollFeil("Ikke tilgang")
 
         // Act & Assert
-        assertThrows<RolleTilgangskontrollFeil> { controller.harSøkerHattUtbetaling(fagsakId) }
+        assertThrows<RolleTilgangskontrollFeil> { controller.søkerHarHattInnvilgetBarnetrygd(fagsakId) }
         verify(exactly = 0) { barnetrygdHistorikkService.harSøkerHattInnvilgetBarnetrygd(any()) }
     }
 }

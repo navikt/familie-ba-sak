@@ -119,7 +119,7 @@ class BarnetrygdHistorikkControllerIntegrasjonsTest(
     ): ResponseEntity<Ressurs<Boolean>> =
         restClient
             .get()
-            .uri(hentUrl("/api/barnetrygdhistorikk/fagsak/$fagsakId/soker-har-hatt-innvilget_barnetrygd"))
+            .uri(hentUrl("/api/barnetrygdhistorikk/fagsak/$fagsakId/soker-har-hatt-innvilget-barnetrygd"))
             .headers { it.addAll(headers) }
             .retrieve()
             .toEntity<Ressurs<Boolean>>()
