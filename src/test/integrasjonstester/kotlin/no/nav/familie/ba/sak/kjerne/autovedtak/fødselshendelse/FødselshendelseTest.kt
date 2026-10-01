@@ -297,7 +297,7 @@ class FødselshendelseTest(
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
                 brevmalService = brevmalService,
-                vilkårInnvilgetFom = LocalDate.now().minusYears(1),
+                vilkårInnvilgetFom = yngsteBarnFødselsdato.plusDays(5),
             )
 
         // Act
@@ -455,7 +455,7 @@ class FødselshendelseTest(
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
                 brevmalService = brevmalService,
-                vilkårInnvilgetFom = LocalDate.now().minusYears(1),
+                vilkårInnvilgetFom = yngsteBarnFødselsdato.plusDays(5),
             )
 
         // Act
