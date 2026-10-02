@@ -3,15 +3,18 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAktør
+import no.nav.familie.ba.sak.datagenerator.lagPersonTilgangAvvistGrunnetSkjerming
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollKlient
+import no.nav.familie.ba.sak.mock.FakeTilgangsmaskinTilgangskontrollKlient
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgang
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
+import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
+import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
-import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -21,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.cache.CacheManager
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClient
 import java.net.URI
@@ -31,9 +35,9 @@ internal class PersonopplysningerServiceIntegrationTest(
     @Qualifier("utenAuthRestClient")
     private val restClient: RestClient,
     @Autowired
-    private val fakeFamilieIntegrasjonerTilgangskontrollKlient: FakeFamilieIntegrasjonerTilgangskontrollKlient,
+    private val fakeTilgangsmaskinTilgangskontrollKlient: FakeTilgangsmaskinTilgangskontrollKlient,
     @Autowired
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+    private val personTilgangService: PersonTilgangService,
     @Autowired
     private val mockPersonidentService: PersonidentService,
     @Autowired
@@ -42,11 +46,15 @@ internal class PersonopplysningerServiceIntegrationTest(
     private val falskIdentitetService: FalskIdentitetService,
     @Autowired
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    @Autowired
+    private val cacheManager: CacheManager,
 ) : AbstractSpringIntegrationTest() {
     lateinit var personopplysningerService: PersonopplysningerService
 
     @BeforeEach
     fun setUp() {
+        mockBrukerContext()
+        cacheManager.getCache(PersonTilgangService.TILGANG_TIL_PERSONER_CACHE)?.clear()
         personopplysningerService =
             PersonopplysningerService(
                 PdlRestKlient(URI.create(wireMockServer.baseUrl() + "/api"), restClient, mockPersonidentService),
@@ -55,7 +63,7 @@ internal class PersonopplysningerServiceIntegrationTest(
                     restClient,
                     mockPersonidentService,
                 ),
-                familieIntegrasjonerTilgangskontrollService,
+                personTilgangService,
                 fakeIntegrasjonKlient,
                 falskIdentitetService,
                 personopplysningGrunnlagRepository,
@@ -65,16 +73,17 @@ internal class PersonopplysningerServiceIntegrationTest(
 
     @AfterEach
     fun tearDown() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.reset()
+        clearBrukerContext()
+        fakeTilgangsmaskinTilgangskontrollKlient.reset()
     }
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
         // Arrange
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(ID_BARN_1, true),
-                Tilgang(ID_BARN_2, false),
+                PersonTilgang.medTilgang(ID_BARN_1),
+                lagPersonTilgangAvvistGrunnetSkjerming(ID_BARN_2),
             ),
         )
         fakeIntegrasjonKlient.leggTilEgenansatt(ID_MOR)
@@ -96,10 +105,10 @@ internal class PersonopplysningerServiceIntegrationTest(
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal returnere riktig personinfo for død person`() {
         // Arrange
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(ID_BARN_1, true),
-                Tilgang(ID_BARN_2, false),
+                PersonTilgang.medTilgang(ID_BARN_1),
+                lagPersonTilgangAvvistGrunnetSkjerming(ID_BARN_2),
             ),
         )
 
@@ -120,7 +129,7 @@ internal class PersonopplysningerServiceIntegrationTest(
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
         // Arrange
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             emptyList(),
             godkjennDefault = true,
         )

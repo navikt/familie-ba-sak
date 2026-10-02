@@ -4,13 +4,13 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitetPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -24,7 +24,7 @@ class PersonControllerTest {
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val personidentService = mockk<PersonidentService>()
-    private val familieIntegrasjonerTilgangskontrollService = mockk<FamilieIntegrasjonerTilgangskontrollService>()
+    private val personTilgangService = mockk<PersonTilgangService>()
     private val utvidetBehandlingService = mockk<UtvidetBehandlingService>()
     private val tilgangService = mockk<TilgangService>()
     private val personController =
@@ -32,7 +32,7 @@ class PersonControllerTest {
             personopplysningerService = personopplysningerService,
             persongrunnlagService = persongrunnlagService,
             personidentService = personidentService,
-            familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
+            personTilgangService = personTilgangService,
             utvidetBehandlingService = utvidetBehandlingService,
             tilgangService = tilgangService,
         )
@@ -52,7 +52,7 @@ class PersonControllerTest {
             val pdlPersonInfo = PdlPersonInfo.Person(personInfo = personInfo)
 
             every { personidentService.hentAktør(person.aktør.aktivFødselsnummer()) } returns person.aktør
-            every { familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør) } returns null
+            every { personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør) } returns null
             every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør) } returns pdlPersonInfo
 
             // Act
@@ -83,7 +83,7 @@ class PersonControllerTest {
             val pdlPersonInfo = PdlPersonInfo.FalskPerson(falskIdentitetPersonInfo = falskIdentitetPersonInfo)
 
             every { personidentService.hentAktør(person.aktør.aktivFødselsnummer()) } returns person.aktør
-            every { familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør) } returns null
+            every { personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør) } returns null
             every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør) } returns pdlPersonInfo
 
             // Act
@@ -114,7 +114,7 @@ class PersonControllerTest {
                 )
 
             every { personidentService.hentAktør(person.aktør.aktivFødselsnummer()) } returns person.aktør
-            every { familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør) } returns personInfoDto
+            every { personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør) } returns personInfoDto
 
             // Act
             val respons = personController.hentPerson(PersonIdent(person.aktør.aktivFødselsnummer()))

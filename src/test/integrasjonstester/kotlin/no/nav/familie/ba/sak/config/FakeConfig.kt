@@ -18,8 +18,6 @@ import no.nav.familie.ba.sak.fake.FakeSanityKlient
 import no.nav.familie.ba.sak.fake.FakeSystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.FakeTilbakekrevingKlient
-import no.nav.familie.ba.sak.fake.FakeTilgangsmaskinKlient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
@@ -29,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.felles.tokenklient.entraid.EntraIDClient
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.unleash.UnleashService
@@ -49,11 +48,6 @@ class FakeConfig {
         every { mock.hentOboToken(any(), any()) } returns "mock-obo-token"
         return mock
     }
-
-    @Bean
-    @Primary
-    @Profile("integrasjonstest", "postgres")
-    fun fakeTilgangsmaskinKlient(): FakeTilgangsmaskinKlient = FakeTilgangsmaskinKlient()
 
     @Bean
     @Primary
@@ -135,7 +129,7 @@ class FakeConfig {
     fun fakePersonopplysningerService(
         pdlRestKlient: PdlRestKlient,
         systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
-        familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+        personTilgangService: PersonTilgangService,
         integrasjonKlient: IntegrasjonKlient,
         falskIdentitetService: FalskIdentitetService,
         personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
@@ -143,7 +137,7 @@ class FakeConfig {
         FakePersonopplysningerService(
             pdlRestKlient = pdlRestKlient,
             systemOnlyPdlRestKlient = systemOnlyPdlRestKlient,
-            familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
+            personTilgangService = personTilgangService,
             integrasjonKlient = integrasjonKlient,
             falskIdentitetService = falskIdentitetService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,

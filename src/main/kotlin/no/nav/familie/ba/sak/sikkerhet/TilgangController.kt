@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import no.nav.familie.ba.sak.ekstern.restDomene.TilgangDTO
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Fødselsnummer
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 class TilgangController(
     private val personopplysningerService: PersonopplysningerService,
     private val personidentService: PersonidentService,
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+    private val personTilgangService: PersonTilgangService,
 ) {
     @PostMapping(path = ["tilgang"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentTilgangOgDiskresjonskode(
@@ -27,7 +26,7 @@ class TilgangController(
         val aktør = personidentService.hentAktør(tilgangRequestDTO.brukerIdent)
 
         val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør)
-        val tilgang = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPerson(tilgangRequestDTO.brukerIdent)
+        val tilgang = personTilgangService.sjekkTilgangTilPerson(tilgangRequestDTO.brukerIdent)
         return ResponseEntity.ok(
             Ressurs.success(
                 data =

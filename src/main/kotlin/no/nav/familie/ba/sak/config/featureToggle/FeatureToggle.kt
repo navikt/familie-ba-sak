@@ -65,9 +65,6 @@ enum class FeatureToggle(
     // NAV-29382
     HENT_VEDTAKSBREV_FRA_JOARK("familie-ba-sak.hent-vedtaksbrev-fra-joark"),
 
-    // NAV-30300
-    SKAL_SKYGGEKJØRE_TILGANGSMASKINEN("familie-ba-sak.skal-skyggekjore-tilgangsmaskinen"),
-
     // NAV-30720
     SKAL_BEHANDLE_SOKNAD_AUTOMATISK("familie-ba-sak.skal-behandle-soknad-automatisk"),
 
