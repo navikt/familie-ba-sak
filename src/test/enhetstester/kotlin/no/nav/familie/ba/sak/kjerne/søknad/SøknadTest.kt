@@ -74,6 +74,47 @@ class SøknadTest {
         }
 
         @Test
+        fun `skal gi false når ingen av barna er fosterbarn eller bor i beredskapshjem`() {
+            // Arrange
+            val søknad =
+                lagSøknadMedBarn(
+                    lagBarn(erFosterbarn = false),
+                    lagBarn(erIBeredskapshjem = false),
+                )
+
+            // Act & Assert
+            assertThat(søknad.harKryssetForFosterhjemEllerBeredskapshjemForMinstEttBarn()).isFalse()
+        }
+
+        @Test
+        fun `skal gi true når minst ett barn bor i beredskapshjem`() {
+            // Arrange
+            val søknad =
+                lagSøknadMedBarn(
+                    lagBarn(),
+                    lagBarn(erIBeredskapshjem = true),
+                )
+
+            // Act & Assert
+            assertThat(søknad.harKryssetForFosterhjemEllerBeredskapshjemForMinstEttBarn()).isTrue()
+        }
+
+        @Test
+        fun `skal gi true når barn er registrert i både fosterhjem og beredskapshjem`() {
+            // Arrange
+            val søknad =
+                lagSøknadMedBarn(
+                    lagBarn(
+                        erFosterbarn = true,
+                        erIBeredskapshjem = true,
+                    ),
+                )
+
+            // Act & Assert
+            assertThat(søknad.harKryssetForFosterhjemEllerBeredskapshjemForMinstEttBarn()).isTrue()
+        }
+
+        @Test
         fun `skal gi false når søknaden ikke har barn`() {
             // Arrange
             val søknad = lagSøknadMedBarn()
@@ -87,12 +128,14 @@ class SøknadTest {
 
     private fun lagBarn(
         erFosterbarn: Boolean = false,
+        erIBeredskapshjem: Boolean = false,
         harKryssetForDeltBosted: Boolean = false,
     ): Barn =
         Barn(
             fnr = randomFnr(),
             planleggerÅBoINorge12Mnd = true,
             erFosterbarn = erFosterbarn,
+            erIBeredskapshjem = erIBeredskapshjem,
             harKryssetForDeltBosted = harKryssetForDeltBosted,
         )
 }

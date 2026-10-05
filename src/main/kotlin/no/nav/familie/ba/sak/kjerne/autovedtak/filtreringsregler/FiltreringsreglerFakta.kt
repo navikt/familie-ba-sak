@@ -27,7 +27,7 @@ data class FiltreringsreglerFaktaFødselshendelse(
     override val søkerHarVerge: Boolean,
     val løperBarnetrygdForBarnetPåAnnenForelder: Boolean,
     val restenAvBarna: List<PersonInfo>,
-    val erFagsakenMigrertEtterBarnFødt: Boolean, // TODO : Er det relevant?
+    val erFagsakenMigrertEtterBarnFødt: Boolean,
     val morHarIkkeOpphørtBarnetrygd: Boolean,
     @JsonIgnore val dagensDato: LocalDate = LocalDate.now(),
 ) : FiltreringsreglerFakta()
@@ -46,7 +46,6 @@ data class FiltreringsreglerFaktaSøknad(
     val søkerHarKryssetForDeltBostedISøknaden: Boolean,
     val søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden: Boolean,
     val søknadenInneholderVedlegg: Boolean,
-    val søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling: Boolean, // TODO : Skal vi gjøre denne sjekken i baks-mottak? Sjekk med Anna
     val søkerHarAdressebeskyttelseGradering6Eller19: Boolean = false,
     val barnHarAdressebeskyttelseGradering6Eller19: Boolean = false,
     val søkerOgBarnHarForelderBarnRelasjon: Boolean = true,

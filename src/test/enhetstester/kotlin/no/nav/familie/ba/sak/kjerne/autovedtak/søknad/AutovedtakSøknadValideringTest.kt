@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagInfotrygdstønad
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
@@ -17,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -71,6 +73,170 @@ class AutovedtakSøknadValideringTest {
 
             // Assert
             assertThat(feil.message).isEqualTo("Vilkårsvurderingen er ikke oppfylt.\nBehandling av søknad må håndteres manuelt.")
+        }
+    }
+
+    @Nested
+    inner class ValiderAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger {
+        private val tidligereBarn = lagPerson(type = PersonType.BARN).aktør
+
+        private fun lagAndel(
+            aktør: Aktør,
+            fom: YearMonth,
+            tom: YearMonth,
+            behandling: Behandling = this@AutovedtakSøknadValideringTest.behandling,
+            beløp: Int = 1968,
+            ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+            prosent: BigDecimal = BigDecimal(100),
+        ) = lagAndelTilkjentYtelse(fom = fom, tom = tom, aktør = aktør, behandling = behandling, beløp = beløp, ytelseType = ytelseType, prosent = prosent)
+
+        private fun valider(
+            andelerDenneBehandlingen: List<AndelTilkjentYtelse>,
+            andelerForrigeBehandling: List<AndelTilkjentYtelse> = emptyList(),
+            infotrygdstønaderTilSøker: List<Stønad> = emptyList(),
+        ) = AutovedtakSøknadValidering.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(
+            andelerDenneBehandlingen = andelerDenneBehandlingen,
+            andelerForrigeBehandling = andelerForrigeBehandling,
+            infotrygdstønaderTilSøker = infotrygdstønaderTilSøker,
+        )
+
+        @Test
+        fun `skal ikke kaste feil når søker ikke har hatt tidligere utbetalinger`() {
+            // Arrange
+            val andelerDenneBehandlingen = listOf(lagAndel(barnFremstiltKravFor, YearMonth.of(2025, 1), YearMonth.of(2030, 12)))
+
+            // Act & Assert
+            assertDoesNotThrow { valider(andelerDenneBehandlingen) }
+        }
+
+        @Test
+        fun `skal ikke kaste feil når innvilget periode starter etter at tidligere utbetaling er avsluttet`() {
+            // Arrange
+            val tidligereAndel = lagAndel(tidligereBarn, YearMonth.of(2020, 1), YearMonth.of(2024, 12), behandling = forrigeBehandling)
+            val andelerDenneBehandlingen =
+                listOf(
+                    lagAndel(tidligereBarn, YearMonth.of(2020, 1), YearMonth.of(2024, 12)),
+                    lagAndel(barnFremstiltKravFor, YearMonth.of(2025, 1), YearMonth.of(2030, 12)),
+                )
+
+            // Act & Assert
+            assertDoesNotThrow { valider(andelerDenneBehandlingen = andelerDenneBehandlingen, andelerForrigeBehandling = listOf(tidligereAndel)) }
+        }
+
+        @Test
+        fun `skal kaste feil når innvilget periode overlapper med tidligere periode satt til 0 prosent pga endret utbetaling`() {
+            // Arrange
+            val tidligereAndel = lagAndel(tidligereBarn, YearMonth.of(2025, 1), YearMonth.of(2030, 12), behandling = forrigeBehandling, beløp = 0, prosent = BigDecimal.ZERO)
+            val andelerDenneBehandlingen =
+                listOf(
+                    lagAndel(tidligereBarn, YearMonth.of(2025, 1), YearMonth.of(2030, 12), beløp = 0, prosent = BigDecimal.ZERO),
+                    lagAndel(barnFremstiltKravFor, YearMonth.of(2025, 1), YearMonth.of(2030, 12)),
+                )
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                valider(andelerDenneBehandlingen = andelerDenneBehandlingen, andelerForrigeBehandling = listOf(tidligereAndel))
+            }
+        }
+
+        @Test
+        fun `skal kaste feil når innvilget periode for et annet barn overlapper med tidligere utbetaling`() {
+            // Arrange
+            val tidligereAndel = lagAndel(tidligereBarn, YearMonth.of(2020, 1), YearMonth.of(2025, 3), behandling = forrigeBehandling)
+            val andelerDenneBehandlingen =
+                listOf(
+                    lagAndel(tidligereBarn, YearMonth.of(2020, 1), YearMonth.of(2025, 3)),
+                    lagAndel(barnFremstiltKravFor, YearMonth.of(2025, 1), YearMonth.of(2030, 12)),
+                )
+
+            // Act
+            val feil =
+                assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                    valider(andelerDenneBehandlingen = andelerDenneBehandlingen, andelerForrigeBehandling = listOf(tidligereAndel))
+                }
+
+            // Assert
+            assertThat(feil.message).isEqualTo(
+                "Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.\nBehandling av søknad må håndteres manuelt.",
+            )
+        }
+
+        @Test
+        fun `skal kaste feil når innvilget periode overlapper med tidligere utbetaling av utvidet barnetrygd til søker`() {
+            // Arrange
+            val tidligereAndel = lagAndel(søker, YearMonth.of(2024, 1), YearMonth.of(2025, 6), behandling = forrigeBehandling, ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+            val andelerDenneBehandlingen =
+                listOf(
+                    lagAndel(søker, YearMonth.of(2024, 1), YearMonth.of(2025, 6), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
+                    lagAndel(barnFremstiltKravFor, YearMonth.of(2025, 6), YearMonth.of(2030, 12)),
+                )
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                valider(andelerDenneBehandlingen = andelerDenneBehandlingen, andelerForrigeBehandling = listOf(tidligereAndel))
+            }
+        }
+
+        @Test
+        fun `skal kaste feil når tidligere utbetalt andel endres i denne behandlingen`() {
+            // Arrange
+            val tidligereAndel = lagAndel(tidligereBarn, YearMonth.of(2025, 1), YearMonth.of(2030, 12), behandling = forrigeBehandling, beløp = 1000)
+            val andelerDenneBehandlingen = listOf(lagAndel(tidligereBarn, YearMonth.of(2025, 1), YearMonth.of(2030, 12), beløp = 1968))
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                valider(andelerDenneBehandlingen = andelerDenneBehandlingen, andelerForrigeBehandling = listOf(tidligereAndel))
+            }
+        }
+
+        @Test
+        fun `skal ikke kaste feil når stønad i Infotrygd er opphørt før innvilget periode`() {
+            // Arrange
+            val andelerDenneBehandlingen = listOf(lagAndel(barnFremstiltKravFor, YearMonth.of(2025, 1), YearMonth.of(2030, 12)))
+            val infotrygdstønad = lagInfotrygdstønad(virkningFom = YearMonth.of(2020, 1), opphørtFom = YearMonth.of(2025, 1))
+
+            // Act & Assert
+            assertDoesNotThrow { valider(andelerDenneBehandlingen = andelerDenneBehandlingen, infotrygdstønaderTilSøker = listOf(infotrygdstønad)) }
+        }
+
+        @Test
+        fun `skal ikke kaste feil når stønad i Infotrygd er feilregistrert`() {
+            // Arrange
+            val andelerDenneBehandlingen = listOf(lagAndel(barnFremstiltKravFor, YearMonth.of(2025, 1), YearMonth.of(2030, 12)))
+            val infotrygdstønad = lagInfotrygdstønad(virkningFom = YearMonth.of(2025, 3), opphørtFom = YearMonth.of(2025, 3))
+
+            // Act & Assert
+            assertDoesNotThrow { valider(andelerDenneBehandlingen = andelerDenneBehandlingen, infotrygdstønaderTilSøker = listOf(infotrygdstønad)) }
+        }
+
+        @Test
+        fun `skal kaste feil når innvilget periode overlapper med opphørt stønad i Infotrygd`() {
+            // Arrange
+            val andelerDenneBehandlingen = listOf(lagAndel(barnFremstiltKravFor, YearMonth.of(2025, 1), YearMonth.of(2030, 12)))
+            val infotrygdstønad = lagInfotrygdstønad(virkningFom = YearMonth.of(2020, 1), opphørtFom = YearMonth.of(2025, 2))
+
+            // Act
+            val feil =
+                assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                    valider(andelerDenneBehandlingen = andelerDenneBehandlingen, infotrygdstønaderTilSøker = listOf(infotrygdstønad))
+                }
+
+            // Assert
+            assertThat(feil.message).isEqualTo(
+                "Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker i Infotrygd.\nBehandling av søknad må håndteres manuelt.",
+            )
+        }
+
+        @Test
+        fun `skal kaste feil når innvilget periode overlapper med løpende stønad i Infotrygd`() {
+            // Arrange
+            val andelerDenneBehandlingen = listOf(lagAndel(barnFremstiltKravFor, YearMonth.of(2025, 1), YearMonth.of(2030, 12)))
+            val infotrygdstønad = lagInfotrygdstønad(virkningFom = YearMonth.of(2020, 1), opphørtFom = null)
+
+            // Act & Assert
+            assertThrows<AutovedtakMåBehandlesManueltFeil> {
+                valider(andelerDenneBehandlingen = andelerDenneBehandlingen, infotrygdstønaderTilSøker = listOf(infotrygdstønad))
+            }
         }
     }
 

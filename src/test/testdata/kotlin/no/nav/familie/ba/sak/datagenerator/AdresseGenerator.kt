@@ -60,6 +60,7 @@ fun lagGrVegadresse(
     husbokstav: String? = null,
     postnummer: String? = null,
     person: Person? = null,
+    periode: DatoIntervallEntitet? = null,
 ) = GrVegadresseBostedsadresse(
     matrikkelId = matrikkelId,
     husnummer = husnummer,
@@ -72,6 +73,7 @@ fun lagGrVegadresse(
     poststed = null,
 ).also {
     it.person = person
+    it.periode = periode
 }
 
 fun lagBostedsadresse(

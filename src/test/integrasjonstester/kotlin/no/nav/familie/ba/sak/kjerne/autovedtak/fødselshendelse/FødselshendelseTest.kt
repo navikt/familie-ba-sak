@@ -247,8 +247,8 @@ class FødselshendelseTest(
     @Test
     fun `Skal innvilge finnmarkstillegg i fødselshendelse revurdering hvis mor og barn bor i Finnmark`() {
         // Arrange
-        val eldsteBarnFødselsdato = LocalDate.of(2020, 1, 1)
-        val yngsteBarnFødselsdato = LocalDate.of(2025, 9, 15)
+        val eldsteBarnFødselsdato = LocalDate.now().minusYears(5)
+        val yngsteBarnFødselsdato = LocalDate.now().minusDays(15)
 
         val eldsteBarnFnr = leggTilPersonInfo(eldsteBarnFødselsdato)
         val yngsteBarnFnr = leggTilPersonInfo(yngsteBarnFødselsdato)
@@ -297,7 +297,7 @@ class FødselshendelseTest(
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
                 brevmalService = brevmalService,
-                vilkårInnvilgetFom = LocalDate.now().minusYears(1),
+                vilkårInnvilgetFom = yngsteBarnFødselsdato.plusDays(5),
             )
 
         // Act
@@ -398,8 +398,8 @@ class FødselshendelseTest(
     @Test
     fun `Skal innvilge svalbardtillegg i fødselshendelse revurdering hvis mor og barn bor på Svalbard`() {
         // Arrange
-        val eldsteBarnFødselsdato = LocalDate.of(2020, 1, 1)
-        val yngsteBarnFødselsdato = LocalDate.of(2025, 9, 15)
+        val eldsteBarnFødselsdato = LocalDate.now().minusYears(5)
+        val yngsteBarnFødselsdato = LocalDate.now().minusDays(15)
 
         val eldsteBarnFnr = leggTilPersonInfo(eldsteBarnFødselsdato)
         val yngsteBarnFnr = leggTilPersonInfo(yngsteBarnFødselsdato)
@@ -455,7 +455,7 @@ class FødselshendelseTest(
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
                 brevmalService = brevmalService,
-                vilkårInnvilgetFom = LocalDate.now().minusYears(1),
+                vilkårInnvilgetFom = yngsteBarnFødselsdato.plusDays(5),
             )
 
         // Act

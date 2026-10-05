@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.søknad
 import no.nav.familie.ba.sak.datagenerator.lagStringSøknadsfelt
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erFosterbarn
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erIBeredskapshjem
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harKryssetForDeltBosted
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.inneholderVedlegg
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.tilBehandlingUnderkategori
@@ -76,6 +77,39 @@ class SøknadMapperTest {
 
             // Act & Assert
             assertThat(spørsmål.erFosterbarn()).isFalse()
+        }
+    }
+
+    @Nested
+    inner class ErIBeredskapshjem {
+        @Test
+        fun `skal gi true når søker har svart ja på at barnet bor i beredskapshjem`() {
+            // Arrange
+            val spørsmål =
+                mapOf<String, Søknadsfelt<Any>>(
+                    "erIBeredskapshjem" to lagStringSøknadsfelt("JA"),
+                )
+            // Act & Assert
+            assertThat(spørsmål.erIBeredskapshjem()).isTrue()
+        }
+
+        @Test
+        fun `skal gi false når søker har svart nei på at barnet bor i beredskapshjem`() {
+            // Arrange
+            val spørsmål =
+                mapOf<String, Søknadsfelt<Any>>(
+                    "erIBeredskapshjem" to lagStringSøknadsfelt("NEI"),
+                )
+            // Act & Assert
+            assertThat(spørsmål.erIBeredskapshjem()).isFalse()
+        }
+
+        @Test
+        fun `skal gi false når eldre søknad mangler spørsmål om beredskapshjem`() {
+            // Arrange
+            val spørsmål = emptyMap<String, Søknadsfelt<Any>>()
+            // Act & Assert
+            assertThat(spørsmål.erIBeredskapshjem()).isFalse()
         }
     }
 

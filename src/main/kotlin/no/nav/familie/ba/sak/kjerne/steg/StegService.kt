@@ -117,7 +117,7 @@ class StegService(
                 }
 
                 nyBehandling.behandlingÅrsak === BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD -> {
-                    emptyList() // TODO : Burde vi hente barn fra søknaden?
+                    emptyList() // Hentes fra søknaden senere i behandlingsløpet
                 }
 
                 nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.FØDSELSHENDELSE, BehandlingÅrsak.HELMANUELL_MIGRERING) -> {

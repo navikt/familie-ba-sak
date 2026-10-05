@@ -18,7 +18,6 @@ fun lagFiltreringsreglerFaktaSøknad(
     søkerHarKryssetForDeltBostedISøknaden: Boolean = false,
     søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden: Boolean = false,
     søknadenInneholderVedlegg: Boolean = false,
-    søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling: Boolean = false,
     søkerHarAdressebeskyttelseGradering6Eller19: Boolean = false,
     barnHarAdressebeskyttelseGradering6Eller19: Boolean = false,
     søkerOgBarnHarForelderBarnRelasjon: Boolean = true,
@@ -42,7 +41,6 @@ fun lagFiltreringsreglerFaktaSøknad(
     søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden =
     søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden,
     søknadenInneholderVedlegg = søknadenInneholderVedlegg,
-    søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling = søkerHarIkkeLøpendeUtbetalingOgHarAldriHattUtbetaling,
     søkerHarAdressebeskyttelseGradering6Eller19 = søkerHarAdressebeskyttelseGradering6Eller19,
     barnHarAdressebeskyttelseGradering6Eller19 = barnHarAdressebeskyttelseGradering6Eller19,
     søkerOgBarnHarForelderBarnRelasjon = søkerOgBarnHarForelderBarnRelasjon,

@@ -49,10 +49,11 @@ class SlettInaktivePersonopplysningsgrunnlagServiceIntegrationTest(
 
         // Act
         val slettedeIder =
-            slettInaktivePersonopplysningsgrunnlagService.slettBatchMedInaktiveGrunnlag(
-                etterId = inaktiveIder.first() - 1,
-                batchStørrelse = 2,
-            )
+            slettInaktivePersonopplysningsgrunnlagService
+                .slettBatchMedInaktiveGrunnlag(
+                    etterId = inaktiveIder.first() - 1,
+                    batchStørrelse = 2,
+                ).grunnlagIder
 
         // Assert
         assertThat(slettedeIder).containsExactly(inaktiveIder[0], inaktiveIder[1])
@@ -73,14 +74,17 @@ class SlettInaktivePersonopplysningsgrunnlagServiceIntegrationTest(
         assertThat(tellRegisteropplysningerRader(person.id).values).allSatisfy { assertThat(it).isEqualTo(1) }
 
         // Act
-        val slettedeIder =
+        val slettetBatch =
             slettInaktivePersonopplysningsgrunnlagService.slettBatchMedInaktiveGrunnlag(
                 etterId = inaktivtGrunnlag.id - 1,
                 batchStørrelse = 10,
             )
 
         // Assert
-        assertThat(slettedeIder).containsExactly(inaktivtGrunnlag.id)
+        assertThat(slettetBatch.grunnlagIder).containsExactly(inaktivtGrunnlag.id)
+        assertThat(slettetBatch.antallSlettedeRaderPerTabell)
+            .containsOnlyKeys(listOf("gr_personopplysninger", "po_person") + REGISTEROPPLYSNINGER_TABELLER)
+            .allSatisfy { _, antall -> assertThat(antall).isEqualTo(1L) }
         assertThat(tellRader("gr_personopplysninger", "id", inaktivtGrunnlag.id)).isEqualTo(0L)
         assertThat(tellRader("po_person", "id", person.id)).isEqualTo(0L)
         assertThat(tellRegisteropplysningerRader(person.id).values).allSatisfy { assertThat(it).isEqualTo(0) }
@@ -95,10 +99,11 @@ class SlettInaktivePersonopplysningsgrunnlagServiceIntegrationTest(
 
         // Act
         val slettedeIder =
-            slettInaktivePersonopplysningsgrunnlagService.slettBatchMedInaktiveGrunnlag(
-                etterId = inaktivtGrunnlag.id - 1,
-                batchStørrelse = 10,
-            )
+            slettInaktivePersonopplysningsgrunnlagService
+                .slettBatchMedInaktiveGrunnlag(
+                    etterId = inaktivtGrunnlag.id - 1,
+                    batchStørrelse = 10,
+                ).grunnlagIder
 
         // Assert
         assertThat(slettedeIder).containsExactly(inaktivtGrunnlag.id)
@@ -114,14 +119,15 @@ class SlettInaktivePersonopplysningsgrunnlagServiceIntegrationTest(
             personopplysningGrunnlagRepository.saveAndFlush(lagPersonopplysningGrunnlagUtenId(behandlingId, aktiv = false))
 
         // Act
-        val slettedeIder =
+        val slettetBatch =
             slettInaktivePersonopplysningsgrunnlagService.slettBatchMedInaktiveGrunnlag(
                 etterId = inaktivtGrunnlagUtenAktivtGrunnlagPåSammeBehandling.id - 1,
                 batchStørrelse = 10,
             )
 
         // Assert
-        assertThat(slettedeIder).isEmpty()
+        assertThat(slettetBatch.grunnlagIder).isEmpty()
+        assertThat(slettetBatch.antallSlettedeRaderPerTabell).isEmpty()
         assertThat(personopplysningGrunnlagRepository.findById(inaktivtGrunnlagUtenAktivtGrunnlagPåSammeBehandling.id)).isPresent()
     }
 

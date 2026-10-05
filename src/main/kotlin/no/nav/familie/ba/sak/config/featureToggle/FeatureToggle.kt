@@ -75,4 +75,7 @@ enum class FeatureToggle(
 
     // NAV-31042
     VURDER_ALLE_FILTRERINGSREGLER("familie-ba-sak.vurder-alle-filtreringsregler"),
+
+    // NAV-31020
+    SIMULER_KUN_ENDREDE_PERIODER("familie-ba-sak.simuler-kun-endrede-perioder"),
 }
