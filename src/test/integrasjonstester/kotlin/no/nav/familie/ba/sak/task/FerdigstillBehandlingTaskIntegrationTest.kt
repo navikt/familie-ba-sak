@@ -48,7 +48,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-class FerdigstillBehandlingTaskTest(
+class FerdigstillBehandlingTaskIntegrationTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingRepository: BehandlingRepository,
