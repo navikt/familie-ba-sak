@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBeg
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.tidslinje.Periode
@@ -35,6 +36,11 @@ fun VedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
     val grunnlagTidslinjePerPersonForrigeBehandling =
         grunnlag.behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.lagBegrunnelseGrunnlagTidslinjer()
 
+    val harAndelerMånedenFørPerioden =
+        this.fom?.toYearMonth()?.minusMonths(1)?.let { månedenFør ->
+            grunnlag.behandlingsGrunnlagForVedtaksperioder.andelerTilkjentYtelse.any { månedenFør in it.stønadFom..it.stønadTom }
+        } == true
+
     return begrunnelsegrunnlagTidslinjerPerPerson.mapValues { (person, grunnlagTidslinje) ->
         val grunnlagMedForrigePeriodeOgBehandlingTidslinje =
             tidslinjeMedVedtaksperioden.lagTidslinjeGrunnlagDennePeriodenForrigePeriodeOgPeriodeForrigeBehandling(
@@ -48,7 +54,11 @@ fun VedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
 
         when (this.type) {
             Vedtaksperiodetype.OPPHØR -> {
-                begrunnelseperioderIVedtaksperiode.first()
+                if (person.type == PersonType.BARN) {
+                    finnGrunnlagForOpphør(begrunnelseperioderIVedtaksperiode, harAndelerMånedenFørPerioden)
+                } else {
+                    begrunnelseperioderIVedtaksperiode.first()
+                }
             }
 
             Vedtaksperiodetype.FORTSATT_INNVILGET -> {
@@ -66,6 +76,35 @@ fun VedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
         }
     }
 }
+
+/**
+ * Bruker grunnlaget fra måneden barnet mister utbetalingen. Vanligvis er det når opphøret starter.
+ * Er barnet født eller flyttet inn hos søker senere, er det måneden barnet begynte å få utbetaling i forrige behandling.
+ */
+private fun finnGrunnlagForOpphør(
+    begrunnelseperioder: List<IBegrunnelseGrunnlagForPeriode>,
+    harAndelerMånedenFørPerioden: Boolean,
+): IBegrunnelseGrunnlagForPeriode {
+    val førstePeriode = begrunnelseperioder.first()
+
+    val harAndelerVedOpphørstidspunktet = førstePeriode.forrigePeriode.harAndeler() || førstePeriode.sammePeriodeForrigeBehandling.harAndeler()
+
+    if (harAndelerVedOpphørstidspunktet) return førstePeriode
+
+    val førstePeriodeMedAndelerIForrigeBehandling = begrunnelseperioder.firstOrNull { it.sammePeriodeForrigeBehandling.harAndeler() } ?: return førstePeriode
+    val harMistetEgneVilkårMidtIUtbetalingsperiode = harAndelerMånedenFørPerioden && !førstePeriodeMedAndelerIForrigeBehandling.dennePerioden.erOrdinæreVilkårInnvilget()
+
+    if (!harMistetEgneVilkårMidtIUtbetalingsperiode) return førstePeriodeMedAndelerIForrigeBehandling
+
+    // Sammenligner med forrige behandling, slik at vilkåret barnet har mistet kommer med i begrunnelsen
+    return BegrunnelseGrunnlagForPeriodeMedOpphør(
+        dennePerioden = førstePeriodeMedAndelerIForrigeBehandling.dennePerioden,
+        forrigePeriode = førstePeriodeMedAndelerIForrigeBehandling.sammePeriodeForrigeBehandling,
+        sammePeriodeForrigeBehandling = førstePeriodeMedAndelerIForrigeBehandling.sammePeriodeForrigeBehandling,
+    )
+}
+
+private fun BegrunnelseGrunnlagForPersonIPeriode?.harAndeler() = this?.andeler?.any() == true
 
 private fun Tidslinje<VedtaksperiodeMedBegrunnelser>.lagTidslinjeGrunnlagDennePeriodenForrigePeriodeOgPeriodeForrigeBehandling(
     grunnlagTidslinje: Tidslinje<BegrunnelseGrunnlagForPersonIPeriode>,
