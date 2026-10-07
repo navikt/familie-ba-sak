@@ -186,7 +186,7 @@ class PersonopplysningerService(
         pdlRestKlient.hentOppholdstillatelse(aktør).firstOrNull()
             ?: throw Feil(
                 message = "Bruker mangler opphold",
-                frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler opphold.",
+                frontendFeilmelding = "Person mangler opphold.",
             )
 
     fun hentLandkodeAlpha2UtenlandskBostedsadresse(aktør: Aktør): String {

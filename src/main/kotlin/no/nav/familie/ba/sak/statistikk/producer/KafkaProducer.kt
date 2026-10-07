@@ -212,7 +212,7 @@ class MockKafkaProducer(
     override fun sendIdentTilPSys(
         hentAlleIdenterTilPsysResponseDTO: HentAlleIdenterTilPsysResponseDTO,
     ) {
-        logger.info("Skipper sending av sendBarnetrygdBisysMelding respons for $hentAlleIdenterTilPsysResponseDTO.requestId fordi kafka ikke er enablet")
+        logger.info("Skipper sending av sendBarnetrygdBisysMelding respons for ${hentAlleIdenterTilPsysResponseDTO.requestId} fordi kafka ikke er enablet")
     }
 
     override fun sendBarnetrygdBisysMelding(
