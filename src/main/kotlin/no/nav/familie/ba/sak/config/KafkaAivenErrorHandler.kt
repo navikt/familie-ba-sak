@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.config
 import no.nav.familie.ba.sak.common.secureLogger
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.task.SimpleAsyncTaskExecutor
@@ -53,6 +54,16 @@ class KafkaAivenErrorHandler : CommonContainerStoppingErrorHandler() {
                 )
             }
         }
+    }
+
+    override fun handleBatch(
+        e: Exception,
+        data: ConsumerRecords<*, *>,
+        consumer: Consumer<*, *>,
+        container: MessageListenerContainer,
+        invokeListener: Runnable,
+    ) {
+        handleRemaining(e, data.toList(), consumer, container)
     }
 
     private fun scheduleRestart(

@@ -4,6 +4,8 @@ import io.mockk.MockKAnnotations
 import io.mockk.mockk
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.ConsumerRecords
+import org.apache.kafka.common.TopicPartition
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -55,6 +57,20 @@ class KafkaAivenErrorHandlerTest {
             .hasMessageContaining("Stopped container")
             .hasStackTraceContaining("Sjekk securelogs for mer info")
             .hasCauseExactlyInstanceOf(Exception::class.java)
+    }
+
+    @Test
+    fun `handleBatch skal stoppe container hvis batch-listener feiler`() {
+        // Arrange
+        val tp = TopicPartition("topic", 1)
+        val records = ConsumerRecords(mapOf(tp to listOf(ConsumerRecord("topic", 1, 1, 1, "record"))), emptyMap())
+
+        // Act & Assert
+        assertThatThrownBy {
+            errorHandler.handleBatch(RuntimeException("Feil i test"), records, consumer, container) {}
+        }.hasMessageNotContaining("Feil i test")
+            .hasMessageContaining("Stopped container")
+            .hasStackTraceContaining("Sjekk securelogs for mer info")
     }
 
     @Test

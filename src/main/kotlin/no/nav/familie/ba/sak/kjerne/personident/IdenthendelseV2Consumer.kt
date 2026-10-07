@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.person.pdl.aktor.v2.Aktor
@@ -12,7 +13,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.util.UUID
 
 @Service
@@ -23,6 +24,7 @@ import java.util.UUID
 )
 class IdenthendelseV2Consumer(
     val personidentService: PersonidentService,
+    private val ventetidFørBehandling: Duration = Duration.ofMinutes(1),
 ) {
     @KafkaListener(
         id = "familie-ba-sak-aktorv2",
@@ -30,22 +32,37 @@ class IdenthendelseV2Consumer(
         topics = ["pdl.aktor-v2"],
         containerFactory = "kafkaAivenHendelseListenerAvroLatestContainerFactory",
     )
-    @Transactional
     fun listen(
-        consumerRecord: ConsumerRecord<String, Aktor?>,
+        consumerRecords: List<ConsumerRecord<String, Aktor?>>,
         ack: Acknowledgment,
     ) {
+        // Venter 1 min per batch da det kan hende at PDL ikke er ferdig med å populere sine opplysninger rett etter at vi har lest meldingen
+        Thread.sleep(ventetidFørBehandling.toMillis())
+
+        consumerRecords.forEachIndexed { indeks, consumerRecord ->
+            try {
+                behandleHendelse(consumerRecord)
+            } catch (e: RuntimeException) {
+                if (indeks > 0) ack.acknowledge(indeks - 1)
+                log.warn("Feil i prosessering av ident-hendelser", e)
+                secureLogger.warn("Feil i prosessering av ident-hendelser $consumerRecord", e)
+                throw RuntimeException("Feil i prosessering av ident-hendelser")
+            }
+        }
+        ack.acknowledge()
+    }
+
+    private fun behandleHendelse(consumerRecord: ConsumerRecord<String, Aktor?>) {
         try {
-            Thread.sleep(60000) // Venter 1 min da det kan hende at PDL ikke er ferdig med å populere sine opplysninger rett etter at vi har lest meldingen
             MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
-            SECURE_LOGGER.info("Har mottatt ident-hendelse $consumerRecord")
+            secureLogger.info("Har mottatt ident-hendelse $consumerRecord")
 
             val aktør = consumerRecord.value()
             val aktørIdPåHendelse = consumerRecord.key()
 
             if (aktør == null) {
                 log.warn("Tom aktør fra identhendelse")
-                SECURE_LOGGER.warn("Tom aktør fra identhendelse med nøkkel $aktørIdPåHendelse")
+                secureLogger.warn("Tom aktør fra identhendelse med nøkkel $aktørIdPåHendelse")
             }
 
             val aktivAktørid =
@@ -66,20 +83,14 @@ class IdenthendelseV2Consumer(
                         personidentService.opprettTaskForIdentHendelse(PersonIdent(folkeregisterident.idnummer.toString()))
                     }
             } else {
-                SECURE_LOGGER.info("Ignorerer å lage task på ident-hendelse fordi aktør $aktørIdPåHendelse ikke lenger er en gyldig aktør")
+                secureLogger.info("Ignorerer å lage task på ident-hendelse fordi aktør $aktørIdPåHendelse ikke lenger er en gyldig aktør")
             }
-        } catch (e: RuntimeException) {
-            log.warn("Feil i prosessering av ident-hendelser", e)
-            SECURE_LOGGER.warn("Feil i prosessering av ident-hendelser $consumerRecord", e)
-            throw RuntimeException("Feil i prosessering av ident-hendelser")
         } finally {
             MDC.clear()
         }
-        ack.acknowledge()
     }
 
     companion object {
-        val SECURE_LOGGER: Logger = LoggerFactory.getLogger("secureLogger")
         val log: Logger = LoggerFactory.getLogger(IdenthendelseV2Consumer::class.java)
     }
 }

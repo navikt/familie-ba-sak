@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.person.pdl.aktor.v2.Type
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
@@ -44,7 +45,7 @@ class PersonidentService(
         return false
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettTaskForIdentHendelse(nyIdent: PersonIdent) {
         if (identSkalLeggesTil(nyIdent)) {
             logger.info("Oppretter task for senere håndterering av ny ident")

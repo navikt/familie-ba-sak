@@ -55,6 +55,7 @@ class KafkaAivenConfig(
     fun kafkaAivenHendelseListenerAvroLatestContainerFactory(kafkaErrorHandler: KafkaAivenErrorHandler): ConcurrentKafkaListenerContainerFactory<String, String> =
         ConcurrentKafkaListenerContainerFactory<String, String>().apply {
             containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
+            setBatchListener(true)
             setConsumerFactory(DefaultKafkaConsumerFactory(consumerConfigsLatestAvro()))
             setCommonErrorHandler(kafkaErrorHandler)
         }
@@ -113,7 +114,7 @@ class KafkaAivenConfig(
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to KafkaAvroDeserializer::class.java,
                 ConsumerConfig.CLIENT_ID_CONFIG to "consumer-familie-ba-sak-2",
-                ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1",
+                ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "10",
                 ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
                 ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "false",
             )
