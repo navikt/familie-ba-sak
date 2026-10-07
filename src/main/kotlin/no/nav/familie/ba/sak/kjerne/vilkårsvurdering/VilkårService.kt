@@ -285,7 +285,7 @@ class VilkårService(
         val aktør = personidentService.hentAktør(personIdent)
         return personResultater.find { it.aktør == aktør } ?: throw Feil(
             message = FANT_IKKE_VILKÅRSVURDERING_FOR_PERSON_FEILMELDING,
-            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident $personIdent",
+            frontendFeilmelding = "Vilkårsvurderingen finnes ikke lenger for en av personene. Oppdater siden og forsøk på nytt.",
         )
     }
 
