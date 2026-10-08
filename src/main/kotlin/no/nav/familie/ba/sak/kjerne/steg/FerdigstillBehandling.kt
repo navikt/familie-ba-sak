@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.pensjon.PensjonService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -16,8 +17,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.task.SendMeldingOmFerdigstiltBehandlingTilPensjonTask
-import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -30,7 +29,7 @@ class FerdigstillBehandling(
     private val behandlingMetrikker: BehandlingMetrikker,
     private val loggService: LoggService,
     private val snikeIKøenService: SnikeIKøenService,
-    private val taskService: TaskService,
+    private val pensjonService: PensjonService,
     private val featureToggleService: FeatureToggleService,
 ) : BehandlingSteg<String> {
     override fun utførStegOgAngiNeste(
@@ -68,12 +67,7 @@ class FerdigstillBehandling(
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandlingSomFerdigstilles = behandling)
 
         if (!erHenlagt && featureToggleService.isEnabled(FeatureToggle.FERDIGSTILL_BEHANDLING_MELDING_TIL_PENSJON)) {
-            val sendMeldingOmFerdigstiltBehandlingTilPensjonTask =
-                SendMeldingOmFerdigstiltBehandlingTilPensjonTask.opprettTask(
-                    behandling.fagsak.aktør.aktivFødselsnummer(),
-                    behandling.id,
-                )
-            taskService.save(sendMeldingOmFerdigstiltBehandlingTilPensjonTask)
+            pensjonService.opprettTaskForSendingAvMeldingOmFerdigstiltBehandling(behandling)
         }
 
         return hentNesteStegForNormalFlyt(behandling)
