@@ -602,17 +602,25 @@ class IntegrasjonKlient(
     fun gjenåpneSakIDokarkiv(request: GjenåpneSakRequest) {
         val uri = URI.create("$integrasjonUri/arkiv/gjenaapneSak")
 
-        kallEksternTjenesteUtenRespons<Any>(
-            tjeneste = "dokarkiv",
-            uri = uri,
-            formål = "Gjenåpne sak ${request.fagsakId} i fagsaksystem ${request.fagsaksystem}",
-        ) {
-            restClient
-                .patch()
-                .uri(uri)
-                .body(request)
-                .retrieve()
-                .body<Ressurs<Any>>()!!
+        try {
+            kallEksternTjenesteUtenRespons<Any>(
+                tjeneste = "dokarkiv",
+                uri = uri,
+                formål = "Gjenåpne sak ${request.fagsakId} i fagsaksystem ${request.fagsaksystem}",
+            ) {
+                restClient
+                    .patch()
+                    .uri(uri)
+                    .body(request)
+                    .retrieve()
+                    .body<Ressurs<Any>>()!!
+            }
+        } catch (exception: HttpClientErrorException.NotFound) {
+            // Dokarkiv svarer 404 når det ikke finnes noen avsluttet arkivsak å gjenåpne, f.eks. fordi saken allerede
+            // er åpen eller ingen journalposter er journalført på fagsaken. Kilden i feilmeldingen brukes for å
+            // skille denne fra en 404 fra familie-integrasjoner selv.
+            if (!exception.responseBodyAsString.contains(DOKARKIV_GJENÅPNE_SAK_KILDE)) throw exception
+            logger.warn("Fant ingen avsluttet sak ${request.fagsakId} i fagsaksystem ${request.fagsaksystem} i dokarkiv. Det er ingenting å gjenåpne.")
         }
     }
 
@@ -848,6 +856,7 @@ class IntegrasjonKlient(
     companion object {
         private val logger = LoggerFactory.getLogger(IntegrasjonKlient::class.java)
         private const val DOKARKIV_AVSLUTT_SAK_KILDE = "dokarkiv.avsluttSak"
+        private const val DOKARKIV_GJENÅPNE_SAK_KILDE = "dokarkiv.gjenaapneSak"
         const val VEDTAK_VEDLEGG_FILNAVN = "NAV_33-0005bm-10.2016.pdf"
         const val VEDTAK_VEDLEGG_TITTEL = "Stønadsmottakerens rettigheter og plikter (Barnetrygd)"
 
