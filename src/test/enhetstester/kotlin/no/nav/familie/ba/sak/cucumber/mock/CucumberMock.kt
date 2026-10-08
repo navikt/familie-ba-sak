@@ -666,6 +666,8 @@ class CucumberMock(
             behandlingMetrikker = behandlingMetrikker,
             loggService = loggService,
             snikeIKøenService = snikeIKøenService,
+            taskService = taskService,
+            featureToggleService = featureToggleService,
         )
 
     val automatiskBeslutningService = AutomatiskBeslutningService(simuleringService)
@@ -784,7 +786,7 @@ class CucumberMock(
         )
 
     val iverksettMotOppdragTask = IverksettMotOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository)
-    val ferdigstillBehandlingTask = FerdigstillBehandlingTask(stegService = stegService, behandlingHentOgPersisterService = behandlingHentOgPersisterService, taskService = taskService, featureToggleService = featureToggleService)
+    val ferdigstillBehandlingTask = FerdigstillBehandlingTask(stegService = stegService, behandlingHentOgPersisterService = behandlingHentOgPersisterService)
 
     val statusFraOppdragTask = StatusFraOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository, featureToggleService)
 
