@@ -24,7 +24,6 @@ class FerdigstillBehandlingTask(
     @WithSpan
     override fun doTask(task: Task) {
         val ferdigstillBehandling = jsonMapper.readValue(task.payload, FerdigstillBehandlingDTO::class.java)
-
         stegService.håndterFerdigstillBehandling(
             behandling =
                 behandlingHentOgPersisterService.hent(
