@@ -40,7 +40,7 @@ class PensjonKafkaProducerTest {
             // Assert
             verify(exactly = 1) {
                 kafkaTemplate.send(
-                    DefaultPensjonKafkaProducer.AAPEN_IDENTER_MED_FERDIGSTILT_BEHANDLING_V1,
+                    DefaultPensjonKafkaProducer.IDENTER_MED_FERDIGSTILT_BEHANDLING_V1_TOPIC,
                     hendelse.ident,
                     jsonMapper.writeValueAsString(hendelse),
                 )
