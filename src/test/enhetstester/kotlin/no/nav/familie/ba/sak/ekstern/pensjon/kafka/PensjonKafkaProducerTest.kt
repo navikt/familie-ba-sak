@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException
 
 class PensjonKafkaProducerTest {
     private val kafkaTemplate = mockk<KafkaTemplate<String, String>>()
-    private val pensjonKafkaProducer = PensjonKafkaProducer(kafkaTemplate)
+    private val pensjonKafkaProducer = DefaultPensjonKafkaProducer(kafkaTemplate)
 
     @Nested
     inner class SendMeldingOmFerdigstiltBehandlingTilPensjon {
@@ -40,7 +40,7 @@ class PensjonKafkaProducerTest {
             // Assert
             verify(exactly = 1) {
                 kafkaTemplate.send(
-                    PensjonKafkaProducer.AAPEN_IDENETER_MED_FERDIGSTILT_BEHANDLING_V1,
+                    DefaultPensjonKafkaProducer.AAPEN_IDENETER_MED_FERDIGSTILT_BEHANDLING_V1,
                     hendelse.ident,
                     jsonMapper.writeValueAsString(hendelse),
                 )
