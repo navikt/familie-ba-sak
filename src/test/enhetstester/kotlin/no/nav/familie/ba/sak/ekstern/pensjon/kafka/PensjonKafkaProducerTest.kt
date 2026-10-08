@@ -24,7 +24,7 @@ class PensjonKafkaProducerTest {
         fun `skal sende ferdigstilthendelse til pensjon via Kafka`() {
             // Arrange
             val hendelse =
-                FerdigstilBehandlingHendelse(
+                FerdigstiltBehandlingHendelse(
                     ident = "12345678901",
                     vedtaktidspunkt = LocalDateTime.of(2026, 10, 8, 12, 0),
                     endringstidspunkt = LocalDate.of(2026, 10, 8),
@@ -40,7 +40,7 @@ class PensjonKafkaProducerTest {
             // Assert
             verify(exactly = 1) {
                 kafkaTemplate.send(
-                    DefaultPensjonKafkaProducer.AAPEN_IDENETER_MED_FERDIGSTILT_BEHANDLING_V1,
+                    DefaultPensjonKafkaProducer.AAPEN_IDENTER_MED_FERDIGSTILT_BEHANDLING_V1,
                     hendelse.ident,
                     jsonMapper.writeValueAsString(hendelse),
                 )
@@ -51,7 +51,7 @@ class PensjonKafkaProducerTest {
         fun `skal kaste feil dersom sending til Kafka feiler`() {
             // Arrange
             val hendelse =
-                FerdigstilBehandlingHendelse(
+                FerdigstiltBehandlingHendelse(
                     ident = "12345678901",
                     vedtaktidspunkt = LocalDateTime.of(2026, 10, 8, 12, 0),
                     endringstidspunkt = LocalDate.of(2026, 10, 8),

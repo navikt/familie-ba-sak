@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
 
 interface PensjonKafkaProducer {
-    fun sendMeldingOmFerdigstiltBehandlingTilPensjon(ferdigstilBehandlingHendelse: FerdigstilBehandlingHendelse)
+    fun sendMeldingOmFerdigstiltBehandlingTilPensjon(ferdigstiltBehandlingHendelse: FerdigstiltBehandlingHendelse)
 }
 
 @Service
@@ -22,11 +22,11 @@ interface PensjonKafkaProducer {
 class DefaultPensjonKafkaProducer(
     private val kafkaTemplate: KafkaTemplate<String, String>,
 ) : PensjonKafkaProducer {
-    override fun sendMeldingOmFerdigstiltBehandlingTilPensjon(ferdigstilBehandlingHendelse: FerdigstilBehandlingHendelse) {
-        val json = jsonMapper.writeValueAsString(ferdigstilBehandlingHendelse)
+    override fun sendMeldingOmFerdigstiltBehandlingTilPensjon(ferdigstiltBehandlingHendelse: FerdigstiltBehandlingHendelse) {
+        val json = jsonMapper.writeValueAsString(ferdigstiltBehandlingHendelse)
         try {
             kafkaTemplate
-                .send(AAPEN_IDENETER_MED_FERDIGSTILT_BEHANDLING_V1, ferdigstilBehandlingHendelse.ident, json)
+                .send(AAPEN_IDENTER_MED_FERDIGSTILT_BEHANDLING_V1, ferdigstiltBehandlingHendelse.ident, json)
                 .get(SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         } catch (e: Exception) {
             logger.error("Feil ved sending av melding om ferdigstilt behandling til pensjon", e)
@@ -37,7 +37,7 @@ class DefaultPensjonKafkaProducer(
     companion object {
         private val logger = LoggerFactory.getLogger(DefaultPensjonKafkaProducer::class.java)
         private const val SEND_TIMEOUT_SECONDS = 5L
-        val AAPEN_IDENETER_MED_FERDIGSTILT_BEHANDLING_V1 = "aapen-identer-med-ferdigstilt-behandling-v1"
+        const val AAPEN_IDENTER_MED_FERDIGSTILT_BEHANDLING_V1 = "aapen-identer-med-ferdigstilt-behandling-v1"
     }
 }
 
@@ -45,7 +45,7 @@ class DefaultPensjonKafkaProducer(
 class MockPensjonKafkaProducer : PensjonKafkaProducer {
     private val logger = LoggerFactory.getLogger(MockPensjonKafkaProducer::class.java)
 
-    override fun sendMeldingOmFerdigstiltBehandlingTilPensjon(ferdigstilBehandlingHendelse: FerdigstilBehandlingHendelse) {
+    override fun sendMeldingOmFerdigstiltBehandlingTilPensjon(ferdigstiltBehandlingHendelse: FerdigstiltBehandlingHendelse) {
         logger.info("Sender ikke melding om ferdigstilt behandling til pensjon fordi Kafka-producer er skrudd av")
     }
 }
