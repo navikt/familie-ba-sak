@@ -6,7 +6,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
-import no.nav.familie.ba.sak.ekstern.pensjon.kafka.FerdigstilBehandlingHendelse
+import no.nav.familie.ba.sak.ekstern.pensjon.kafka.FerdigstiltBehandlingHendelse
 import no.nav.familie.ba.sak.ekstern.pensjon.kafka.PensjonKafkaProducer
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -63,13 +63,13 @@ class SendMeldingOmFerdigstiltBehandlingTilPensjonTaskTest {
 
             val task = SendMeldingOmFerdigstiltBehandlingTilPensjonTask.opprettTask(personIdent, behandlingsId)
 
-            val hendelseSlot = slot<FerdigstilBehandlingHendelse>()
+            val hendelseSlot = slot<FerdigstiltBehandlingHendelse>()
 
             every { vedtakService.hentAktivForBehandlingThrows(behandlingsId) } returns lagVedtak(vedtaksdato = vedtaktidspunkt)
             every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingsId) } returns endringstidspunkt
             every { pensjonKafkaProducer.sendMeldingOmFerdigstiltBehandlingTilPensjon(capture(hendelseSlot)) } returns Unit
 
-            val forventetHendelse = FerdigstilBehandlingHendelse(personIdent, vedtaktidspunkt, endringstidspunkt)
+            val forventetHendelse = FerdigstiltBehandlingHendelse(personIdent, vedtaktidspunkt, endringstidspunkt)
 
             // Act
             sendMeldingOmFerdigstiltBehandlingTilPensjonTask.doTask(task)
