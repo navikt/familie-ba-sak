@@ -29,8 +29,8 @@ class SendMeldingOmFerdigstiltBehandlingTilPensjonTask(
     override fun doTask(task: Task) {
         val dto = jsonMapper.readValue(task.payload, SendMeldingOmFerdigstiltBehandlingTilPensjonDTO::class.java)
 
-        val vedtaktidspunkt = vedtakService.hentAktivForBehandlingThrows(dto.behandlingsId).vedtaksdato ?: throw Feil("Fant ikke vedtaksdato for vedtak for behandling=${dto.behandlingsId}")
-        val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(dto.behandlingsId)
+        val vedtaktidspunkt = vedtakService.hentAktivForBehandlingThrows(dto.behandlingId).vedtaksdato ?: throw Feil("Fant ikke vedtaksdato for vedtak for behandling=${dto.behandlingId}")
+        val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(dto.behandlingId)
 
         val hendelse = FerdigstiltBehandlingHendelse(dto.personIdent, vedtaktidspunkt, endringstidspunkt)
 
@@ -42,7 +42,7 @@ class SendMeldingOmFerdigstiltBehandlingTilPensjonTask(
 
         fun opprettTask(
             personIdent: String,
-            behandlingsId: Long,
+            behandlingId: Long,
         ): Task =
             Task(
                 type = TASK_STEP_TYPE,
@@ -50,13 +50,13 @@ class SendMeldingOmFerdigstiltBehandlingTilPensjonTask(
                     jsonMapper.writeValueAsString(
                         SendMeldingOmFerdigstiltBehandlingTilPensjonDTO(
                             personIdent = personIdent,
-                            behandlingsId = behandlingsId,
+                            behandlingId = behandlingId,
                         ),
                     ),
                 properties =
                     Properties().apply {
                         this["personIdent"] = personIdent
-                        this["behandlingId"] = behandlingsId.toString()
+                        this["behandlingId"] = behandlingId.toString()
                     },
             )
     }
