@@ -37,7 +37,7 @@ class DefaultPensjonKafkaProducer(
     companion object {
         private val logger = LoggerFactory.getLogger(DefaultPensjonKafkaProducer::class.java)
         private const val SEND_TIMEOUT_SECONDS = 5L
-        const val IDENTER_MED_FERDIGSTILT_BEHANDLING_V1_TOPIC = "identer-med-ferdigstilt-behandling-v1"
+        const val IDENTER_MED_FERDIGSTILT_BEHANDLING_V1_TOPIC = "teamfamilie.identer-med-ferdigstilt-behandling-v1"
     }
 }
 
