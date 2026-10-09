@@ -13,9 +13,12 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING_3MND
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING_3ÅR
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.beskjærTilOgMed
 import no.nav.familie.tidslinje.utvidelser.kombiner
-import no.nav.familie.tidslinje.utvidelser.outerJoin
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.kombinerUtenNull
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -41,26 +44,31 @@ fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
     val sisteDatoForEndretUtbetalingAndel = datoForGyldigEtterbetaling.toLocalDate().sisteDagIForrigeMåned()
 
     val nåværendeAndelerTidslinjer = nåværendeAndeler.tilTidslinjerPerAktørOgType().beskjærTilOgMed(sisteDatoForEndretUtbetalingAndel)
-    val forrigeAndelerTidslinjer = forrigeAndeler.tilTidslinjerPerAktørOgType().beskjærTilOgMed(sisteDatoForEndretUtbetalingAndel)
+    val harUtbetalingIForrigeBehandlingTidslinjePerAktør = forrigeAndeler.tilHarUtbetalingTidslinjePerAktør()
 
     val perioderMedUgyldigEtterbetalingForAktører =
         nåværendeAndelerTidslinjer
-            .outerJoin(forrigeAndelerTidslinjer) { nåværendeAndel, forrigeAndel ->
-                if (nåværendeAndel == null) return@outerJoin null
+            .map { (aktørOgType, nåværendeAndelerTidslinje) ->
+                val aktør = aktørOgType.first
+                val harUtbetalingIForrigeBehandlingTidslinje =
+                    harUtbetalingIForrigeBehandlingTidslinjePerAktør[aktør] ?: tomTidslinje()
 
-                val aktør = nåværendeAndel.aktør
-                val nåværendeBeløp = nåværendeAndel.kalkulertUtbetalingsbeløp
-                val forrigeBeløp = forrigeAndel?.kalkulertUtbetalingsbeløp ?: 0
+                nåværendeAndelerTidslinje.kombinerMed(harUtbetalingIForrigeBehandlingTidslinje) { nåværendeAndel, harUtbetalingIForrigeBehandling ->
+                    if (nåværendeAndel == null) return@kombinerMed null
 
-                val nåværendeAndelOverlapperMedEksisterendeEndretUtbetalingAndel =
-                    nåværendeEndretUtbetalingAndeler.any {
-                        it.overlapperMed(MånedPeriode(nåværendeAndel.stønadFom, nåværendeAndel.stønadTom)) &&
-                            aktør in it.aktører
+                    val nåværendeAndelOverlapperMedEksisterendeEndretUtbetalingAndel =
+                        nåværendeEndretUtbetalingAndeler.any {
+                            it.overlapperMed(MånedPeriode(nåværendeAndel.stønadFom, nåværendeAndel.stønadTom)) &&
+                                aktør in it.aktører
+                        }
+
+                    aktør.takeIf {
+                        nåværendeAndel.kalkulertUtbetalingsbeløp > 0 &&
+                            harUtbetalingIForrigeBehandling != true &&
+                            !nåværendeAndelOverlapperMedEksisterendeEndretUtbetalingAndel
                     }
-
-                aktør.takeIf { nåværendeBeløp > forrigeBeløp && !nåværendeAndelOverlapperMedEksisterendeEndretUtbetalingAndel }
-            }.values
-            .kombiner()
+                }
+            }.kombiner()
             .tilPerioderIkkeNull()
 
     return perioderMedUgyldigEtterbetalingForAktører
@@ -80,6 +88,14 @@ fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
             )
         }.slåSammenLikeEndretUtbetalingAndeler()
 }
+
+private fun List<AndelTilkjentYtelse>.tilHarUtbetalingTidslinjePerAktør(): Map<Aktør, Tidslinje<Boolean>> =
+    tilTidslinjerPerAktørOgType()
+        .entries
+        .groupBy({ it.key.first }, { it.value })
+        .mapValues { (_, tidslinjer) ->
+            tidslinjer.kombinerUtenNull { andeler -> andeler.any { it.kalkulertUtbetalingsbeløp > 0 } }
+        }
 
 private fun List<EndretUtbetalingAndel>.slåSammenLikeEndretUtbetalingAndeler() =
     this
