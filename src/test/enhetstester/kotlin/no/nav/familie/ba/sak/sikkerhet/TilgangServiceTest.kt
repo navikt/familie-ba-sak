@@ -7,15 +7,18 @@ import no.nav.familie.ba.sak.common.clearAllCaches
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.datagenerator.BEGRUNNELSE_SKJERMING_FRA_TILGANGSMASKINEN
+import no.nav.familie.ba.sak.datagenerator.BEGRUNNELSE_STRENGT_FORTROLIG_FRA_TILGANGSMASKINEN
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagPersonTilgangAvvistGrunnetSkjerming
+import no.nav.familie.ba.sak.datagenerator.lagPersonTilgangAvvistGrunnetStrengtFortrolig
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -28,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollKlient
+import no.nav.familie.ba.sak.mock.FakeTilgangsmaskinTilgangskontrollKlient
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
@@ -53,27 +57,29 @@ class TilgangServiceTest {
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
     private val cacheManager = ConcurrentMapCacheManager()
     private val auditLogger = AuditLogger("familie-ba-sak")
+    private val fakeTilgangsmaskinTilgangskontrollKlient = FakeTilgangsmaskinTilgangskontrollKlient()
     private val fakeFamilieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient()
 
-    private val familieIntegrasjonerTilgangskontrollService =
-        FamilieIntegrasjonerTilgangskontrollService(
+    private val personTilgangService =
+        PersonTilgangService(
+            fakeTilgangsmaskinTilgangskontrollKlient,
             fakeFamilieIntegrasjonerTilgangskontrollKlient,
+            featureToggleService,
             cacheManager,
             mockk(),
-            mockk(relaxed = true),
         )
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository = mockk(relaxed = true)
     private val strengtFortroligService =
         StrengtFortroligService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-            familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
+            personTilgangService = personTilgangService,
             featureToggleService = featureToggleService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
     private val tilgangService =
         TilgangService(
-            familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
+            personTilgangService = personTilgangService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             persongrunnlagService = persongrunnlagService,
             fagsakService = fagsakService,
@@ -102,24 +108,22 @@ class TilgangServiceTest {
         every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns
             personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn()
         every { featureToggleService.isEnabled(FeatureToggle.TILLAT_TILGANG_SKJERMET_BARN_UTEN_LØPENDE_ANDELER) } returns false
+        every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns true
         cacheManager.clearAllCaches()
     }
 
     @AfterEach
     internal fun tearDown() {
         clearBrukerContext()
+        fakeTilgangsmaskinTilgangskontrollKlient.reset()
         fakeFamilieIntegrasjonerTilgangskontrollKlient.reset()
     }
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til person eller dets barn`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(
-                    aktør.aktivFødselsnummer(),
-                    false,
-                    "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse",
-                ),
+                lagPersonTilgangAvvistGrunnetStrengtFortrolig(aktør.aktivFødselsnummer()),
             ),
         )
 
@@ -131,18 +135,15 @@ class TilgangServiceTest {
                 )
             }
 
-        assertThat(rolleTilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
-        assertThat(rolleTilgangskontrollFeil.frontendFeilmelding).isEqualTo("Saksbehandler A har ikke tilgang. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
+        assertThat(rolleTilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang. $BEGRUNNELSE_STRENGT_FORTROLIG_FRA_TILGANGSMASKINEN.")
+        assertThat(rolleTilgangskontrollFeil.frontendFeilmelding).isEqualTo("Saksbehandler A har ikke tilgang. $BEGRUNNELSE_STRENGT_FORTROLIG_FRA_TILGANGSMASKINEN.")
     }
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til person og dets barn`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(
-                    aktør.aktivFødselsnummer(),
-                    true,
-                ),
+                PersonTilgang.medTilgang(aktør.aktivFødselsnummer()),
             ),
         )
 
@@ -151,13 +152,9 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til behandling`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(
-                    aktør.aktivFødselsnummer(),
-                    false,
-                    "NAV-ansatt",
-                ),
+                lagPersonTilgangAvvistGrunnetSkjerming(aktør.aktivFødselsnummer()),
             ),
         )
 
@@ -168,18 +165,15 @@ class TilgangServiceTest {
                     AuditLoggerEvent.ACCESS,
                 )
             }
-        assertThat(rolleTilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til behandling=${behandling.id}. NAV-ansatt.")
-        assertThat(rolleTilgangskontrollFeil.frontendFeilmelding).isEqualTo("Behandlingen inneholder personer som krever ytterligere tilganger. NAV-ansatt.")
+        assertThat(rolleTilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til behandling=${behandling.id}. $BEGRUNNELSE_SKJERMING_FRA_TILGANGSMASKINEN.")
+        assertThat(rolleTilgangskontrollFeil.frontendFeilmelding).isEqualTo("Behandlingen inneholder personer som krever ytterligere tilganger. $BEGRUNNELSE_SKJERMING_FRA_TILGANGSMASKINEN.")
     }
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til behandling`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(
-                    aktør.aktivFødselsnummer(),
-                    true,
-                ),
+                PersonTilgang.medTilgang(aktør.aktivFødselsnummer()),
             ),
         )
 
@@ -188,46 +182,37 @@ class TilgangServiceTest {
 
     @Test
     internal fun `validerTilgangTilPersoner - hvis samme saksbehandler kaller skal den ha cachet`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(
-                    olaIdent,
-                    true,
-                ),
+                PersonTilgang.medTilgang(olaIdent),
             ),
         )
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(1)
+        assertThat(fakeTilgangsmaskinTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(1)
     }
 
     @Test
     internal fun `validerTilgangTilPersoner - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(
-                    olaIdent,
-                    true,
-                ),
+                PersonTilgang.medTilgang(olaIdent),
             ),
         )
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
         mockBrukerContext("B")
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(2)
+        assertThat(fakeTilgangsmaskinTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(2)
     }
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis samme saksbehandler kaller skal den ha cachet`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(
-                    aktør.aktivFødselsnummer(),
-                    true,
-                ),
+                PersonTilgang.medTilgang(aktør.aktivFødselsnummer()),
             ),
         )
 
@@ -235,17 +220,14 @@ class TilgangServiceTest {
 
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(1)
+        assertThat(fakeTilgangsmaskinTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(1)
     }
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(
-                    aktør.aktivFødselsnummer(),
-                    true,
-                ),
+                PersonTilgang.medTilgang(aktør.aktivFødselsnummer()),
             ),
         )
 
@@ -253,7 +235,7 @@ class TilgangServiceTest {
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
         mockBrukerContext("B")
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(2)
+        assertThat(fakeTilgangsmaskinTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(2)
     }
 
     @Test
@@ -281,13 +263,10 @@ class TilgangServiceTest {
                 ),
             ),
         )
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(
-                    søkerAktør.aktivFødselsnummer(),
-                    false,
-                    "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'",
-                ),
+                lagPersonTilgangAvvistGrunnetStrengtFortrolig(søkerAktør.aktivFødselsnummer()),
+                PersonTilgang.medTilgang(barnAktør.aktivFødselsnummer()),
             ),
         )
 
@@ -301,8 +280,8 @@ class TilgangServiceTest {
                     AuditLoggerEvent.ACCESS,
                 )
             }
-        assertThat(rolletilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til fagsak=${fagsak.id}. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'.")
-        assertThat(rolletilgangskontrollFeil.frontendFeilmelding).isEqualTo("Fagsaken inneholder personer som krever ytterligere tilganger. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'.")
+        assertThat(rolletilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til fagsak=${fagsak.id}. $BEGRUNNELSE_STRENGT_FORTROLIG_FRA_TILGANGSMASKINEN.")
+        assertThat(rolletilgangskontrollFeil.frontendFeilmelding).isEqualTo("Fagsaken inneholder personer som krever ytterligere tilganger. $BEGRUNNELSE_STRENGT_FORTROLIG_FRA_TILGANGSMASKINEN.")
     }
 
     @Test
@@ -320,13 +299,10 @@ class TilgangServiceTest {
             emptyList<PersonEnkel>().toSet(),
         )
 
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(
-                    søkerAktør.aktivFødselsnummer(),
-                    false,
-                    "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'",
-                ),
+                lagPersonTilgangAvvistGrunnetStrengtFortrolig(søkerAktør.aktivFødselsnummer()),
+                lagPersonTilgangAvvistGrunnetStrengtFortrolig(barnAktør.aktivFødselsnummer()),
             ),
         )
         mockBrukerContext("A")
@@ -339,11 +315,11 @@ class TilgangServiceTest {
                     AuditLoggerEvent.ACCESS,
                 )
             }
-        assertThat(rolletilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til fagsak=${fagsak.id}. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'.")
-        assertThat(rolletilgangskontrollFeil.frontendFeilmelding).isEqualTo("Fagsaken inneholder personer som krever ytterligere tilganger. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'.")
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollKlient.hentKallMotSjekkTilgangTilPersoner())
+        assertThat(rolletilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til fagsak=${fagsak.id}. $BEGRUNNELSE_STRENGT_FORTROLIG_FRA_TILGANGSMASKINEN.")
+        assertThat(rolletilgangskontrollFeil.frontendFeilmelding).isEqualTo("Fagsaken inneholder personer som krever ytterligere tilganger. $BEGRUNNELSE_STRENGT_FORTROLIG_FRA_TILGANGSMASKINEN.")
+        assertThat(fakeTilgangsmaskinTilgangskontrollKlient.hentKallMotSjekkTilgangTilPersoner())
             .hasSize(1)
-            .containsOnly(listOf(barnAktør.aktivFødselsnummer(), søkerAktør.aktivFødselsnummer()))
+            .containsOnly(setOf(barnAktør.aktivFødselsnummer(), søkerAktør.aktivFødselsnummer()))
     }
 
     @Test
@@ -351,11 +327,11 @@ class TilgangServiceTest {
         val fnr = randomFnr()
         val fnr2 = randomFnr()
         val fnr3 = randomFnr()
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
             listOf(
-                Tilgang(fnr, true),
-                Tilgang(fnr2, false),
-                Tilgang(fnr3, true),
+                PersonTilgang.medTilgang(fnr),
+                lagPersonTilgangAvvistGrunnetSkjerming(fnr2),
+                PersonTilgang.medTilgang(fnr3),
             ),
         )
         assertThrows<RolleTilgangskontrollFeil> {
@@ -414,10 +390,10 @@ class TilgangServiceTest {
                     ),
                 )
 
-            fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+            fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
                 listOf(
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'"),
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
+                    lagPersonTilgangAvvistGrunnetStrengtFortrolig(barnAktør.aktivFødselsnummer()),
+                    PersonTilgang.medTilgang(søkerAktør.aktivFødselsnummer()),
                 ),
             )
 
@@ -441,10 +417,10 @@ class TilgangServiceTest {
                     ),
                 )
 
-            fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+            fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
                 listOf(
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'"),
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
+                    lagPersonTilgangAvvistGrunnetStrengtFortrolig(barnAktør.aktivFødselsnummer()),
+                    PersonTilgang.medTilgang(søkerAktør.aktivFødselsnummer()),
                 ),
             )
 
@@ -459,10 +435,10 @@ class TilgangServiceTest {
             // Arrange
             every { featureToggleService.isEnabled(FeatureToggle.TILLAT_TILGANG_SKJERMET_BARN_UTEN_LØPENDE_ANDELER) } returns false
 
-            fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+            fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
                 listOf(
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'"),
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
+                    lagPersonTilgangAvvistGrunnetStrengtFortrolig(barnAktør.aktivFødselsnummer()),
+                    PersonTilgang.medTilgang(søkerAktør.aktivFødselsnummer()),
                 ),
             )
 
@@ -477,10 +453,10 @@ class TilgangServiceTest {
             // Arrange
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns null
 
-            fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+            fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
                 listOf(
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'"),
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
+                    lagPersonTilgangAvvistGrunnetStrengtFortrolig(barnAktør.aktivFødselsnummer()),
+                    PersonTilgang.medTilgang(søkerAktør.aktivFødselsnummer()),
                 ),
             )
 
@@ -504,10 +480,10 @@ class TilgangServiceTest {
                     ),
                 )
 
-            fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+            fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
                 listOf(
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'"),
-                    Tilgang(søkerAktør.aktivFødselsnummer(), false, "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'"),
+                    lagPersonTilgangAvvistGrunnetStrengtFortrolig(barnAktør.aktivFødselsnummer()),
+                    lagPersonTilgangAvvistGrunnetStrengtFortrolig(søkerAktør.aktivFødselsnummer()),
                 ),
             )
 
@@ -520,10 +496,74 @@ class TilgangServiceTest {
         @Test
         fun `validerTilgangTilFagsak - skal blokkere tilgang når barn er stanses av annen årsak enn strengt fortrolig`() {
             // Arrange
+            fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
+                listOf(
+                    lagPersonTilgangAvvistGrunnetSkjerming(barnAktør.aktivFødselsnummer()),
+                    PersonTilgang.medTilgang(søkerAktør.aktivFødselsnummer()),
+                ),
+            )
+
+            // Act && Assert
+            assertThrows<RolleTilgangskontrollFeil> {
+                tilgangService.validerTilgangTilFagsak(testFagsak.id, AuditLoggerEvent.ACCESS)
+            }
+        }
+
+        @Test
+        fun `validerTilgangTilFagsak - skal tillate tilgang ved skjermet barn uten løpende andeler når familie-integrasjoner avviser grunnet strengt fortrolig`() {
+            // Arrange
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns false
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns testBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(testBehandling.id) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2024, 12),
+                        behandling = testBehandling,
+                        aktør = barnAktør,
+                    ),
+                )
+
             fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
                 listOf(
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, "NAV-ansatt"),
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
+                    Tilgang(
+                        personIdent = barnAktør.aktivFødselsnummer(),
+                        harTilgang = false,
+                        begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'",
+                    ),
+                    Tilgang(personIdent = søkerAktør.aktivFødselsnummer(), harTilgang = true),
+                ),
+            )
+
+            // Act && Assert
+            assertDoesNotThrow {
+                tilgangService.validerTilgangTilFagsak(testFagsak.id, AuditLoggerEvent.ACCESS)
+            }
+        }
+
+        @Test
+        fun `validerTilgangTilFagsak - skal blokkere tilgang når familie-integrasjoner avviser barn av annen grunn enn strengt fortrolig`() {
+            // Arrange
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns false
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns testBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(testBehandling.id) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2024, 12),
+                        behandling = testBehandling,
+                        aktør = barnAktør,
+                    ),
+                )
+
+            fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+                listOf(
+                    Tilgang(
+                        personIdent = barnAktør.aktivFødselsnummer(),
+                        harTilgang = false,
+                        begrunnelse = "Bruker mangler rollen '0000-GA-Egne_ansatte'",
+                    ),
+                    Tilgang(personIdent = søkerAktør.aktivFødselsnummer(), harTilgang = true),
                 ),
             )
 
@@ -553,10 +593,10 @@ class TilgangServiceTest {
                     ),
                 )
 
-            fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
+            fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(
                 listOf(
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'"),
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
+                    lagPersonTilgangAvvistGrunnetStrengtFortrolig(barnAktør.aktivFødselsnummer()),
+                    PersonTilgang.medTilgang(søkerAktør.aktivFødselsnummer()),
                 ),
             )
 

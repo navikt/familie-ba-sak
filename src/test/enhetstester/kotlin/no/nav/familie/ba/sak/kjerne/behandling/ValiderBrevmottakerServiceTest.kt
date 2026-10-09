@@ -6,26 +6,26 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class ValiderBrevmottakerServiceTest {
     private val brevmottakerRepository = mockk<BrevmottakerRepository>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
-    private val familieIntegrasjonerTilgangskontrollService = mockk<FamilieIntegrasjonerTilgangskontrollService>()
+    private val personTilgangService = mockk<PersonTilgangService>()
     private val fagsakRepository = mockk<FagsakRepository>()
     val validerBrevmottakerService =
         ValiderBrevmottakerService(
             brevmottakerRepository = brevmottakerRepository,
             persongrunnlagService = persongrunnlagService,
-            familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
+            personTilgangService = personTilgangService,
             fagsakRepository = fagsakRepository,
         )
 
@@ -57,7 +57,7 @@ class ValiderBrevmottakerServiceTest {
         verify(exactly = 1) { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) }
         verify(exactly = 0) { persongrunnlagService.hentAktiv(any()) }
         verify(exactly = 0) {
-            familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
+            personTilgangService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
                 any(),
             )
         }
@@ -72,7 +72,7 @@ class ValiderBrevmottakerServiceTest {
                 behandlingId,
                 søker,
             )
-        every { familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns
+        every { personTilgangService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns
             listOf(
                 søker.aktør.aktivFødselsnummer(),
             )
@@ -95,7 +95,7 @@ class ValiderBrevmottakerServiceTest {
                 behandlingId,
                 søker,
             )
-        every { familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns emptyList()
+        every { personTilgangService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns emptyList()
 
         // Act
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
@@ -105,7 +105,7 @@ class ValiderBrevmottakerServiceTest {
 
         // Assert
         verify(exactly = 1) {
-            familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
+            personTilgangService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
                 any(),
             )
         }
@@ -120,7 +120,7 @@ class ValiderBrevmottakerServiceTest {
                 behandlingId,
                 søker,
             )
-        every { familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns
+        every { personTilgangService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns
             listOf(
                 søker.aktør.aktivFødselsnummer(),
             )
@@ -141,7 +141,7 @@ class ValiderBrevmottakerServiceTest {
                 behandlingId,
                 søker,
             )
-        every { familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns
+        every { personTilgangService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns
             listOf(
                 søker.aktør.aktivFødselsnummer(),
             )
