@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.feilHvis
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.secureLogger
@@ -27,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
+import no.nav.familie.ba.sak.task.SendMeldingOmFerdigstiltBehandlingTilPensjonTask
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
@@ -91,6 +91,15 @@ class PensjonService(
         val uuid = UUID.randomUUID()
         taskRepository.save(HentAlleIdenterTilPsysTask.lagTask(år, uuid))
         return uuid.toString()
+    }
+
+    fun opprettTaskForSendingAvMeldingOmFerdigstiltBehandling(behandling: Behandling) {
+        val task =
+            SendMeldingOmFerdigstiltBehandlingTilPensjonTask.opprettTask(
+                behandling.fagsak.aktør.aktivFødselsnummer(),
+                behandling.id,
+            )
+        taskRepository.save(task)
     }
 
     private fun hentRelaterteFagsaker(

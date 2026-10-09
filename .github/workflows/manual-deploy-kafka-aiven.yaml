@@ -67,6 +67,11 @@ jobs:
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/kafka/aapen-familie-ba-sak-identer-med-barnetrygd-prod.yaml
+      - name: Deploy identer-med-ferdigstilt-behandling-v1 til dev
+        uses: nais/deploy/actions/deploy@7ad7c2b833e1db74a80954e3ee6bb6ac060a8ae7 # ratchet:nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/kafka/identer-med-ferdigstilt-behandling-v1-dev.yaml
 
   loggfeil:
     name: Send logg til slack ved feil

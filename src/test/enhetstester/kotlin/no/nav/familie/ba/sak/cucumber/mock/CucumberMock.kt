@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingSøknads
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockOppdragBackendKlient
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockPensjonService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockSystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockTilbakekrevingsvedtakMotregningRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategiForValutakurserRepository
@@ -151,6 +152,7 @@ class CucumberMock(
     val tilbakekrevingService = mockTilbakekrevingService()
     val taskRepository = MockTasker().mockTaskRepositoryWrapper(this, scope)
     val featureToggleService = mockFeatureToggleService()
+    val pensjonService = mockPensjonService()
     val mockPåVentService = mockk<SettPåVentService>()
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
     val brevmottakerService = mockk<BrevmottakerService>()
@@ -666,6 +668,8 @@ class CucumberMock(
             behandlingMetrikker = behandlingMetrikker,
             loggService = loggService,
             snikeIKøenService = snikeIKøenService,
+            pensjonService = pensjonService,
+            featureToggleService = featureToggleService,
         )
 
     val automatiskBeslutningService = AutomatiskBeslutningService(simuleringService)
