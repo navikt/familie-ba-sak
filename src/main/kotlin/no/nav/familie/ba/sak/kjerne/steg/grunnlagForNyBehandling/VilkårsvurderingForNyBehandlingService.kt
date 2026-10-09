@@ -133,7 +133,7 @@ class VilkårsvurderingForNyBehandlingService(
                             ),
                     )
             }
-        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+        return vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering = vilkårsvurdering)
     }
 
     fun genererVilkårsvurderingForHelmanuellMigrering(
@@ -150,7 +150,7 @@ class VilkårsvurderingForNyBehandlingService(
                         nyMigreringsdato = nyMigreringsdato,
                     )
             }
-        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+        return vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering = vilkårsvurdering)
     }
 
     private fun genererVilkårsvurderingForSatsendringMånedligvalutaJusteringFinnmarkstilleggOgSvalbardtillegg(
@@ -177,7 +177,7 @@ class VilkårsvurderingForNyBehandlingService(
             forrigeBehandling = forrigeBehandlingSomErVedtatt,
         )
 
-        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
+        return vilkårsvurderingService.lagreNyOgSlettGammel(nyVilkårsvurdering)
     }
 
     fun initierVilkårsvurderingForBehandling(
@@ -304,7 +304,7 @@ class VilkårsvurderingForNyBehandlingService(
                 frontendFeilmelding = VilkårsvurderingUtils.lagFjernAdvarsel(aktivtSomErRedusert.personResultater),
             )
         }
-        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
+        return vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering = initieltSomErOppdatert)
     }
 
     /***
@@ -358,7 +358,7 @@ class VilkårsvurderingForNyBehandlingService(
             behandling = behandling,
             forrigeBehandling = forrigeBehandlingSomErVedtatt,
         )
-        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+        return vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering = vilkårsvurdering)
     }
 
     private fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? =

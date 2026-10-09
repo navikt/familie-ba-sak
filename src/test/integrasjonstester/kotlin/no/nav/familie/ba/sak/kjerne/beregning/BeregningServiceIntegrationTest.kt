@@ -127,7 +127,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 dato20211101,
                 dato20211101.plusYears(17),
             )
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering = vilkårsvurdering)
 
         // Act
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -202,7 +202,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         ),
                     )
             }
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
+        vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering)
 
         val kompetanseNorgeErSekundærland =
             lagKompetanse(
