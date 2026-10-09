@@ -71,8 +71,6 @@ enum class FeatureToggle(
     // NAV-30720
     SKAL_BEHANDLE_SOKNAD_AUTOMATISK("familie-ba-sak.skal-behandle-soknad-automatisk"),
 
-    SKAL_SLETTE_INAKTIVE_PERSONOPPLYSNINGSGRUNNLAG("familie-ba-sak.skal-slette-inaktive-personopplysningsgrunnlag"),
-
     // NAV-31042
     VURDER_ALLE_FILTRERINGSREGLER("familie-ba-sak.vurder-alle-filtreringsregler"),
 

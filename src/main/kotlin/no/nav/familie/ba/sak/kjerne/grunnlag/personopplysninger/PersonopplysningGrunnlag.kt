@@ -40,8 +40,6 @@ data class PersonopplysningGrunnlag(
         cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE],
     )
     val personer: MutableSet<Person> = mutableSetOf(),
-    @Column(name = "aktiv", nullable = false)
-    var aktiv: Boolean = true,
 ) : BaseEntitet() {
     val barna: List<Person>
         get() = personer.filter { it.type == PersonType.BARN }
@@ -98,7 +96,6 @@ data class PersonopplysningGrunnlag(
         val sb = StringBuilder("PersonopplysningGrunnlagEntitet{")
         sb.append("id=").append(id)
         sb.append(", personer=").append(personer.toString())
-        sb.append(", aktiv=").append(aktiv)
         sb.append('}')
         return sb.toString()
     }

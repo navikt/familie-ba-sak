@@ -22,7 +22,7 @@ class PersonopplysningGrunnlagRepositoryTest(
     @Nested
     inner class HentAktivForBehandlinger {
         @Test
-        fun `skal hente aktive grunnlag per behandling`() {
+        fun `skal hente grunnlag per behandling`() {
             // Arrange
             val aktør1 = aktørIdRepository.save(randomAktør())
             val aktør2 = aktørIdRepository.save(randomAktør())
@@ -34,19 +34,15 @@ class PersonopplysningGrunnlagRepositoryTest(
             val behandling2 = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak2))
             val behandlinger = setOf(behandling1.id, behandling2.id)
 
-            val grunnlag1 = personopplysningGrunnlagRepository.save(lagPersonopplysningGrunnlagUtenId(behandlingId = behandling1.id, aktiv = true))
-            val grunnlag2 = personopplysningGrunnlagRepository.save(lagPersonopplysningGrunnlagUtenId(behandlingId = behandling1.id, aktiv = false))
-            val grunnlag3 = personopplysningGrunnlagRepository.save(lagPersonopplysningGrunnlagUtenId(behandlingId = behandling2.id, aktiv = true))
-            val grunnlag4 = personopplysningGrunnlagRepository.save(lagPersonopplysningGrunnlagUtenId(behandlingId = behandling2.id, aktiv = false))
+            val grunnlag1 = personopplysningGrunnlagRepository.save(lagPersonopplysningGrunnlagUtenId(behandlingId = behandling1.id))
+            val grunnlag2 = personopplysningGrunnlagRepository.save(lagPersonopplysningGrunnlagUtenId(behandlingId = behandling2.id))
 
             // Act
-            val aktive = personopplysningGrunnlagRepository.hentAktivForBehandlinger(behandlinger)
+            val grunnlag = personopplysningGrunnlagRepository.hentAktivForBehandlinger(behandlinger)
 
             // Assert
-            assertThat(aktive).anySatisfy { assertThat(it.id).isEqualTo(grunnlag1.id) }
-            assertThat(aktive).anySatisfy { assertThat(it.id).isEqualTo(grunnlag3.id) }
-            assertThat(aktive).noneSatisfy { assertThat(it.id).isEqualTo(grunnlag2.id) }
-            assertThat(aktive).noneSatisfy { assertThat(it.id).isEqualTo(grunnlag4.id) }
+            assertThat(grunnlag).anySatisfy { assertThat(it.id).isEqualTo(grunnlag1.id) }
+            assertThat(grunnlag).anySatisfy { assertThat(it.id).isEqualTo(grunnlag2.id) }
         }
     }
 }
