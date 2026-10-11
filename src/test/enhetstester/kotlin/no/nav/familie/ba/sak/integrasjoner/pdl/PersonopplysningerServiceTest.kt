@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
@@ -20,8 +19,9 @@ import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService.Companion.KAN_IKKE_HÅNDTERE_FALSK_IDENTITET
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgang
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.assertThrows
 class PersonopplysningerServiceTest {
     private val pdlRestKlient: PdlRestKlient = mockk()
     private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient = mockk()
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService = mockk()
+    private val personTilgangService: PersonTilgangService = mockk()
     private val integrasjonKlient: IntegrasjonKlient = mockk()
     private val falskIdentitetService: FalskIdentitetService = mockk()
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository = mockk()
@@ -37,7 +37,7 @@ class PersonopplysningerServiceTest {
         PersonopplysningerService(
             pdlRestKlient = pdlRestKlient,
             systemOnlyPdlRestKlient = systemOnlyPdlRestKlient,
-            familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
+            personTilgangService = personTilgangService,
             integrasjonKlient = integrasjonKlient,
             falskIdentitetService = falskIdentitetService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
@@ -65,12 +65,12 @@ class PersonopplysningerServiceTest {
 
         val tilganger =
             mapOf(
-                Pair(person.aktør.aktivFødselsnummer(), Tilgang(personIdent = person.aktør.aktivFødselsnummer(), harTilgang = true)),
-                Pair(barn.aktør.aktivFødselsnummer(), Tilgang(personIdent = barn.aktør.aktivFødselsnummer(), harTilgang = true)),
+                Pair(person.aktør.aktivFødselsnummer(), PersonTilgang.medTilgang(person.aktør.aktivFødselsnummer())),
+                Pair(barn.aktør.aktivFødselsnummer(), PersonTilgang.medTilgang(barn.aktør.aktivFødselsnummer())),
             )
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } returns personInfo
         every { pdlRestKlient.hentPerson(barn.aktør, PersonInfoQuery.ENKEL) } returns personInfoBarn
-        every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { personTilgangService.sjekkTilgangTilPersoner(any()) } returns tilganger
         every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
 
         // Act
@@ -112,12 +112,12 @@ class PersonopplysningerServiceTest {
 
         val tilganger =
             mapOf(
-                Pair(person.aktør.aktivFødselsnummer(), Tilgang(personIdent = person.aktør.aktivFødselsnummer(), harTilgang = true)),
-                Pair(barn.aktør.aktivFødselsnummer(), Tilgang(personIdent = barn.aktør.aktivFødselsnummer(), harTilgang = true)),
+                Pair(person.aktør.aktivFødselsnummer(), PersonTilgang.medTilgang(person.aktør.aktivFødselsnummer())),
+                Pair(barn.aktør.aktivFødselsnummer(), PersonTilgang.medTilgang(barn.aktør.aktivFødselsnummer())),
             )
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } returns personInfo
         every { pdlRestKlient.hentPerson(barn.aktør, PersonInfoQuery.ENKEL) } returns personInfoBarn
-        every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { personTilgangService.sjekkTilgangTilPersoner(any()) } returns tilganger
         every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
 
         // Act
@@ -149,13 +149,13 @@ class PersonopplysningerServiceTest {
             )
         val tilganger =
             mapOf(
-                relasjon.aktør.aktivFødselsnummer() to Tilgang(personIdent = relasjon.aktør.aktivFødselsnummer(), harTilgang = true),
+                relasjon.aktør.aktivFødselsnummer() to PersonTilgang.medTilgang(relasjon.aktør.aktivFødselsnummer()),
             )
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } returns personInfo
         every { pdlRestKlient.hentPerson(relasjon.aktør, PersonInfoQuery.ENKEL) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
         every { falskIdentitetService.hentFalskIdentitet(relasjon.aktør) } throws FunksjonellFeil(KAN_IKKE_HÅNDTERE_FALSK_IDENTITET)
-        every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { personTilgangService.sjekkTilgangTilPersoner(any()) } returns tilganger
         every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
 
         // Act
@@ -180,13 +180,13 @@ class PersonopplysningerServiceTest {
             )
         val tilganger =
             mapOf(
-                relasjon.aktør.aktivFødselsnummer() to Tilgang(personIdent = relasjon.aktør.aktivFødselsnummer(), harTilgang = true),
+                relasjon.aktør.aktivFødselsnummer() to PersonTilgang.medTilgang(relasjon.aktør.aktivFødselsnummer()),
             )
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } returns personInfo
         every { pdlRestKlient.hentPerson(relasjon.aktør, PersonInfoQuery.ENKEL) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
         every { falskIdentitetService.hentFalskIdentitet(relasjon.aktør) } throws FunksjonellFeil(KAN_IKKE_HÅNDTERE_FALSK_IDENTITET)
-        every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { personTilgangService.sjekkTilgangTilPersoner(any()) } returns tilganger
         every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
 
         // Act & Assert
@@ -212,13 +212,13 @@ class PersonopplysningerServiceTest {
             )
         val tilganger =
             mapOf(
-                relasjon.aktør.aktivFødselsnummer() to Tilgang(personIdent = relasjon.aktør.aktivFødselsnummer(), harTilgang = true),
+                relasjon.aktør.aktivFødselsnummer() to PersonTilgang.medTilgang(relasjon.aktør.aktivFødselsnummer()),
             )
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } returns personInfo
         every { pdlRestKlient.hentPerson(relasjon.aktør, PersonInfoQuery.ENKEL) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
         every { falskIdentitetService.hentFalskIdentitet(relasjon.aktør) } throws FunksjonellFeil(KAN_IKKE_HÅNDTERE_FALSK_IDENTITET)
-        every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { personTilgangService.sjekkTilgangTilPersoner(any()) } returns tilganger
         every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
         every { personopplysningGrunnlagRepository.finnSøkerOgBarnPåFagsakerHvorAktørInngår(person.aktør) } returns setOf(person.aktør)
 
@@ -244,13 +244,13 @@ class PersonopplysningerServiceTest {
             )
         val tilganger =
             mapOf(
-                relasjon.aktør.aktivFødselsnummer() to Tilgang(personIdent = relasjon.aktør.aktivFødselsnummer(), harTilgang = true),
+                relasjon.aktør.aktivFødselsnummer() to PersonTilgang.medTilgang(relasjon.aktør.aktivFødselsnummer()),
             )
 
         every { pdlRestKlient.hentPerson(person.aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON) } returns personInfo
         every { pdlRestKlient.hentPerson(relasjon.aktør, PersonInfoQuery.ENKEL) } throws PdlPersonKanIkkeBehandlesIFagsystem(årsak = PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
         every { falskIdentitetService.hentFalskIdentitet(relasjon.aktør) } throws FunksjonellFeil(KAN_IKKE_HÅNDTERE_FALSK_IDENTITET)
-        every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns tilganger
+        every { personTilgangService.sjekkTilgangTilPersoner(any()) } returns tilganger
         every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
         every { personopplysningGrunnlagRepository.finnSøkerOgBarnPåFagsakerHvorAktørInngår(person.aktør) } returns setOf(person.aktør, relasjon.aktør)
 

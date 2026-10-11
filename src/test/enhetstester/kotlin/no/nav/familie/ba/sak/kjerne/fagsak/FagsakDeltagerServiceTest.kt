@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitetPersonInfo
@@ -25,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.assertj.core.api.Assertions.assertThat
@@ -37,7 +37,7 @@ class FagsakDeltagerServiceTest {
     private val personRepository = mockk<PersonRepository>()
     private val personidentService = mockk<PersonidentService>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
-    private val familieIntegrasjonerTilgangskontrollService = mockk<FamilieIntegrasjonerTilgangskontrollService>()
+    private val personTilgangService = mockk<PersonTilgangService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val integrasjonKlient = mockk<IntegrasjonKlient>()
     private val fagsakService = mockk<FagsakService>()
@@ -49,7 +49,7 @@ class FagsakDeltagerServiceTest {
             personRepository = personRepository,
             personidentService = personidentService,
             personopplysningerService = personopplysningerService,
-            familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
+            personTilgangService = personTilgangService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             integrasjonKlient = integrasjonKlient,
         )
@@ -73,7 +73,7 @@ class FagsakDeltagerServiceTest {
         val (barnIdent, barnAktør) = randomBarnFnr().let { it to randomAktør(it) }
         every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(barnIdent) } returns barnAktør
         every {
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(barnAktør)
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(barnAktør)
         } returns
             PersonInfoDto(
                 personIdent = barnAktør.aktivFødselsnummer(),
@@ -97,7 +97,7 @@ class FagsakDeltagerServiceTest {
         val navn = "Mock Mockesen"
         val personInfo = PersonInfo(fødselsdato = LocalDate.now().minusYears(30), kjønn = Kjønn.KVINNE, navn = navn)
         every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(ident) } returns aktør
-        every { familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør) } returns null
+        every { personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(aktør) } returns null
         every {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
         } returns PdlPersonInfo.Person(personInfo = personInfo)
@@ -141,7 +141,7 @@ class FagsakDeltagerServiceTest {
             )
         every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(barnIdent) } returns barnAktør
         every {
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(match { it in aktører })
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(match { it in aktører })
         } returns null
         every {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(barnAktør)
@@ -186,7 +186,7 @@ class FagsakDeltagerServiceTest {
             )
         every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(barnIdent) } returns barnAktør
         every {
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(match { it in aktører })
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(match { it in aktører })
         } returns null
         every {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(barnAktør)
@@ -217,7 +217,7 @@ class FagsakDeltagerServiceTest {
             personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer("a")
         } returns person.aktør
         every {
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør)
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør)
         } returns null
         every {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
@@ -229,7 +229,7 @@ class FagsakDeltagerServiceTest {
             behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
         } returns behandling
         every {
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(any())
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(any())
         } returns null
         every {
             personopplysningerService.hentPdlPersonInfoEnkel(any())
@@ -252,7 +252,7 @@ class FagsakDeltagerServiceTest {
             personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer("a")
         } returns person.aktør
         every {
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør)
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør)
         } returns null
         every {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
@@ -264,7 +264,7 @@ class FagsakDeltagerServiceTest {
             behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
         } returns behandling
         every {
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(any())
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(any())
         } returns null
         every {
             personopplysningerService.hentPdlPersonInfoEnkel(any())
@@ -287,7 +287,7 @@ class FagsakDeltagerServiceTest {
             personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(person.aktør.aktivFødselsnummer())
         } returns person.aktør
         every {
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør)
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør)
         } returns null
         every {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
@@ -299,7 +299,7 @@ class FagsakDeltagerServiceTest {
             behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
         } returns behandling
         every {
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(any())
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(any())
         } returns null
         every { fagsakRepository.finnFagsakerForAktør(person.aktør) } returns emptyList()
         every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
@@ -323,7 +323,7 @@ class FagsakDeltagerServiceTest {
             personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(person.aktør.aktivFødselsnummer())
         } returns person.aktør
         every {
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør)
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør)
         } returns null
         every {
             personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør)
@@ -335,7 +335,7 @@ class FagsakDeltagerServiceTest {
             behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
         } returns behandling
         every {
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(any())
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(any())
         } returns null
         every { fagsakRepository.finnFagsakerForAktør(person.aktør) } returns emptyList()
         every { integrasjonKlient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()

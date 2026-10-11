@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.fake
 
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -23,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -42,14 +42,14 @@ import java.time.LocalDate
 class FakePersonopplysningerService(
     pdlRestKlient: PdlRestKlient,
     systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
-    familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+    personTilgangService: PersonTilgangService,
     integrasjonKlient: IntegrasjonKlient,
     falskIdentitetService: FalskIdentitetService,
     personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 ) : PersonopplysningerService(
         pdlRestKlient,
         systemOnlyPdlRestKlient,
-        familieIntegrasjonerTilgangskontrollService,
+        personTilgangService,
         integrasjonKlient,
         falskIdentitetService,
         personopplysningGrunnlagRepository,

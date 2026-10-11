@@ -8,6 +8,9 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagPersonTilgangAvvistGrunnetSkjerming
+import no.nav.familie.ba.sak.datagenerator.lagPersonTilgangAvvistGrunnetStrengtFortrolig
+import no.nav.familie.ba.sak.datagenerator.lagPersonTilgangAvvistGrunnetStrengtFortroligUtland
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.ArbeidsfordelingPåBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -20,7 +23,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.PersonMedAndelerDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -38,17 +40,17 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService.Companion.BEGRUNNELSE_STRENGT_FORTROLIG
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService.Companion.SKJERMET_BARN
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService.Companion.SKJERMET_BARN_FØDSELSDATO
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgang
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
-import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -62,7 +64,7 @@ import java.time.YearMonth
 class StrengtFortroligServiceTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository = mockk()
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService = mockk()
+    private val personTilgangService: PersonTilgangService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
 
@@ -70,7 +72,7 @@ class StrengtFortroligServiceTest {
         StrengtFortroligService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-            familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
+            personTilgangService = personTilgangService,
             featureToggleService = featureToggleService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
@@ -234,8 +236,8 @@ class StrengtFortroligServiceTest {
             mockBarnUtenLøpendeAndeler()
             val tilganger =
                 listOf(
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, BEGRUNNELSE_STRENGT_FORTROLIG),
+                    PersonTilgang.medTilgang(søkerAktør.aktivFødselsnummer()),
+                    lagPersonTilgangAvvistGrunnetStrengtFortrolig(barnAktør.aktivFødselsnummer()),
                 )
 
             // Act
@@ -251,8 +253,8 @@ class StrengtFortroligServiceTest {
             // Arrange
             val tilganger =
                 listOf(
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
-                    Tilgang(barnAktør.aktivFødselsnummer(), true),
+                    PersonTilgang.medTilgang(søkerAktør.aktivFødselsnummer()),
+                    PersonTilgang.medTilgang(barnAktør.aktivFødselsnummer()),
                 )
 
             // Act
@@ -278,8 +280,8 @@ class StrengtFortroligServiceTest {
                 )
             val tilganger =
                 listOf(
-                    Tilgang(søkerAktør.aktivFødselsnummer(), true),
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, BEGRUNNELSE_STRENGT_FORTROLIG),
+                    PersonTilgang.medTilgang(søkerAktør.aktivFødselsnummer()),
+                    lagPersonTilgangAvvistGrunnetStrengtFortrolig(barnAktør.aktivFødselsnummer()),
                 )
 
             // Act
@@ -294,14 +296,14 @@ class StrengtFortroligServiceTest {
         fun `skal returnere false når saksbehandler mangler tilgang til søker`() {
             // Arrange
             mockBarnUtenLøpendeAndeler()
-            every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns
+            every { personTilgangService.sjekkTilgangTilPersoner(any()) } returns
                 mapOf(
-                    barnAktør.aktivFødselsnummer() to Tilgang(barnAktør.aktivFødselsnummer(), false, BEGRUNNELSE_STRENGT_FORTROLIG),
+                    barnAktør.aktivFødselsnummer() to lagPersonTilgangAvvistGrunnetStrengtFortrolig(barnAktør.aktivFødselsnummer()),
                 )
             val tilganger =
                 listOf(
-                    Tilgang(søkerAktør.aktivFødselsnummer(), false, BEGRUNNELSE_STRENGT_FORTROLIG),
-                    Tilgang(barnAktør.aktivFødselsnummer(), false, BEGRUNNELSE_STRENGT_FORTROLIG),
+                    lagPersonTilgangAvvistGrunnetStrengtFortrolig(søkerAktør.aktivFødselsnummer()),
+                    lagPersonTilgangAvvistGrunnetStrengtFortrolig(barnAktør.aktivFødselsnummer()),
                 )
 
             // Act
@@ -412,11 +414,27 @@ class StrengtFortroligServiceTest {
         }
 
         @Test
+        fun `skal returnere ident for skjermet barn med strengt fortrolig adresse i utlandet uten løpende andeler`() {
+            // Arrange
+            every { personTilgangService.sjekkTilgangTilPersoner(any()) } returns
+                mapOf(
+                    barnAktør.aktivFødselsnummer() to lagPersonTilgangAvvistGrunnetStrengtFortroligUtland(barnAktør.aktivFødselsnummer()),
+                )
+            mockBarnUtenLøpendeAndeler()
+
+            // Act
+            val resultat = strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak)
+
+            // Assert
+            assertThat(resultat).containsExactly(barnAktør.aktivFødselsnummer())
+        }
+
+        @Test
         fun `skal returnere tomt sett når barn mangler tilgang av annen årsak enn strengt fortrolig`() {
             // Arrange
-            every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns
+            every { personTilgangService.sjekkTilgangTilPersoner(any()) } returns
                 mapOf(
-                    barnAktør.aktivFødselsnummer() to Tilgang(barnAktør.aktivFødselsnummer(), false, "Annen årsak"),
+                    barnAktør.aktivFødselsnummer() to lagPersonTilgangAvvistGrunnetSkjerming(barnAktør.aktivFødselsnummer()),
                 )
             mockBarnUtenLøpendeAndeler()
 
@@ -666,18 +684,18 @@ class StrengtFortroligServiceTest {
     )
 
     private fun mockSaksbehandlerHarTilgangTilSøkerMenIkkeBarn() {
-        every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns
+        every { personTilgangService.sjekkTilgangTilPersoner(any()) } returns
             mapOf(
-                søkerAktør.aktivFødselsnummer() to Tilgang(søkerAktør.aktivFødselsnummer(), true),
-                barnAktør.aktivFødselsnummer() to Tilgang(barnAktør.aktivFødselsnummer(), false, BEGRUNNELSE_STRENGT_FORTROLIG),
+                søkerAktør.aktivFødselsnummer() to PersonTilgang.medTilgang(søkerAktør.aktivFødselsnummer()),
+                barnAktør.aktivFødselsnummer() to lagPersonTilgangAvvistGrunnetStrengtFortrolig(barnAktør.aktivFødselsnummer()),
             )
     }
 
     private fun mockSaksbehandlerHarTilgangTilAllePersoner() {
-        every { familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(any()) } returns
+        every { personTilgangService.sjekkTilgangTilPersoner(any()) } returns
             mapOf(
-                søkerAktør.aktivFødselsnummer() to Tilgang(søkerAktør.aktivFødselsnummer(), true),
-                barnAktør.aktivFødselsnummer() to Tilgang(barnAktør.aktivFødselsnummer(), true),
+                søkerAktør.aktivFødselsnummer() to PersonTilgang.medTilgang(søkerAktør.aktivFødselsnummer()),
+                barnAktør.aktivFødselsnummer() to PersonTilgang.medTilgang(barnAktør.aktivFødselsnummer()),
             )
     }
 

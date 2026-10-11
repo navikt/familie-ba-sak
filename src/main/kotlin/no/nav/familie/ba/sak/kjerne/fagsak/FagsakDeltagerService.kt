@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerDto
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
@@ -15,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -27,7 +27,7 @@ class FagsakDeltagerService(
     private val personRepository: PersonRepository,
     private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService,
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+    private val personTilgangService: PersonTilgangService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val fagsakService: FagsakService,
     private val integrasjonKlient: IntegrasjonKlient,
@@ -245,7 +245,7 @@ class FagsakDeltagerService(
 
     private fun hentMaskertPersonVedManglendeTilgang(aktør: Aktør): FagsakDeltagerDto? =
         runCatching {
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
         }.fold(
             onSuccess = {
                 it?.let {

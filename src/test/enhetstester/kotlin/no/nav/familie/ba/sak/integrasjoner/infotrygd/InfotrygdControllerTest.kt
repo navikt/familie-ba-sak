@@ -4,16 +4,21 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.familie.ba.sak.common.clearAllCaches
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAktør
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
+import no.nav.familie.ba.sak.datagenerator.lagPersonTilgangAvvistGrunnetFortrolig
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollKlient
+import no.nav.familie.ba.sak.mock.FakeTilgangsmaskinTilgangskontrollKlient
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgang
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
+import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
+import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
-import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -26,29 +31,32 @@ import org.springframework.http.HttpStatus
 class InfotrygdControllerTest {
     private val systemOnlyPdlRestKlient = mockk<SystemOnlyPdlRestKlient>()
     private val cacheManager = spyk(ConcurrentMapCacheManager())
-    private val familieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient()
+    private val fakeTilgangsmaskinTilgangskontrollKlient = FakeTilgangsmaskinTilgangskontrollKlient()
 
-    private val familieIntegrasjonerTilgangskontrollService =
-        FamilieIntegrasjonerTilgangskontrollService(
-            familieIntegrasjonerTilgangskontrollKlient,
+    private val personTilgangService =
+        PersonTilgangService(
+            fakeTilgangsmaskinTilgangskontrollKlient,
+            mockk(),
+            mockk<FeatureToggleService> { every { isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns true },
             cacheManager,
             systemOnlyPdlRestKlient,
-            mockk(relaxed = true),
         )
 
     private val infotrygdBarnetrygdKlient = mockk<InfotrygdBarnetrygdKlient>()
     private val personidentService = mockk<PersonidentService>()
-    private val infotrygdService: InfotrygdService = InfotrygdService(infotrygdBarnetrygdKlient, familieIntegrasjonerTilgangskontrollService, personidentService)
+    private val infotrygdService: InfotrygdService = InfotrygdService(infotrygdBarnetrygdKlient, personTilgangService, personidentService)
     private val infotrygdController = InfotrygdController(infotrygdBarnetrygdKlient, personidentService, infotrygdService)
 
     @BeforeEach
     fun setUp() {
+        mockBrukerContext()
         cacheManager.clearAllCaches()
     }
 
     @AfterEach
     fun tearDown() {
-        familieIntegrasjonerTilgangskontrollKlient.reset()
+        clearBrukerContext()
+        fakeTilgangsmaskinTilgangskontrollKlient.reset()
     }
 
     @Test
@@ -57,7 +65,7 @@ class InfotrygdControllerTest {
         val fnr = "12345678910"
 
         every { personidentService.hentAktør(fnr) } returns lagAktør(fnr)
-        familieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang(fnr, true)))
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(listOf(PersonTilgang.medTilgang(fnr)))
         every {
             infotrygdBarnetrygdKlient.hentSaker(
                 any(),
@@ -86,7 +94,7 @@ class InfotrygdControllerTest {
         val fnr = "12345678910"
 
         every { personidentService.hentAktør(fnr) } returns lagAktør(fnr)
-        familieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang(fnr, false)))
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(listOf(lagPersonTilgangAvvistGrunnetFortrolig(fnr)))
 
         every { systemOnlyPdlRestKlient.hentAdressebeskyttelse(any()) } returns
             listOf(Adressebeskyttelse(ADRESSEBESKYTTELSEGRADERING.FORTROLIG))

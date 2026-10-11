@@ -7,11 +7,11 @@ import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonInfoDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonInfoMedNavnOgAdresseDto
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -32,7 +32,7 @@ class PersonController(
     private val personopplysningerService: PersonopplysningerService,
     private val persongrunnlagService: PersongrunnlagService,
     private val personidentService: PersonidentService,
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+    private val personTilgangService: PersonTilgangService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilgangService: TilgangService,
 ) {
@@ -47,7 +47,7 @@ class PersonController(
 
         val aktør = personidentService.hentAktør(personIdent)
         val personinfo =
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
                 ?: personopplysningerService
                     .hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
                     .tilPersonInfoDto(personIdent)
@@ -65,7 +65,7 @@ class PersonController(
 
         val aktør = personidentService.hentAktør(personIdent)
         val personinfo =
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
                 ?: personopplysningerService
                     .hentPersoninfoEnkel(aktør)
                     .tilPersonInfoDto(personIdent)
@@ -83,7 +83,7 @@ class PersonController(
 
         val aktør = personidentService.hentAktør(personIdent)
         val personinfo =
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
                 ?: personopplysningerService
                     .hentPersoninfoNavnOgAdresse(aktør)
                     .tilPersonInfoMedNavnOgAdresseDto(personIdent)

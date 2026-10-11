@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -15,8 +14,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgang
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -24,7 +24,7 @@ import java.time.LocalDate
 class StrengtFortroligService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+    private val personTilgangService: PersonTilgangService,
     private val featureToggleService: FeatureToggleService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
@@ -211,7 +211,7 @@ class StrengtFortroligService(
      */
     fun saksbehandlerManglerKunTilgangTilSkjermedeBarnUtenLøpendeAndeler(
         fagsak: Fagsak,
-        tilgangerTilPersoner: List<Tilgang>,
+        tilgangerTilPersoner: List<PersonTilgang>,
     ): Boolean {
         val personerSaksbehandlerIkkeHarTilgangTil =
             tilgangerTilPersoner.filterNot { it.harTilgang }.map { it.personIdent }.toSet()
@@ -240,7 +240,7 @@ class StrengtFortroligService(
                 ?.map { it.aktør.aktivFødselsnummer() }
                 ?: listOf(fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer() ?: fagsak.aktør.aktivFødselsnummer())
 
-        return familieIntegrasjonerTilgangskontrollService
+        return personTilgangService
             .hentIdenterMedStrengtFortroligAdressebeskyttelse(identer)
             .isNotEmpty()
     }
@@ -266,7 +266,7 @@ class StrengtFortroligService(
         val barnSaksbehandlerIkkeHarTilgangTilGrunnetStrengtFortrolig =
             tilgangerTilBarn
                 .filterNot { it.harTilgang }
-                .takeIf { it.isNotEmpty() && it.all { p -> p.begrunnelse?.contains(BEGRUNNELSE_STRENGT_FORTROLIG) == true } }
+                .takeIf { it.isNotEmpty() && it.all { p -> p.erAvvistGrunnetStrengtFortrolig() } }
                 ?.map { it.personIdent }
                 ?: return emptySet()
 
@@ -282,8 +282,8 @@ class StrengtFortroligService(
         return skjermedeBarnSomHarAndelerMenIngenLøpende.toSet()
     }
 
-    private fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> =
-        familieIntegrasjonerTilgangskontrollService
+    private fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<PersonTilgang> =
+        personTilgangService
             .sjekkTilgangTilPersoner(personIdenter)
             .map { it.value }
 
@@ -309,7 +309,6 @@ class StrengtFortroligService(
 
     companion object {
         const val SKJERMET_BARN = "SKJERMET BARN"
-        const val BEGRUNNELSE_STRENGT_FORTROLIG = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'"
         val SKJERMET_BARN_FØDSELSDATO = LocalDate.of(9999, 1, 1)
     }
 }

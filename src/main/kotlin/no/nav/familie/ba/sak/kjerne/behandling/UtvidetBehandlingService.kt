@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilTotrinnskontrollDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilUtenlandskPeriodebeløpDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakursDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilVedtakDto
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
@@ -45,6 +44,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.Tilba
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.tilTilbakekrevingsvedtakMotregningDto
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import org.springframework.stereotype.Service
 
 @Service
@@ -73,7 +73,7 @@ class UtvidetBehandlingService(
     private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
     private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+    private val personTilgangService: PersonTilgangService,
     private val institusjonService: InstitusjonService,
     private val strengtFortroligService: StrengtFortroligService,
 ) {
@@ -84,7 +84,7 @@ class UtvidetBehandlingService(
         val søknadsgrunnlag =
             søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentSøknadDto()?.let { søknadDTO ->
                 val (barnUtenIdenter, barnMedIdenter) = søknadDTO.barnaMedOpplysninger.partition { it.ident.isBlank() }
-                val tilganger = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(barnMedIdenter.map { it.ident })
+                val tilganger = personTilgangService.sjekkTilgangTilPersoner(barnMedIdenter.map { it.ident })
                 søknadDTO.copy(
                     barnaMedOpplysninger = barnUtenIdenter + barnMedIdenter.filter { tilganger.getValue(it.ident).harTilgang },
                 )
