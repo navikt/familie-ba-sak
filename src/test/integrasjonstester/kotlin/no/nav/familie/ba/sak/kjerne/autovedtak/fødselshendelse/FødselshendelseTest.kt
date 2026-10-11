@@ -248,7 +248,7 @@ class FødselshendelseTest(
     fun `Skal innvilge finnmarkstillegg i fødselshendelse revurdering hvis mor og barn bor i Finnmark`() {
         // Arrange
         val eldsteBarnFødselsdato = LocalDate.now().minusYears(5)
-        val yngsteBarnFødselsdato = LocalDate.now().minusDays(15)
+        val yngsteBarnFødselsdato = LocalDate.now().minusMonths(1).withDayOfMonth(1)
 
         val eldsteBarnFnr = leggTilPersonInfo(eldsteBarnFødselsdato)
         val yngsteBarnFnr = leggTilPersonInfo(yngsteBarnFødselsdato)
@@ -399,7 +399,7 @@ class FødselshendelseTest(
     fun `Skal innvilge svalbardtillegg i fødselshendelse revurdering hvis mor og barn bor på Svalbard`() {
         // Arrange
         val eldsteBarnFødselsdato = LocalDate.now().minusYears(5)
-        val yngsteBarnFødselsdato = LocalDate.now().minusDays(15)
+        val yngsteBarnFødselsdato = LocalDate.now().minusMonths(1).withDayOfMonth(1)
 
         val eldsteBarnFnr = leggTilPersonInfo(eldsteBarnFødselsdato)
         val yngsteBarnFnr = leggTilPersonInfo(yngsteBarnFødselsdato)
