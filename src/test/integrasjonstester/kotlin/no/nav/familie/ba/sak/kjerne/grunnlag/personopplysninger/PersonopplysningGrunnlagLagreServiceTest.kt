@@ -34,7 +34,6 @@ class PersonopplysningGrunnlagLagreServiceTest(
 
         // Assert
         assertThat(lagretGrunnlag.id).isNotZero()
-        assertThat(lagretGrunnlag.aktiv).isTrue()
         assertThat(personopplysningGrunnlagRepository.findById(lagretGrunnlag.id)).isPresent()
         assertThat(personRepository.findById(lagretGrunnlag.personer.single().id)).isPresent()
         assertThat(personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.id).isEqualTo(lagretGrunnlag.id)

@@ -20,23 +20,13 @@ class PersonRepositoryTest(
     @Autowired private val personRepository: PersonRepository,
 ) : AbstractSpringIntegrationTest() {
     @Test
-    fun `skal kun hente personer fra aktive grunnlag`() {
+    fun `skal hente personer fra grunnlag`() {
         // Arrange
         val aktør = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
         val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
-        val inaktivtGrunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                søkerPersonIdent = aktør.aktivFødselsnummer(),
-                barnasIdenter = emptyList(),
-                søkerAktør = aktør,
-                barnAktør = emptyList(),
-            ).also { it.aktiv = false }
-        personopplysningGrunnlagRepository.save(inaktivtGrunnlag)
-
-        val aktivtGrunnlag =
+        val grunnlag =
             personopplysningGrunnlagRepository.save(
                 lagTestPersonopplysningGrunnlag(
                     behandlingId = behandling.id,
@@ -52,30 +42,7 @@ class PersonRepositoryTest(
 
         // Assert
         assertThat(personer).hasSize(1)
-        assertThat(personer.single().personopplysningGrunnlag.id).isEqualTo(aktivtGrunnlag.id)
-    }
-
-    @Test
-    fun `skal returnere tom liste når aktør kun finnes i inaktivt grunnlag`() {
-        // Arrange
-        val aktør = aktørIdRepository.save(randomAktør())
-        val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
-        val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
-        personopplysningGrunnlagRepository.save(
-            lagTestPersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                søkerPersonIdent = aktør.aktivFødselsnummer(),
-                barnasIdenter = emptyList(),
-                søkerAktør = aktør,
-                barnAktør = emptyList(),
-            ).also { it.aktiv = false },
-        )
-
-        // Act
-        val personer = personRepository.finnPersonerIAktiveGrunnlag(aktør)
-
-        // Assert
-        assertThat(personer).isEmpty()
+        assertThat(personer.single().personopplysningGrunnlag.id).isEqualTo(grunnlag.id)
     }
 
     @Test

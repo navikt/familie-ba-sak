@@ -522,8 +522,6 @@ class PersongrunnlagIntegrationTest(
                     målform = Målform.NB,
                 )
 
-            assertThat(forrigePersonopplysningGrunnlag.aktiv).isTrue()
-
             // Act
             val nyttPersonopplysningGrunnlag =
                 persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
@@ -565,8 +563,6 @@ class PersongrunnlagIntegrationTest(
 
             val gammelPersonId = forrigePersonopplysningGrunnlag.personer.single().id
 
-            assertThat(forrigePersonopplysningGrunnlag.aktiv).isTrue()
-
             // Act
             val nyttPersonopplysningGrunnlag =
                 persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
@@ -578,7 +574,6 @@ class PersongrunnlagIntegrationTest(
 
             // Assert
             assertThat(nyttPersonopplysningGrunnlag.id).isNotEqualTo(forrigePersonopplysningGrunnlag.id)
-            assertThat(nyttPersonopplysningGrunnlag.aktiv).isTrue()
             assertThat(nyttPersonopplysningGrunnlag.personer).extracting("aktør").containsExactlyInAnyOrder(søkerAktør, barnAktør)
 
             assertThat(personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id)).isEmpty()
@@ -612,8 +607,6 @@ class PersongrunnlagIntegrationTest(
 
             val gammelPersonId = forrigePersonopplysningGrunnlag.personer.first().id
 
-            assertThat(forrigePersonopplysningGrunnlag.aktiv).isTrue()
-
             // Act
             val nyttPersonopplysningGrunnlag =
                 persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
@@ -625,7 +618,6 @@ class PersongrunnlagIntegrationTest(
 
             // Assert
             assertThat(nyttPersonopplysningGrunnlag.id).isNotEqualTo(forrigePersonopplysningGrunnlag.id)
-            assertThat(nyttPersonopplysningGrunnlag.aktiv).isTrue()
             assertThat(nyttPersonopplysningGrunnlag.personer).extracting("aktør").containsExactly(søkerAktør)
 
             assertThat(personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id)).isEmpty()
@@ -659,8 +651,6 @@ class PersongrunnlagIntegrationTest(
 
             val gammelPersonId = forrigePersonopplysningGrunnlag.personer.first().id
 
-            assertThat(forrigePersonopplysningGrunnlag.aktiv).isTrue()
-
             fakePersonopplysningerService.hentPersoninfoEnkel(søkerAktør).also {
                 leggTilPersonInfo(
                     fødselsdato = it.fødselsdato,
@@ -680,7 +670,6 @@ class PersongrunnlagIntegrationTest(
 
             // Assert
             assertThat(nyttPersonopplysningGrunnlag.id).isNotEqualTo(forrigePersonopplysningGrunnlag.id)
-            assertThat(nyttPersonopplysningGrunnlag.aktiv).isTrue()
             assertThat(nyttPersonopplysningGrunnlag.personer).extracting("aktør").containsExactlyInAnyOrder(søkerAktør, barnAktør)
             assertThat(nyttPersonopplysningGrunnlag.personer.first { it.aktør == søkerAktør }.navn).isEqualTo("Søker sitt nye navn")
 
