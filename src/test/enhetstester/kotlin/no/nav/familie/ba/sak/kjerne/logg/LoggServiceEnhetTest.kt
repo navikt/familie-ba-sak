@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.logg
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFiltreringResultat
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
@@ -118,5 +120,37 @@ internal class LoggServiceEnhetTest {
         assertThat(opprettetLogg.tekst).isEqualTo(
             "Behandlingen stoppet i filtreringsreglene: Det er registrert dødsdato på barnet.",
         )
+    }
+
+    @Test
+    fun `loggEndretUtbetalingAndelLagtTil skal lagre logg når siste logg på behandlingen er av en annen type`() {
+        // Arrange
+        val behandlingId = 1L
+        every { loggRepository.hentLoggForBehandling(behandlingId) } returns
+            listOf(Logg(behandlingId = behandlingId, type = LoggType.ENDRET_UTBETALING_FJERNET, rolle = BehandlerRolle.SAKSBEHANDLER))
+        every { loggRepository.save(any()) } returnsArgument 0
+
+        // Act
+        val opprettetLogg = loggService.loggEndretUtbetalingAndelLagtTil(behandlingId)
+
+        // Assert
+        assertThat(opprettetLogg?.type).isEqualTo(LoggType.ENDRET_UTBETALING_LAGT_TIL)
+        assertThat(opprettetLogg?.tittel).isEqualTo("Endret utbetalingsperiode lagt til")
+        verify(exactly = 1) { loggRepository.save(any()) }
+    }
+
+    @Test
+    fun `loggEndretUtbetalingAndelLagtTil skal ikke lagre logg når siste logg på behandlingen er av samme type`() {
+        // Arrange
+        val behandlingId = 1L
+        every { loggRepository.hentLoggForBehandling(behandlingId) } returns
+            listOf(Logg(behandlingId = behandlingId, type = LoggType.ENDRET_UTBETALING_LAGT_TIL, rolle = BehandlerRolle.SAKSBEHANDLER))
+
+        // Act
+        val opprettetLogg = loggService.loggEndretUtbetalingAndelLagtTil(behandlingId)
+
+        // Assert
+        assertThat(opprettetLogg).isNull()
+        verify(exactly = 0) { loggRepository.save(any()) }
     }
 }

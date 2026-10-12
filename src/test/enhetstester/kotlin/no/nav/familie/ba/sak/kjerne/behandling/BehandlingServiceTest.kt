@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRe
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -40,6 +41,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.time.YearMonth
 import java.util.UUID
 
@@ -84,6 +87,39 @@ class BehandlingServiceTest {
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
             fagsakLåsingService = fagsakLåsingService,
         )
+
+    @Nested
+    inner class OppdaterBehandlingsresultat {
+        @ParameterizedTest
+        @CsvSource(
+            "FØRSTEGANGSBEHANDLING, SØKNAD, false, 1",
+            "FØRSTEGANGSBEHANDLING, FØDSELSHENDELSE, true, 1",
+            "MIGRERING_FRA_INFOTRYGD, HELMANUELL_MIGRERING, false, 1",
+            "MIGRERING_FRA_INFOTRYGD, MIGRERING, true, 0",
+        )
+        fun `skal opprette behandlingsresultatlogg for alle behandlinger unntatt automatiske migreringer`(
+            behandlingType: BehandlingType,
+            årsak: BehandlingÅrsak,
+            skalBehandlesAutomatisk: Boolean,
+            forventetAntallLogger: Int,
+        ) {
+            // Arrange
+            val behandling = lagBehandling(behandlingType = behandlingType, årsak = årsak, skalBehandlesAutomatisk = skalBehandlesAutomatisk)
+
+            every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(any(), any()) } returnsArgument 0
+            every { loggService.opprettBehandlingsresultatLogg(any(), any(), any()) } returns mockk()
+
+            // Act
+            val oppdatertBehandling = behandlingService.oppdaterBehandlingsresultat(behandling.id, Behandlingsresultat.INNVILGET)
+
+            // Assert
+            assertThat(oppdatertBehandling.resultat).isEqualTo(Behandlingsresultat.INNVILGET)
+            verify(exactly = forventetAntallLogger) {
+                loggService.opprettBehandlingsresultatLogg(behandling, Behandlingsresultat.IKKE_VURDERT, Behandlingsresultat.INNVILGET)
+            }
+        }
+    }
 
     @Nested
     inner class OpprettBehandling {

@@ -233,6 +233,8 @@ data class Behandling(
 
     fun erMigrering() = type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
 
+    fun erAutomatiskMigrering() = erMigrering() && skalBehandlesAutomatisk
+
     fun erSatsendringNasjonal() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
 
     fun erMånedligValutajustering() = this.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING

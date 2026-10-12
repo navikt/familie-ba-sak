@@ -18,12 +18,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunkt
 import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -41,6 +43,7 @@ class EndretUtbetalingAndelService(
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val loggService: LoggService,
 ) {
     private val logger = LoggerFactory.getLogger(EndretUtbetalingAndelService::class.java)
 
@@ -55,6 +58,8 @@ class EndretUtbetalingAndelService(
         if (endretUtbetalingAndel.erAutomatiskGenerert == true) {
             throw FunksjonellFeil("Automatisk genererte endrede utbetalingsperioder kan ikke endres, kun fjernes.")
         }
+
+        val erNyEndretUtbetalingAndel = endretUtbetalingAndel.manglerObligatoriskFelt()
 
         val personIdenterIEndretUtbetalingAndel =
             endretUtbetalingAndelDto.personIdenter.takeUnless { it.isNullOrEmpty() }
@@ -106,6 +111,10 @@ class EndretUtbetalingAndelService(
             )
         }
 
+        if (erNyEndretUtbetalingAndel) {
+            loggService.loggEndretUtbetalingAndelLagtTil(behandling.id)
+        }
+
         oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling)
     }
 
@@ -131,7 +140,16 @@ class EndretUtbetalingAndelService(
     fun fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         behandling: Behandling,
         endretUtbetalingAndelId: Long,
-    ) = fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, listOf(endretUtbetalingAndelId))
+    ) {
+        val erUtfyltEndretUtbetalingAndel =
+            endretUtbetalingAndelRepository.findByIdOrNull(endretUtbetalingAndelId)?.manglerObligatoriskFelt() == false
+
+        fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, listOf(endretUtbetalingAndelId))
+
+        if (erUtfyltEndretUtbetalingAndel) {
+            loggService.loggEndretUtbetalingAndelFjernet(behandling.id)
+        }
+    }
 
     @Transactional
     fun fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(

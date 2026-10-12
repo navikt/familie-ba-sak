@@ -15,7 +15,10 @@ fun mockLoggService(): LoggService {
     every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any(), any()) } just runs
     every { loggService.opprettBehandlingLogg(any()) } just runs
     every { loggService.opprettSettPåMaskinellVent(any(), any()) } just runs
-    every { loggService.opprettVilkårsvurderingLogg(any(), any(), any()) } returns null
+    every { loggService.opprettVilkårsvurderingLogg(any()) } returns mockk()
+    every { loggService.opprettBehandlingsresultatLogg(any(), any(), any()) } returns mockk()
+    every { loggService.loggEndretUtbetalingAndelLagtTil(any()) } returns mockk()
+    every { loggService.loggEndretUtbetalingAndelFjernet(any()) } returns mockk()
     every { loggService.opprettFerdigstillBehandling(any()) } just runs
     every { loggService.opprettTattAvMaskinellVent(any()) } just runs
     every { loggService.opprettEndretBehandlingstema(any(), any(), any(), any(), any(), any()) } just runs

@@ -274,13 +274,12 @@ class BehandlingService(
     fun oppdaterBehandlingsresultat(
         behandlingId: Long,
         resultat: Behandlingsresultat,
-        opprettVilkårsvurderingLogg: Boolean,
     ): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
-        if (opprettVilkårsvurderingLogg) {
-            loggService.opprettVilkårsvurderingLogg(
+        if (!behandling.erAutomatiskMigrering()) {
+            loggService.opprettBehandlingsresultatLogg(
                 behandling = behandling,
                 forrigeBehandlingsresultat = behandling.resultat,
                 nyttBehandlingsresultat = resultat,
