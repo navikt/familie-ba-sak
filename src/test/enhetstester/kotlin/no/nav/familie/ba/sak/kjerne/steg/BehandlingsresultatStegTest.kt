@@ -78,7 +78,7 @@ class BehandlingsresultatStegTest {
 
             every { behandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.INNVILGET_OG_ENDRET
             every { behandlingService.nullstillEndringstidspunkt(fødselshendelseBehandling.id) } just runs
-            every { behandlingService.oppdaterBehandlingsresultat(any(), any(), any()) } returns
+            every { behandlingService.oppdaterBehandlingsresultat(any(), any()) } returns
                 fødselshendelseBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
             every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns
                 fødselshendelseBehandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)

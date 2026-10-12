@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -51,6 +52,7 @@ class VilkårsvurderingSteg(
     private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
     private val satsendringEøsService: SatsendringEøsService,
+    private val loggService: LoggService,
 ) : BehandlingSteg<List<String>?> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -146,6 +148,10 @@ class VilkårsvurderingSteg(
         behandlingstemaService.oppdaterBehandlingstemaForVilkår(
             behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
         )
+
+        if (!behandling.erAutomatiskMigrering()) {
+            loggService.opprettVilkårsvurderingLogg(behandling)
+        }
 
         return hentNesteStegForNormalFlyt(behandling)
     }

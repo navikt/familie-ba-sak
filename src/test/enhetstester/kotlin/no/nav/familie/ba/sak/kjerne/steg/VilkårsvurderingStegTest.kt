@@ -46,6 +46,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
@@ -85,6 +86,7 @@ class VilkårsvurderingStegTest {
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService = mockk()
     private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService = mockk()
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService = mockk()
+    private val loggService: LoggService = mockk(relaxed = true)
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg =
         VilkårsvurderingSteg(
@@ -104,6 +106,7 @@ class VilkårsvurderingStegTest {
             registrertSøknadstidspunktService = registrertSøknadstidspunktService,
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
             satsendringEøsService = mockk(relaxed = true),
+            loggService = loggService,
         )
 
     val behandling =
@@ -136,6 +139,7 @@ class VilkårsvurderingStegTest {
 
     @Test
     fun `skal fortsette til neste steg når helmanuell migreringsbehandling har del bosted`() {
+        // Arrange
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerPersonResultat =
             lagPersonResultat(
@@ -162,9 +166,24 @@ class VilkårsvurderingStegTest {
         vikårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
 
+        // Act & Assert
         assertDoesNotThrow { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, null) }
 
         verify(exactly = 1) { registrertSøknadstidspunktService.settSøknadstidspunktForPersonerFremstiltKravFor(behandling) }
+        verify(exactly = 1) { loggService.opprettVilkårsvurderingLogg(behandling) }
+    }
+
+    @Test
+    fun `skal ikke opprette vilkårsvurderingslogg for automatiske migreringer`() {
+        // Arrange
+        val automatiskMigrering = behandling.copy(skalBehandlesAutomatisk = true)
+        every { tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(automatiskMigrering) } returns Unit
+
+        // Act
+        vilkårsvurderingSteg.utførStegOgAngiNeste(automatiskMigrering, null)
+
+        // Assert
+        verify(exactly = 0) { loggService.opprettVilkårsvurderingLogg(any()) }
     }
 
     @Test
@@ -648,6 +667,7 @@ class VilkårsvurderingStegTest {
                     registrertSøknadstidspunktService = registrertSøknadstidspunktService,
                     utenlandskPeriodebeløpService = realUtenlandskPeriodebeløpService,
                     satsendringEøsService = mockk(relaxed = true),
+                    loggService = loggService,
                 )
 
             // Act/Assert

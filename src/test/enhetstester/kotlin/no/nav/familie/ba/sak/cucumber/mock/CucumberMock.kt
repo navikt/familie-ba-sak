@@ -576,6 +576,7 @@ class CucumberMock(
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             registrertSøknadstidspunktService = mockk(relaxed = true),
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            loggService = loggService,
         )
 
     val preutfyllBosattIRiketService =
@@ -717,6 +718,7 @@ class CucumberMock(
             registrertSøknadstidspunktService = mockk(relaxed = true),
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
             satsendringEøsService = mockk(relaxed = true),
+            loggService = loggService,
         )
 
     val stegService =

@@ -24,8 +24,6 @@ import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -123,49 +121,55 @@ class LoggServiceTest(
     }
 
     @Test
-    fun `Skal lage nye vilkårslogger og endringer`() {
+    fun `skal lage behandlingsresultatlogg når behandlingsresultat settes`() {
         // Arrange
         val behandling = lagBehandling()
 
         // Act
-        val vilkårsvurderingLogg =
-            loggService.opprettVilkårsvurderingLogg(
+        val behandlingsresultatLogg =
+            loggService.opprettBehandlingsresultatLogg(
                 behandling = behandling,
-                forrigeBehandlingsresultat = behandling.resultat,
+                forrigeBehandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
                 nyttBehandlingsresultat = Behandlingsresultat.INNVILGET,
             )
 
         // Assert
-        assertNotNull(vilkårsvurderingLogg)
-        assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg!!.tittel)
-
-        behandling.resultat = Behandlingsresultat.INNVILGET
-        val nyVilkårsvurderingLogg =
-            loggService.opprettVilkårsvurderingLogg(
-                behandling = behandling,
-                forrigeBehandlingsresultat = behandling.resultat,
-                nyttBehandlingsresultat = Behandlingsresultat.AVSLÅTT,
-            )
-
-        assertNotNull(nyVilkårsvurderingLogg)
-        assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg!!.tittel)
-
-        val logger = loggService.hentLoggForBehandling(behandlingId = behandling.id)
-        assertEquals(2, logger.size)
+        assertEquals(LoggType.BEHANDLINGSRESULTAT, behandlingsresultatLogg.type)
+        assertEquals("Behandlingsresultat satt", behandlingsresultatLogg.tittel)
+        assertEquals("Resultat ble innvilget", behandlingsresultatLogg.tekst)
+        assertEquals(listOf(behandlingsresultatLogg.id), loggService.hentLoggForBehandling(behandling.id).map { it.id })
     }
 
     @Test
-    fun `Skal ikke logge ved uforandret behandlingsresultat`() {
+    fun `skal lage behandlingsresultatlogg når behandlingsresultat endres`() {
         // Act
-        val vilkårsvurderingLogg =
-            loggService.opprettVilkårsvurderingLogg(
+        val behandlingsresultatLogg =
+            loggService.opprettBehandlingsresultatLogg(
+                behandling = lagBehandling(),
+                forrigeBehandlingsresultat = Behandlingsresultat.INNVILGET,
+                nyttBehandlingsresultat = Behandlingsresultat.AVSLÅTT,
+            )
+
+        // Assert
+        assertEquals(LoggType.BEHANDLINGSRESULTAT, behandlingsresultatLogg.type)
+        assertEquals("Behandlingsresultat endret", behandlingsresultatLogg.tittel)
+        assertEquals("Resultat gikk fra innvilget til avslått", behandlingsresultatLogg.tekst)
+    }
+
+    @Test
+    fun `skal lage behandlingsresultatlogg også når behandlingsresultat er uendret`() {
+        // Act
+        val behandlingsresultatLogg =
+            loggService.opprettBehandlingsresultatLogg(
                 behandling = lagBehandling(),
                 forrigeBehandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET,
                 nyttBehandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET,
             )
 
         // Assert
-        assertNull(vilkårsvurderingLogg)
+        assertEquals(LoggType.BEHANDLINGSRESULTAT, behandlingsresultatLogg.type)
+        assertEquals("Behandlingsresultat vurdert", behandlingsresultatLogg.tittel)
+        assertEquals("Resultat er uendret: fortsatt innvilget", behandlingsresultatLogg.tekst)
     }
 
     @Test
@@ -179,7 +183,7 @@ class LoggServiceTest(
 
         // Act
         loggService.opprettBehandlingLogg(BehandlingLoggRequest(behandling))
-        loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
+        loggService.opprettBehandlingsresultatLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
         loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = true)
         loggService.opprettBeslutningOmVedtakLogg(
             behandling = behandling,
@@ -199,8 +203,8 @@ class LoggServiceTest(
         }
         assertTrue {
             logger.any {
-                it.type == LoggType.VILKÅRSVURDERING &&
-                    it.tittel == "Vilkårsvurdering gjennomført" &&
+                it.type == LoggType.BEHANDLINGSRESULTAT &&
+                    it.tittel == "Behandlingsresultat satt" &&
                     it.tekst == "Resultat ble innvilget"
             }
         }
@@ -236,7 +240,7 @@ class LoggServiceTest(
 
         // Act
         loggService.opprettBehandlingLogg(BehandlingLoggRequest(behandling))
-        loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
+        loggService.opprettBehandlingsresultatLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
         loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false)
         loggService.opprettBeslutningOmVedtakLogg(
             behandling = behandling,
@@ -256,8 +260,8 @@ class LoggServiceTest(
         }
         assertTrue {
             logger.any {
-                it.type == LoggType.VILKÅRSVURDERING &&
-                    it.tittel == "Vilkårsvurdering gjennomført" &&
+                it.type == LoggType.BEHANDLINGSRESULTAT &&
+                    it.tittel == "Behandlingsresultat satt" &&
                     it.tekst == "Resultat ble innvilget"
             }
         }

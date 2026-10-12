@@ -139,31 +139,35 @@ class LoggService(
         )
     }
 
-    fun opprettVilkårsvurderingLogg(
+    fun opprettVilkårsvurderingLogg(behandling: Behandling): Logg =
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.VILKÅRSVURDERING,
+                rolle = hentRolletilgangFraSikkerhetscontext(SAKSBEHANDLER),
+            ),
+        )
+
+    fun opprettBehandlingsresultatLogg(
         behandling: Behandling,
         forrigeBehandlingsresultat: Behandlingsresultat,
         nyttBehandlingsresultat: Behandlingsresultat,
-    ): Logg? {
-        val tekst =
-            when {
-                forrigeBehandlingsresultat == Behandlingsresultat.IKKE_VURDERT -> {
-                    "Resultat ble ${nyttBehandlingsresultat.displayName.lowercase()}"
-                }
+    ): Logg {
+        val forrige = forrigeBehandlingsresultat.displayName.lowercase()
+        val nytt = nyttBehandlingsresultat.displayName.lowercase()
 
-                forrigeBehandlingsresultat != nyttBehandlingsresultat -> {
-                    "Resultat gikk fra ${forrigeBehandlingsresultat.displayName.lowercase()} til ${nyttBehandlingsresultat.displayName.lowercase()}"
-                }
-
-                else -> {
-                    return null
-                }
+        val (tittel, tekst) =
+            when (forrigeBehandlingsresultat) {
+                Behandlingsresultat.IKKE_VURDERT -> "Behandlingsresultat satt" to "Resultat ble $nytt"
+                nyttBehandlingsresultat -> "Behandlingsresultat vurdert" to "Resultat er uendret: $nytt"
+                else -> "Behandlingsresultat endret" to "Resultat gikk fra $forrige til $nytt"
             }
 
         return lagre(
             Logg(
                 behandlingId = behandling.id,
-                type = LoggType.VILKÅRSVURDERING,
-                tittel = if (forrigeBehandlingsresultat != Behandlingsresultat.IKKE_VURDERT) "Vilkårsvurdering endret" else "Vilkårsvurdering gjennomført",
+                type = LoggType.BEHANDLINGSRESULTAT,
+                tittel = tittel,
                 rolle = hentRolletilgangFraSikkerhetscontext(SAKSBEHANDLER),
                 tekst = tekst,
             ),
@@ -612,6 +616,26 @@ class LoggService(
                     """.trimIndent(),
             ),
         )
+
+    fun loggEndretUtbetalingAndelLagtTil(behandlingId: Long) = loggHvisSisteLoggErAvAnnenType(behandlingId, LoggType.ENDRET_UTBETALING_LAGT_TIL)
+
+    fun loggEndretUtbetalingAndelFjernet(behandlingId: Long) = loggHvisSisteLoggErAvAnnenType(behandlingId, LoggType.ENDRET_UTBETALING_FJERNET)
+
+    private fun loggHvisSisteLoggErAvAnnenType(
+        behandlingId: Long,
+        type: LoggType,
+    ): Logg? {
+        val erSisteLoggSammeType = hentLoggForBehandling(behandlingId).firstOrNull()?.type == type
+        if (erSisteLoggSammeType) return null
+
+        return lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = type,
+                rolle = hentRolletilgangFraSikkerhetscontext(SAKSBEHANDLER),
+            ),
+        )
+    }
 
     fun loggSammensattKontrollsakLagtTil(sammensattKontrollsak: SammensattKontrollsak) =
         lagre(

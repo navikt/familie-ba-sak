@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunkt
 import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPerson
 import no.nav.familie.ba.sak.kjerne.registrertsøknadstidspunkt.RegistrertSøknadstidspunktPåPersonService
@@ -46,6 +47,7 @@ import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.Optional
 
 class EndretUtbetalingAndelServiceTest {
     private val mockEndretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
@@ -57,6 +59,7 @@ class EndretUtbetalingAndelServiceTest {
     private val mockBeregningService = mockk<BeregningService>()
     private val mockRegistrertSøknadstidspunktPåPersonService = mockk<RegistrertSøknadstidspunktPåPersonService>()
     private val mockBehandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val mockLoggService = mockk<LoggService>(relaxed = true)
 
     private lateinit var endretUtbetalingAndelService: EndretUtbetalingAndelService
 
@@ -75,6 +78,7 @@ class EndretUtbetalingAndelServiceTest {
                 endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService,
                 registrertSøknadstidspunktService = mockRegistrertSøknadstidspunktPåPersonService,
                 behandlingHentOgPersisterService = mockBehandlingHentOgPersisterService,
+                loggService = mockLoggService,
             )
     }
 
@@ -300,6 +304,109 @@ class EndretUtbetalingAndelServiceTest {
 
         assertThat(feil.message).isEqualTo("Automatisk genererte endrede utbetalingsperioder kan ikke endres, kun fjernes.")
         verify(exactly = 0) { mockPersongrunnlagService.hentPersonerPåBehandling(any(), any()) }
+    }
+
+    @Nested
+    inner class LoggingAvEndretUtbetalingAndel {
+        private val behandling = lagBehandling()
+        private val barn = lagPerson(type = PersonType.BARN)
+        private val endretUtbetalingAndelId = 1L
+        private val tomEndretUtbetalingAndel = EndretUtbetalingAndel(id = endretUtbetalingAndelId, behandlingId = behandling.id)
+        private val utfyltEndretUtbetalingAndel =
+            lagEndretUtbetalingAndel(
+                id = endretUtbetalingAndelId,
+                behandlingId = behandling.id,
+                aktører = setOf(barn.aktør),
+                prosent = BigDecimal.ZERO,
+                årsak = Årsak.ENDRE_MOTTAKER,
+                fom = YearMonth.now().minusMonths(5),
+                tom = YearMonth.now(),
+            )
+
+        @BeforeEach
+        fun setup() {
+            every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), behandling) } returns listOf(barn)
+            every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(behandling.id, barn)
+            every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns
+                listOf(lagAndelTilkjentYtelse(person = barn, fom = YearMonth.now().minusYears(1), tom = YearMonth.now().plusYears(1)))
+            every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandling.id) } returns emptyList()
+            every { mockEndretUtbetalingAndelRepository.saveAndFlush(any<EndretUtbetalingAndel>()) } returnsArgument 0
+            every { mockEndretUtbetalingAndelRepository.deleteAllById(any()) } just Runs
+            every { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any(), any()) } returns mockk()
+            every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) } returns mockk()
+        }
+
+        private fun lagUtfyltEndretUtbetalingAndelDto() =
+            EndretUtbetalingAndelDto(
+                id = endretUtbetalingAndelId,
+                personIdenter = listOf(barn.aktør.aktivFødselsnummer()),
+                prosent = BigDecimal.ZERO,
+                fom = utfyltEndretUtbetalingAndel.fom,
+                tom = utfyltEndretUtbetalingAndel.tom,
+                årsak = utfyltEndretUtbetalingAndel.årsak,
+                avtaletidspunktDeltBosted = null,
+                søknadstidspunkt = utfyltEndretUtbetalingAndel.søknadstidspunkt,
+                begrunnelse = "Test",
+                erTilknyttetAndeler = true,
+            )
+
+        @Test
+        fun `skal logge at endret utbetalingsperiode er lagt til når en ny periode lagres`() {
+            // Arrange
+            every { mockEndretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId) } returns tomEndretUtbetalingAndel
+
+            // Act
+            endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+                behandling = behandling,
+                endretUtbetalingAndelId = endretUtbetalingAndelId,
+                endretUtbetalingAndelDto = lagUtfyltEndretUtbetalingAndelDto(),
+            )
+
+            // Assert
+            verify(exactly = 1) { mockLoggService.loggEndretUtbetalingAndelLagtTil(behandling.id) }
+        }
+
+        @Test
+        fun `skal ikke logge at endret utbetalingsperiode er lagt til når en eksisterende periode endres`() {
+            // Arrange
+            every { mockEndretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId) } returns utfyltEndretUtbetalingAndel
+
+            // Act
+            endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+                behandling = behandling,
+                endretUtbetalingAndelId = endretUtbetalingAndelId,
+                endretUtbetalingAndelDto = lagUtfyltEndretUtbetalingAndelDto(),
+            )
+
+            // Assert
+            verify(exactly = 0) { mockLoggService.loggEndretUtbetalingAndelLagtTil(any()) }
+        }
+
+        @Test
+        fun `skal logge at endret utbetalingsperiode er fjernet når en utfylt periode fjernes`() {
+            // Arrange
+            every { mockEndretUtbetalingAndelRepository.findById(endretUtbetalingAndelId) } returns Optional.of(utfyltEndretUtbetalingAndel)
+
+            // Act
+            endretUtbetalingAndelService.fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling = behandling, endretUtbetalingAndelId = endretUtbetalingAndelId)
+
+            // Assert
+            verify(exactly = 1) { mockEndretUtbetalingAndelRepository.deleteAllById(listOf(endretUtbetalingAndelId)) }
+            verify(exactly = 1) { mockLoggService.loggEndretUtbetalingAndelFjernet(behandling.id) }
+        }
+
+        @Test
+        fun `skal ikke logge at endret utbetalingsperiode er fjernet når en tom periode fjernes`() {
+            // Arrange
+            every { mockEndretUtbetalingAndelRepository.findById(endretUtbetalingAndelId) } returns Optional.of(tomEndretUtbetalingAndel)
+
+            // Act
+            endretUtbetalingAndelService.fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling = behandling, endretUtbetalingAndelId = endretUtbetalingAndelId)
+
+            // Assert
+            verify(exactly = 1) { mockEndretUtbetalingAndelRepository.deleteAllById(listOf(endretUtbetalingAndelId)) }
+            verify(exactly = 0) { mockLoggService.loggEndretUtbetalingAndelFjernet(any()) }
+        }
     }
 
     private fun lagEndretUtbetalingAndelDtoForOppdatering(personIdenter: List<String>? = listOf("12345678910")) =
