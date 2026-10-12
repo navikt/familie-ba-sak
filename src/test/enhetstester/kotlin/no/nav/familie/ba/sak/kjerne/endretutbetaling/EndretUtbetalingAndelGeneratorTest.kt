@@ -30,7 +30,7 @@ class EndretUtbetalingAndelGeneratorTest {
         val søknadMottattDato = LocalDate.of(2024, 9, 30)
 
         val nåværendeAndeler = lagAndelTilkjentYtelserForSøkerOgBarn(behandling = behandling, beløp = 2000)
-        val forrigeAndeler = lagAndelTilkjentYtelserForSøkerOgBarn(behandling = forrigeBehandling, beløp = 1000)
+        val forrigeAndeler = lagAndelTilkjentYtelserForSøkerOgBarn(behandling = forrigeBehandling, beløp = 0)
 
         // Act
         val endretUtbetalingAndeler =
@@ -55,7 +55,7 @@ class EndretUtbetalingAndelGeneratorTest {
         val søknadMottattDato = LocalDate.of(2024, 10, 1)
 
         val nåværendeAndeler = lagAndelTilkjentYtelserForSøkerOgBarn(behandling = behandling, beløp = 2000)
-        val forrigeAndeler = lagAndelTilkjentYtelserForSøkerOgBarn(behandling = forrigeBehandling, beløp = 1000)
+        val forrigeAndeler = lagAndelTilkjentYtelserForSøkerOgBarn(behandling = forrigeBehandling, beløp = 0)
 
         // Act
         val endretUtbetalingAndeler =
@@ -112,7 +112,7 @@ class EndretUtbetalingAndelGeneratorTest {
             nåværendeAndeler.map {
                 it.copy(
                     behandlingId = forrigeBehandling.id,
-                    kalkulertUtbetalingsbeløp = 1000,
+                    kalkulertUtbetalingsbeløp = 0,
                 )
             }
 
@@ -192,7 +192,7 @@ class EndretUtbetalingAndelGeneratorTest {
             nåværendeAndeler.map {
                 it.copy(
                     behandlingId = forrigeBehandling.id,
-                    kalkulertUtbetalingsbeløp = 1000,
+                    kalkulertUtbetalingsbeløp = 0,
                 )
             }
 
@@ -273,6 +273,113 @@ class EndretUtbetalingAndelGeneratorTest {
         // Assert
         val endretUtbetalingAndel = endretUtbetalingAndeler.single()
         assertEndretUtbetalingAndel(endretUtbetalingAndel, søknadMottattDato)
+    }
+
+    @Test
+    fun `skal ikke preutfylle endret utbetaling andeler for perioder der personen hadde utbetaling i forrige behandling`() {
+        // Arrange
+        val søknadMottattDato = LocalDate.of(2024, 10, 1)
+
+        val nåværendeAndeler = lagAndelTilkjentYtelserForSøkerOgBarn(behandling = behandling, beløp = 2000)
+        val forrigeAndeler = lagAndelTilkjentYtelserForSøkerOgBarn(behandling = forrigeBehandling, beløp = 1000)
+
+        // Act
+        val endretUtbetalingAndeler =
+            genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
+                behandling = behandling,
+                søknadMottattDato = søknadMottattDato,
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+                aktørerPåBehandling = listOf(søker, barn),
+                nåværendeEndretUtbetalingAndeler = emptyList(),
+                erAutomatiskGenerert = true,
+            )
+
+        // Assert
+        assertThat(endretUtbetalingAndeler).isEmpty()
+    }
+
+    @Test
+    fun `skal ikke preutfylle endret utbetaling andeler når personen hadde utbetaling av en annen ytelsetype i forrige behandling`() {
+        // Arrange
+        val søknadMottattDato = LocalDate.of(2024, 10, 1)
+
+        val utvidetAndel =
+            lagAndelTilkjentYtelse(
+                fom = fomAndelTilkjentYtelse,
+                tom = tomAndelTilkjentYtelse,
+                aktør = søker,
+                behandling = behandling,
+                kalkulertUtbetalingsbeløp = 1000,
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+            )
+        val småbarnstilleggAndel =
+            lagAndelTilkjentYtelse(
+                fom = fomAndelTilkjentYtelse,
+                tom = tomAndelTilkjentYtelse,
+                aktør = søker,
+                behandling = behandling,
+                kalkulertUtbetalingsbeløp = 500,
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
+            )
+
+        // Act
+        val endretUtbetalingAndeler =
+            genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
+                behandling = behandling,
+                søknadMottattDato = søknadMottattDato,
+                nåværendeAndeler = listOf(utvidetAndel, småbarnstilleggAndel),
+                forrigeAndeler = listOf(utvidetAndel.copy(behandlingId = forrigeBehandling.id)),
+                aktørerPåBehandling = listOf(søker),
+                nåværendeEndretUtbetalingAndeler = emptyList(),
+                erAutomatiskGenerert = true,
+            )
+
+        // Assert
+        assertThat(endretUtbetalingAndeler).isEmpty()
+    }
+
+    @Test
+    fun `skal bare preutfylle endret utbetaling andeler for perioder der personen ikke hadde utbetaling i forrige behandling`() {
+        // Arrange
+        val søknadMottattDato = LocalDate.of(2024, 10, 1)
+        val sisteMånedMedUtbetalingIForrigeBehandling = YearMonth.of(2022, 12)
+
+        val nåværendeAndel =
+            lagAndelTilkjentYtelse(
+                fom = fomAndelTilkjentYtelse,
+                tom = tomAndelTilkjentYtelse,
+                aktør = barn,
+                behandling = behandling,
+                kalkulertUtbetalingsbeløp = 2000,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+            )
+        val forrigeAndel =
+            nåværendeAndel.copy(
+                behandlingId = forrigeBehandling.id,
+                stønadTom = sisteMånedMedUtbetalingIForrigeBehandling,
+                kalkulertUtbetalingsbeløp = 1000,
+            )
+
+        // Act
+        val endretUtbetalingAndeler =
+            genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
+                behandling = behandling,
+                søknadMottattDato = søknadMottattDato,
+                nåværendeAndeler = listOf(nåværendeAndel),
+                forrigeAndeler = listOf(forrigeAndel),
+                aktørerPåBehandling = listOf(barn),
+                nåværendeEndretUtbetalingAndeler = emptyList(),
+                erAutomatiskGenerert = true,
+            )
+
+        // Assert
+        assertEndretUtbetalingAndel(
+            endretUtbetalingAndel = endretUtbetalingAndeler.single(),
+            forventetSøknadMottattDato = søknadMottattDato,
+            forventedeAktører = setOf(barn),
+            forventetFom = sisteMånedMedUtbetalingIForrigeBehandling.plusMonths(1),
+        )
     }
 
     private fun lagAndelTilkjentYtelserForSøkerOgBarn(

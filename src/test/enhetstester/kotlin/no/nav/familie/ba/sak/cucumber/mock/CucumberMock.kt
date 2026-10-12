@@ -575,6 +575,7 @@ class CucumberMock(
             endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             registrertSøknadstidspunktService = mockk(relaxed = true),
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         )
 
     val preutfyllBosattIRiketService =

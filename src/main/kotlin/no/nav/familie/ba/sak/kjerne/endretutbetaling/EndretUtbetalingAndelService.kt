@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -39,6 +40,7 @@ class EndretUtbetalingAndelService(
     private val endretUtbetalingAndelOppdatertAbonnementer: List<EndretUtbetalingAndelerOppdatertAbonnent> = emptyList(),
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     private val logger = LoggerFactory.getLogger(EndretUtbetalingAndelService::class.java)
 
@@ -232,7 +234,7 @@ class EndretUtbetalingAndelService(
 
         if (lagretSøknadstidspunktPerIdent.isEmpty()) return
 
-        val andelerSomSkalRyddes = finnAndelerSomSkalRyddes(behandling, personerSomErSøktFor = lagretSøknadstidspunktPerIdent.keys)
+        val andelerSomSkalRyddes = finnAndelerSomSkalRyddes(behandling, lagretSøknadstidspunktPerIdent)
         fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, andelerSomSkalRyddes)
 
         val nåværendeAndeler = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
@@ -276,17 +278,49 @@ class EndretUtbetalingAndelService(
 
     private fun finnAndelerSomSkalRyddes(
         behandling: Behandling,
-        personerSomErSøktFor: Set<String>,
-    ): List<Long> =
-        endretUtbetalingAndelRepository
+        lagretSøknadstidspunktPerIdent: Map<String, LocalDate>,
+    ): List<Long> {
+        val endringerFraForrigeVedtatteBehandling =
+            behandlingHentOgPersisterService
+                .hentForrigeBehandlingSomErVedtatt(behandling)
+                ?.let { endretUtbetalingAndelRepository.findByBehandlingId(it.id) }
+                ?: emptyList()
+
+        return endretUtbetalingAndelRepository
             .findByBehandlingId(behandling.id)
             .filter {
                 it.manglerObligatoriskFelt() ||
                     (
                         it.årsak in setOf(ETTERBETALING_3ÅR, ETTERBETALING_3MND) &&
-                            it.aktører.any { aktør -> aktør.aktivFødselsnummer() in personerSomErSøktFor }
+                            it.aktører.any { aktør -> aktør.aktivFødselsnummer() in lagretSøknadstidspunktPerIdent } &&
+                            !it.skalBeholdesFraForrigeBehandling(endringerFraForrigeVedtatteBehandling, lagretSøknadstidspunktPerIdent)
                     )
             }.map { it.id }
+    }
+
+    private fun EndretUtbetalingAndel.skalBeholdesFraForrigeBehandling(
+        endringerFraForrigeBehandling: List<EndretUtbetalingAndel>,
+        lagretSøknadstidspunktPerIdent: Map<String, LocalDate>,
+    ): Boolean {
+        val søknadstidspunktPåEndring = søknadstidspunkt ?: return false
+        val enAvPersoneneHarTidligereSøknadstidspunkt =
+            aktører.any { aktør ->
+                lagretSøknadstidspunktPerIdent[aktør.aktivFødselsnummer()]?.isBefore(søknadstidspunktPåEndring) == true
+            }
+        return !enAvPersoneneHarTidligereSøknadstidspunkt && erKopiertFraEnAv(endringerFraForrigeBehandling)
+    }
+
+    private fun EndretUtbetalingAndel.erKopiertFraEnAv(endringerFraForrigeBehandling: List<EndretUtbetalingAndel>): Boolean {
+        val prosentIDenneBehandling = prosent ?: return false
+        return endringerFraForrigeBehandling.any { forrige ->
+            forrige.årsak == årsak &&
+                forrige.fom == fom &&
+                forrige.tom == tom &&
+                forrige.søknadstidspunkt == søknadstidspunkt &&
+                forrige.prosent?.compareTo(prosentIDenneBehandling) == 0 &&
+                forrige.aktører.containsAll(aktører)
+        }
+    }
 
     private fun grupperPersonerPåSøknadstidspunkt(
         aktørerPåBehandling: List<Aktør>,
