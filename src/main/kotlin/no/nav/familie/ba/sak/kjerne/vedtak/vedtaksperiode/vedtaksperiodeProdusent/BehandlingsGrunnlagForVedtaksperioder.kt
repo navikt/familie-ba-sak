@@ -97,7 +97,6 @@ data class BehandlingsGrunnlagForVedtaksperioder(
 
     fun utledGrunnlagTidslinjePerPerson(
         skalSplittePåValutakursendringer: Boolean = true,
-        featureToggleService: FeatureToggleService,
     ): Map<AktørOgRolleBegrunnelseGrunnlag, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag> {
         val søker = persongrunnlag.søker
         val ordinæreVilkårForSøkerForskjøvetTidslinje =
