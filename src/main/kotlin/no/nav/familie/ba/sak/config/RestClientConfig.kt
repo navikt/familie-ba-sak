@@ -34,7 +34,7 @@ class RestClientConfig(
         val requestFactory =
             SimpleClientHttpRequestFactory().apply {
                 setConnectTimeout(Duration.ofSeconds(2))
-                setReadTimeout(Duration.ofSeconds(5))
+                setReadTimeout(Duration.ofSeconds(10))
             }
         return entraIDRestClientFactory
             .lagOboRestKlient(scope) {
