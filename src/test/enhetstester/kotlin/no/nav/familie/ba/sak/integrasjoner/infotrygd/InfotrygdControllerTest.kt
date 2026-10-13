@@ -4,8 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.familie.ba.sak.common.clearAllCaches
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.datagenerator.lagPersonTilgangAvvistGrunnetFortrolig
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
@@ -36,8 +34,6 @@ class InfotrygdControllerTest {
     private val personTilgangService =
         PersonTilgangService(
             fakeTilgangsmaskinTilgangskontrollKlient,
-            mockk(),
-            mockk<FeatureToggleService> { every { isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns true },
             cacheManager,
             systemOnlyPdlRestKlient,
         )

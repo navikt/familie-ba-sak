@@ -5,20 +5,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.clearAllCaches
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagPersonTilgangAvvistGrunnetSkjerming
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelsePerson
 import no.nav.familie.ba.sak.integrasjoner.tilgangsmaskin.TilgangsmaskinTilgangskontrollKlient
-import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.ba.sak.mock.FakeTilgangsmaskinTilgangskontrollKlient
 import no.nav.familie.ba.sak.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
-import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
-import no.nav.familie.tilgangsmaskin.Avvisningskode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -29,10 +23,6 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 class PersonTilgangServiceTest {
     private val fakeTilgangsmaskinTilgangskontrollKlient = FakeTilgangsmaskinTilgangskontrollKlient()
 
-    private val fakeFamilieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient()
-
-    private val featureToggleService = mockk<FeatureToggleService>()
-
     private val cacheManager = ConcurrentMapCacheManager()
 
     private val systemOnlyPdlRestKlient = mockk<SystemOnlyPdlRestKlient>()
@@ -40,8 +30,6 @@ class PersonTilgangServiceTest {
     private val service =
         PersonTilgangService(
             fakeTilgangsmaskinTilgangskontrollKlient,
-            fakeFamilieIntegrasjonerTilgangskontrollKlient,
-            featureToggleService,
             cacheManager,
             systemOnlyPdlRestKlient,
         )
@@ -49,17 +37,15 @@ class PersonTilgangServiceTest {
     @BeforeEach
     fun setUp() {
         cacheManager.clearAllCaches()
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns true
     }
 
     @AfterEach
     fun tearDown() {
         fakeTilgangsmaskinTilgangskontrollKlient.reset()
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.reset()
     }
 
     @Test
-    fun `skal sjekke tilgang mot Tilgangsmaskinen når toggle er på`() {
+    fun `skal sjekke tilgang mot Tilgangsmaskinen`() {
         // Arrange
         fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(listOf(lagPersonTilgangAvvistGrunnetSkjerming("1")))
 
@@ -69,111 +55,6 @@ class PersonTilgangServiceTest {
         // Assert
         assertThat(tilgang).isEqualTo(lagPersonTilgangAvvistGrunnetSkjerming("1"))
         assertThat(fakeTilgangsmaskinTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(1)
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(0)
-    }
-
-    @Test
-    fun `skal sjekke tilgang mot familie-integrasjoner når toggle er av`() {
-        // Arrange
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns false
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang(personIdent = "1", harTilgang = true)))
-
-        // Act
-        val tilgang = testWithBrukerContext { service.sjekkTilgangTilPerson("1") }
-
-        // Assert
-        assertThat(tilgang).isEqualTo(PersonTilgang.medTilgang("1"))
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollKlient.hentKallMotSjekkTilgangTilPersoner()).containsExactly(listOf("1"))
-        assertThat(fakeTilgangsmaskinTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(0)
-    }
-
-    @Test
-    fun `skal gi avvisningskode for strengt fortrolig adresse når familie-integrasjoner avviser grunnet manglende strengt fortrolig-rolle`() {
-        // Arrange
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns false
-        val begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'"
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
-            listOf(Tilgang(personIdent = "1", harTilgang = false, begrunnelse = begrunnelse)),
-        )
-
-        // Act
-        val tilgang = testWithBrukerContext { service.sjekkTilgangTilPerson("1") }
-
-        // Assert
-        assertThat(tilgang).isEqualTo(PersonTilgang.avvist("1", Avvisningskode.AVVIST_STRENGT_FORTROLIG_ADRESSE, begrunnelse))
-        assertThat(tilgang.erAvvistGrunnetStrengtFortrolig()).isTrue
-    }
-
-    @Test
-    fun `skal gi avvisningskode UKJENT når familie-integrasjoner avviser av andre grunner`() {
-        // Arrange
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns false
-        val begrunnelse = "Bruker mangler rollen '0000-GA-Egne_ansatte'"
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
-            listOf(Tilgang(personIdent = "1", harTilgang = false, begrunnelse = begrunnelse)),
-        )
-
-        // Act
-        val tilgang = testWithBrukerContext { service.sjekkTilgangTilPerson("1") }
-
-        // Assert
-        assertThat(tilgang).isEqualTo(PersonTilgang.avvist("1", Avvisningskode.UKJENT, begrunnelse))
-        assertThat(tilgang.erAvvistGrunnetStrengtFortrolig()).isFalse
-    }
-
-    @Test
-    fun `skal gi standardbegrunnelse når familie-integrasjoner avviser uten begrunnelse`() {
-        // Arrange
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns false
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang(personIdent = "1", harTilgang = false)))
-
-        // Act
-        val tilgang = testWithBrukerContext { service.sjekkTilgangTilPerson("1") }
-
-        // Assert
-        assertThat(tilgang)
-            .isEqualTo(PersonTilgang.avvist("1", Avvisningskode.UKJENT, "familie-integrasjoner ga ikke tilgang til personen"))
-    }
-
-    @Test
-    fun `skal kaste feil når familie-integrasjoner ikke svarer for alle identer`() {
-        // Arrange
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns false
-        val familieIntegrasjonerTilgangskontrollKlient = mockk<FamilieIntegrasjonerTilgangskontrollKlient>()
-        val serviceMedUfullstendigSvar =
-            PersonTilgangService(
-                fakeTilgangsmaskinTilgangskontrollKlient,
-                familieIntegrasjonerTilgangskontrollKlient,
-                featureToggleService,
-                cacheManager,
-                systemOnlyPdlRestKlient,
-            )
-        every { familieIntegrasjonerTilgangskontrollKlient.sjekkTilgangTilPersoner(listOf("1", "2")) } returns
-            listOf(Tilgang(personIdent = "1", harTilgang = true))
-
-        // Act
-        val feil = assertThrows<Feil> { testWithBrukerContext { serviceMedUfullstendigSvar.sjekkTilgangTilPersoner(listOf("1", "2")) } }
-
-        // Assert
-        assertThat(feil.message).isEqualTo("Fikk ikke svar fra familie-integrasjoner for 1 av 2 identer.")
-    }
-
-    @Test
-    fun `skal ikke bruke tilganger cachet fra den andre kilden når toggle endres`() {
-        // Arrange
-        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(listOf(lagPersonTilgangAvvistGrunnetSkjerming("1")))
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(listOf(Tilgang(personIdent = "1", harTilgang = true)))
-        val tilgangFraTilgangsmaskinen = testWithBrukerContext { service.sjekkTilgangTilPerson("1") }
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns false
-
-        // Act
-        val tilgangFraFamilieIntegrasjoner = testWithBrukerContext { service.sjekkTilgangTilPerson("1") }
-
-        // Assert
-        assertThat(tilgangFraTilgangsmaskinen.harTilgang).isFalse
-        assertThat(tilgangFraFamilieIntegrasjoner.harTilgang).isTrue
-        assertThat(fakeTilgangsmaskinTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(1)
-        assertThat(fakeFamilieIntegrasjonerTilgangskontrollKlient.antallKallTilSjekkTilgangTilPersoner()).isEqualTo(1)
     }
 
     @Test
@@ -278,8 +159,6 @@ class PersonTilgangServiceTest {
         val serviceMedFeilendeKlient =
             PersonTilgangService(
                 tilgangsmaskinTilgangskontrollKlient,
-                fakeFamilieIntegrasjonerTilgangskontrollKlient,
-                featureToggleService,
                 cacheManager,
                 systemOnlyPdlRestKlient,
             )

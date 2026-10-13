@@ -55,7 +55,6 @@ internal class PersonopplysningerServiceIntegrationTest(
     fun setUp() {
         mockBrukerContext()
         cacheManager.getCache(PersonTilgangService.TILGANGSMASKINEN_CACHE)?.clear()
-        cacheManager.getCache(PersonTilgangService.FAMILIE_INTEGRASJONER_CACHE)?.clear()
         personopplysningerService =
             PersonopplysningerService(
                 PdlRestKlient(URI.create(wireMockServer.baseUrl() + "/api"), restClient, mockPersonidentService),
