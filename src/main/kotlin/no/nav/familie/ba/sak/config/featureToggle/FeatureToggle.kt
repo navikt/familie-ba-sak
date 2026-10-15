@@ -73,7 +73,4 @@ enum class FeatureToggle(
 
     // NAV-31020
     SIMULER_KUN_ENDREDE_PERIODER("familie-ba-sak.simuler-kun-endrede-perioder"),
-
-    // NAV-31078
-    SKAL_BRUKE_TILGANGSMASKINEN("familie-ba-sak.skal-bruke-tilgangsmaskinen"),
 }

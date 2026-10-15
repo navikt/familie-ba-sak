@@ -30,11 +30,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
-import no.nav.familie.ba.sak.mock.FakeFamilieIntegrasjonerTilgangskontrollKlient
 import no.nav.familie.ba.sak.mock.FakeTilgangsmaskinTilgangskontrollKlient
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
-import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import no.nav.familie.log.mdc.MDCConstants
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -58,13 +56,10 @@ class TilgangServiceTest {
     private val cacheManager = ConcurrentMapCacheManager()
     private val auditLogger = AuditLogger("familie-ba-sak")
     private val fakeTilgangsmaskinTilgangskontrollKlient = FakeTilgangsmaskinTilgangskontrollKlient()
-    private val fakeFamilieIntegrasjonerTilgangskontrollKlient = FakeFamilieIntegrasjonerTilgangskontrollKlient()
 
     private val personTilgangService =
         PersonTilgangService(
             fakeTilgangsmaskinTilgangskontrollKlient,
-            fakeFamilieIntegrasjonerTilgangskontrollKlient,
-            featureToggleService,
             cacheManager,
             mockk(),
         )
@@ -108,7 +103,6 @@ class TilgangServiceTest {
         every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns
             personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn()
         every { featureToggleService.isEnabled(FeatureToggle.TILLAT_TILGANG_SKJERMET_BARN_UTEN_LØPENDE_ANDELER) } returns false
-        every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns true
         cacheManager.clearAllCaches()
     }
 
@@ -116,7 +110,6 @@ class TilgangServiceTest {
     internal fun tearDown() {
         clearBrukerContext()
         fakeTilgangsmaskinTilgangskontrollKlient.reset()
-        fakeFamilieIntegrasjonerTilgangskontrollKlient.reset()
     }
 
     @Test
@@ -500,70 +493,6 @@ class TilgangServiceTest {
                 listOf(
                     lagPersonTilgangAvvistGrunnetSkjerming(barnAktør.aktivFødselsnummer()),
                     PersonTilgang.medTilgang(søkerAktør.aktivFødselsnummer()),
-                ),
-            )
-
-            // Act && Assert
-            assertThrows<RolleTilgangskontrollFeil> {
-                tilgangService.validerTilgangTilFagsak(testFagsak.id, AuditLoggerEvent.ACCESS)
-            }
-        }
-
-        @Test
-        fun `validerTilgangTilFagsak - skal tillate tilgang ved skjermet barn uten løpende andeler når familie-integrasjoner avviser grunnet strengt fortrolig`() {
-            // Arrange
-            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns false
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns testBehandling
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(testBehandling.id) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = YearMonth.of(2023, 1),
-                        tom = YearMonth.of(2024, 12),
-                        behandling = testBehandling,
-                        aktør = barnAktør,
-                    ),
-                )
-
-            fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
-                listOf(
-                    Tilgang(
-                        personIdent = barnAktør.aktivFødselsnummer(),
-                        harTilgang = false,
-                        begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse'",
-                    ),
-                    Tilgang(personIdent = søkerAktør.aktivFødselsnummer(), harTilgang = true),
-                ),
-            )
-
-            // Act && Assert
-            assertDoesNotThrow {
-                tilgangService.validerTilgangTilFagsak(testFagsak.id, AuditLoggerEvent.ACCESS)
-            }
-        }
-
-        @Test
-        fun `validerTilgangTilFagsak - skal blokkere tilgang når familie-integrasjoner avviser barn av annen grunn enn strengt fortrolig`() {
-            // Arrange
-            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_TILGANGSMASKINEN) } returns false
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(testFagsak.id) } returns testBehandling
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(testBehandling.id) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = YearMonth.of(2023, 1),
-                        tom = YearMonth.of(2024, 12),
-                        behandling = testBehandling,
-                        aktør = barnAktør,
-                    ),
-                )
-
-            fakeFamilieIntegrasjonerTilgangskontrollKlient.leggTilTilganger(
-                listOf(
-                    Tilgang(
-                        personIdent = barnAktør.aktivFødselsnummer(),
-                        harTilgang = false,
-                        begrunnelse = "Bruker mangler rollen '0000-GA-Egne_ansatte'",
-                    ),
-                    Tilgang(personIdent = søkerAktør.aktivFødselsnummer(), harTilgang = true),
                 ),
             )
 
