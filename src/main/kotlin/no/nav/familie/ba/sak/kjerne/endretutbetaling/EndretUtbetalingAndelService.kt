@@ -252,19 +252,17 @@ class EndretUtbetalingAndelService(
 
         if (lagretSøknadstidspunktPerIdent.isEmpty()) return
 
-        val andelerSomSkalRyddes = finnAndelerSomSkalRyddes(behandling, lagretSøknadstidspunktPerIdent)
-        val (andelerSomSkalSlettes, andelerMedAktørerUtenSøknadstidspunkt) =
-            andelerSomSkalRyddes.partition { andel ->
-                andel.manglerObligatoriskFelt() ||
-                    andel.aktører.all { aktør -> aktør.aktivFødselsnummer() in lagretSøknadstidspunktPerIdent }
-            }
-        if (andelerMedAktørerUtenSøknadstidspunkt.isNotEmpty()) {
-            andelerMedAktørerUtenSøknadstidspunkt.forEach { andel ->
-                andel.aktører.removeIf { aktør -> aktør.aktivFødselsnummer() in lagretSøknadstidspunktPerIdent }
-            }
-            endretUtbetalingAndelRepository.saveAllAndFlush(andelerMedAktørerUtenSøknadstidspunkt)
+        val harSøknadstidspunkt = { aktør: Aktør -> aktør.aktivFødselsnummer() in lagretSøknadstidspunktPerIdent }
+
+        val (endretUtbetalingAndelerSomSkalSlettes, endretUtbetalingAndelerSomSkalBeholdes) =
+            finnEndretUtbetalingAndelerSomSkalRyddes(behandling, lagretSøknadstidspunktPerIdent)
+                .partition { it.manglerObligatoriskFelt() || it.aktører.all(harSøknadstidspunkt) }
+
+        if (endretUtbetalingAndelerSomSkalBeholdes.isNotEmpty()) {
+            endretUtbetalingAndelerSomSkalBeholdes.forEach { it.aktører.removeAll(harSøknadstidspunkt) }
+            endretUtbetalingAndelRepository.saveAllAndFlush(endretUtbetalingAndelerSomSkalBeholdes)
         }
-        fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, andelerSomSkalSlettes.map { it.id })
+        fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, endretUtbetalingAndelerSomSkalSlettes.map { it.id })
 
         val nåværendeAndeler = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
         val forrigeAndeler = beregningService.hentAndelerFraForrigeIverksattebehandling(behandling)
@@ -305,7 +303,7 @@ class EndretUtbetalingAndelService(
         genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
     }
 
-    private fun finnAndelerSomSkalRyddes(
+    private fun finnEndretUtbetalingAndelerSomSkalRyddes(
         behandling: Behandling,
         lagretSøknadstidspunktPerIdent: Map<String, LocalDate>,
     ): List<EndretUtbetalingAndel> {
