@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.ResponseEntity
@@ -34,6 +35,7 @@ class RegistrertSøknadstidspunktPåPersonController(
     private val registrertSøknadstidspunktService: RegistrertSøknadstidspunktPåPersonService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) {
     @GetMapping("/behandling/{behandlingId}")
     fun hentRegistrertSøknadstidspunktPåPersoner(
@@ -45,7 +47,7 @@ class RegistrertSøknadstidspunktPåPersonController(
             handling = "hent søknadstidspunkt",
         )
 
-        validerAtBehandlingErSøknadsbehandling(behandlingHentOgPersisterService.hent(behandlingId))
+        validerAtSøknadstidspunktKanRegistreres(behandlingHentOgPersisterService.hent(behandlingId))
 
         val registrerteSøknadstidspunkt =
             registrertSøknadstidspunktService
@@ -68,19 +70,21 @@ class RegistrertSøknadstidspunktPåPersonController(
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         validerBehandlingKanRedigeres(behandling)
-        validerAtBehandlingErSøknadsbehandling(behandling)
+        validerAtSøknadstidspunktKanRegistreres(behandling)
 
         endretUtbetalingAndelService.endreSøknadstidspunktOgGenererEtterbetalingsandeler(
             behandling = behandling,
             søknadstidspunktPerPerson = request.søknadstidspunktPerPerson.map { it.tilRegistrertSøknadstidspunkt() },
         )
+        tilbakestillBehandlingTilBehandlingsresultatService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)))
     }
 
-    private fun validerAtBehandlingErSøknadsbehandling(behandling: Behandling) {
-        if (behandling.opprettetÅrsak != BehandlingÅrsak.SØKNAD) {
-            throw FunksjonellFeil("Søknadstidspunkt kan kun registreres for søknadsbehandlinger.")
+    private fun validerAtSøknadstidspunktKanRegistreres(behandling: Behandling) {
+        val kanRegistrereSøknadstidspunkt = behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD || behandling.erRevurderingKlage()
+        if (!kanRegistrereSøknadstidspunkt) {
+            throw FunksjonellFeil("Søknadstidspunkt kan kun registreres for søknadsbehandlinger og revurderinger etter klage.")
         }
     }
 }

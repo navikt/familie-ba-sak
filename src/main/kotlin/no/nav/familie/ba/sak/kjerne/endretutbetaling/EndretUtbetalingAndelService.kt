@@ -253,7 +253,18 @@ class EndretUtbetalingAndelService(
         if (lagretSøknadstidspunktPerIdent.isEmpty()) return
 
         val andelerSomSkalRyddes = finnAndelerSomSkalRyddes(behandling, lagretSøknadstidspunktPerIdent)
-        fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, andelerSomSkalRyddes)
+        val (andelerSomSkalSlettes, andelerMedAktørerUtenSøknadstidspunkt) =
+            andelerSomSkalRyddes.partition { andel ->
+                andel.manglerObligatoriskFelt() ||
+                    andel.aktører.all { aktør -> aktør.aktivFødselsnummer() in lagretSøknadstidspunktPerIdent }
+            }
+        if (andelerMedAktørerUtenSøknadstidspunkt.isNotEmpty()) {
+            andelerMedAktørerUtenSøknadstidspunkt.forEach { andel ->
+                andel.aktører.removeIf { aktør -> aktør.aktivFødselsnummer() in lagretSøknadstidspunktPerIdent }
+            }
+            endretUtbetalingAndelRepository.saveAllAndFlush(andelerMedAktørerUtenSøknadstidspunkt)
+        }
+        fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, andelerSomSkalSlettes.map { it.id })
 
         val nåværendeAndeler = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
         val forrigeAndeler = beregningService.hentAndelerFraForrigeIverksattebehandling(behandling)
@@ -297,7 +308,7 @@ class EndretUtbetalingAndelService(
     private fun finnAndelerSomSkalRyddes(
         behandling: Behandling,
         lagretSøknadstidspunktPerIdent: Map<String, LocalDate>,
-    ): List<Long> {
+    ): List<EndretUtbetalingAndel> {
         val endringerFraForrigeVedtatteBehandling =
             behandlingHentOgPersisterService
                 .hentForrigeBehandlingSomErVedtatt(behandling)
@@ -313,7 +324,7 @@ class EndretUtbetalingAndelService(
                             it.aktører.any { aktør -> aktør.aktivFødselsnummer() in lagretSøknadstidspunktPerIdent } &&
                             !it.skalBeholdesFraForrigeBehandling(endringerFraForrigeVedtatteBehandling, lagretSøknadstidspunktPerIdent)
                     )
-            }.map { it.id }
+            }
     }
 
     private fun EndretUtbetalingAndel.skalBeholdesFraForrigeBehandling(
