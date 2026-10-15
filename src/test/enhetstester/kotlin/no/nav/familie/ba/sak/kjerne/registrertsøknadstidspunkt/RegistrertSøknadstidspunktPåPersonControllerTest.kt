@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.CsvSource
 import java.time.LocalDate
 
 class RegistrertSøknadstidspunktPåPersonControllerTest {
@@ -50,11 +50,10 @@ class RegistrertSøknadstidspunktPåPersonControllerTest {
         justRun { mockTilgangService.verifiserHarTilgangTilHandling(any(), any()) }
     }
 
-    @ParameterizedTest
-    @EnumSource(value = BehandlingÅrsak::class, names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"])
-    fun `skal hente registrerte søknadstidspunkt for revurdering etter klage`(årsak: BehandlingÅrsak) {
+    @Test
+    fun `skal hente registrerte søknadstidspunkt for revurdering etter klage`() {
         // Arrange
-        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = årsak)
+        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.KLAGE)
         val barn = lagPerson(type = PersonType.BARN)
         val søknadstidspunkt = LocalDate.of(2025, 4, 15)
 
@@ -72,10 +71,13 @@ class RegistrertSøknadstidspunktPåPersonControllerTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = BehandlingÅrsak::class, names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"])
-    fun `skal endre søknadstidspunkt, generere etterbetalingsperioder og tilbakestille til behandlingsresultat for revurdering etter klage`(årsak: BehandlingÅrsak) {
+    @CsvSource("FØRSTEGANGSBEHANDLING, SØKNAD", "REVURDERING, KLAGE")
+    fun `skal endre søknadstidspunkt, generere etterbetalingsperioder og tilbakestille til behandlingsresultat for søknad og revurdering etter klage`(
+        behandlingType: BehandlingType,
+        årsak: BehandlingÅrsak,
+    ) {
         // Arrange
-        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = årsak)
+        val behandling = lagBehandling(behandlingType = behandlingType, årsak = årsak)
         val søknadstidspunkt = LocalDate.of(2025, 4, 15)
 
         every { mockBehandlingHentOgPersisterService.hent(behandling.id) } returns behandling
@@ -102,10 +104,14 @@ class RegistrertSøknadstidspunktPåPersonControllerTest {
         }
     }
 
-    @Test
-    fun `skal ikke kunne endre søknadstidspunkt når behandlingen verken er søknad eller revurdering etter klage`() {
+    @ParameterizedTest
+    @CsvSource("REVURDERING, NYE_OPPLYSNINGER", "REVURDERING, IVERKSETTE_KA_VEDTAK", "FØRSTEGANGSBEHANDLING, KLAGE")
+    fun `skal ikke kunne endre søknadstidspunkt når behandlingen verken er søknad eller revurdering etter klage`(
+        behandlingType: BehandlingType,
+        årsak: BehandlingÅrsak,
+    ) {
         // Arrange
-        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.NYE_OPPLYSNINGER)
+        val behandling = lagBehandling(behandlingType = behandlingType, årsak = årsak)
 
         every { mockBehandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 

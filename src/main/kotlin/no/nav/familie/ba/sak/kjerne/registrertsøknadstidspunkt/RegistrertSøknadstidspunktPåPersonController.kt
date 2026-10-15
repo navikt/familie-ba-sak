@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRegistrertSøknadstidspunktP�
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
@@ -82,7 +83,8 @@ class RegistrertSøknadstidspunktPåPersonController(
     }
 
     private fun validerAtSøknadstidspunktKanRegistreres(behandling: Behandling) {
-        val kanRegistrereSøknadstidspunkt = behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD || behandling.erRevurderingKlage()
+        val erRevurderingEtterKlage = behandling.type == BehandlingType.REVURDERING && behandling.erKlage()
+        val kanRegistrereSøknadstidspunkt = behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD || erRevurderingEtterKlage
         if (!kanRegistrereSøknadstidspunkt) {
             throw FunksjonellFeil("Søknadstidspunkt kan kun registreres for søknadsbehandlinger og revurderinger etter klage.")
         }
