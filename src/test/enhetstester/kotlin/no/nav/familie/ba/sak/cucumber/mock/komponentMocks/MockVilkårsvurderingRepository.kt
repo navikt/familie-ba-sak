@@ -25,5 +25,10 @@ fun mockVilkårsvurderingRepository(dataFraCucumber: VedtaksperioderOgBegrunnels
         vilkårsvurdering
     }
 
+    every { vilkårsvurderingRepository.delete(any()) } answers {
+        val vilkårsvurdering = firstArg<Vilkårsvurdering>()
+        dataFraCucumber.vilkårsvurderinger.remove(vilkårsvurdering.behandling.id)
+    }
+
     return vilkårsvurderingRepository
 }
