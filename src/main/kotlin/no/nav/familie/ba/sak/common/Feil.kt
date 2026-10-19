@@ -16,7 +16,7 @@ class AutovedtakSkalIkkeGjennomføresFeil(
     val beskrivelse: String,
 ) : RuntimeException(beskrivelse)
 
-class AutovedtakMåBehandlesManueltFeil(
+open class AutovedtakMåBehandlesManueltFeil(
     val beskrivelse: String,
 ) : RuntimeException(beskrivelse)
 

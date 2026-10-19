@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 
-import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.leggTilBegrunnelseIVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.MANGLER_PERIODE_MED_NY_INNVILGELSE
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -30,7 +30,10 @@ class AutovedtakSøknadBegrunnelseService(
         val månederMedNyInnvilgelse = nyeAndeler.finnFørsteMånederMedUtbetaling(YtelseType.ORDINÆR_BARNETRYGD)
 
         if (månederMedNyInnvilgelse.isEmpty()) {
-            throw AutovedtakMåBehandlesManueltFeil("Det er forsøkt å begrunne autovedtak søknad men det ble ikke funnet noen perioder med ny innvilgelse.\nSøknaden må behandles manuelt.")
+            throw AutovedtakSøknadMåBehandlesManueltFeil(
+                beskrivelse = "Det er forsøkt å begrunne autovedtak søknad men det ble ikke funnet noen perioder med ny innvilgelse.\nSøknaden må behandles manuelt.",
+                årsak = MANGLER_PERIODE_MED_NY_INNVILGELSE,
+            )
         }
 
         val vedtaksperioder =

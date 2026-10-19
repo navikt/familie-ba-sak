@@ -1,11 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 
-import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.opphørtFomSomYearMonth
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.virkningFomSomYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.BEHANDLINGSRESULTAT_IKKE_INNVILGET
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.ENDREDE_ANDELER_UTEN_KRAV
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.FEILUTBETALING
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.INGEN_UTBETALING
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.OVERLAPP_INFOTRYGD
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.OVERLAPP_TIDLIGERE_UTBETALING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET
@@ -28,17 +33,36 @@ object AutovedtakSøknadValidering {
     private const val MÅ_HÅNDTERES_MANUELT = "Behandling av søknad må håndteres manuelt."
 
     fun validerAtVilkårsvurderingErOppfylt(vilkårsvurdering: Vilkårsvurdering) {
-        val erVilkårsvurderingOppfylt = vilkårsvurdering.personResultater.flatMap { it.vilkårResultater }.all { it.erOppfylt() }
+        val feiledeVilkår =
+            vilkårsvurdering.personResultater
+                .flatMap { personResultat ->
+                    personResultat.vilkårResultater
+                        .filterNot { it.erOppfylt() }
+                        .map { it.vilkårType }
+                        .distinct()
+                        .map { vilkår ->
+                            AutovedtakSøknadMåBehandlesManueltÅrsak.fraVilkår(
+                                vilkår = vilkår,
+                                erSøker = personResultat.erSøkersResultater(),
+                            )
+                        }
+                }
 
-        if (!erVilkårsvurderingOppfylt) {
-            throw AutovedtakMåBehandlesManueltFeil("Vilkårsvurderingen er ikke oppfylt.\n$MÅ_HÅNDTERES_MANUELT")
+        if (feiledeVilkår.isNotEmpty()) {
+            throw AutovedtakSøknadMåBehandlesManueltFeil(
+                beskrivelse = "Vilkårsvurderingen er ikke oppfylt.\n$MÅ_HÅNDTERES_MANUELT",
+                årsaker = feiledeVilkår,
+            )
         }
     }
 
     fun validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandlingsresultat: Behandlingsresultat) {
         val gyldigeBehandlingsresultater = setOf(INNVILGET, DELVIS_INNVILGET)
         if (behandlingsresultat !in gyldigeBehandlingsresultater) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad gir behandlingsresultatet '${behandlingsresultat.displayName}'.\n$MÅ_HÅNDTERES_MANUELT")
+            throw AutovedtakSøknadMåBehandlesManueltFeil(
+                beskrivelse = "Automatisk behandling av søknad gir behandlingsresultatet '${behandlingsresultat.displayName}'.\n$MÅ_HÅNDTERES_MANUELT",
+                årsak = BEHANDLINGSRESULTAT_IKKE_INNVILGET,
+            )
         }
     }
 
@@ -69,8 +93,9 @@ object AutovedtakSøknadValidering {
                 "Automatisk behandling av søknad i behandling $behandlingId gir endring i andeler for personer det ikke er fremstilt krav for. " +
                     "AktørIder: ${personerMedEndringIAndelerUtenKrav.map { it.aktørId }}",
             )
-            throw AutovedtakMåBehandlesManueltFeil(
-                "Automatisk behandling av søknad gir endring i andeler for ${personerMedEndringIAndelerUtenKrav.size} person(er) det ikke er fremstilt krav for.\n$MÅ_HÅNDTERES_MANUELT",
+            throw AutovedtakSøknadMåBehandlesManueltFeil(
+                beskrivelse = "Automatisk behandling av søknad gir endring i andeler for ${personerMedEndringIAndelerUtenKrav.size} person(er) det ikke er fremstilt krav for.\n$MÅ_HÅNDTERES_MANUELT",
+                årsak = ENDREDE_ANDELER_UTEN_KRAV,
             )
         }
     }
@@ -95,7 +120,10 @@ object AutovedtakSøknadValidering {
                 .kombiner { true }
 
         if (innvilgetTidslinje.harOverlappMed(tidligereAndelerTidslinje)) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.\n$MÅ_HÅNDTERES_MANUELT")
+            throw AutovedtakSøknadMåBehandlesManueltFeil(
+                beskrivelse = "Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.\n$MÅ_HÅNDTERES_MANUELT",
+                årsak = OVERLAPP_TIDLIGERE_UTBETALING,
+            )
         }
 
         val infotrygdstønaderTidslinje =
@@ -105,7 +133,10 @@ object AutovedtakSøknadValidering {
                 .kombiner { true }
 
         if (innvilgetTidslinje.harOverlappMed(infotrygdstønaderTidslinje)) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker i Infotrygd.\n$MÅ_HÅNDTERES_MANUELT")
+            throw AutovedtakSøknadMåBehandlesManueltFeil(
+                beskrivelse = "Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker i Infotrygd.\n$MÅ_HÅNDTERES_MANUELT",
+                årsak = OVERLAPP_INFOTRYGD,
+            )
         }
     }
 
@@ -125,14 +156,20 @@ object AutovedtakSøknadValidering {
         val harIngenUtbetaling = simulering.flatMap { it.økonomiSimuleringPostering }.all { it.beløp.compareTo(BigDecimal.ZERO) == 0 }
 
         if (harIngenUtbetaling) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til ingen utbetaling.\n$MÅ_HÅNDTERES_MANUELT")
+            throw AutovedtakSøknadMåBehandlesManueltFeil(
+                beskrivelse = "Automatisk behandling av søknad fører til ingen utbetaling.\n$MÅ_HÅNDTERES_MANUELT",
+                årsak = INGEN_UTBETALING,
+            )
         }
     }
 
     fun validerAtDetIkkeErFeilutbetaling(simulering: List<ØkonomiSimuleringMottaker>) {
         val feilutbetaling = vedtakSimuleringMottakereTilSimuleringDto(simulering).feilutbetaling
         if (feilutbetaling > BigDecimal.ZERO) {
-            throw AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad fører til feilutbetaling.\n$MÅ_HÅNDTERES_MANUELT")
+            throw AutovedtakSøknadMåBehandlesManueltFeil(
+                beskrivelse = "Automatisk behandling av søknad fører til feilutbetaling.\n$MÅ_HÅNDTERES_MANUELT",
+                årsak = FEILUTBETALING,
+            )
         }
     }
 }

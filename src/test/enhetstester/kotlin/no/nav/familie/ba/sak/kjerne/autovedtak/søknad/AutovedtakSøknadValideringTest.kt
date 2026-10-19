@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
@@ -12,12 +13,17 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.BARN_VILKÅR_BOR_MED_SØKER
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.BARN_VILKÅR_BOSATT_I_RIKET
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.BARN_VILKÅR_LOVLIG_OPPHOLD
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.SØKER_VILKÅR_BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import org.assertj.core.api.Assertions.assertThat
@@ -73,6 +79,99 @@ class AutovedtakSøknadValideringTest {
 
             // Assert
             assertThat(feil.message).isEqualTo("Vilkårsvurderingen er ikke oppfylt.\nBehandling av søknad må håndteres manuelt.")
+            assertThat((feil as AutovedtakSøknadMåBehandlesManueltFeil).årsaker).containsExactly(SØKER_VILKÅR_BOSATT_I_RIKET)
+        }
+
+        @Test
+        fun `skal ta med ulike vilkårstyper én gang per person selv med flere perioder`() {
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling, lagPersonResultater = { vurdering ->
+                    setOf(
+                        lagPersonResultat(vilkårsvurdering = vurdering, aktør = barnFremstiltKravFor, lagVilkårResultater = { personResultat ->
+                            setOf(
+                                lagVilkårResultat(personResultat = personResultat, vilkårType = Vilkår.UNDER_18_ÅR, resultat = Resultat.OPPFYLT),
+                                lagVilkårResultat(personResultat = personResultat, vilkårType = Vilkår.BOR_MED_SØKER, resultat = Resultat.IKKE_OPPFYLT),
+                                lagVilkårResultat(personResultat = personResultat, vilkårType = Vilkår.BOR_MED_SØKER, resultat = Resultat.IKKE_OPPFYLT, periodeFom = java.time.LocalDate.of(2025, 1, 1)),
+                                lagVilkårResultat(personResultat = personResultat, vilkårType = Vilkår.LOVLIG_OPPHOLD, resultat = Resultat.IKKE_OPPFYLT),
+                                lagVilkårResultat(personResultat = personResultat, vilkårType = Vilkår.BOSATT_I_RIKET, resultat = Resultat.OPPFYLT),
+                            )
+                        }),
+                    )
+                })
+
+            // Act
+            val feil = assertThrows<AutovedtakSøknadMåBehandlesManueltFeil> { AutovedtakSøknadValidering.validerAtVilkårsvurderingErOppfylt(vilkårsvurdering) }
+
+            // Assert
+            assertThat(feil.årsaker).containsExactlyInAnyOrder(BARN_VILKÅR_BOR_MED_SØKER, BARN_VILKÅR_LOVLIG_OPPHOLD)
+        }
+
+        @Test
+        fun `skal gi en søkerårsak og to like barnårsaker men bare én for flere perioder hos samme barn`() {
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = behandling,
+                    lagPersonResultater = { vurdering ->
+                        setOf(søker, barnFremstiltKravFor, barnUtenKrav)
+                            .map { aktør ->
+                                lagPersonResultat(
+                                    vilkårsvurdering = vurdering,
+                                    aktør = aktør,
+                                    lagVilkårResultater = { personResultat ->
+                                        val feiletVilkår =
+                                            lagVilkårResultat(
+                                                personResultat = personResultat,
+                                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                resultat = Resultat.IKKE_OPPFYLT,
+                                            )
+                                        val resultater =
+                                            if (aktør == barnFremstiltKravFor) {
+                                                setOf(feiletVilkår, feiletVilkår.copy(periodeFom = java.time.LocalDate.of(2025, 1, 1)))
+                                            } else {
+                                                setOf(feiletVilkår)
+                                            }
+                                        if (aktør == søker) resultater else resultater + lagVilkårResultat(personResultat = personResultat, vilkårType = Vilkår.UNDER_18_ÅR, resultat = Resultat.OPPFYLT)
+                                    },
+                                )
+                            }.toSet()
+                    },
+                )
+
+            // Act
+            val feil = assertThrows<AutovedtakSøknadMåBehandlesManueltFeil> { AutovedtakSøknadValidering.validerAtVilkårsvurderingErOppfylt(vilkårsvurdering) }
+
+            // Assert
+            assertThat(feil.årsaker).containsExactlyInAnyOrder(
+                SØKER_VILKÅR_BOSATT_I_RIKET,
+                BARN_VILKÅR_BOSATT_I_RIKET,
+                BARN_VILKÅR_BOSATT_I_RIKET,
+            )
+        }
+
+        @Test
+        fun `skal feile uten å klassifisere barn uten under 18 år som barn når bor med søker feiler`() {
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = behandling,
+                    lagPersonResultater = { vurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vurdering,
+                                aktør = barnFremstiltKravFor,
+                                lagVilkårResultater = { personResultat ->
+                                    setOf(lagVilkårResultat(personResultat = personResultat, vilkårType = Vilkår.BOR_MED_SØKER, resultat = Resultat.IKKE_OPPFYLT))
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            // Act & Assert
+            val feil = assertThrows<Feil> { AutovedtakSøknadValidering.validerAtVilkårsvurderingErOppfylt(vilkårsvurdering) }
+            assertThat(feil.message).contains("BOR_MED_SØKER").doesNotContain(barnFremstiltKravFor.aktørId)
         }
     }
 
