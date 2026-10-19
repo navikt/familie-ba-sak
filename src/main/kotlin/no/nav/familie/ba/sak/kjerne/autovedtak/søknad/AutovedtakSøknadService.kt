@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.statistikk.automatiskbehandlingavSoknadStatistikk.AutovedtakSøknadStatistikkService
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -32,6 +33,7 @@ class AutovedtakSøknadService(
     private val autovedtakSøknadValideringService: AutovedtakSøknadValideringService,
     private val stegService: StegService,
     private val oppgaveService: OppgaveService,
+    private val autovedtakSøknadStatistikkService: AutovedtakSøknadStatistikkService,
 ) : AutovedtakBehandlingService<SøknadData> {
     override fun skalAutovedtakBehandles(behandlingsdata: SøknadData): Boolean = true
 
@@ -49,6 +51,12 @@ class AutovedtakSøknadService(
         return try {
             vedtaAutomatisk(behandling = automatiskBehandling, behandlingsdata = behandlingsdata)
         } catch (feil: AutovedtakMåBehandlesManueltFeil) {
+            val årsaker = (feil as? AutovedtakSøknadMåBehandlesManueltFeil)?.årsaker
+            if (årsaker.isNullOrEmpty()) {
+                throw Feil("Manglende eller tom liste med statistikkårsaker for automatisk behandling av søknad")
+            }
+
+            autovedtakSøknadStatistikkService.lagreÅrsaker(automatiskBehandling.id, årsaker)
             // Kaster ikke videre fordi henleggelsen må committes sammen med resten av transaksjonen.
             henleggBehandlingOgOpprettManuellBehandling(
                 automatiskBehandling = automatiskBehandling,

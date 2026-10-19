@@ -16,6 +16,12 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SøknadData
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.BARN_VILKÅR_BOSATT_I_RIKET
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.BEHANDLINGSRESULTAT_IKKE_INNVILGET
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.ENDREDE_ANDELER_FOR_BARN_UTEN_FREMSTILT_KRAV
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.INGEN_UTBETALING
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.OVERLAPP_TIDLIGERE_UTBETALING
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.SØKER_VILKÅR_BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -28,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.statistikk.automatiskbehandlingavSoknadStatistikk.AutovedtakSøknadStatistikkService
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -48,6 +55,7 @@ class AutovedtakSøknadServiceTest {
     private val autovedtakSøknadValideringService = mockk<AutovedtakSøknadValideringService>()
     private val stegService = mockk<StegService>()
     private val oppgaveService = mockk<OppgaveService>()
+    private val statistikkService = mockk<AutovedtakSøknadStatistikkService>()
 
     private val autovedtakSøknadService =
         AutovedtakSøknadService(
@@ -58,6 +66,7 @@ class AutovedtakSøknadServiceTest {
             autovedtakSøknadValideringService = autovedtakSøknadValideringService,
             stegService = stegService,
             oppgaveService = oppgaveService,
+            autovedtakSøknadStatistikkService = statistikkService,
         )
 
     private val fagsak = lagFagsak()
@@ -128,6 +137,54 @@ class AutovedtakSøknadServiceTest {
             every { stegService.håndterHenleggBehandling(any(), any()) } returns behandling
             every { stegService.håndterNyBehandlingOgSendInfotrygdFeed(any()) } returns lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
             every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) } returns "Oppgave opprettet"
+            justRun { statistikkService.lagreÅrsaker(any(), any()) }
+        }
+
+        @Test
+        fun `skal sende videre én årsak per person og vilkårstype uten å fjerne like barnårsaker`() {
+            // Arrange
+            val årsaker = listOf(SØKER_VILKÅR_BOSATT_I_RIKET, BARN_VILKÅR_BOSATT_I_RIKET, BARN_VILKÅR_BOSATT_I_RIKET)
+            every { autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(any()) } throws
+                AutovedtakSøknadMåBehandlesManueltFeil("Vilkårsvurderingen er ikke oppfylt", årsaker)
+
+            // Act
+            autovedtakSøknadService.kjørBehandling(søknadData)
+
+            // Assert
+            verifyOrder {
+                statistikkService.lagreÅrsaker(automatiskBehandling.id, årsaker)
+                stegService.håndterHenleggBehandling(automatiskBehandling, any())
+                stegService.håndterNyBehandlingOgSendInfotrygdFeed(any())
+                oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any())
+            }
+            verify(exactly = 1) { statistikkService.lagreÅrsaker(any(), any()) }
+        }
+
+        @Test
+        fun `skal lagre kun første valideringsfeil utenfor vilkårsvurderingen`() {
+            // Arrange
+            every { autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(any()) } throws
+                AutovedtakSøknadMåBehandlesManueltFeil("Manuell", BEHANDLINGSRESULTAT_IKKE_INNVILGET)
+
+            // Act
+            autovedtakSøknadService.kjørBehandling(søknadData)
+
+            // Assert
+            verify(exactly = 1) {
+                statistikkService.lagreÅrsaker(automatiskBehandling.id, listOf(BEHANDLINGSRESULTAT_IKKE_INNVILGET))
+            }
+            verify(exactly = 0) { autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(any()) }
+        }
+
+        @Test
+        fun `skal la feil ved lagring av statistikk avbryte forsøket`() {
+            // Arrange
+            every { autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(any()) } throws
+                AutovedtakSøknadMåBehandlesManueltFeil("Manuell", SØKER_VILKÅR_BOSATT_I_RIKET)
+            every { statistikkService.lagreÅrsaker(any(), any()) } throws IllegalStateException("Lagring feilet")
+
+            // Act & Assert
+            assertThrows<IllegalStateException> { autovedtakSøknadService.kjørBehandling(søknadData) }
         }
 
         @Test
@@ -177,7 +234,7 @@ class AutovedtakSøknadServiceTest {
             // Arrange
             val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
             every { autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(behandlingEtterVilkårsvurdering) } throws
-                AutovedtakMåBehandlesManueltFeil("Vilkårsvurderingen har vilkår som ikke er oppfylt.")
+                AutovedtakSøknadMåBehandlesManueltFeil("Vilkårsvurderingen har vilkår som ikke er oppfylt.", SØKER_VILKÅR_BOSATT_I_RIKET)
 
             // Act
             autovedtakSøknadService.kjørBehandling(søknadData)
@@ -200,7 +257,7 @@ class AutovedtakSøknadServiceTest {
             // Arrange
             val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
             every { autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(behandling) } throws
-                AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.")
+                AutovedtakSøknadMåBehandlesManueltFeil("Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.", OVERLAPP_TIDLIGERE_UTBETALING)
 
             // Act
             autovedtakSøknadService.kjørBehandling(søknadData)
@@ -225,32 +282,34 @@ class AutovedtakSøknadServiceTest {
         }
 
         @Test
-        fun `skal henlegge og opprette manuell behandling i stedet for å simulere og vedta når behandlingen må behandles manuelt`() {
+        fun `skal avbryte før henleggelse når manuell behandling mangler statistikkårsak`() {
             // Arrange
-            val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
             every { autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandling) } throws
                 AutovedtakMåBehandlesManueltFeil("Behandling av søknad må håndteres manuelt.")
 
-            // Act
-            val resultat = autovedtakSøknadService.kjørBehandling(søknadData)
-
-            // Assert
-            assertThat(resultat).isEqualTo("Automatisk behandling av søknad er henlagt og sendt til manuell behandling: Behandling av søknad må håndteres manuelt.")
-            verify(exactly = 1) { stegService.håndterHenleggBehandling(automatiskBehandling, capture(henleggBehandlingInfoSlot)) }
-            assertThat(henleggBehandlingInfoSlot.captured.årsak).isEqualTo(HenleggÅrsak.AUTOMATISK_HENLAGT)
-            assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Behandling av søknad må håndteres manuelt.")
-            verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling) }
-            verify(exactly = 1) {
-                oppgaveService.opprettOppgaveForManuellBehandling(
-                    behandlingId = any(),
-                    manuellOppgaveType = ManuellOppgaveType.SØKNAD,
-                    oppgavetype = Oppgavetype.BehandleSak,
-                )
-            }
+            // Act & Assert
+            assertThrows<Feil> { autovedtakSøknadService.kjørBehandling(søknadData) }
             verify(exactly = 0) {
-                simuleringService.oppdaterSimuleringPåBehandling(any())
-                autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
-                taskService.save(any())
+                stegService.håndterHenleggBehandling(any(), any())
+                stegService.håndterNyBehandlingOgSendInfotrygdFeed(any())
+                oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any())
+                statistikkService.lagreÅrsaker(any(), any())
+            }
+        }
+
+        @Test
+        fun `skal avbryte før henleggelse når listen med statistikkårsaker er tom`() {
+            // Arrange
+            every { autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(any()) } throws
+                AutovedtakSøknadMåBehandlesManueltFeil("Manuell", emptyList())
+
+            // Act & Assert
+            assertThrows<Feil> { autovedtakSøknadService.kjørBehandling(søknadData) }
+            verify(exactly = 0) {
+                stegService.håndterHenleggBehandling(any(), any())
+                stegService.håndterNyBehandlingOgSendInfotrygdFeed(any())
+                oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any())
+                statistikkService.lagreÅrsaker(any(), any())
             }
         }
 
@@ -259,7 +318,7 @@ class AutovedtakSøknadServiceTest {
             // Arrange
             val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
             every { autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling) } throws
-                AutovedtakMåBehandlesManueltFeil("Automatisk behandling av søknad gir endring i andeler for 1 person(er) det ikke er fremstilt krav for.")
+                AutovedtakSøknadMåBehandlesManueltFeil("Automatisk behandling av søknad gir endring i andeler for 1 person(er) det ikke er fremstilt krav for.", ENDREDE_ANDELER_FOR_BARN_UTEN_FREMSTILT_KRAV)
 
             // Act
             autovedtakSøknadService.kjørBehandling(søknadData)
@@ -280,7 +339,7 @@ class AutovedtakSøknadServiceTest {
             // Arrange
             val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
             every { autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering) } throws
-                AutovedtakMåBehandlesManueltFeil("Behandling av søknad må håndteres manuelt.")
+                AutovedtakSøknadMåBehandlesManueltFeil("Behandling av søknad må håndteres manuelt.", INGEN_UTBETALING)
 
             // Act
             autovedtakSøknadService.kjørBehandling(søknadData)
@@ -306,6 +365,7 @@ class AutovedtakSøknadServiceTest {
 
             // Assert
             assertThat(resultat).isEqualTo(AutovedtakStegService.BEHANDLING_FERDIG)
+            verify(exactly = 0) { statistikkService.lagreÅrsaker(any(), any()) }
             assertThat(taskSlot.captured.type).isEqualTo(IverksettMotOppdragTask.TASK_STEP_TYPE)
             verify(exactly = 1) {
                 autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(behandling)
@@ -361,6 +421,7 @@ class AutovedtakSøknadServiceTest {
                 verify(exactly = 1) { stegService.håndterHenleggBehandling(behandlingStoppetAvFiltrering, capture(henleggBehandlingInfoSlot)) }
                 assertThat(henleggBehandlingInfoSlot.captured.årsak).isEqualTo(HenleggÅrsak.AUTOMATISK_HENLAGT)
                 assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Søknaden oppfyller ikke filtreringsreglene for automatisk behandling.")
+                verify(exactly = 0) { statistikkService.lagreÅrsaker(any(), any()) }
             }
 
             @Test
