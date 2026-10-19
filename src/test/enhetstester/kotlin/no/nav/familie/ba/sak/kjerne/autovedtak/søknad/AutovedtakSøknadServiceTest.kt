@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SøknadData
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.BARN_VILKÅR_BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.BEHANDLINGSRESULTAT_IKKE_INNVILGET
-import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.ENDREDE_ANDELER_UTEN_KRAV
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.ENDREDE_ANDELER_FOR_BARN_UTEN_FREMSTILT_KRAV
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.INGEN_UTBETALING
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.OVERLAPP_TIDLIGERE_UTBETALING
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.SØKER_VILKÅR_BOSATT_I_RIKET
@@ -318,7 +318,7 @@ class AutovedtakSøknadServiceTest {
             // Arrange
             val henleggBehandlingInfoSlot = slot<HenleggBehandlingInfoDto>()
             every { autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling) } throws
-                AutovedtakSøknadMåBehandlesManueltFeil("Automatisk behandling av søknad gir endring i andeler for 1 person(er) det ikke er fremstilt krav for.", ENDREDE_ANDELER_UTEN_KRAV)
+                AutovedtakSøknadMåBehandlesManueltFeil("Automatisk behandling av søknad gir endring i andeler for 1 person(er) det ikke er fremstilt krav for.", ENDREDE_ANDELER_FOR_BARN_UTEN_FREMSTILT_KRAV)
 
             // Act
             autovedtakSøknadService.kjørBehandling(søknadData)

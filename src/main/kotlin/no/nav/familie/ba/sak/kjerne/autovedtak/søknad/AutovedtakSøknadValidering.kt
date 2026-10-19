@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.opphørtFomSomYearMonth
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.virkningFomSomYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.BEHANDLINGSRESULTAT_IKKE_INNVILGET
-import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.ENDREDE_ANDELER_UTEN_KRAV
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.ENDREDE_ANDELER_FOR_BARN_UTEN_FREMSTILT_KRAV
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.FEILUTBETALING
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.INGEN_UTBETALING
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.OVERLAPP_INFOTRYGD
@@ -95,7 +95,7 @@ object AutovedtakSøknadValidering {
             )
             throw AutovedtakSøknadMåBehandlesManueltFeil(
                 beskrivelse = "Automatisk behandling av søknad gir endring i andeler for ${personerMedEndringIAndelerUtenKrav.size} person(er) det ikke er fremstilt krav for.\n$MÅ_HÅNDTERES_MANUELT",
-                årsak = ENDREDE_ANDELER_UTEN_KRAV,
+                årsak = ENDREDE_ANDELER_FOR_BARN_UTEN_FREMSTILT_KRAV,
             )
         }
     }
