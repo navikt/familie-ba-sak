@@ -97,6 +97,7 @@ class AutovedtakSøknadService(
         autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandlingEtterBehandlingsresultat)
         autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandlingEtterBehandlingsresultat)
         autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(behandlingEtterBehandlingsresultat)
+        autovedtakSøknadValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandlingEtterBehandlingsresultat)
 
         val simulering = simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterBehandlingsresultat)
         autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)

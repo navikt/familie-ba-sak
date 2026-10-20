@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
+import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInfotrygdstønad
@@ -19,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -38,6 +41,7 @@ class AutovedtakSøknadValideringServiceTest {
     private val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val infotrygdService = mockk<InfotrygdService>()
+    private val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService>()
 
     private val autovedtakSøknadValideringService =
         AutovedtakSøknadValideringService(
@@ -46,6 +50,7 @@ class AutovedtakSøknadValideringServiceTest {
             søknadGrunnlagService = søknadGrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             infotrygdService = infotrygdService,
+            tilkjentYtelseValideringService = tilkjentYtelseValideringService,
         )
 
     private val behandling =
@@ -246,6 +251,47 @@ class AutovedtakSøknadValideringServiceTest {
 
             // Act & Assert
             assertThrows<AutovedtakMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simuleringUtenUtbetaling) }
+        }
+    }
+
+    @Nested
+    inner class ValiderAtIngenUtbetalingerOverstiger100Prosent {
+        @BeforeEach
+        fun setup() {
+            justRun { tilkjentYtelseValideringService.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandling) }
+            justRun { tilkjentYtelseValideringService.validerAtSøkerIkkeFårFlereUtvidetAndelerSammePeriode(behandling) }
+        }
+
+        @Test
+        fun `skal ikke kaste feil når ingen utbetalinger overstiger 100 prosent`() {
+            // Act & Assert
+            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling) }
+        }
+
+        @Test
+        fun `skal kaste feil med årsak for barn når barn får mer enn 100 prosent utbetaling`() {
+            // Arrange
+            every { tilkjentYtelseValideringService.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandling) } throws UtbetalingsikkerhetFeil("Over 100% for barn født 01.01.20")
+
+            // Act
+            val feil = assertThrows<AutovedtakSøknadMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling) }
+
+            // Assert
+            assertThat(feil.årsaker).containsExactly(AutovedtakSøknadMåBehandlesManueltÅrsak.UTBETALING_OVER_100_PROSENT_BARN)
+            assertThat(feil.beskrivelse).doesNotContain("01.01.20")
+            verify(exactly = 0) { tilkjentYtelseValideringService.validerAtSøkerIkkeFårFlereUtvidetAndelerSammePeriode(any()) }
+        }
+
+        @Test
+        fun `skal kaste feil med årsak for søker når søker får mer enn 100 prosent utvidet barnetrygd`() {
+            // Arrange
+            every { tilkjentYtelseValideringService.validerAtSøkerIkkeFårFlereUtvidetAndelerSammePeriode(behandling) } throws UtbetalingsikkerhetFeil("Over 100% utvidet")
+
+            // Act
+            val feil = assertThrows<AutovedtakSøknadMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling) }
+
+            // Assert
+            assertThat(feil.årsaker).containsExactly(AutovedtakSøknadMåBehandlesManueltÅrsak.UTBETALING_OVER_100_PROSENT_SØKER)
         }
     }
 }
