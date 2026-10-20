@@ -19,8 +19,6 @@ PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 
 FAMILIE_TILBAKE_SCOPE: api://prod-gcp.tilbake.tilbakekreving-backend/.default
 FAMILIE_TILBAKE_URL: http://tilbakekreving-backend.tilbake/api
-TILBAKEKREVING_REQUEST_TOPIC: tilbake.privat-tbk-hentfagsystemsbehandling
-TILBAKEKREVING_RESPONSE_TOPIC: tilbake.privat-tbk-hentfagsystemsbehandling-svar
 
 FAMILIE_EF_SAK_SCOPE: api://prod-gcp.teamfamilie.familie-ef-sak/.default
 
