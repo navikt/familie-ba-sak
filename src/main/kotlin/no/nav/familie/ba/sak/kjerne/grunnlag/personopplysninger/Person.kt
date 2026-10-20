@@ -180,9 +180,9 @@ data class Person(
         if (harFalskIdentitet != other.harFalskIdentitet) return false
 
         if (opphold.toSet() != other.opphold.toSet()) return false
-        if (bostedsadresser.toSet() != other.bostedsadresser.toSet()) return false
-        if (oppholdsadresser.toSet() != other.oppholdsadresser.toSet()) return false
-        if (deltBosted.toSet() != other.deltBosted.toSet()) return false
+        if (bostedsadresser.map { it.tilAdresse() }.toSet() != other.bostedsadresser.map { it.tilAdresse() }.toSet()) return false
+        if (oppholdsadresser.map { it.tilAdresse() }.toSet() != other.oppholdsadresser.map { it.tilAdresse() }.toSet()) return false
+        if (deltBosted.map { it.tilAdresse() }.toSet() != other.deltBosted.map { it.tilAdresse() }.toSet()) return false
         if (sivilstander.toSet() != other.sivilstander.toSet()) return false
         if (statsborgerskap.toSet() != other.statsborgerskap.toSet()) return false
         if (arbeidsforhold.toSet() != other.arbeidsforhold.toSet()) return false
