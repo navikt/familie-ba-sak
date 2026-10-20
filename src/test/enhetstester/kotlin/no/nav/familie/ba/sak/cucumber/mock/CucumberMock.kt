@@ -583,6 +583,7 @@ class CucumberMock(
         PreutfyllBosattIRiketService(
             søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,
+            featureToggleService = featureToggleService,
         )
 
     val preutfyllBosattIRiketForFødselshendelserService =

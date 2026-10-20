@@ -180,7 +180,7 @@ class PreutfyllLovligOppholdService(
  * Slår sammen perioder som overlapper eller har mellomrom innenfor samme måned.
  * F.eks. 14.feb→16.feb + 19.feb→28.feb → 14.feb→28.feb
  */
-private fun List<Periode<Boolean>>.slåSammenPerioderInnenforSammeMåned(): List<Periode<Boolean>> =
+internal fun List<Periode<Boolean>>.slåSammenPerioderInnenforSammeMåned(): List<Periode<Boolean>> =
     sortedBy { it.fom }.fold(emptyList()) { acc, periode ->
         val forrigePeriode = acc.lastOrNull()
         val forrigePeriodeTom = forrigePeriode?.tom

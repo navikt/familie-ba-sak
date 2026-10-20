@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -18,6 +21,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RI
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE.MIDLERTIDIG
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE.PERMANENT
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.omfatter
@@ -35,6 +41,7 @@ import java.time.LocalDate
 class PreutfyllBosattIRiketService(
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
@@ -159,6 +166,11 @@ class PreutfyllBosattIRiketService(
                 OppfyltDelvilkår("- Bosatt i Norge siden fødsel.")
             }
 
+            featureToggleService.isEnabled(FeatureToggle.OPPFYLL_BOSATT_I_RIKET_BASERT_PÅ_OPPHOLDSTILLATELSE) &&
+                erBosattINorgeNåOgHarOppholdstillatelseIMerEnn12Måneder(erBosattINorgePeriode, person) -> {
+                OppfyltDelvilkår("- Norsk bostedsadresse og gyldig oppholdstillatelse i mer enn 12 måneder.", INFORMASJON_OM_OPPHOLDSTILLATELSE)
+            }
+
             digitalSøknad == null -> {
                 IkkeVurdertVilkår(evalueringÅrsaker = setOf(VilkårKanskjeOppfyltÅrsak.BOSATT_I_RIKET_IKKE_MULIG_Å_FASTSETTE_SKAL_BO_LENGRE_ENN_12_MND))
             }
@@ -171,6 +183,23 @@ class PreutfyllBosattIRiketService(
                 IkkeOppfyltDelvilkår(evalueringÅrsaker = setOf(VilkårIkkeOppfyltÅrsak.HAR_IKKE_BODD_I_RIKET_12_MND))
             }
         }
+
+    private fun erBosattINorgeNåOgHarOppholdstillatelseIMerEnn12Måneder(
+        erBosattINorgePeriode: Periode<Boolean?>,
+        person: Person,
+    ): Boolean =
+        erBosattINorgePeriode.omfatter(LocalDate.now()) &&
+            erBosattINorgePeriode.tom == null &&
+            person.opphold
+                .filter { it.type in setOf(PERMANENT, MIDLERTIDIG) }
+                .map { Periode(verdi = true, fom = it.gyldigPeriode?.fom, tom = it.gyldigPeriode?.tom) }
+                .slåSammenPerioderInnenforSammeMåned()
+                .filter { it.omfatter(LocalDate.now()) }
+                .any { oppholdstillatelse ->
+                    val fom = oppholdstillatelse.fom
+                    val tom = oppholdstillatelse.tom
+                    fom == null || tom == null || tom.isAfter(fom.plusMonths(12))
+                }
 
     private fun erOppgittAtPlanleggerÅBoINorge12Måneder(
         digitalSøknad: Søknad,
