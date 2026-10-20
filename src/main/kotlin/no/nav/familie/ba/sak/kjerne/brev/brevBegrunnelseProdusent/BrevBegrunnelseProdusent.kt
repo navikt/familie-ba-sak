@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.forrigeMåned
-import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.pdl.logger
@@ -201,7 +201,7 @@ private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
                     .tilSanityFormat(),
             apiNavn = this.sanityApiNavn,
             belop = Utils.formaterBeløp(begrunnelsesgruppe.beløp),
-            soknadstidspunkt = begrunnelsesgruppe.søknadstidspunkt?.tilKortString() ?: "",
+            soknadstidspunkt = begrunnelsesgruppe.søknadstidspunkt?.tilDagMånedÅr() ?: "",
             avtaletidspunktDeltBosted = "",
             sokersRettTilUtvidet =
                 hentSøkersRettTilUtvidet(
@@ -286,8 +286,8 @@ private fun Standardbegrunnelse.delOppBegrunnelsenPåAvtaletidspunkt(
                     .tilSanityFormat(),
             apiNavn = this.sanityApiNavn,
             belop = Utils.formaterBeløp(beløpUtbetaltForBarnTilhørendeAvtaletidspunkt),
-            soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: "",
-            avtaletidspunktDeltBosted = avtaletidspunktDeltBosted.tilKortString(),
+            soknadstidspunkt = søknadstidspunkt?.tilDagMånedÅr() ?: "",
+            avtaletidspunktDeltBosted = avtaletidspunktDeltBosted.tilDagMånedÅr(),
             sokersRettTilUtvidet =
                 hentSøkersRettTilUtvidet(
                     utvidetUtbetalingsdetaljer =

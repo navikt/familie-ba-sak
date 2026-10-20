@@ -71,12 +71,12 @@ Egenskap: Brevperioder: Allerede utbetalt og delt bosted med utvidet barnetrygd
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.03.2026 til 31.03.2026
       | Begrunnelse                                               | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp | Søknadstidspunkt |
-      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY | STANDARD | Nei           | 01.01.20             | 1           | februar 2026                         | 0     | 01.03.26         |
+      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY | STANDARD | Nei           | 01.01.20             | 1           | februar 2026                         | 0     | 1. mars 2026     |
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.04.2026 til 30.04.2026
       | Begrunnelse                                               | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp | Søknadstidspunkt | Søkers rett til utvidet     |
-      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY | STANDARD | Nei           | 01.01.20             | 1           | mars 2026                            | 0     | 01.03.26         | SØKER_HAR_RETT_MEN_FÅR_IKKE |
+      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY | STANDARD | Nei           | 01.01.20             | 1           | mars 2026                            | 0     | 1. mars 2026     | SØKER_HAR_RETT_MEN_FÅR_IKKE |
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.05.2026 til 31.05.2026
       | Begrunnelse                                               | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp | Søknadstidspunkt | Søkers rett til utvidet     |
-      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY | STANDARD | Nei           | 01.01.20             | 1           | april 2026                           | 0     | 01.03.26         | SØKER_HAR_RETT_MEN_FÅR_IKKE |
+      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY | STANDARD | Nei           | 01.01.20             | 1           | april 2026                           | 0     | 1. mars 2026     | SØKER_HAR_RETT_MEN_FÅR_IKKE |
