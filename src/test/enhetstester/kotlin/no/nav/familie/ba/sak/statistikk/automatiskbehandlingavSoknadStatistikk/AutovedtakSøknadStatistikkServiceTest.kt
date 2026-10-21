@@ -52,7 +52,7 @@ class AutovedtakSøknadStatistikkServiceTest {
 
         // Assert
         verify(exactly = 1) { repository.saveAll(any<Iterable<AutomatiskBehandlingAvSøknadStatistikk>>()) }
-        assertThat(lagrede.captured.map { it.journalpostId }).containsExactly(123L, 123L)
+        assertThat(lagrede.captured.map { it.journalpostId }).containsExactly(123L, 123L, 123L)
         assertThat(lagrede.captured.map { it.behandlingId }).containsOnlyNulls()
         assertThat(lagrede.captured.map { it.årsakTilManuellBehandling }).containsExactlyElementsOf(årsaker.map { it.name })
     }
