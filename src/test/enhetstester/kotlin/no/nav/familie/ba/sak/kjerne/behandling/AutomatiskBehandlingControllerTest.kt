@@ -8,8 +8,8 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.`AutovedtakSøknadFeilårsak`
-import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.`AutovedtakSøknadStatistikkDto`
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadFeilårsak
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadStatistikkDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.automatiskbehandlingavSoknadStatistikk.AutovedtakSøknadStatistikkService
