@@ -159,5 +159,5 @@ Egenskap: Svalbardtillegg autovedtak
       | 01.10.2025 | 31.03.2031 | INNVILGET_SVALBARDTILLEGG |                 |            |
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.10.2025 til 31.03.2031
-      | Begrunnelse                | Type     | Gjelder søker | Barnas fødselsdatoer           | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
+      | Begrunnelse               | Type     | Gjelder søker | Barnas fødselsdatoer           | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | INNVILGET_SVALBARDTILLEGG | STANDARD | JA            | 14.04.13, 18.08.19 og 01.11.21 | 3           | september 2025                       |         | 7 452 |                  | SØKER_FÅR_UTVIDET       |                             |

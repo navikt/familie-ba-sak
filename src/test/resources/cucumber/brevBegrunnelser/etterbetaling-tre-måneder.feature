@@ -97,11 +97,11 @@ Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre måneder 
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.02.2020 til 31.05.2020
       | Begrunnelse                                                                          | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet     |
-      | ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING | Ja            |                      | 0           | januar 2020                          | NB      | 1 581 | 30.06.23         | SØKER_HAR_RETT_MEN_FÅR_IKKE |
+      | ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING | Ja            |                      | 0           | januar 2020                          | NB      | 1 581 | 30. juni 2023    | SØKER_HAR_RETT_MEN_FÅR_IKKE |
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.06.2020 til 30.06.2022
       | Begrunnelse                                                       | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_KUN_UTVIDET_DEL | Ja            | 13.02.05 og 06.11.10 | 2           | mai 2020                             | NB      | 2 635 | 30.06.23         | SØKER_FÅR_UTVIDET       |
+      | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_KUN_UTVIDET_DEL | Ja            | 13.02.05 og 06.11.10 | 2           | mai 2020                             | NB      | 2 635 | 30. juni 2023    | SØKER_FÅR_UTVIDET       |
 
   Scenario: Etter endret utbetalingsperiode begrunnelser som gjelder søker skal inkludere barn som får utbetalt i samme periode
 
@@ -223,7 +223,7 @@ Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre måneder 
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.07.2024 til 31.07.2024
       | Begrunnelse                                                                  | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_FOR_PRAKTISERT_DELT_BOSTED | STANDARD | Ja            | 30.04.15 og 29.08.18 | 2           | juni 2024                            |         | 5 792 | 23.10.24         | SØKER_FÅR_UTVIDET       |                             |
+      | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_FOR_PRAKTISERT_DELT_BOSTED | STANDARD | Ja            | 30.04.15 og 29.08.18 | 2           | juni 2024                            |         | 5 792 | 23. oktober 2024 | SØKER_FÅR_UTVIDET       |                             |
 
   Scenario: Skal ikke flette inn barn med delt bosted hvis de hadde delt bosted i forrige periode og
     Gitt følgende fagsaker
@@ -333,4 +333,4 @@ Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre måneder 
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.07.2025 til 31.01.2026
       | Begrunnelse                                       | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER | Nei           | 02.01.09             | 1           | juni 2025                            | NB      | 1 968 | 30.04.26         | SØKER_FÅR_UTVIDET       |
+      | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER | Nei           | 02.01.09             | 1           | juni 2025                            | NB      | 1 968 | 30. april 2026   | SØKER_FÅR_UTVIDET       |
