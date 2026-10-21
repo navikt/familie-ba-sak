@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.stereotype.Service
@@ -13,21 +12,15 @@ class RegistrerInstitusjon(
     val institusjonService: InstitusjonService,
     val loggService: LoggService,
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    val fagsakService: FagsakService,
-) : BehandlingSteg<Institusjon> {
+) : BehandlingSteg<String> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        institusjon: Institusjon,
+        data: String,
     ): StegType {
-        institusjonService
-            .hentEllerOpprettInstitusjon(
-                orgNummer = institusjon.orgNummer,
-                tssEksternId = institusjon.tssEksternId,
-            ).apply {
-                val fagsak = behandling.fagsak
-                fagsak.institusjon = this
-                fagsakService.lagre(fagsak)
-            }
+        if (behandling.fagsak.institusjon == null) {
+            throw Feil("Fagsak ${behandling.fagsak.id} mangler institusjon. Institusjon må være registrert på fagsaken før steget REGISTRERE_INSTITUSJON kan utføres.")
+        }
+
         loggService.opprettRegistrerInstitusjonLogg(
             behandling,
         )

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.validering.OrganisasjonsnummerValidator
-import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 
 data class InstitusjonDto(
     val orgNummer: String?,
@@ -20,15 +19,4 @@ data class InstitusjonDto(
             throw FunksjonellFeil("Mangler tssEksternId.")
         }
     }
-}
-
-data class RegistrerInstitusjonDto(
-    val orgNummer: String,
-    val tssEksternId: String,
-) {
-    fun tilInstitusjon(): Institusjon =
-        Institusjon(
-            orgNummer = orgNummer,
-            tssEksternId = tssEksternId,
-        )
 }

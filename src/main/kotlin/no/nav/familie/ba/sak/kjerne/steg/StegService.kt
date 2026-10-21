@@ -41,7 +41,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -506,12 +505,11 @@ class StegService(
     @Transactional
     fun håndterRegistrerInstitusjon(
         behandling: Behandling,
-        institusjon: Institusjon,
     ): Behandling {
         val behandlingSteg: RegistrerInstitusjon = hentBehandlingSteg(StegType.REGISTRERE_INSTITUSJON) as RegistrerInstitusjon
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, institusjon)
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
     }
 
