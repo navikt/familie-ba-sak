@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.`AutovedtakSøknadStatistikkDto`
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.statistikk.automatiskbehandlingavSoknadStatistikk.AutovedtakSøknadStatistikkService
 import no.nav.familie.ba.sak.task.BehandleAutomatiskSøknadTask
 import no.nav.familie.ba.sak.task.dto.BehandleAutomatiskSøknadTaskDTO
 import org.springframework.http.MediaType
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 class AutomatiskBehandlingController(
     private val tilgangService: TilgangService,
     private val taskRepository: TaskRepositoryWrapper,
+    private val autovedtakSøknadStatistikkService: AutovedtakSøknadStatistikkService,
 ) {
     @PostMapping("/automatisk-soknad", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettAutomatiskBehandlingAvSøknad(
@@ -30,5 +34,20 @@ class AutomatiskBehandlingController(
 
         val task = BehandleAutomatiskSøknadTask.opprettTask(BehandleAutomatiskSøknadTaskDTO(nyBehandling))
         taskRepository.save(task)
+    }
+
+    @PostMapping("/automatisk-soknad/statistikk")
+    fun registrerStatistikkForAutovedtakSøknad(
+        @Valid @RequestBody statistikkDto: AutovedtakSøknadStatistikkDto,
+    ) {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SYSTEM,
+            handling = "Registrerer årsaker til at søknad ikke behandles automatisk",
+        )
+
+        autovedtakSøknadStatistikkService.lagreÅrsakerForJournalpost(
+            journalpostId = statistikkDto.journalpostId,
+            årsaker = statistikkDto.feilårsaker,
+        )
     }
 }
