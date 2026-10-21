@@ -38,6 +38,8 @@ enum class AutovedtakSøknadMåBehandlesManueltÅrsak {
     INGEN_UTBETALING,
     FEILUTBETALING,
     MANGLER_PERIODE_MED_NY_INNVILGELSE,
+    UTBETALING_OVER_100_PROSENT_BARN,
+    UTBETALING_OVER_100_PROSENT_SØKER,
     ;
 
     companion object {

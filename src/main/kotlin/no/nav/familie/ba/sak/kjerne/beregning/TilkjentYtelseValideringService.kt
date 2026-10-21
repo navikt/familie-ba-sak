@@ -65,7 +65,7 @@ class TilkjentYtelseValideringService(
         )
     }
 
-    private fun validerAtSøkerIkkeFårFlereUtvidetAndelerSammePeriode(behandling: Behandling) {
+    fun validerAtSøkerIkkeFårFlereUtvidetAndelerSammePeriode(behandling: Behandling) {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
         val fagsak = behandling.fagsak
 

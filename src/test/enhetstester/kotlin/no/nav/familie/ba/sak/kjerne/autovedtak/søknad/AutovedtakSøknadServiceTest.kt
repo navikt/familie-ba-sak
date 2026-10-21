@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehan
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.INGEN_UTBETALING
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.OVERLAPP_TIDLIGERE_UTBETALING
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.SØKER_VILKÅR_BOSATT_I_RIKET
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.UTBETALING_OVER_100_PROSENT_BARN
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggBehandlingInfoDto
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -129,6 +130,7 @@ class AutovedtakSøknadServiceTest {
             justRun { autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(any()) }
             justRun { autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(any()) }
             justRun { autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(any()) }
+            justRun { autovedtakSøknadValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(any()) }
             every { simuleringService.oppdaterSimuleringPåBehandling(behandling) } returns simulering
             justRun { autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(any()) }
             justRun { autovedtakSøknadBegrunnelseService.begrunnAutovedtakForSøknad(any()) }
@@ -202,6 +204,7 @@ class AutovedtakSøknadServiceTest {
                 autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandling)
                 autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling)
                 autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(behandling)
+                autovedtakSøknadValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling)
                 simuleringService.oppdaterSimuleringPåBehandling(behandling)
                 autovedtakSøknadValideringService.validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering)
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling)
@@ -273,6 +276,28 @@ class AutovedtakSøknadServiceTest {
                     manuellOppgaveType = ManuellOppgaveType.SØKNAD,
                     oppgavetype = Oppgavetype.BehandleSak,
                 )
+            }
+            verify(exactly = 0) {
+                simuleringService.oppdaterSimuleringPåBehandling(any())
+                autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
+                taskService.save(any())
+            }
+        }
+
+        @Test
+        fun `skal henlegge, lagre årsak og opprette manuell behandling i stedet for å simulere og vedta når utbetalingen overstiger 100 prosent`() {
+            // Arrange
+            every { autovedtakSøknadValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling) } throws
+                AutovedtakSøknadMåBehandlesManueltFeil("Automatisk behandling av søknad gir utbetaling som overstiger 100% for ett eller flere barn.", UTBETALING_OVER_100_PROSENT_BARN)
+
+            // Act
+            autovedtakSøknadService.kjørBehandling(søknadData)
+
+            // Assert
+            verifyOrder {
+                statistikkService.lagreÅrsaker(automatiskBehandling.id, listOf(UTBETALING_OVER_100_PROSENT_BARN))
+                stegService.håndterHenleggBehandling(automatiskBehandling, any())
+                stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
             }
             verify(exactly = 0) {
                 simuleringService.oppdaterSimuleringPåBehandling(any())
