@@ -204,7 +204,7 @@ class RolletilgangTest(
             assertThrows<HttpClientErrorException> {
                 restClient
                     .post()
-                    .uri(hentUrl("/api/forvalter/ferdigstill-oppgaver"))
+                    .uri(hentUrl("/api/forvalter/oppgave/ferdigstill-oppgaver"))
                     .headers { h -> h.addAll(requestEntity.headers) }
                     .body(requestEntity.body!!)
                     .retrieve()
@@ -249,7 +249,7 @@ class RolletilgangTest(
         val response =
             restClient
                 .post()
-                .uri(hentUrl("/api/forvalter/ferdigstill-oppgaver"))
+                .uri(hentUrl("/api/forvalter/oppgave/ferdigstill-oppgaver"))
                 .headers { h -> h.addAll(requestEntity.headers) }
                 .body(requestEntity.body!!)
                 .retrieve()
