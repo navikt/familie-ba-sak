@@ -354,7 +354,7 @@ class FerdigstillBehandlingTaskTest(
                     personResultater.first { it.erSøkersResultater() }.vilkårResultater.forEach { it.resultat = Resultat.IKKE_OPPFYLT }
                 }
 
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+            vilkårsvurderingService.lagreNyOgSlettGammel(vilkårsvurdering = vilkårsvurdering)
             val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
 
             behandlingService.oppdaterStatusPåBehandling(

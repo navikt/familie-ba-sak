@@ -680,7 +680,6 @@ class CucumberMock(
             beregningService = beregningService,
             taskRepository = taskRepository,
             loggService = loggService,
-            vilkårsvurderingService = vilkårsvurderingService,
             featureToggleService = featureToggleService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             saksbehandlerContext = saksbehandlerContext,
