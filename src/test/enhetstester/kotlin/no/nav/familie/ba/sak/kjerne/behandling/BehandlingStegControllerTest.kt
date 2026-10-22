@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -33,6 +34,7 @@ class BehandlingStegControllerTest {
     private val stegServiceMock = mockk<StegService>()
     private val utvidetBehandlingServiceMock = mockk<UtvidetBehandlingService>()
     private val totrinnskontrollServiceMock = mockk<TotrinnskontrollService>()
+    private val behandlingsresultatStegValideringService = mockk<BehandlingsresultatStegValideringService>()
     private val behandlingStegController =
         BehandlingStegController(
             behandlingHentOgPersisterService = behandlingHentOgPersisterServiceMock,
@@ -41,6 +43,7 @@ class BehandlingStegControllerTest {
             featureToggleService = featureToggleService,
             utvidetBehandlingService = utvidetBehandlingServiceMock,
             totrinnskontrollService = totrinnskontrollServiceMock,
+            behandlingsresultatStegValideringService = behandlingsresultatStegValideringService,
         )
 
     @BeforeEach
@@ -77,6 +80,24 @@ class BehandlingStegControllerTest {
                         årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
                     ),
             )
+        }
+    }
+
+    @Test
+    fun `Skal validere behandlingsresultat med valideringstjenesten`() {
+        // Arrange
+        val behandling = lagBehandling()
+        every { tilgangServiceMock.verifiserHarTilgangTilHandling(any(), any()) } just runs
+        every { behandlingHentOgPersisterServiceMock.hent(behandling.id) } returns behandling
+        every { behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling) } just runs
+
+        // Act
+        val respons = behandlingStegController.validerBehandlingsresultat(behandling.id)
+
+        // Assert
+        assertThat(respons.body?.data).isTrue()
+        verify(exactly = 1) {
+            behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
         }
     }
 
