@@ -7,8 +7,6 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatServi
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
@@ -25,7 +23,6 @@ class BehandlingsresultatSteg(
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
@@ -35,54 +32,7 @@ class BehandlingsresultatSteg(
         behandling: Behandling,
         stegService: StegService?,
     ) {
-        if (!behandling.erSatsendringMånedligValutajusteringEllerRegionstillegg() && behandling.skalBehandlesAutomatisk) {
-            return
-        }
-
-        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
-
-        validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
-            tilkjentYtelse = tilkjentYtelse,
-            søkerOgBarn = søkerOgBarn,
-        )
-
-        behandlingsresultatstegValideringService.validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(behandling = behandling)
-
-        if (behandling.erSatsendringNasjonal()) {
-            behandlingsresultatstegValideringService.validerSatsendring(tilkjentYtelse)
-        }
-
-        if (behandling.erFinnmarkstillegg()) {
-            behandlingsresultatstegValideringService.validerFinnmarkstilleggBehandling(tilkjentYtelse)
-        }
-
-        if (behandling.erSvalbardtillegg()) {
-            behandlingsresultatstegValideringService.validerSvalbardtilleggBehandling(tilkjentYtelse)
-        }
-
-        if (!behandling.erSatsendringMånedligValutajusteringEllerRegionstillegg()) {
-            behandlingsresultatstegValideringService.validerEndredeUtbetalingsandeler(tilkjentYtelse)
-            behandlingsresultatstegValideringService.validerKompetanse(behandling.id)
-            behandlingsresultatstegValideringService.validerSekundærlandKompetanse(behandling.id)
-            behandlingsresultatstegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(behandling)
-            behandlingsresultatstegValideringService.validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(behandling)
-        }
-
-        if (behandling.erMånedligValutajustering()) {
-            behandlingsresultatstegValideringService.validerIngenEndringTilbakeITid(tilkjentYtelse)
-            behandlingsresultatstegValideringService.validerSatsErUendret(tilkjentYtelse)
-        }
-
-        if (behandling.erSatsendringEøs()) {
-            behandlingsresultatstegValideringService.validerAtMinstEttUtenlandskPeriodebeløpErEndret(behandling)
-            behandlingsresultatstegValideringService.validerIngenEndringIAndelerFørSatsendringstidspunkt(tilkjentYtelse)
-        }
-
-        if (behandling.erEndreMigreringsdato()) {
-            behandlingsresultatstegValideringService
-                .validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)
-        }
+        behandlingsresultatstegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
     }
 
     @Transactional
