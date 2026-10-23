@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerInstitusjonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
@@ -208,12 +207,10 @@ class BehandlingStegController(
     @PostMapping(path = ["registrer-institusjon"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun registerInstitusjon(
         @PathVariable behandlingId: Long,
-        @RequestBody restInstitusjon: RegistrerInstitusjonDto,
     ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val institusjon = restInstitusjon.tilInstitusjon()
 
-        stegService.håndterRegistrerInstitusjon(behandling, institusjon)
+        stegService.håndterRegistrerInstitusjon(behandling)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
     }
 
