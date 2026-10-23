@@ -69,13 +69,13 @@ class FerdigstillBehandlingTest {
             every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
             every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns lagTilkjentYtelse(behandling)
             every { featureToggleService.isEnabled(FeatureToggle.FERDIGSTILL_BEHANDLING_MELDING_TIL_PENSJON) } returns true
-            every { pensjonService.opprettTaskForSendingAvMeldingOmFerdigstiltBehandling(behandling) } just runs
+            every { pensjonService.opprettTaskForLagringAvFerdigstiltBehandlingForPensjon(behandling) } just runs
 
             // Act
             ferdigstillBehandling.utførStegOgAngiNeste(behandling, "")
 
             // Assert
-            verify(exactly = 1) { pensjonService.opprettTaskForSendingAvMeldingOmFerdigstiltBehandling(behandling) }
+            verify(exactly = 1) { pensjonService.opprettTaskForLagringAvFerdigstiltBehandlingForPensjon(behandling) }
         }
 
         @Test
@@ -89,7 +89,7 @@ class FerdigstillBehandlingTest {
             ferdigstillBehandling.utførStegOgAngiNeste(behandling, "")
 
             // Assert
-            verify(exactly = 0) { pensjonService.opprettTaskForSendingAvMeldingOmFerdigstiltBehandling(any()) }
+            verify(exactly = 0) { pensjonService.opprettTaskForLagringAvFerdigstiltBehandlingForPensjon(any()) }
         }
 
         @Test
@@ -111,7 +111,7 @@ class FerdigstillBehandlingTest {
             ferdigstillBehandling.utførStegOgAngiNeste(henlagtBehandling, "")
 
             // Assert
-            verify(exactly = 0) { pensjonService.opprettTaskForSendingAvMeldingOmFerdigstiltBehandling(any()) }
+            verify(exactly = 0) { pensjonService.opprettTaskForLagringAvFerdigstiltBehandlingForPensjon(any()) }
         }
     }
 }

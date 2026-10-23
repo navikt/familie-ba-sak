@@ -67,7 +67,7 @@ class FerdigstillBehandling(
         snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandlingSomFerdigstilles = behandling)
 
         if (!erHenlagt && featureToggleService.isEnabled(FeatureToggle.FERDIGSTILL_BEHANDLING_MELDING_TIL_PENSJON)) {
-            pensjonService.opprettTaskForSendingAvMeldingOmFerdigstiltBehandling(behandling)
+            pensjonService.opprettTaskForLagringAvFerdigstiltBehandlingForPensjon(behandling)
         }
 
         return hentNesteStegForNormalFlyt(behandling)

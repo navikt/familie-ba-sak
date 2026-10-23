@@ -8,6 +8,6 @@ import no.nav.familie.ba.sak.ekstern.pensjon.PensjonService
 
 fun mockPensjonService(): PensjonService {
     val pensjonService = mockk<PensjonService>()
-    every { pensjonService.opprettTaskForSendingAvMeldingOmFerdigstiltBehandling(any()) } just runs
+    every { pensjonService.opprettTaskForLagringAvFerdigstiltBehandlingForPensjon(any()) } just runs
     return pensjonService
 }

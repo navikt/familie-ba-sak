@@ -19,15 +19,16 @@ class PensjonKafkaProducerTest {
     private val pensjonKafkaProducer = DefaultPensjonKafkaProducer(kafkaTemplate)
 
     @Nested
-    inner class SendMeldingOmFerdigstiltBehandlingTilPensjon {
+    inner class SendMeldingOmFerdigstiltBehandlingForPensjon {
         @Test
         fun `skal sende ferdigstilthendelse til pensjon via Kafka`() {
             // Arrange
-            val hendelse =
-                FerdigstiltBehandlingHendelse(
+            val payload =
+                FerdigstiltBehandlingForPensjonPayload(
                     ident = "12345678901",
                     vedtaktidspunkt = LocalDateTime.of(2026, 10, 8, 12, 0),
                     endringstidspunkt = LocalDate.of(2026, 10, 8),
+                    sekvensnummer = 1L,
                 )
 
             val sendFuture = CompletableFuture.completedFuture(mockk<SendResult<String, String>>())
@@ -35,14 +36,14 @@ class PensjonKafkaProducerTest {
             every { kafkaTemplate.send(any(), any(), any()) } returns sendFuture
 
             // Act
-            pensjonKafkaProducer.sendMeldingOmFerdigstiltBehandlingTilPensjon(hendelse)
+            pensjonKafkaProducer.sendMeldingOmFerdigstiltBehandlingForPensjon(payload)
 
             // Assert
             verify(exactly = 1) {
                 kafkaTemplate.send(
-                    DefaultPensjonKafkaProducer.IDENTER_MED_FERDIGSTILT_BEHANDLING_V1_TOPIC,
-                    hendelse.ident,
-                    jsonMapper.writeValueAsString(hendelse),
+                    DefaultPensjonKafkaProducer.FERDIGSTILT_BEHANDLING_FOR_PENSJON_V1_TOPIC,
+                    payload.ident,
+                    jsonMapper.writeValueAsString(payload),
                 )
             }
         }
@@ -50,18 +51,19 @@ class PensjonKafkaProducerTest {
         @Test
         fun `skal kaste feil dersom sending til Kafka feiler`() {
             // Arrange
-            val hendelse =
-                FerdigstiltBehandlingHendelse(
+            val payload =
+                FerdigstiltBehandlingForPensjonPayload(
                     ident = "12345678901",
                     vedtaktidspunkt = LocalDateTime.of(2026, 10, 8, 12, 0),
                     endringstidspunkt = LocalDate.of(2026, 10, 8),
+                    sekvensnummer = 1L,
                 )
 
             every { kafkaTemplate.send(any(), any(), any()) } returns
                 CompletableFuture.failedFuture(RuntimeException("Kafka nede"))
 
             // Act & Assert
-            assertThatThrownBy { pensjonKafkaProducer.sendMeldingOmFerdigstiltBehandlingTilPensjon(hendelse) }
+            assertThatThrownBy { pensjonKafkaProducer.sendMeldingOmFerdigstiltBehandlingForPensjon(payload) }
                 .isInstanceOf(ExecutionException::class.java)
                 .hasRootCauseMessage("Kafka nede")
         }

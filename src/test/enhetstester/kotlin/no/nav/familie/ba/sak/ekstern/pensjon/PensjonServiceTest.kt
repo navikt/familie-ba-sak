@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.task.SendMeldingOmFerdigstiltBehandlingTilPensjonTask
+import no.nav.familie.ba.sak.task.LagreFerdigstiltBehandlingForPensjonTask
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -44,14 +44,14 @@ class PensjonServiceTest {
         )
 
     @Nested
-    inner class OpprettTaskForSendingAvMeldingOmFerdigstiltBehandling {
+    inner class OpprettTaskForLagringAvFerdigstiltBehandlingForPensjon {
         @Test
-        fun `skal opprette task for sending av melding om ferdigstilt behandling til pensjon`() {
+        fun `skal opprette task for lagring av ferdigstilt behandling for pensjon`() {
             // Arrange
             val behandling = lagBehandling()
 
             val forventetTask =
-                SendMeldingOmFerdigstiltBehandlingTilPensjonTask.opprettTask(
+                LagreFerdigstiltBehandlingForPensjonTask.opprettTask(
                     behandling.fagsak.aktør.aktivFødselsnummer(),
                     behandling.id,
                 )
@@ -61,11 +61,11 @@ class PensjonServiceTest {
             every { taskRepository.save(capture(taskSlot)) } answers { firstArg() }
 
             // Act
-            pensjonService.opprettTaskForSendingAvMeldingOmFerdigstiltBehandling(behandling)
+            pensjonService.opprettTaskForLagringAvFerdigstiltBehandlingForPensjon(behandling)
 
             // Assert
             verify(exactly = 1) { taskRepository.save(any()) }
-            assertThat(taskSlot.captured.type).isEqualTo(SendMeldingOmFerdigstiltBehandlingTilPensjonTask.TASK_STEP_TYPE)
+            assertThat(taskSlot.captured.type).isEqualTo(LagreFerdigstiltBehandlingForPensjonTask.TASK_STEP_TYPE)
             assertThat(taskSlot.captured.payload).isEqualTo(forventetTask.payload)
         }
     }

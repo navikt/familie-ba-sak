@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
 
 interface PensjonKafkaProducer {
-    fun sendMeldingOmFerdigstiltBehandlingTilPensjon(ferdigstiltBehandlingHendelse: FerdigstiltBehandlingHendelse)
+    fun sendMeldingOmFerdigstiltBehandlingForPensjon(ferdigstiltBehandlingForPensjonPayload: FerdigstiltBehandlingForPensjonPayload)
 }
 
 @Service
@@ -22,14 +22,13 @@ interface PensjonKafkaProducer {
 class DefaultPensjonKafkaProducer(
     private val kafkaTemplate: KafkaTemplate<String, String>,
 ) : PensjonKafkaProducer {
-    override fun sendMeldingOmFerdigstiltBehandlingTilPensjon(ferdigstiltBehandlingHendelse: FerdigstiltBehandlingHendelse) {
-        val json = jsonMapper.writeValueAsString(ferdigstiltBehandlingHendelse)
+    override fun sendMeldingOmFerdigstiltBehandlingForPensjon(ferdigstiltBehandlingForPensjonPayload: FerdigstiltBehandlingForPensjonPayload) {
+        val json = jsonMapper.writeValueAsString(ferdigstiltBehandlingForPensjonPayload)
         try {
-            kafkaTemplate
-                .send(IDENTER_MED_FERDIGSTILT_BEHANDLING_V1_TOPIC, ferdigstiltBehandlingHendelse.ident, json)
-                .get(SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            val future = kafkaTemplate.send(FERDIGSTILT_BEHANDLING_FOR_PENSJON_V1_TOPIC, ferdigstiltBehandlingForPensjonPayload.ident, json)
+            future.get(SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS) // Vent på at meldingen er sendt
         } catch (e: Exception) {
-            logger.error("Feil ved sending av melding om ferdigstilt behandling til pensjon", e)
+            logger.error("Feil ved sending av melding om ferdigstilt behandling for pensjon", e)
             throw e
         }
     }
@@ -37,7 +36,7 @@ class DefaultPensjonKafkaProducer(
     companion object {
         private val logger = LoggerFactory.getLogger(DefaultPensjonKafkaProducer::class.java)
         private const val SEND_TIMEOUT_SECONDS = 5L
-        const val IDENTER_MED_FERDIGSTILT_BEHANDLING_V1_TOPIC = "teamfamilie.identer-med-ferdigstilt-behandling-v1"
+        const val FERDIGSTILT_BEHANDLING_FOR_PENSJON_V1_TOPIC = "teamfamilie.ferdigstilt-behandling-for-pensjon-v1"
     }
 }
 
@@ -45,7 +44,7 @@ class DefaultPensjonKafkaProducer(
 class MockPensjonKafkaProducer : PensjonKafkaProducer {
     private val logger = LoggerFactory.getLogger(MockPensjonKafkaProducer::class.java)
 
-    override fun sendMeldingOmFerdigstiltBehandlingTilPensjon(ferdigstiltBehandlingHendelse: FerdigstiltBehandlingHendelse) {
-        logger.info("Sender ikke melding om ferdigstilt behandling til pensjon fordi Kafka-producer er skrudd av")
+    override fun sendMeldingOmFerdigstiltBehandlingForPensjon(ferdigstiltBehandlingForPensjonPayload: FerdigstiltBehandlingForPensjonPayload) {
+        logger.info("Sender ikke melding om ferdigstilt behandling for pensjon fordi Kafka-producer er skrudd av")
     }
 }

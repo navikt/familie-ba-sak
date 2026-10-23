@@ -1,7 +1,7 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: identer-med-ferdigstilt-behandling-v1
+  name: ferdigstilt-behandling-for-pensjon-v1
   namespace: teamfamilie
   labels:
     team: teamfamilie

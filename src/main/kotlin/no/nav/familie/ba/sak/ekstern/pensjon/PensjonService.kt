@@ -26,7 +26,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
-import no.nav.familie.ba.sak.task.SendMeldingOmFerdigstiltBehandlingTilPensjonTask
+import no.nav.familie.ba.sak.task.LagreFerdigstiltBehandlingForPensjonTask
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
@@ -93,9 +93,9 @@ class PensjonService(
         return uuid.toString()
     }
 
-    fun opprettTaskForSendingAvMeldingOmFerdigstiltBehandling(behandling: Behandling) {
+    fun opprettTaskForLagringAvFerdigstiltBehandlingForPensjon(behandling: Behandling) {
         val task =
-            SendMeldingOmFerdigstiltBehandlingTilPensjonTask.opprettTask(
+            LagreFerdigstiltBehandlingForPensjonTask.opprettTask(
                 behandling.fagsak.aktør.aktivFødselsnummer(),
                 behandling.id,
             )
