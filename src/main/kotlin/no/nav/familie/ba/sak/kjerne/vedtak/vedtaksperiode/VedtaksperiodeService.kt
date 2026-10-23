@@ -111,13 +111,11 @@ class VedtaksperiodeService(
     fun finnEndringstidspunktForBehandling(behandlingId: Long): LocalDate {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        val forrigeBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
         return utledEndringstidspunkt(
             behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
             behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
-            featureToggleService = featureToggleService,
         )
     }
 
@@ -240,7 +238,6 @@ class VedtaksperiodeService(
             grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
             vedtak = vedtak,
             nåDato = LocalDate.now(),
-            featureToggleService = featureToggleService,
         )
     }
 
