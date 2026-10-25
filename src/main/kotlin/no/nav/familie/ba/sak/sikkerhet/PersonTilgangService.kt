@@ -18,13 +18,13 @@ class PersonTilgangService(
 ) {
     fun hentMaskertPersonInfoVedManglendeTilgang(aktør: Aktør): PersonInfoDto? {
         val tilgang = sjekkTilgangTilPerson(personIdent = aktør.aktivFødselsnummer())
-        return if (tilgang.avvisning != null) {
+        return if (!tilgang.harTilgang) {
             val adressebeskyttelse = systemOnlyPdlRestKlient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
             PersonInfoDto(
                 personIdent = aktør.aktivFødselsnummer(),
                 adressebeskyttelseGradering = adressebeskyttelse,
                 harTilgang = false,
-                avvisningskode = tilgang.avvisning.avvisningskode,
+                avvisningskode = tilgang.avvisning?.avvisningskode,
             )
         } else {
             null
