@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.tilgangsmaskin.Avvisningskode
 import java.time.LocalDate
 
 data class PersonInfoDto(
@@ -17,6 +18,7 @@ data class PersonInfoDto(
     val kjønn: Kjønn? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
     var harTilgang: Boolean = true,
+    val avvisningskode: Avvisningskode? = null,
     val forelderBarnRelasjon: List<ForelderBarnRelasjonDto> = emptyList(),
     val forelderBarnRelasjonMaskert: List<ForelderBarnRelasjonMaskertDto> = emptyList(),
     val kommunenummer: String = "ukjent",

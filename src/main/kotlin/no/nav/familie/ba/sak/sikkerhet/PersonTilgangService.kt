@@ -17,13 +17,14 @@ class PersonTilgangService(
     private val systemOnlyPdlRestKlient: SystemOnlyPdlRestKlient,
 ) {
     fun hentMaskertPersonInfoVedManglendeTilgang(aktør: Aktør): PersonInfoDto? {
-        val harTilgang = sjekkTilgangTilPerson(personIdent = aktør.aktivFødselsnummer()).harTilgang
-        return if (!harTilgang) {
+        val tilgang = sjekkTilgangTilPerson(personIdent = aktør.aktivFødselsnummer())
+        return if (tilgang.avvisning != null) {
             val adressebeskyttelse = systemOnlyPdlRestKlient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
             PersonInfoDto(
                 personIdent = aktør.aktivFødselsnummer(),
                 adressebeskyttelseGradering = adressebeskyttelse,
                 harTilgang = false,
+                avvisningskode = tilgang.avvisning.avvisningskode,
             )
         } else {
             null
