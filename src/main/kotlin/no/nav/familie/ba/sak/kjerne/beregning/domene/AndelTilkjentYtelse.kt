@@ -152,6 +152,8 @@ data class AndelTilkjentYtelse(
 
     fun erSvalbardtillegg() = this.type == YtelseType.SVALBARDTILLEGG
 
+    fun erFinnmarkEllerSvalbardtillegg() = erFinnmarkstillegg() || erSvalbardtillegg()
+
     fun erSøkersAndel() = erUtvidet() || erSmåbarnstillegg()
 
     fun erLøpende(): Boolean = this.stønadTom > YearMonth.now()
