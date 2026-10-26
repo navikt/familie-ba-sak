@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatDelete
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
@@ -41,6 +42,7 @@ class VilkårService(
     private val persongrunnlagService: PersongrunnlagService,
     private val endringIPreutfyltVilkårLoggRepository: EndringIPreutfyltVilkårLoggRepository,
     private val featureToggleService: FeatureToggleService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? =
         vilkårsvurderingService.hentAktivForBehandling(
@@ -76,7 +78,7 @@ class VilkårService(
 
         if (eksisterendeVilkårResultat.erOpprinneligPreutfyltIBehandling == behandlingId) {
             val erEndringIBegrunnelse = eksisterendeVilkårResultat.begrunnelse != vilkårResultatDto.begrunnelse
-            val erEndringIAnnetFeltEnnBegrunnelse = erEndringIVilkår(eksisterendeVilkårResultat, vilkårResultatDto)
+            val erEndringIAnnetFeltEnnBegrunnelse = erEndringIVilkårSomPåvirkerResultat(eksisterendeVilkårResultat, vilkårResultatDto)
 
             if (!erEndringIBegrunnelse && !erEndringIAnnetFeltEnnBegrunnelse) {
                 return vilkårsvurdering.personResultater.map { it.tilPersonResultatDto() }
@@ -127,10 +129,14 @@ class VilkårService(
             migreringsdatoPåFagsak,
         )
 
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
+        val personResultatList = vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
+        if (erEndringIVilkårSomPåvirkerResultat(vilkårResultat, vilkårResultatDto)) {
+            tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
+        }
+        return personResultatList
     }
 
-    private fun erEndringIVilkår(
+    private fun erEndringIVilkårSomPåvirkerResultat(
         vilkårResultat: VilkårResultat,
         vilkårResultatDto: VilkårResultatDto,
     ): Boolean =
