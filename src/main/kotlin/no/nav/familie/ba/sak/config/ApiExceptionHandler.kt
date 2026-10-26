@@ -30,6 +30,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.servlet.resource.NoResourceFoundException
 import java.io.EOFException
@@ -139,7 +140,19 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(IntegrasjonException::class)
-    fun handleIntegrasjonException(integrasjonException: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> = illegalState(integrasjonException.message.toString(), integrasjonException)
+    fun handleIntegrasjonException(integrasjonException: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
+        val cause = integrasjonException.cause
+        if (cause !is HttpServerErrorException) {
+            return illegalState(integrasjonException.message.toString(), integrasjonException)
+        }
+
+        logger.warn("Ekstern tjeneste svarte med ${cause.statusCode.value()}. Se securelogs for detaljer.")
+        secureLogger.warn("Ekstern tjeneste svarte med ${cause.statusCode.value()}: ${integrasjonException.message}", integrasjonException)
+
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Ressurs.failure(integrasjonException.message.toString()))
+    }
 
     @ExceptionHandler(PdlPersonKanIkkeBehandlesIFagsystem::class)
     fun handlePdlPersonKanIkkeBehandlesIFagsystem(feil: PdlPersonKanIkkeBehandlesIFagsystem): ResponseEntity<Ressurs<Nothing>> {
