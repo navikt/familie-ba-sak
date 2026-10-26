@@ -102,4 +102,5 @@ enum class LoggType(
     SAMMENSATT_KONTROLLSAK_FJERNET("Sammensatt kontrollsak fjernet"),
     ULOVFESTET_MOTREGNING_BENYTTET("Ulovfestet motregning er benyttet"),
     ULOVFESTET_MOTREGNING_ANGRET("Ulovfestet motregning er angret"),
+    SØKNADSTIDSPUNKT_ENDRET("Søknadstidspunkt endret"),
 }

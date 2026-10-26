@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -27,6 +28,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
     private val mockPersongrunnlagService = mockk<PersongrunnlagService>()
     private val mockBehandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>()
     private val mockSøknadGrunnlagService = mockk<SøknadGrunnlagService>()
+    private val mockLoggService = mockk<LoggService>()
 
     private val registrertSøknadstidspunktService =
         RegistrertSøknadstidspunktPåPersonService(
@@ -34,6 +36,7 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             persongrunnlagService = mockPersongrunnlagService,
             behandlingSøknadsinfoService = mockBehandlingSøknadsinfoService,
             søknadGrunnlagService = mockSøknadGrunnlagService,
+            loggService = mockLoggService,
         )
 
     @Nested
@@ -47,9 +50,12 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             val søknadstidspunkt = LocalDate.of(2025, 4, 15)
 
             every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), behandling) } returns listOf(barnA, barnB)
+            every { mockPersongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(behandling.id, barnA, barnB)
+            every { mockRegistrertSøknadstidspunktPåPersonRepository.findByBehandlingId(behandling.id) } returns emptyList()
             every { mockRegistrertSøknadstidspunktPåPersonRepository.deleteByBehandlingId(any()) } just Runs
             val lagretSlot = slot<List<RegistrertSøknadstidspunktPåPerson>>()
             every { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(capture(lagretSlot)) } answers { firstArg() }
+            every { mockLoggService.opprettSøknadstidspunktEndretLogg(any(), any(), any(), any()) } returns null
 
             // Act
             registrertSøknadstidspunktService.lagreSøknadstidspunkterPåPersoner(
@@ -67,6 +73,48 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
                 RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barnA.aktør, søknadstidspunkt = søknadstidspunkt),
                 RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barnB.aktør, søknadstidspunkt = søknadstidspunkt),
             )
+        }
+
+        @Test
+        fun `skal logge endringen med søknadstidspunktene før og etter lagring`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val barnMedEndretTidspunkt = lagPerson(type = PersonType.BARN)
+            val barnSomFjernes = lagPerson(type = PersonType.BARN)
+            val forrigeSøknadstidspunkt = LocalDate.of(2025, 2, 1)
+            val nyttSøknadstidspunkt = LocalDate.of(2025, 4, 15)
+            val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnMedEndretTidspunkt, barnSomFjernes)
+
+            every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), behandling) } returns listOf(barnMedEndretTidspunkt)
+            every { mockPersongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
+            every { mockRegistrertSøknadstidspunktPåPersonRepository.findByBehandlingId(behandling.id) } returns
+                listOf(
+                    RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barnMedEndretTidspunkt.aktør, søknadstidspunkt = forrigeSøknadstidspunkt),
+                    RegistrertSøknadstidspunktPåPerson(behandlingId = behandling.id, aktør = barnSomFjernes.aktør, søknadstidspunkt = forrigeSøknadstidspunkt),
+                )
+            every { mockRegistrertSøknadstidspunktPåPersonRepository.deleteByBehandlingId(any()) } just Runs
+            every { mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(any<List<RegistrertSøknadstidspunktPåPerson>>()) } answers { firstArg() }
+            every { mockLoggService.opprettSøknadstidspunktEndretLogg(any(), any(), any(), any()) } returns null
+
+            // Act
+            registrertSøknadstidspunktService.lagreSøknadstidspunkterPåPersoner(
+                behandling = behandling,
+                søknadstidspunktPerPerson = listOf(RegistrertSøknadstidspunkt(barnMedEndretTidspunkt.aktør.aktivFødselsnummer(), nyttSøknadstidspunkt)),
+            )
+
+            // Assert
+            verify(exactly = 1) {
+                mockLoggService.opprettSøknadstidspunktEndretLogg(
+                    behandling = behandling,
+                    personer = personopplysningGrunnlag.personer,
+                    forrigeSøknadstidspunktPerAktør =
+                        mapOf(
+                            barnMedEndretTidspunkt.aktør to forrigeSøknadstidspunkt,
+                            barnSomFjernes.aktør to forrigeSøknadstidspunkt,
+                        ),
+                    nyttSøknadstidspunktPerAktør = mapOf(barnMedEndretTidspunkt.aktør to nyttSøknadstidspunkt),
+                )
+            }
         }
 
         @Test

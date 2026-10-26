@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoServ
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -16,6 +17,7 @@ class RegistrertSøknadstidspunktPåPersonService(
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
+    private val loggService: LoggService,
 ) {
     fun hentForBehandling(behandlingId: Long): List<RegistrertSøknadstidspunktPåPerson> = registrertSøknadstidspunktRepository.findByBehandlingId(behandlingId)
 
@@ -56,18 +58,31 @@ class RegistrertSøknadstidspunktPåPersonService(
                 .hentPersonerPåBehandling(søknadstidspunktPerPerson.map { it.personIdent }, behandling)
                 .associate { it.aktør.aktivFødselsnummer() to it.aktør }
 
+        val forrigeSøknadstidspunktPerAktør =
+            registrertSøknadstidspunktRepository
+                .findByBehandlingId(behandling.id)
+                .associate { it.aktør to it.søknadstidspunkt }
+
         registrertSøknadstidspunktRepository.deleteByBehandlingId(behandling.id)
 
-        registrertSøknadstidspunktRepository.saveAll(
-            søknadstidspunktPerPerson.map { registrertSøknadstidspunkt ->
-                RegistrertSøknadstidspunktPåPerson(
-                    behandlingId = behandling.id,
-                    aktør =
-                        aktørPerIdent[registrertSøknadstidspunkt.personIdent]
-                            ?: throw FunksjonellFeil("Fant ikke en av de oppgitte personene på behandling ${behandling.id}"),
-                    søknadstidspunkt = registrertSøknadstidspunkt.søknadstidspunkt,
-                )
-            },
+        val lagredeSøknadstidspunkt =
+            registrertSøknadstidspunktRepository.saveAll(
+                søknadstidspunktPerPerson.map { registrertSøknadstidspunkt ->
+                    RegistrertSøknadstidspunktPåPerson(
+                        behandlingId = behandling.id,
+                        aktør =
+                            aktørPerIdent[registrertSøknadstidspunkt.personIdent]
+                                ?: throw FunksjonellFeil("Fant ikke en av de oppgitte personene på behandling ${behandling.id}"),
+                        søknadstidspunkt = registrertSøknadstidspunkt.søknadstidspunkt,
+                    )
+                },
+            )
+
+        loggService.opprettSøknadstidspunktEndretLogg(
+            behandling = behandling,
+            personer = persongrunnlagService.hentAktivThrows(behandling.id).personer,
+            forrigeSøknadstidspunktPerAktør = forrigeSøknadstidspunktPerAktør,
+            nyttSøknadstidspunktPerAktør = lagredeSøknadstidspunkt.associate { it.aktør to it.søknadstidspunkt },
         )
     }
 }
