@@ -75,6 +75,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.test.context.ActiveProfiles
@@ -367,10 +368,12 @@ class BehandleAutomatiskSøknadTaskIntegrasjonTest(
                 .value
                 // Unngår å bruke fake-implementasjoner av taskRepository og BrevKlient da vi ønsker å lagre tasker i databasen og ønsker å kunne trigge feil fra BrevKlient.
                 .filterNot { it in setOf("fake-task-repository", "mock-brev-klient") }
+                .plus("automatisk-soknad-transaksjonstest")
                 .toTypedArray()
     }
 
     @TestConfiguration
+    @Profile("automatisk-soknad-transaksjonstest")
     class TestConfig {
         @Bean
         @Primary
