@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
@@ -27,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.EndringIPreutfyltVilkårLoggRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -55,6 +57,7 @@ class VilkårServiceTest(
     @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val endringIPreutfyltVilkårLoggRepository: EndringIPreutfyltVilkårLoggRepository,
+    @Autowired private val vedtakRepository: VedtakRepository,
 ) : AbstractSpringIntegrationTest() {
     private lateinit var behandling: Behandling
     private lateinit var søkerFnr: String
@@ -92,6 +95,7 @@ class VilkårServiceTest(
                 barnAktør = listOf(barnAktør),
             ),
         )
+        vedtakRepository.save(lagVedtak(behandling = behandling))
     }
 
     @Nested
