@@ -6,6 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -103,6 +104,11 @@ class RegistrertSøknadstidspunktPåPersonServiceTest {
             )
 
             // Assert
+            verifyOrder {
+                mockRegistrertSøknadstidspunktPåPersonRepository.findByBehandlingId(behandling.id)
+                mockRegistrertSøknadstidspunktPåPersonRepository.deleteByBehandlingId(behandling.id)
+                mockRegistrertSøknadstidspunktPåPersonRepository.saveAll(any<List<RegistrertSøknadstidspunktPåPerson>>())
+            }
             verify(exactly = 1) {
                 mockLoggService.opprettSøknadstidspunktEndretLogg(
                     behandling = behandling,
