@@ -58,8 +58,8 @@ Egenskap: Innvilget Finnmarkstillegg begrunnelse pga søker
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                                  | Ugyldige begrunnelser                                                        |
-      | 01.08.2025 | 31.07.2033 | UTBETALING         | INNVILGET_FINNMARKSTILLEGG, INNVILGET_BOSATT_I_RIKTET | INNVILGET_FINNMARKSTILLEGG_UTEN_DATO, INNVILGET_FINNMARKSTILLEGG_INSTITUSJON |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                                                                        | Ugyldige begrunnelser                  |
+      | 01.08.2025 | 31.07.2033 | UTBETALING         | INNVILGET_FINNMARKSTILLEGG, INNVILGET_BOSATT_I_RIKTET, INNVILGET_FINNMARKSTILLEGG_UTEN_DATO | INNVILGET_FINNMARKSTILLEGG_INSTITUSJON |
 
     Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato   | Standardbegrunnelser       |
