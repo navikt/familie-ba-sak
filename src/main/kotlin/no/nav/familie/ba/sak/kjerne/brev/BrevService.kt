@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
-import no.nav.familie.ba.sak.internal.TestVerktøyService
+import no.nav.familie.ba.sak.internal.tabulærtest.GenererTabulærTestService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.AUTOMATISK_BEHANDLING_BREVSIGNATUR
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.finnInnvilgedeOgReduserteFinnmarkstilleggPerioder
@@ -102,7 +102,7 @@ class BrevService(
     private val saksbehandlerContext: SaksbehandlerContext,
     private val brevmalService: BrevmalService,
     private val kodeverkService: KodeverkService,
-    private val testVerktøyService: TestVerktøyService,
+    private val genererTabulærTestService: GenererTabulærTestService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val valutakursRepository: ValutakursRepository,
@@ -528,7 +528,7 @@ class BrevService(
                         "Brevbegrunnelsefeil for behandling $behandlingId, " +
                             "fagsak ${vedtak.behandling.fagsak.id} " +
                             "på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom}. " +
-                            "\nAutogenerert test:\n" + testVerktøyService.hentBegrunnelsetest(behandlingId),
+                            "\nAutogenerert testgrunnlag:\n" + genererTabulærTestService.genererTestMedAlleGrunnlagsdata(behandlingId),
                     )
                     throw e
                 }
