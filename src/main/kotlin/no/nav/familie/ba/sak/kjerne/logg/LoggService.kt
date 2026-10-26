@@ -25,10 +25,8 @@ import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetaling
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtak
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøs
@@ -666,6 +664,15 @@ class LoggService(
             ),
         )
 
+    fun loggSøknadstidspunktEndret(behandlingId: Long) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.SØKNADSTIDSPUNKT_ENDRET,
+                rolle = hentRolletilgangFraSikkerhetscontext(SAKSBEHANDLER),
+            ),
+        )
+
     fun loggRefusjonEøsPeriodeFjernet(refusjonEøs: RefusjonEøs) =
         lagre(
             Logg(
@@ -711,34 +718,6 @@ class LoggService(
                 rolle = hentRolletilgangFraSikkerhetscontext(SAKSBEHANDLER),
             ),
         )
-
-    fun opprettSøknadstidspunktEndretLogg(
-        behandling: Behandling,
-        personer: Set<Person>,
-        forrigeSøknadstidspunktPerAktør: Map<Aktør, LocalDate>,
-        nyttSøknadstidspunktPerAktør: Map<Aktør, LocalDate>,
-    ): Logg? {
-        val endringer =
-            personer
-                .filter { forrigeSøknadstidspunktPerAktør[it.aktør] != nyttSøknadstidspunktPerAktør[it.aktør] }
-                .sortedWith(compareBy({ it.type != PersonType.SØKER }, { it.fødselsdato }))
-                .map { person ->
-                    val personTekst = if (person.type == PersonType.SØKER) "Søker" else "Barn ${person.fødselsdato.tilKortString()}"
-                    val nyttSøknadstidspunkt = nyttSøknadstidspunktPerAktør[person.aktør]?.tilKortString() ?: "fjernet"
-                    "$personTekst: $nyttSøknadstidspunkt"
-                }
-
-        if (endringer.isEmpty()) return null
-
-        return lagre(
-            Logg(
-                behandlingId = behandling.id,
-                type = LoggType.SØKNADSTIDSPUNKT_ENDRET,
-                rolle = hentRolletilgangFraSikkerhetscontext(SAKSBEHANDLER),
-                tekst = endringer.joinToString(", "),
-            ),
-        )
-    }
 
     fun lagre(logg: Logg): Logg {
         metrikkPerLoggType[logg.type]?.increment()

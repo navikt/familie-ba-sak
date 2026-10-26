@@ -58,32 +58,21 @@ class RegistrertSøknadstidspunktPåPersonService(
                 .hentPersonerPåBehandling(søknadstidspunktPerPerson.map { it.personIdent }, behandling)
                 .associate { it.aktør.aktivFødselsnummer() to it.aktør }
 
-        val forrigeSøknadstidspunktPerAktør =
-            registrertSøknadstidspunktRepository
-                .findByBehandlingId(behandling.id)
-                .associate { it.aktør to it.søknadstidspunkt }
-
         registrertSøknadstidspunktRepository.deleteByBehandlingId(behandling.id)
 
-        val lagredeSøknadstidspunkt =
-            registrertSøknadstidspunktRepository.saveAll(
-                søknadstidspunktPerPerson.map { registrertSøknadstidspunkt ->
-                    RegistrertSøknadstidspunktPåPerson(
-                        behandlingId = behandling.id,
-                        aktør =
-                            aktørPerIdent[registrertSøknadstidspunkt.personIdent]
-                                ?: throw FunksjonellFeil("Fant ikke en av de oppgitte personene på behandling ${behandling.id}"),
-                        søknadstidspunkt = registrertSøknadstidspunkt.søknadstidspunkt,
-                    )
-                },
-            )
-
-        loggService.opprettSøknadstidspunktEndretLogg(
-            behandling = behandling,
-            personer = persongrunnlagService.hentAktivThrows(behandling.id).personer,
-            forrigeSøknadstidspunktPerAktør = forrigeSøknadstidspunktPerAktør,
-            nyttSøknadstidspunktPerAktør = lagredeSøknadstidspunkt.associate { it.aktør to it.søknadstidspunkt },
+        registrertSøknadstidspunktRepository.saveAll(
+            søknadstidspunktPerPerson.map { registrertSøknadstidspunkt ->
+                RegistrertSøknadstidspunktPåPerson(
+                    behandlingId = behandling.id,
+                    aktør =
+                        aktørPerIdent[registrertSøknadstidspunkt.personIdent]
+                            ?: throw FunksjonellFeil("Fant ikke en av de oppgitte personene på behandling ${behandling.id}"),
+                    søknadstidspunkt = registrertSøknadstidspunkt.søknadstidspunkt,
+                )
+            },
         )
+
+        loggService.loggSøknadstidspunktEndret(behandling.id)
     }
 }
 

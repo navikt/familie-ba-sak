@@ -207,27 +207,6 @@ class StrengtFortroligServiceTest {
         }
 
         @Test
-        fun `skal filtrere bort logginnslag om endret søknadstidspunkt når behandlingen har skjermet barn`() {
-            // Arrange
-            mockSaksbehandlerHarTilgangTilSøkerMenIkkeBarn()
-            mockBarnUtenLøpendeAndeler()
-
-            val logger =
-                listOf(
-                    Logg(behandlingId = behandling.id, type = LoggType.BEHANDLING_OPPRETTET, rolle = BehandlerRolle.SYSTEM, tekst = "Behandling opprettet"),
-                    Logg(behandlingId = behandling.id, type = LoggType.SØKNADSTIDSPUNKT_ENDRET, rolle = BehandlerRolle.SAKSBEHANDLER, tekst = "Barn 04.03.18: 01.03.25"),
-                )
-
-            // Act
-            val resultat = strengtFortroligService.anonymiserLoggForStrengtFortroligeBarn(logger, behandling.id)
-
-            // Assert
-            assertThat(resultat).hasSize(2)
-            assertThat(resultat.single { it.type == LoggType.BEHANDLING_OPPRETTET }.tekst).isEqualTo("Behandling opprettet")
-            assertThat(resultat.single { it.type == LoggType.SØKNADSTIDSPUNKT_ENDRET }.tekst).isEqualTo("Informasjon om strengt fortrolig barn er filtrert ut.")
-        }
-
-        @Test
         fun `skal returnere alle logginnslag når saksbehandler har tilgang til alle personer`() {
             // Arrange
             mockSaksbehandlerHarTilgangTilAllePersoner()

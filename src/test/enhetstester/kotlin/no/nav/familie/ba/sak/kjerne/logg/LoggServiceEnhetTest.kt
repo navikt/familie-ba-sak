@@ -6,15 +6,12 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFiltreringResultat
-import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class LoggServiceEnhetTest {
     private val loggRepository = mockk<LoggRepository>()
@@ -151,69 +148,6 @@ internal class LoggServiceEnhetTest {
 
         // Act
         val opprettetLogg = loggService.loggEndretUtbetalingAndelLagtTil(behandlingId)
-
-        // Assert
-        assertThat(opprettetLogg).isNull()
-        verify(exactly = 0) { loggRepository.save(any()) }
-    }
-
-    @Test
-    fun `opprettSøknadstidspunktEndretLogg skal lagre ett samlet innslag med kun endrede personer, søker først og barn sortert på fødselsdato`() {
-        // Arrange
-        val behandling = lagBehandling(id = 1)
-        val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 1))
-        val eldsteBarn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2018, 3, 4))
-        val yngsteBarn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2021, 5, 6))
-        val uendretBarn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 7, 8))
-        val fjernetBarn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 9, 10))
-
-        every { loggRepository.save(any()) } returnsArgument 0
-
-        // Act
-        val opprettetLogg =
-            loggService.opprettSøknadstidspunktEndretLogg(
-                behandling = behandling,
-                personer = setOf(yngsteBarn, fjernetBarn, uendretBarn, eldsteBarn, søker),
-                forrigeSøknadstidspunktPerAktør =
-                    mapOf(
-                        søker.aktør to LocalDate.of(2025, 2, 1),
-                        eldsteBarn.aktør to LocalDate.of(2025, 2, 1),
-                        uendretBarn.aktør to LocalDate.of(2025, 2, 1),
-                        fjernetBarn.aktør to LocalDate.of(2025, 2, 1),
-                    ),
-                nyttSøknadstidspunktPerAktør =
-                    mapOf(
-                        søker.aktør to LocalDate.of(2025, 3, 1),
-                        eldsteBarn.aktør to LocalDate.of(2025, 3, 1),
-                        yngsteBarn.aktør to LocalDate.of(2025, 3, 1),
-                        uendretBarn.aktør to LocalDate.of(2025, 2, 1),
-                    ),
-            )
-
-        // Assert
-        assertThat(opprettetLogg).isNotNull
-        assertThat(opprettetLogg!!.type).isEqualTo(LoggType.SØKNADSTIDSPUNKT_ENDRET)
-        assertThat(opprettetLogg.behandlingId).isEqualTo(behandling.id)
-        assertThat(opprettetLogg.tittel).isEqualTo("Søknadstidspunkt endret")
-        assertThat(opprettetLogg.tekst).isEqualTo("Søker: 01.03.25, Barn 04.03.18: 01.03.25, Barn 10.09.20: fjernet, Barn 06.05.21: 01.03.25")
-        verify(exactly = 1) { loggRepository.save(any()) }
-    }
-
-    @Test
-    fun `opprettSøknadstidspunktEndretLogg skal ikke lagre innslag når ingen søknadstidspunkt er endret`() {
-        // Arrange
-        val behandling = lagBehandling(id = 1)
-        val barn = lagPerson(type = PersonType.BARN)
-        val søknadstidspunkt = mapOf(barn.aktør to LocalDate.of(2025, 2, 1))
-
-        // Act
-        val opprettetLogg =
-            loggService.opprettSøknadstidspunktEndretLogg(
-                behandling = behandling,
-                personer = setOf(barn),
-                forrigeSøknadstidspunktPerAktør = søknadstidspunkt,
-                nyttSøknadstidspunktPerAktør = søknadstidspunkt,
-            )
 
         // Assert
         assertThat(opprettetLogg).isNull()

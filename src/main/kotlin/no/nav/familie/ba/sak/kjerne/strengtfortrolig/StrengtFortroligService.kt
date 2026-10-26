@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.logg.Logg
-import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
 import no.nav.familie.ba.sak.sikkerhet.PersonTilgang
@@ -144,8 +143,7 @@ class StrengtFortroligService(
             }
 
         return logger.map { logg ->
-            // Søknadstidspunkt-logg identifiserer barn med fødselsdato, ikke ident, så vi kan ikke se hvilket barn den gjelder
-            if (logg.type == LoggType.SØKNADSTIDSPUNKT_ENDRET || forbudteLogg.any { logg.tekst.contains(it) }) {
+            if (forbudteLogg.any { logg.tekst.contains(it) }) {
                 logg.copy(tekst = "Informasjon om strengt fortrolig barn er filtrert ut.")
             } else {
                 logg
