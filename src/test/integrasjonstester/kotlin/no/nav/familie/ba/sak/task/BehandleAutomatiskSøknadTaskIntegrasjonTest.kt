@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV10
@@ -15,10 +14,9 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FILTRERINGSREGL
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendringeøs.SatsendringEøsKjøringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.SØKER_VILKÅR_BOSATT_I_RIKET
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -30,26 +28,27 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggRepository
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.statistikk.automatiskbehandlingavSoknadStatistikk.AutomatiskBehandlingAvSøknadStatistikkRepository
@@ -76,6 +75,8 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ActiveProfilesResolver
 import org.springframework.transaction.UnexpectedRollbackException
@@ -106,17 +107,21 @@ class BehandleAutomatiskSøknadTaskIntegrasjonTest(
     @Autowired private val integrasjonKlient: FakeIntegrasjonKlient,
 ) : AbstractSpringIntegrationTest() {
     @Autowired
-    private lateinit var behandlingsresultatStegValideringService: TestBehandlingsresultatStegValideringService
+    private lateinit var behandlingsresultatSteg: TestBehandlingsresultatSteg
+
+    @Autowired
+    private lateinit var stegService: StegService
 
     @Autowired
     private lateinit var brevKlient: TestBrevKlient
 
-    private val prevalidertBehandlingId get() = behandlingsresultatStegValideringService.prevalidertBehandlingId
+    private val prevalidertBehandlingId get() = behandlingsresultatSteg.prevalidertBehandlingId
 
     @BeforeEach
     fun settOpp() {
-        behandlingsresultatStegValideringService.prevalidertBehandlingId = null
-        behandlingsresultatStegValideringService.førPrevalidering = {}
+        assertThat(stegService.hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT)).isSameAs(behandlingsresultatSteg)
+        behandlingsresultatSteg.prevalidertBehandlingId = null
+        behandlingsresultatSteg.førPrevalidering = {}
         brevKlient.førGenerering = {}
         brevKlient.genererteBrev.clear()
     }
@@ -126,7 +131,7 @@ class BehandleAutomatiskSøknadTaskIntegrasjonTest(
         // Arrange
         val behandleAutomatiskSøknadTask = opprettBehandleAutomatiskSøknadTask()
         val feil = IllegalStateException("Feil i prevalidering")
-        behandlingsresultatStegValideringService.førPrevalidering = {
+        behandlingsresultatSteg.førPrevalidering = {
             throw feil
         }
 
@@ -162,7 +167,7 @@ class BehandleAutomatiskSøknadTaskIntegrasjonTest(
     fun `skal rulle hele behandlingsforsøket tilbake selv om AutovedtakSøknadService fanger den spesifikke feilen`() {
         // Arrange
         val behandleAutomatiskSøknadTask = opprettBehandleAutomatiskSøknadTask()
-        behandlingsresultatStegValideringService.førPrevalidering = {
+        behandlingsresultatSteg.førPrevalidering = {
             throw AutovedtakSøknadMåBehandlesManueltFeil("Feil fra prevalidering", SØKER_VILKÅR_BOSATT_I_RIKET)
         }
 
@@ -369,33 +374,31 @@ class BehandleAutomatiskSøknadTaskIntegrasjonTest(
     class TestConfig {
         @Bean
         @Primary
-        fun testBehandlingsresultatStegValideringService(
-            beregningService: BeregningService,
-            behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-            andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-            vilkårService: VilkårService,
-            kompetanseRepository: KompetanseRepository,
-            utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
-            valutakursRepository: ValutakursRepository,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-            strengtFortroligService: StrengtFortroligService,
+        // StegService selects the first matching step from an injected list; @Primary alone is not enough.
+        @Order(Ordered.HIGHEST_PRECEDENCE)
+        fun testBehandlingsresultatSteg(
+            behandlingService: BehandlingService,
+            simuleringService: SimuleringService,
+            vedtakService: VedtakService,
+            vedtaksperiodeService: VedtaksperiodeService,
+            behandlingsresultatService: BehandlingsresultatService,
             persongrunnlagService: PersongrunnlagService,
-            clockProvider: ClockProvider,
-            satsendringEøsKjøringService: SatsendringEøsKjøringService,
-        ): TestBehandlingsresultatStegValideringService =
-            TestBehandlingsresultatStegValideringService(
-                beregningService,
-                behandlingHentOgPersisterService,
-                andelTilkjentYtelseRepository,
-                vilkårService,
-                kompetanseRepository,
-                utenlandskPeriodebeløpRepository,
-                valutakursRepository,
-                andelerTilkjentYtelseOgEndreteUtbetalingerService,
-                strengtFortroligService,
+            beregningService: BeregningService,
+            småbarnstilleggService: SmåbarnstilleggService,
+            tilbakestillBehandlingService: TilbakestillBehandlingService,
+            behandlingsresultatStegValideringService: BehandlingsresultatStegValideringService,
+        ): TestBehandlingsresultatSteg =
+            TestBehandlingsresultatSteg(
+                behandlingService,
+                simuleringService,
+                vedtakService,
+                vedtaksperiodeService,
+                behandlingsresultatService,
                 persongrunnlagService,
-                clockProvider,
-                satsendringEøsKjøringService,
+                beregningService,
+                småbarnstilleggService,
+                tilbakestillBehandlingService,
+                behandlingsresultatStegValideringService,
             )
 
         @Bean
@@ -403,41 +406,39 @@ class BehandleAutomatiskSøknadTaskIntegrasjonTest(
         fun testBrevKlient(testVerktøyService: TestVerktøyService): TestBrevKlient = TestBrevKlient(testVerktøyService)
     }
 
-    class TestBehandlingsresultatStegValideringService(
-        beregningService: BeregningService,
-        behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-        andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-        vilkårService: VilkårService,
-        kompetanseRepository: KompetanseRepository,
-        utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
-        valutakursRepository: ValutakursRepository,
-        andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-        strengtFortroligService: StrengtFortroligService,
+    class TestBehandlingsresultatSteg(
+        behandlingService: BehandlingService,
+        simuleringService: SimuleringService,
+        vedtakService: VedtakService,
+        vedtaksperiodeService: VedtaksperiodeService,
+        behandlingsresultatService: BehandlingsresultatService,
         persongrunnlagService: PersongrunnlagService,
-        clockProvider: ClockProvider,
-        satsendringEøsKjøringService: SatsendringEøsKjøringService,
-    ) : BehandlingsresultatStegValideringService(
-            beregningService,
-            behandlingHentOgPersisterService,
-            andelTilkjentYtelseRepository,
-            vilkårService,
-            kompetanseRepository,
-            utenlandskPeriodebeløpRepository,
-            valutakursRepository,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            strengtFortroligService,
+        beregningService: BeregningService,
+        småbarnstilleggService: SmåbarnstilleggService,
+        tilbakestillBehandlingService: TilbakestillBehandlingService,
+        behandlingsresultatStegValideringService: BehandlingsresultatStegValideringService,
+    ) : BehandlingsresultatSteg(
+            behandlingService,
+            simuleringService,
+            vedtakService,
+            vedtaksperiodeService,
+            behandlingsresultatService,
             persongrunnlagService,
-            clockProvider,
-            satsendringEøsKjøringService,
+            beregningService,
+            småbarnstilleggService,
+            tilbakestillBehandlingService,
+            behandlingsresultatStegValideringService,
         ) {
         var prevalidertBehandlingId: Long? = null
         var førPrevalidering: (Behandling) -> Unit = {}
 
-        override fun validerBehandlingFørBehandlingsresultat(behandling: Behandling) {
-            // Automatiske søknader hopper ellers over denne valideringen.
+        override fun preValiderSteg(
+            behandling: Behandling,
+            stegService: StegService?,
+        ) {
             prevalidertBehandlingId = behandling.id
             førPrevalidering(behandling)
-            super.validerBehandlingFørBehandlingsresultat(behandling)
+            super.preValiderSteg(behandling, stegService)
         }
     }
 
