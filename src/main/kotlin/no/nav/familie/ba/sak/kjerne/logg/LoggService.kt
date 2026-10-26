@@ -723,10 +723,9 @@ class LoggService(
                 .filter { forrigeSøknadstidspunktPerAktør[it.aktør] != nyttSøknadstidspunktPerAktør[it.aktør] }
                 .sortedWith(compareBy({ it.type != PersonType.SØKER }, { it.fødselsdato }))
                 .map { person ->
-                    val personTekst = if (person.type == PersonType.SØKER) "Søker" else "Barn født ${person.fødselsdato.tilddMMyyyy()}"
-                    val forrigeSøknadstidspunkt = forrigeSøknadstidspunktPerAktør[person.aktør]?.tilddMMyyyy() ?: "Ikke registrert"
-                    val nyttSøknadstidspunkt = nyttSøknadstidspunktPerAktør[person.aktør]?.tilddMMyyyy() ?: "Ikke registrert"
-                    "$personTekst: $forrigeSøknadstidspunkt → $nyttSøknadstidspunkt"
+                    val personTekst = if (person.type == PersonType.SØKER) "Søker" else "Barn ${person.fødselsdato.tilKortString()}"
+                    val nyttSøknadstidspunkt = nyttSøknadstidspunktPerAktør[person.aktør]?.tilKortString() ?: "fjernet"
+                    "$personTekst: $nyttSøknadstidspunkt"
                 }
 
         if (endringer.isEmpty()) return null
@@ -736,7 +735,7 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.SØKNADSTIDSPUNKT_ENDRET,
                 rolle = hentRolletilgangFraSikkerhetscontext(SAKSBEHANDLER),
-                tekst = endringer.joinToString("\n"),
+                tekst = endringer.joinToString(", "),
             ),
         )
     }

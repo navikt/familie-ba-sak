@@ -195,14 +195,7 @@ internal class LoggServiceEnhetTest {
         assertThat(opprettetLogg!!.type).isEqualTo(LoggType.SØKNADSTIDSPUNKT_ENDRET)
         assertThat(opprettetLogg.behandlingId).isEqualTo(behandling.id)
         assertThat(opprettetLogg.tittel).isEqualTo("Søknadstidspunkt endret")
-        assertThat(opprettetLogg.tekst).isEqualTo(
-            """
-            Søker: 01.02.2025 → 01.03.2025
-            Barn født 04.03.2018: 01.02.2025 → 01.03.2025
-            Barn født 10.09.2020: 01.02.2025 → Ikke registrert
-            Barn født 06.05.2021: Ikke registrert → 01.03.2025
-            """.trimIndent(),
-        )
+        assertThat(opprettetLogg.tekst).isEqualTo("Søker: 01.03.25, Barn 04.03.18: 01.03.25, Barn 10.09.20: fjernet, Barn 06.05.21: 01.03.25")
         verify(exactly = 1) { loggRepository.save(any()) }
     }
 
