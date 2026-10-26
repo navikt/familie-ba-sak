@@ -38,8 +38,8 @@ Egenskap: Innvilget finnmarkstillegg institusjon
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                   | Ugyldige begrunnelser                |
-      | 01.08.2025 | 31.07.2033 | UTBETALING         | INNVILGET_FINNMARKSTILLEGG_INSTITUSJON | INNVILGET_FINNMARKSTILLEGG_UTEN_DATO |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                                                         | Ugyldige begrunnelser |
+      | 01.08.2025 | 31.07.2033 | UTBETALING         | INNVILGET_FINNMARKSTILLEGG_INSTITUSJON, INNVILGET_FINNMARKSTILLEGG_UTEN_DATO |                       |
 
     Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser                   |
