@@ -86,12 +86,12 @@ class SendMeldingTilBisysTask(
         // Bisys skal ikke varsles om endringer i Finnmarks- og Svalbardtillegg, siden disse ikke påvirker bidrag eller forskudd
         val andelTilkjentYtelseTidslinjerPerAktørOgType =
             tilkjentYtelse.andelerTilkjentYtelse
-                .filterNot { it.erRegionstillegg() }
+                .filterNot { it.erFinnmarkEllerSvalbardtillegg() }
                 .tilTidslinjerPerAktørOgType()
 
         val forrigeAndelTilkjentYtelseTidslinjerPerAktørOgType =
             forrigeTilkjentYtelse.andelerTilkjentYtelse
-                .filterNot { it.erRegionstillegg() }
+                .filterNot { it.erFinnmarkEllerSvalbardtillegg() }
                 .tilTidslinjerPerAktørOgType()
 
         val opphørEllerReduksjonPerAktør =
