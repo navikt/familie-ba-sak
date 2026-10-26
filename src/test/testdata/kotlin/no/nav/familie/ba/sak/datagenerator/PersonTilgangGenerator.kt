@@ -8,6 +8,7 @@ const val BEGRUNNELSE_STRENGT_FORTROLIG_FRA_TILGANGSMASKINEN = "Du har ikke tilg
 const val BEGRUNNELSE_STRENGT_FORTROLIG_UTLAND_FRA_TILGANGSMASKINEN = "Du har ikke tilgang til brukere med strengt fortrolig adresse i utlandet (§ 19)"
 const val BEGRUNNELSE_FORTROLIG_FRA_TILGANGSMASKINEN = "Du har ikke tilgang til brukere med fortrolig adresse (kode 7)"
 const val BEGRUNNELSE_SKJERMING_FRA_TILGANGSMASKINEN = "Du har ikke tilgang til Nav-ansatte og deres nærmeste familie"
+const val BEGRUNNELSE_HABILITET_FRA_TILGANGSMASKINEN = "Du har ikke tilgang til data om deg selv eller dine nærstående"
 
 fun lagPersonTilgangAvvistGrunnetStrengtFortrolig(personIdent: String) =
     PersonTilgang.avvist(
@@ -35,4 +36,11 @@ fun lagPersonTilgangAvvistGrunnetSkjerming(personIdent: String) =
         personIdent = personIdent,
         avvisningskode = Avvisningskode.AVVIST_SKJERMING,
         begrunnelse = BEGRUNNELSE_SKJERMING_FRA_TILGANGSMASKINEN,
+    )
+
+fun lagPersonTilgangAvvistGrunnetHabilitet(personIdent: String) =
+    PersonTilgang.avvist(
+        personIdent = personIdent,
+        avvisningskode = Avvisningskode.AVVIST_HABILITET,
+        begrunnelse = BEGRUNNELSE_HABILITET_FRA_TILGANGSMASKINEN,
     )
