@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
@@ -17,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatDelete
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
@@ -40,7 +40,7 @@ class VilkårService(
     private val personidentService: PersonidentService,
     private val persongrunnlagService: PersongrunnlagService,
     private val endringIPreutfyltVilkårLoggRepository: EndringIPreutfyltVilkårLoggRepository,
-    private val featureToggleService: FeatureToggleService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? =
         vilkårsvurderingService.hentAktivForBehandling(
@@ -74,18 +74,19 @@ class VilkårService(
             personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
                 ?: throw Feil("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
+        val erEndringSomPåvirkerResultat = erEndringIVilkårSomPåvirkerResultat(eksisterendeVilkårResultat, vilkårResultatDto)
+
         if (eksisterendeVilkårResultat.erOpprinneligPreutfyltIBehandling == behandlingId) {
             val erEndringIBegrunnelse = eksisterendeVilkårResultat.begrunnelse != vilkårResultatDto.begrunnelse
-            val erEndringIAnnetFeltEnnBegrunnelse = erEndringIVilkår(eksisterendeVilkårResultat, vilkårResultatDto)
 
-            if (!erEndringIBegrunnelse && !erEndringIAnnetFeltEnnBegrunnelse) {
+            if (!erEndringIBegrunnelse && !erEndringSomPåvirkerResultat) {
                 return vilkårsvurdering.personResultater.map { it.tilPersonResultatDto() }
             }
 
             val begrunnelseErTomEllerAutomatiskUtfylt =
                 vilkårResultatDto.begrunnelse.run { isBlank() || startsWith(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT) }
 
-            if (erEndringIAnnetFeltEnnBegrunnelse && begrunnelseErTomEllerAutomatiskUtfylt) {
+            if (erEndringSomPåvirkerResultat && begrunnelseErTomEllerAutomatiskUtfylt) {
                 throw FunksjonellFeil(
                     melding = "Begrunnelse må være fylt inn ved oppdatering av preutfylt vilkår",
                     frontendFeilmelding = "Du har endret vilkåret, og må derfor fjerne den automatiske begrunnelsen og fylle inn en ny begrunnelse.",
@@ -127,10 +128,14 @@ class VilkårService(
             migreringsdatoPåFagsak,
         )
 
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
+        val personResultatList = vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
+        if (erEndringSomPåvirkerResultat) {
+            tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
+        }
+        return personResultatList
     }
 
-    private fun erEndringIVilkår(
+    private fun erEndringIVilkårSomPåvirkerResultat(
         vilkårResultat: VilkårResultat,
         vilkårResultatDto: VilkårResultatDto,
     ): Boolean =

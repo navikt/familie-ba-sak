@@ -253,6 +253,7 @@ class FagsakDeltagerService(
                         rolle = FagsakDeltagerRolle.UKJENT,
                         adressebeskyttelseGradering = it.adressebeskyttelseGradering,
                         harTilgang = false,
+                        avvisningskode = it.avvisningskode,
                     )
                 }
             },

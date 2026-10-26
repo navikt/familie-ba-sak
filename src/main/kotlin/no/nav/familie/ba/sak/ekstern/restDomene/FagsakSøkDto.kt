@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.tilgangsmaskin.Avvisningskode
 
 data class SøkParamDto(
     val personIdent: String,
@@ -37,6 +38,7 @@ data class FagsakDeltagerDto(
     val fagsakStatus: FagsakStatus? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
     val harTilgang: Boolean = true,
+    val avvisningskode: Avvisningskode? = null,
     val erEgenAnsatt: Boolean? = null,
 ) {
     override fun toString(): String = "FagsakDeltagerDto(rolle=$rolle, kjønn=$kjønn, fagsakId=$fagsakId)"
