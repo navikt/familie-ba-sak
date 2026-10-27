@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.internal.vedtak
+package no.nav.familie.ba.sak.internal.tabulærtest
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilIUtenlandskP
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.UtfyltValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilIValutakurs
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -29,130 +28,29 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import org.apache.commons.lang3.RandomStringUtils
 import java.time.LocalDate
 
-fun lagTestForVedtaksperioderOgBegrunnelser(
-    behandling: Behandling,
-    forrigeBehandling: Behandling?,
-    persongrunnlag: PersonopplysningGrunnlag,
-    persongrunnlagForrigeBehandling: PersonopplysningGrunnlag?,
-    personResultater: Set<PersonResultat>,
-    personResultaterForrigeBehandling: Set<PersonResultat>?,
-    andeler: List<AndelTilkjentYtelse>,
-    andelerForrigeBehandling: List<AndelTilkjentYtelse>?,
-    endredeUtbetalinger: List<EndretUtbetalingAndel>,
-    endredeUtbetalingerForrigeBehandling: List<EndretUtbetalingAndel>?,
-    kompetanse: Collection<Kompetanse>,
-    kompetanseForrigeBehandling: Collection<Kompetanse>?,
-    utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
-    utenlandskePeriodebeløpForrigeBehandling: Collection<UtenlandskPeriodebeløp>?,
-    valutakurser: Collection<Valutakurs>,
-    valutakurserForrigeBehandling: Collection<Valutakurs>?,
-    personerFremstiltKravFor: List<Aktør>,
-    testSpesifikkeTekster: String,
-): String {
-    val test =
-        lagGenereltTestoppsettForVedtaksperioderOgBegrunnelser(
-            behandling = behandling,
-            forrigeBehandling = forrigeBehandling,
-            persongrunnlag = persongrunnlag,
-            persongrunnlagForrigeBehandling = persongrunnlagForrigeBehandling,
-            personResultater = personResultater,
-            personResultaterForrigeBehandling = personResultaterForrigeBehandling,
-            andeler = andeler,
-            andelerForrigeBehandling = andelerForrigeBehandling,
-            endredeUtbetalinger = endredeUtbetalinger,
-            endredeUtbetalingerForrigeBehandling = endredeUtbetalingerForrigeBehandling,
-            kompetanse = kompetanse,
-            kompetanseForrigeBehandling = kompetanseForrigeBehandling,
-            utenlandskePeriodebeløp = utenlandskePeriodebeløp,
-            utenlandskePeriodebeløpForrigeBehandling = utenlandskePeriodebeløpForrigeBehandling,
-            valutakurser = valutakurser,
-            valutakurserForrigeBehandling = valutakurserForrigeBehandling,
-            personerFremstiltKravFor = personerFremstiltKravFor,
-        ) + testSpesifikkeTekster
-    return test.anonymiser(persongrunnlag, persongrunnlagForrigeBehandling, forrigeBehandling, behandling)
-}
-
-private fun lagGenereltTestoppsettForVedtaksperioderOgBegrunnelser(
-    behandling: Behandling,
-    forrigeBehandling: Behandling?,
-    persongrunnlag: PersonopplysningGrunnlag,
-    persongrunnlagForrigeBehandling: PersonopplysningGrunnlag?,
-    personResultater: Set<PersonResultat>,
-    personResultaterForrigeBehandling: Set<PersonResultat>?,
-    andeler: List<AndelTilkjentYtelse>,
-    andelerForrigeBehandling: List<AndelTilkjentYtelse>?,
-    endredeUtbetalinger: List<EndretUtbetalingAndel>,
-    endredeUtbetalingerForrigeBehandling: List<EndretUtbetalingAndel>?,
-    kompetanse: Collection<Kompetanse>,
-    kompetanseForrigeBehandling: Collection<Kompetanse>?,
-    utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
-    utenlandskePeriodebeløpForrigeBehandling: Collection<UtenlandskPeriodebeløp>?,
-    valutakurser: Collection<Valutakurs>,
-    valutakurserForrigeBehandling: Collection<Valutakurs>?,
-    personerFremstiltKravFor: List<Aktør>,
-): String {
-    val test =
-        """
+internal fun hentTekstForBakgrunn() =
+    """
 # language: no
 # encoding: UTF-8
 
 Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.secure().nextAlphanumeric(10)}
 
-  Bakgrunn:""" +
-            hentTekstForFagsak(behandling) +
-            hentTekstForBehandlinger(behandling, forrigeBehandling) +
-            hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
-            """
-      
-  Scenario: Plassholdertekst for scenario - ${RandomStringUtils.secure().nextAlphanumeric(10)}
-    Og dagens dato er ${LocalDate.now().tilddMMyyyy()}""" +
-            hentTekstForPersonerFremstiltKravFor(behandling.id, personerFremstiltKravFor) +
-            lagPersonresultaterTekst(forrigeBehandling) +
-            lagPersonresultaterTekst(behandling) +
-            hentTekstForVilkårresultater(
-                personResultaterForrigeBehandling?.sorterPåFødselsdato(persongrunnlagForrigeBehandling!!),
-                forrigeBehandling?.id,
-            ) +
-            hentTekstForVilkårresultater(personResultater.sorterPåFødselsdato(persongrunnlag), behandling.id) +
-            hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) +
-            hentTekstForUtenlandskPeriodebeløp(utenlandskePeriodebeløp, utenlandskePeriodebeløpForrigeBehandling) +
-            hentTekstForValutakurser(valutakurser, valutakurserForrigeBehandling) +
-            hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
-            hentTekstForTilkjentYtelse(andeler, persongrunnlag, andelerForrigeBehandling, persongrunnlagForrigeBehandling) + """
-    
-    Når vedtaksperiodene genereres for behandling ${behandling.id}
-"""
-    return test
-}
+  Bakgrunn:"""
 
-private fun String.anonymiser(
-    persongrunnlag: PersonopplysningGrunnlag,
-    persongrunnlagForrigeBehandling: PersonopplysningGrunnlag?,
-    forrigeBehandling: Behandling?,
-    behandling: Behandling,
-): String {
-    val personerSomTestes: Set<Person> =
-        persongrunnlag.personer.toSet() + (persongrunnlagForrigeBehandling?.personer?.toSet() ?: emptySet())
-    val aktørIder = personerSomTestes.sortedBy { it.fødselsdato }.map { it.aktør.aktørId }
+internal fun hentTekstForScenario() =
+    """
 
-    val behandlinger = listOfNotNull(forrigeBehandling?.id, behandling.id)
+  Scenario: Plassholdertekst for scenario - ${RandomStringUtils.secure().nextAlphanumeric(10)}"""
 
-    val testMedAnonymeAktørIder =
-        aktørIder.foldIndexed(this) { index, acc, aktørId ->
-            acc.replace(aktørId, (index + 1).toString())
-        }
-    return behandlinger.foldIndexed(testMedAnonymeAktørIder) { index, acc, behandlingId ->
-        acc.replace(behandlingId.toString(), (index + 1).toString())
-    }
-}
+internal fun hentTekstForDagensDato(dato: LocalDate) = "\n    Og dagens dato er ${dato.tilddMMyyyy()}"
 
-private fun hentTekstForFagsak(behandling: Behandling) =
+internal fun hentTekstForFagsak(behandling: Behandling) =
     """
     Gitt følgende fagsaker
     | FagsakId | Fagsaktype | Status |
     | 1 | ${behandling.fagsak.type} | ${behandling.fagsak.status} |"""
 
-private fun hentTekstForBehandlinger(
+internal fun hentTekstForBehandlinger(
     behandling: Behandling,
     forrigeBehandling: Behandling?,
 ) = """
@@ -166,7 +64,7 @@ private fun hentTekstForBehandlinger(
 }
     | ${behandling.id} | 1 | ${forrigeBehandling?.id ?: ""} |${behandling.resultat} | ${behandling.opprettetÅrsak} | ${if (behandling.skalBehandlesAutomatisk) "Ja" else "Nei"} | ${behandling.kategori} | ${behandling.status} |"""
 
-private fun hentTekstForPersongrunnlag(
+internal fun hentTekstForPersongrunnlag(
     persongrunnlag: PersonopplysningGrunnlag,
     persongrunnlagForrigeBehandling: PersonopplysningGrunnlag?,
 ) = """
@@ -176,14 +74,16 @@ private fun hentTekstForPersongrunnlag(
     hentPersongrunnlagRader(persongrunnlagForrigeBehandling) +
     hentPersongrunnlagRader(persongrunnlag)
 
-private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): String =
+private fun hentPersongrunnlagRader(
+    persongrunnlag: PersonopplysningGrunnlag?,
+): String =
     persongrunnlag?.personer?.sortedBy { it.fødselsdato }?.joinToString("") {
         """
     | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|${it.dødsfall?.dødsfallDato?.tilddMMyyyy() ?: ""}|"""
     } ?: ""
 
-private fun hentTekstForPersonerFremstiltKravFor(
-    behandlingId: Long?,
+internal fun hentTekstForPersonerFremstiltKravFor(
+    behandlingId: Long,
     personerFremstiltKravFor: List<Aktør>,
 ) = """
     Og med personer fremstilt krav for
@@ -193,26 +93,23 @@ private fun hentTekstForPersonerFremstiltKravFor(
     | $behandlingId | ${it.aktørId} |"""
     }
 
-private fun lagPersonresultaterTekst(behandling: Behandling?) =
-    behandling?.let {
-        """
+internal fun lagPersonresultaterTekst(
+    behandling: Behandling?,
+) = behandling?.let {
+    """
     Og lag personresultater for behandling ${it.id}"""
-    } ?: ""
+} ?: ""
 
-private fun hentTekstForVilkårresultater(
-    personResultater: List<PersonResultat>?,
-    behandlingId: Long?,
-): String {
-    if (personResultater == null || behandlingId == null) {
-        return ""
-    }
-
-    return """
+internal fun hentTekstForVilkårresultater(
+    personResultater: Set<PersonResultat>,
+    behandlingId: Long,
+    persongrunnlag: PersonopplysningGrunnlag,
+): String =
+    """
 
     Og legg til nye vilkårresultater for behandling $behandlingId
     | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter |""" +
-        tilVilkårResultatRader(personResultater)
-}
+        tilVilkårResultatRader(personResultater.sorterPåFødselsdato(persongrunnlag))
 
 private data class VilkårResultatRad(
     val aktørId: String,
@@ -225,39 +122,40 @@ private data class VilkårResultatRad(
     val vurderesEtter: Regelverk?,
 )
 
-private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
-    personResultater?.joinToString("\n") { personResultat ->
-        personResultat.vilkårResultater
-            .sortedBy { it.periodeFom }
-            .groupBy {
-                VilkårResultatRad(
-                    personResultat.aktør.aktørId,
-                    it.utdypendeVilkårsvurderinger.toSet(),
-                    it.periodeFom,
-                    it.periodeTom,
-                    it.resultat,
-                    it.erEksplisittAvslagPåSøknad,
-                    it.standardbegrunnelser,
-                    it.vurderesEtter,
-                )
-            }.toList()
-            .joinToString("") { (vilkårResultatRad, vilkårResultater) ->
-                "\n | ${vilkårResultatRad.aktørId} " +
-                    "| ${vilkårResultater.map { it.vilkårType }.joinToString(",")} " +
-                    "| ${vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")} " +
-                    "| ${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""} " +
-                    "| ${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""} " +
-                    "| ${vilkårResultatRad.resultat} " +
-                    "| ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} " +
-                    "| ${vilkårResultatRad.standardbegrunnelser.joinToString(",")}" +
-                    "| ${vilkårResultatRad.vurderesEtter ?: ""} " +
-                    "| "
-            }
-    } ?: ""
+private fun tilVilkårResultatRader(
+    personResultater: List<PersonResultat>?,
+) = personResultater?.joinToString("\n") { personResultat ->
+    personResultat.vilkårResultater
+        .sortedBy { it.periodeFom }
+        .groupBy {
+            VilkårResultatRad(
+                personResultat.aktør.aktørId,
+                it.utdypendeVilkårsvurderinger.toSet(),
+                it.periodeFom,
+                it.periodeTom,
+                it.resultat,
+                it.erEksplisittAvslagPåSøknad,
+                it.standardbegrunnelser,
+                it.vurderesEtter,
+            )
+        }.toList()
+        .joinToString("") { (vilkårResultatRad, vilkårResultater) ->
+            "\n | ${vilkårResultatRad.aktørId} " +
+                "| ${vilkårResultater.map { it.vilkårType }.joinToString(",")} " +
+                "| ${vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")} " +
+                "| ${vilkårResultatRad.fom?.tilddMMyyyy() ?: ""} " +
+                "| ${vilkårResultatRad.tom?.tilddMMyyyy() ?: ""} " +
+                "| ${vilkårResultatRad.resultat} " +
+                "| ${if (vilkårResultatRad.erEksplisittAvslagPåSøknad == true) "Ja" else "Nei"} " +
+                "| ${vilkårResultatRad.standardbegrunnelser.joinToString(",")}" +
+                "| ${vilkårResultatRad.vurderesEtter ?: ""} " +
+                "| "
+        }
+} ?: ""
 
 private fun Set<PersonResultat>.sorterPåFødselsdato(persongrunnlag: PersonopplysningGrunnlag) = this.sortedBy { personresultat -> persongrunnlag.personer.single { personresultat.aktør == it.aktør }.fødselsdato }
 
-private fun hentTekstForKompetanse(
+internal fun hentTekstForKompetanse(
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
 ): String {
@@ -276,7 +174,9 @@ private fun hentTekstForKompetanse(
     }
 }
 
-private fun hentKompetanseRader(kompetanser: Collection<Kompetanse>?): String =
+private fun hentKompetanseRader(
+    kompetanser: Collection<Kompetanse>?,
+): String =
     kompetanser
         ?.map { it.tilIKompetanse() }
         ?.filterIsInstance<UtfyltKompetanse>()
@@ -305,7 +205,7 @@ private fun hentKompetanseRader(kompetanser: Collection<Kompetanse>?): String =
             } |"""
         } ?: ""
 
-private fun hentTekstForUtenlandskPeriodebeløp(
+internal fun hentTekstForUtenlandskPeriodebeløp(
     utenlandskPeriodebeløp: Collection<UtenlandskPeriodebeløp>,
     utenlandskPeriodebeløpForrigeBehandling: Collection<UtenlandskPeriodebeløp>?,
 ): String {
@@ -324,7 +224,9 @@ private fun hentTekstForUtenlandskPeriodebeløp(
     }
 }
 
-private fun hentUtenlandskPeriodebeløpRader(utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>?): String =
+private fun hentUtenlandskPeriodebeløpRader(
+    utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>?,
+): String =
     utenlandskePeriodebeløp
         ?.map { it.tilIUtenlandskPeriodebeløp() }
         ?.filterIsInstance<UtfyltUtenlandskPeriodebeløp>()
@@ -349,7 +251,7 @@ private fun hentUtenlandskPeriodebeløpRader(utenlandskePeriodebeløp: Collectio
             }|"""
         } ?: ""
 
-private fun hentTekstForValutakurser(
+internal fun hentTekstForValutakurser(
     valutakurser: Collection<Valutakurs>,
     valutakurserForrigeBehandling: Collection<Valutakurs>?,
 ): String {
@@ -368,7 +270,9 @@ private fun hentTekstForValutakurser(
     }
 }
 
-private fun hentValutakursRader(valutakurser: Collection<Valutakurs>?): String =
+private fun hentValutakursRader(
+    valutakurser: Collection<Valutakurs>?,
+): String =
     valutakurser
         ?.map { it.tilIValutakurs() }
         ?.filterIsInstance<UtfyltValutakurs>()
@@ -393,7 +297,7 @@ private fun hentValutakursRader(valutakurser: Collection<Valutakurs>?): String =
             }|"""
         } ?: ""
 
-private fun hentTekstForEndretUtbetaling(
+internal fun hentTekstForEndretUtbetaling(
     endredeUtbetalinger: List<EndretUtbetalingAndel>,
     endredeUtbetalingerForrigeBehandling: List<EndretUtbetalingAndel>?,
 ): String {
@@ -411,7 +315,9 @@ private fun hentTekstForEndretUtbetaling(
     }
 }
 
-private fun hentEndretUtbetalingRader(endredeUtbetalinger: List<EndretUtbetalingAndel>?): String =
+private fun hentEndretUtbetalingRader(
+    endredeUtbetalinger: List<EndretUtbetalingAndel>?,
+): String =
     endredeUtbetalinger
         .orEmpty()
         .mapNotNull { it.tilEndretUtbetalingRad() }
@@ -430,7 +336,7 @@ private fun EndretUtbetalingAndel.tilEndretUtbetalingRad(): String? {
     | $aktørIder |${utfylt.behandlingId}|$fom|$tom|${utfylt.årsak} | ${utfylt.prosent} | $søknadstidspunkt | $avtaletidspunkt |"""
 }
 
-private fun hentTekstForTilkjentYtelse(
+internal fun hentTekstForTilkjentYtelse(
     andeler: List<AndelTilkjentYtelse>,
     persongrunnlag: PersonopplysningGrunnlag,
     andelerForrigeBehandling: List<AndelTilkjentYtelse>?,
