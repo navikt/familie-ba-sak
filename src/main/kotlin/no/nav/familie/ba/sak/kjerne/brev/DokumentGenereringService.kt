@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.internal.TestVerktøyService
+import no.nav.familie.ba.sak.internal.tabulærtest.GenererTabulærTestService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
@@ -31,7 +31,7 @@ class DokumentGenereringService(
     private val kodeverkService: KodeverkService,
     private val saksbehandlerContext: SaksbehandlerContext,
     private val sammensattKontrollsakService: SammensattKontrollsakService,
-    @Lazy private val testVerktøyService: TestVerktøyService,
+    @Lazy private val genererTabulærTestService: GenererTabulærTestService,
     private val personopplysningerService: PersonopplysningerService,
     private val organisasjonService: OrganisasjonService,
 ) {
@@ -57,8 +57,7 @@ class DokumentGenereringService(
 
             throw funksjonellFeil
         } catch (feil: Throwable) {
-            secureLogger.info("Feil ved dokumentgenerering. Genererer hentBegrunnelsetest \n ${testVerktøyService.hentBegrunnelsetest(vedtak.behandling.id)}")
-            secureLogger.info("Feil ved dokumentgenerering. Genererer hentVedtaksperioderTest \n ${testVerktøyService.hentVedtaksperioderTest(vedtak.behandling.id)}")
+            secureLogger.info("Feil ved dokumentgenerering. Autogenerert testgrunnlag:\n ${genererTabulærTestService.genererTestMedAlleGrunnlagsdata(vedtak.behandling.id)}")
 
             throw Feil(
                 message = "Klarte ikke generere vedtaksbrev på fagsak/behandling ${vedtak.behandling.fagsak.id}/${vedtak.behandling.id}: ${feil.message}",

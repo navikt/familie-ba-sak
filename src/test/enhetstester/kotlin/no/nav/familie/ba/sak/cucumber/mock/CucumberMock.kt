@@ -243,14 +243,6 @@ class CucumberMock(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vilkårService = vilkårService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            endretUtbetalingRepository = endretUtbetalingAndelRepository,
-            vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-            vedtakRepository = vedtakRepository,
-            kompetanseRepository = kompetanseRepository,
-            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
-            valutakursRepository = valutakursRepository,
-            søknadGrunnlagService = søknadGrunnlagService,
         )
 
     val strengtFortroligService =

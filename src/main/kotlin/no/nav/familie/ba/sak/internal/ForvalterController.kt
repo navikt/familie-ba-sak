@@ -21,6 +21,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.internal.tabulærtest.GenererTabulærTestDto
+import no.nav.familie.ba.sak.internal.tabulærtest.GenererTabulærTestService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -87,7 +89,7 @@ class ForvalterController(
     private val integrasjonKlient: IntegrasjonKlient,
     private val forvalterService: ForvalterService,
     private val ecbService: ECBService,
-    private val testVerktøyService: TestVerktøyService,
+    private val genererTabulærTestService: GenererTabulærTestService,
     private val tilgangService: TilgangService,
     private val økonomiService: ØkonomiService,
     private val opprettTaskService: OpprettTaskService,
@@ -208,33 +210,22 @@ class ForvalterController(
         return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
     }
 
-    @GetMapping(path = ["/behandling/{behandlingId}/begrunnelsetest"])
-    fun hentBegrunnelsetestPåBehandling(
-        @PathVariable behandlingId: Long,
+    @Operation(
+        summary = "Generer testgrunnlag",
+        description = "Fagsaker, behandlinger og persongrunnlag er alltid med. Øvrige databolker og forrige vedtatte behandling kan velges. EØS-data er ikke med som standard. Handling og forventninger må legges til manuelt.",
+    )
+    @PostMapping(path = ["/generer-test"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.TEXT_PLAIN_VALUE])
+    fun genererTest(
+        @RequestBody genererTabulærTestDto: GenererTabulærTestDto,
     ): String {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilBehandling(behandlingId = genererTabulærTestDto.behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Hente begrunnelsetest",
+            handling = "Generere test",
         )
 
-        return testVerktøyService
-            .hentBegrunnelsetest(behandlingId)
-            .replace("\n", System.lineSeparator())
-    }
-
-    @GetMapping(path = ["/behandling/{behandlingId}/vedtaksperiodertest"])
-    fun hentVedtaksperioderTestPåBehandling(
-        @PathVariable behandlingId: Long,
-    ): String {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Hente vedtaksperiodertest",
-        )
-
-        return testVerktøyService
-            .hentVedtaksperioderTest(behandlingId)
+        return genererTabulærTestService
+            .genererTest(genererTabulærTestDto)
             .replace("\n", System.lineSeparator())
     }
 
