@@ -58,7 +58,6 @@ class VilkårController(
             vilkårId = vilkaarId,
             personResultatDto = personResultatDto,
         )
-        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
     }
 

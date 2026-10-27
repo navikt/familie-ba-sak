@@ -664,6 +664,15 @@ class LoggService(
             ),
         )
 
+    fun loggSøknadstidspunktEndret(behandlingId: Long) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.SØKNADSTIDSPUNKT_ENDRET,
+                rolle = hentRolletilgangFraSikkerhetscontext(SAKSBEHANDLER),
+            ),
+        )
+
     fun loggRefusjonEøsPeriodeFjernet(refusjonEøs: RefusjonEøs) =
         lagre(
             Logg(

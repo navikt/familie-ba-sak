@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoServ
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -16,6 +17,7 @@ class RegistrertSøknadstidspunktPåPersonService(
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
+    private val loggService: LoggService,
 ) {
     fun hentForBehandling(behandlingId: Long): List<RegistrertSøknadstidspunktPåPerson> = registrertSøknadstidspunktRepository.findByBehandlingId(behandlingId)
 
@@ -69,6 +71,8 @@ class RegistrertSøknadstidspunktPåPersonService(
                 )
             },
         )
+
+        loggService.loggSøknadstidspunktEndret(behandling.id)
     }
 }
 

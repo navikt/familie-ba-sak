@@ -18,18 +18,18 @@
     <properties>
 
         <java.version>25</java.version>
-        <kotlin.version>2.4.10</kotlin.version>
+        <kotlin.version>2.4.21</kotlin.version>
         <kotlin.compiler.languageVersion>2.3</kotlin.compiler.languageVersion>
         <kotlin.compiler.apiVersion>2.3</kotlin.compiler.apiVersion>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20260817115650_f13f507</prosessering.version>
-        <felles.version>4.20261007140752_857f456</felles.version>
-        <eksterne-kontrakter-bisys.version>2.0_20260918153401_c082792</eksterne-kontrakter-bisys.version>
-        <familie.kontrakter.saksstatistikk>2.0_20260918153401_c082792</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20260918153401_c082792</familie.kontrakter.stønadsstatistikk>
-        <felles-kontrakter.version>4.0_20261012093940_a9af98d</felles-kontrakter.version>
+        <felles.version>4.20261014144209_63578dc</felles.version>
+        <eksterne-kontrakter-bisys.version>2.0_20261023114954_0543fb5</eksterne-kontrakter-bisys.version>
+        <familie.kontrakter.saksstatistikk>2.0_20261023114954_0543fb5</familie.kontrakter.saksstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20261023114954_0543fb5</familie.kontrakter.stønadsstatistikk>
+        <felles-kontrakter.version>4.0_20261023114950_9ae0359</felles-kontrakter.version>
         <utbetalingsgenerator.version>1.0_20260923084625_49defa2</utbetalingsgenerator.version>
         <cucumber.version>7.34.8</cucumber.version>
         <mockk.version>1.14.11</mockk.version>
@@ -43,10 +43,10 @@
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <unleash.version>12.3.0</unleash.version>
         <testcontainers.postgresql.version>1.21.4</testcontainers.postgresql.version>
-        <maven.model.version>3.9.16</maven.model.version>
+        <maven.model.version>3.10.0</maven.model.version>
         <avro.version>1.12.2</avro.version>
         <avro.serializable.packages>no.nav.person.pdl.aktor.v2</avro.serializable.packages>
-        <confluent.version>8.3.1</confluent.version>
+        <confluent.version>8.3.2</confluent.version>
         <sonar.organization>navikt</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.sources>src/main</sonar.sources>
@@ -186,7 +186,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.13</version>
+            <version>42.7.14</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
