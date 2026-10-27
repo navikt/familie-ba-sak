@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.fake.FakeBrevKlient
 import no.nav.familie.ba.sak.fake.FakeIntegrasjonKlient
 import no.nav.familie.ba.sak.fake.FakeOppdragBackendKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService
-import no.nav.familie.ba.sak.internal.TestVerktøyService
+import no.nav.familie.ba.sak.internal.tabulærtest.GenererTabulærTestService
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FILTRERINGSREGLER_SØKNAD
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.erOppfylt
@@ -79,7 +79,6 @@ import org.springframework.context.annotation.Profile
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ActiveProfilesResolver
 import org.springframework.transaction.UnexpectedRollbackException
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -87,8 +86,30 @@ import java.util.UUID
 
 @Import(BehandleAutomatiskSøknadTaskIntegrasjonTest.TestConfig::class)
 @ActiveProfiles(
-    resolver = BehandleAutomatiskSøknadTaskIntegrasjonTest.ProfilResolver::class,
     inheritProfiles = false,
+    value = [
+        "postgres",
+        "integrasjonstest",
+        "testcontainers",
+        "mock-pdl",
+        "mock-pdl-klient",
+        "mock-ident-klient",
+        "mock-ef-klient",
+        "mock-infotrygd-barnetrygd",
+        "fake-tilbakekreving-klient",
+        "mock-infotrygd-feed",
+        "mock-localdate-service",
+        "mock-sanity-klient",
+        "mock-unleash",
+        "mock-system-only-integrasjon-klient",
+        "fake-integrasjon-klient",
+        "fake-ecb-valutakurs-rest-klient",
+        "fake-økonomi-klient",
+        "fake-env-service",
+        "automatisk-soknad-transaksjonstest",
+        // "mock-brev-klient" er utelatt for å kunne trigge feil ved brevutsendelse.
+        // "fake-task-repository" er utelatt for å teste tasker og transaksjons-oppsett for familie-prosessering.
+    ],
 )
 class BehandleAutomatiskSøknadTaskIntegrasjonTest(
     @Autowired private val taskWorker: TaskWorker,
@@ -361,23 +382,11 @@ class BehandleAutomatiskSøknadTaskIntegrasjonTest(
         }
     }
 
-    class ProfilResolver : ActiveProfilesResolver {
-        override fun resolve(testClass: Class<*>): Array<String> =
-            AbstractSpringIntegrationTest::class.java
-                .getAnnotation(ActiveProfiles::class.java)
-                .value
-                // Unngår å bruke fake-implementasjoner av taskRepository og BrevKlient da vi ønsker å lagre tasker i databasen og ønsker å kunne trigge feil fra BrevKlient.
-                .filterNot { it in setOf("fake-task-repository", "mock-brev-klient") }
-                .plus("automatisk-soknad-transaksjonstest")
-                .toTypedArray()
-    }
-
     @TestConfiguration
     @Profile("automatisk-soknad-transaksjonstest")
     class TestConfig {
         @Bean
         @Primary
-        // StegService selects the first matching step from an injected list; @Primary alone is not enough.
         @Order(Ordered.HIGHEST_PRECEDENCE)
         fun testBehandlingsresultatSteg(
             behandlingService: BehandlingService,
@@ -406,7 +415,7 @@ class BehandleAutomatiskSøknadTaskIntegrasjonTest(
 
         @Bean
         @Primary
-        fun testBrevKlient(testVerktøyService: TestVerktøyService): TestBrevKlient = TestBrevKlient(testVerktøyService)
+        fun testBrevKlient(genererTabulærTestService: GenererTabulærTestService): TestBrevKlient = TestBrevKlient(genererTabulærTestService)
     }
 
     class TestBehandlingsresultatSteg(
@@ -446,8 +455,8 @@ class BehandleAutomatiskSøknadTaskIntegrasjonTest(
     }
 
     class TestBrevKlient(
-        testVerktøyService: TestVerktøyService,
-    ) : FakeBrevKlient(testVerktøyService) {
+        genererTabulærTestService: GenererTabulærTestService,
+    ) : FakeBrevKlient(genererTabulærTestService) {
         var førGenerering: () -> Unit = {}
 
         override fun genererBrev(
