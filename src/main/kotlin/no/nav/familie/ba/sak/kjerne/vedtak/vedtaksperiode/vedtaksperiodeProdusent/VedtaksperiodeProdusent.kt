@@ -227,7 +227,7 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling>>.slåSammenU
         .kombiner { grunnlagTidslinje ->
             grunnlagTidslinje.toList().takeIf { it.isNotEmpty() }
         }.tilPerioderIkkeNull()
-        .map { periode -> periode.copy(verdi = periode.verdi.map { it.fjernAvslagsbegrunnelserDerBarnIkkeHarEksplisittAvslag(personerFremstiltKravFor) }) }
+        .map { periode -> periode.copy(verdi = periode.verdi.map { it.fjernAvslagsbegrunnelserSomHørerTilAvslagsperioden(personerFremstiltKravFor) }) }
 }
 
 private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling>>.utledEksplisitteAvslagsperioder(personerFremstiltKravFor: List<Aktør>): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>> {
@@ -292,7 +292,7 @@ private fun GrunnlagForGjeldendeOgForrigeBehandling.medVilkårSomHarEksplisitteA
             ),
     )
 
-private fun GrunnlagForGjeldendeOgForrigeBehandling.fjernAvslagsbegrunnelserDerBarnIkkeHarEksplisittAvslag(personerFremstiltKravFor: List<Aktør>): GrunnlagForGjeldendeOgForrigeBehandling =
+private fun GrunnlagForGjeldendeOgForrigeBehandling.fjernAvslagsbegrunnelserSomHørerTilAvslagsperioden(personerFremstiltKravFor: List<Aktør>): GrunnlagForGjeldendeOgForrigeBehandling =
     if (gjeldende?.erEksplisittAvslag(personerFremstiltKravFor) == true) {
         copy(
             gjeldende =
