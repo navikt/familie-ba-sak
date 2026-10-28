@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.NyttVilkårDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonResultatDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SlettVilkårDto
@@ -12,22 +13,33 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetTidslinjeForOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatDelete
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.EndringIPreutfyltVilkårLogg.Companion.opprettLoggForEndringIPreutfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.EndringIPreutfyltVilkårLoggRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.mapIkkeNull
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -41,6 +53,7 @@ class VilkårService(
     private val persongrunnlagService: PersongrunnlagService,
     private val endringIPreutfyltVilkårLoggRepository: EndringIPreutfyltVilkårLoggRepository,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
+    private val kompetanseService: KompetanseService,
 ) {
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? =
         vilkårsvurderingService.hentAktivForBehandling(
@@ -110,6 +123,17 @@ class VilkårService(
             endringIPreutfyltVilkårLoggRepository.save(logg)
         }
 
+        // Bare endring i bosatt i riket nullstiller kompetanse. Tidslinjen bygges kun når det finnes kompetanse,
+        // siden den feiler på perioder med fom etter tom, som ikke valideres her.
+        val utdypendeVilkårsvurderingerFørEndringTidslinje =
+            if (eksisterendeVilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET &&
+                kompetanseService.hentKompetanser(BehandlingId(behandlingId)).isNotEmpty()
+            ) {
+                personResultat.tilUtdypendeVilkårsvurderingerForBosattIRiketTidslinje()
+            } else {
+                null
+            }
+
         muterPersonVilkårResultaterPut(personResultat, vilkårResultatDto)
 
         val vilkårResultat =
@@ -130,10 +154,45 @@ class VilkårService(
 
         val personResultatList = vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilPersonResultatDto() }
         if (erEndringSomPåvirkerResultat) {
+            // Endring i kompetanse tilbakestiller behandlingen til behandlingsresultat,
+            // så kompetansen må nullstilles før steget resettes til vilkårsvurdering.
+            if (utdypendeVilkårsvurderingerFørEndringTidslinje != null) {
+                nullstillKompetanseVedEndringIUtdypendeVilkårsvurdering(BehandlingId(behandlingId), personResultat, utdypendeVilkårsvurderingerFørEndringTidslinje)
+            }
             tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
         }
         return personResultatList
     }
+
+    private fun nullstillKompetanseVedEndringIUtdypendeVilkårsvurdering(
+        behandlingId: BehandlingId,
+        personResultat: PersonResultat,
+        utdypendeVilkårsvurderingerFørEndringTidslinje: Tidslinje<Set<UtdypendeVilkårsvurdering>>,
+    ) {
+        // Tar også med måneder uten oppfylt bosatt i riket før endringen, siden kompetansen kan være forlenget forbi vilkårets tom
+        val perioderMedEndretUtdypendeVilkårsvurdering =
+            utdypendeVilkårsvurderingerFørEndringTidslinje
+                .kombinerMed(personResultat.tilUtdypendeVilkårsvurderingerForBosattIRiketTidslinje()) { før, etter -> etter != null && før != etter }
+                .tilPerioderIkkeNull()
+                .filter { it.verdi }
+
+        val barnAktører =
+            if (personResultat.erSøkersResultater()) {
+                kompetanseService.hentKompetanser(behandlingId).flatMap { it.barnAktører }.toSet()
+            } else {
+                setOf(personResultat.aktør)
+            }
+
+        perioderMedEndretUtdypendeVilkårsvurdering.forEach { periode ->
+            val blankKompetanse = Kompetanse.NULL.copy(fom = periode.fom?.toYearMonth(), tom = periode.tom?.toYearMonth(), barnAktører = barnAktører)
+            kompetanseService.oppdaterKompetanse(behandlingId, blankKompetanse)
+        }
+    }
+
+    private fun PersonResultat.tilUtdypendeVilkårsvurderingerForBosattIRiketTidslinje(): Tidslinje<Set<UtdypendeVilkårsvurdering>> =
+        vilkårResultater
+            .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOSATT_I_RIKET)
+            .mapIkkeNull { it.utdypendeVilkårsvurderinger.toSet() - UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG }
 
     private fun erEndringIVilkårSomPåvirkerResultat(
         vilkårResultat: VilkårResultat,
@@ -297,6 +356,7 @@ class VilkårService(
     companion object {
         const val FANT_IKKE_AKTIV_VILKÅRSVURDERING_FEILMELDING = "Fant ikke aktiv vilkårsvurdering"
         const val FANT_IKKE_VILKÅRSVURDERING_FOR_PERSON_FEILMELDING = "Fant ikke vilkårsvurdering for person"
+        private val UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG = setOf(BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD)
     }
 }
 
