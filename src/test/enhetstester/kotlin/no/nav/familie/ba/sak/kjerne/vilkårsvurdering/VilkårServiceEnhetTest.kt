@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
@@ -179,11 +178,11 @@ class VilkårServiceEnhetTest {
         private val behandling = lagBehandling()
         private val søker = behandling.fagsak.aktør
         private val barn = randomAktør()
-        private val annetBarn = randomAktør() // Har kompetanse, men ingen vilkårsvurdering
+        private val barnUtenVilkårsvurdering = randomAktør()
         private val nullstilteKompetanser = mutableListOf<Kompetanse>()
 
         @Test
-        fun `skal nullstille kompetanse for barnet fra ny periode med annen utdypende vilkårsvurdering enn forrige periode`() {
+        fun `skal nullstille kompetanse for barnet før behandlingen tilbakestilles når ny periode har annen utdypende vilkårsvurdering enn forrige periode`() {
             // Arrange
             val vilkårsvurdering =
                 opprettVilkårsvurderingMedKompetanse(
@@ -204,11 +203,9 @@ class VilkårServiceEnhetTest {
             }
 
             // Assert
-            // Ny periode henger sammen med forrige, så endringen gjelder fra august
             assertThat(nullstilteKompetanser).containsExactly(
                 Kompetanse.NULL.copy(fom = YearMonth.of(2024, 8), tom = null, barnAktører = setOf(barn)),
             )
-            // Nullstilling må skje før steget tilbakestilles
             verifyOrder {
                 kompetanseService.oppdaterKompetanse(any(), any())
                 tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id)
@@ -232,9 +229,9 @@ class VilkårServiceEnhetTest {
             }
 
             // Assert
-            // Oppfylt fra januar gir rett fra februar
+            val førsteMånedMedRett = YearMonth.of(2024, 2)
             assertThat(nullstilteKompetanser).containsExactly(
-                Kompetanse.NULL.copy(fom = YearMonth.of(2024, 2), tom = YearMonth.of(2024, 12), barnAktører = setOf(barn, annetBarn)),
+                Kompetanse.NULL.copy(fom = førsteMånedMedRett, tom = YearMonth.of(2024, 12), barnAktører = setOf(barn, barnUtenVilkårsvurdering)),
             )
         }
 
@@ -254,21 +251,19 @@ class VilkårServiceEnhetTest {
             endreVilkår(vilkårsvurdering, barn, vilkårId = 12) { it.copy(periodeFom = LocalDate.of(2024, 3, 1)) }
 
             // Assert
-            // Henger sammen med forrige periode, så endringen gjelder fra mars
             assertThat(nullstilteKompetanser).containsExactly(
                 Kompetanse.NULL.copy(fom = YearMonth.of(2024, 3), tom = YearMonth.of(2024, 6), barnAktører = setOf(barn)),
             )
         }
 
         @Test
-        fun `skal nullstille kompetanse etter forrige periodes tom når ny periode har annen utdypende vilkårsvurdering`() {
+        fun `skal nullstille kompetanse fra ny periode som starter etter forrige periodes tom`() {
             // Arrange
-            // Kompetansen forlenges til uendelig når vilkåret varer forbi inneværende måned, så den kan finnes etter vilkårets tom
             val vilkårsvurdering =
                 opprettVilkårsvurderingMedKompetanse(
                     barnetsBosattIRiket =
                         listOf(
-                            oppfyltBosattIRiket(id = 11, fom = LocalDate.of(2024, 1, 1), tom = LocalDate.of(2026, 12, 31), utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BARN_BOR_I_EØS),
+                            oppfyltBosattIRiket(id = 11, fom = LocalDate.of(2024, 1, 1), tom = LocalDate.of(2024, 6, 30), utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BARN_BOR_I_EØS),
                             ikkeVurdertBosattIRiket(id = 12),
                         ),
                 )
@@ -276,7 +271,7 @@ class VilkårServiceEnhetTest {
             // Act
             endreVilkår(vilkårsvurdering, barn, vilkårId = 12) {
                 it.copy(
-                    periodeFom = LocalDate.of(2027, 1, 1),
+                    periodeFom = LocalDate.of(2024, 7, 1),
                     resultat = Resultat.OPPFYLT,
                     utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE),
                 )
@@ -284,7 +279,7 @@ class VilkårServiceEnhetTest {
 
             // Assert
             assertThat(nullstilteKompetanser).containsExactly(
-                Kompetanse.NULL.copy(fom = YearMonth.of(2027, 1), tom = null, barnAktører = setOf(barn)),
+                Kompetanse.NULL.copy(fom = YearMonth.of(2024, 7), tom = null, barnAktører = setOf(barn)),
             )
         }
 
@@ -307,30 +302,8 @@ class VilkårServiceEnhetTest {
             verify(exactly = 1) { tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id) }
         }
 
-        @ParameterizedTest
-        @EnumSource(value = UtdypendeVilkårsvurdering::class, names = ["BOSATT_I_FINNMARK_NORD_TROMS", "BOSATT_PÅ_SVALBARD"])
-        fun `skal ikke nullstille kompetanse når kun Finnmark- eller Svalbard-markering endres`(markering: UtdypendeVilkårsvurdering) {
-            // Arrange
-            val vilkårsvurdering =
-                opprettVilkårsvurderingMedKompetanse(
-                    barnetsBosattIRiket =
-                        listOf(
-                            oppfyltBosattIRiket(id = 11, fom = LocalDate.of(2024, 1, 1), tom = null, utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BARN_BOR_I_EØS),
-                        ),
-                )
-
-            // Act
-            endreVilkår(vilkårsvurdering, barn, vilkårId = 11) {
-                it.copy(utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_EØS, markering))
-            }
-
-            // Assert
-            assertThat(nullstilteKompetanser).isEmpty()
-            verify(exactly = 1) { tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id) }
-        }
-
         @Test
-        fun `skal ikke nullstille kompetanse for ny periode med samme utdypende vilkårsvurdering som forrige periode`() {
+        fun `skal ikke nullstille kompetanse når en periode deles uten å endre utdypende vilkårsvurdering`() {
             // Arrange
             val vilkårsvurdering =
                 opprettVilkårsvurderingMedKompetanse(
@@ -371,8 +344,8 @@ class VilkårServiceEnhetTest {
                             vilkårsvurdering = vilkårsvurdering,
                             aktør = barn,
                             lagVilkårResultater = { personResultat ->
-                                // UNDER_18_ÅR gjør at personresultatet regnes som barnets og ikke søkerens
-                                (barnetsBosattIRiket + lagVilkårResultat(vilkårType = Vilkår.UNDER_18_ÅR))
+                                val barnetsUnder18ÅrVilkår = lagVilkårResultat(vilkårType = Vilkår.UNDER_18_ÅR)
+                                (barnetsBosattIRiket + barnetsUnder18ÅrVilkår)
                                     .onEach { it.personResultat = personResultat }
                                     .toSet()
                             },
@@ -387,7 +360,7 @@ class VilkårServiceEnhetTest {
             every { behandlingService.hentMigreringsdatoPåFagsak(behandling.fagsak.id) } returns null
             every { tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id) } returns behandling
             every { kompetanseService.hentKompetanser(BehandlingId(behandling.id)) } returns
-                listOf(lagKompetanse(behandlingId = behandling.id, barnAktører = setOf(barn, annetBarn)))
+                listOf(lagKompetanse(behandlingId = behandling.id, barnAktører = setOf(barn, barnUtenVilkårsvurdering)))
             every { kompetanseService.oppdaterKompetanse(BehandlingId(behandling.id), capture(nullstilteKompetanser)) } just Runs
 
             return vilkårsvurdering
