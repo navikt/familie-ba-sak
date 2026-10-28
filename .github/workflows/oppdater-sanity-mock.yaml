@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '0 6 * * MON-FRI'
   workflow_dispatch:
+  # Workflowen trigges hovedsaklig av Sanity webhook.
+  # Webhooken er avhengig av PAT som har 90 dager levetid med permission 'Actions: Read and Write'
 
 concurrency:
   group: ${{ github.workflow }}
