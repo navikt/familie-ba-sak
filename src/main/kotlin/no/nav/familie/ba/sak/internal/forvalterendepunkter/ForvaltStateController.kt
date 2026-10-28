@@ -1,8 +1,9 @@
-package no.nav.familie.ba.sak.internal
+package no.nav.familie.ba.sak.internal.forvalterendepunkter
 
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.internal.ForvalterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus

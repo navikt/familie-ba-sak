@@ -1,6 +1,7 @@
-package no.nav.familie.ba.sak.internal
+package no.nav.familie.ba.sak.internal.forvalterendepunkter
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.parameters.RequestBody
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
@@ -8,6 +9,9 @@ import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
+import no.nav.familie.ba.sak.internal.ForvalterPersonInfoDto
+import no.nav.familie.ba.sak.internal.HentPersonFraPdlRequest
+import no.nav.familie.ba.sak.internal.tilForvalterPersonInfoDto
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -19,7 +23,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -33,14 +36,14 @@ class ForvaltIdentController(
 ) {
     @PatchMapping("/patch-fagsak-med-ny-ident")
     fun patchMergetIdent(
-        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        @RequestBody(
             description =
                 "skalSjekkeAtGammelIdentErHistoriskAvNyIdent - Sjekker at " +
                     "gammel ident er historisk av ny. Hvis man ønsker å patche med en ident hvor den gamle ikke er historisk av ny, så settes " +
                     "denne til false. OBS: Du må da være sikker på at identen man ønsker å patche til er samme person. Dette kan skje hvis " +
                     "identen ikke er merget av folketrygden.",
         )
-        @RequestBody
+        @org.springframework.web.bind.annotation.RequestBody
         @Valid
         patchMergetIdentDto: PatchMergetIdentDto,
     ): ResponseEntity<String> {
@@ -55,13 +58,13 @@ class ForvaltIdentController(
 
     @PatchMapping("/patch-fagsak-med-ny-aktoer")
     fun patchAktørIdent(
-        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        @RequestBody(
             description =
                 "skalSjekkeAtGammelIdentErHistoriskAvNyIdent - Sjekker at " +
                     "gammel aktørId er historisk av ny. Hvis man ønsker å patche med en aktørId hvor den gamle ikke er historisk av ny, så settes " +
                     "denne til false. OBS: Du må da være sikker på at identen man ønsker å patche til er samme person.",
         )
-        @RequestBody
+        @org.springframework.web.bind.annotation.RequestBody
         @Valid
         patchMergetAktørDto: PatchMergetAktørDto,
     ): ResponseEntity<String> {
@@ -82,7 +85,7 @@ class ForvaltIdentController(
                 "vilkårresultatet sin periodeFom < personens fødselsdato. Dette skjer typisk ved endring av fødselsdato/fnr i folkeregisteret.",
     )
     fun flyttVilkårFomDatoTilFødselsdato(
-        @RequestBody behandlinger: Set<Long>,
+        @org.springframework.web.bind.annotation.RequestBody behandlinger: Set<Long>,
     ): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
@@ -97,7 +100,7 @@ class ForvaltIdentController(
 
     @PostMapping("/hent-alle-identer")
     fun hentAlleIdenter(
-        @RequestBody ident: String,
+        @org.springframework.web.bind.annotation.RequestBody ident: String,
     ): ResponseEntity<List<IdentInformasjon>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
@@ -116,7 +119,7 @@ class ForvaltIdentController(
                 "og til securelogger med hvilke flagg som ble satt.",
     )
     fun hentPersonFraPdl(
-        @RequestBody hentPersonFraPdlRequest: HentPersonFraPdlRequest,
+        @org.springframework.web.bind.annotation.RequestBody hentPersonFraPdlRequest: HentPersonFraPdlRequest,
     ): ResponseEntity<Ressurs<ForvalterPersonInfoDto>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,

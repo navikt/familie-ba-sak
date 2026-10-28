@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.internal
+package no.nav.familie.ba.sak.internal.forvalterendepunkter
 
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
