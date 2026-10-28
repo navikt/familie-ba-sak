@@ -1,0 +1,49 @@
+name: Oppdater Sanity-mock
+
+on:
+  schedule:
+    - cron: '0 6 * * MON-FRI'
+  workflow_dispatch:
+  # Workflowen trigges hovedsaklig av Sanity webhook.
+  # Webhooken er avhengig av PAT som har 90 dager levetid med permission 'Actions: Read and Write'
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  oppdater-mock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Hent begrunnelser fra Sanity
+        run: bash src/test/resources/oppdater-sanity-mock.sh
+
+      - name: Hent token for Sanitybot
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # ratchet:actions/create-github-app-token@v3.3.0
+        with:
+          app-id: ${{ vars.SANITYBOT_CLIENT_ID }}
+          private-key: ${{ secrets.SANITYBOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Opprett eller oppdater PR
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # ratchet:peter-evans/create-pull-request@v8.1.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          sign-commits: true
+          branch: sanity-bot
+          delete-branch: true
+          add-paths: |
+            src/test/resources/cucumber/gyldigeBegrunnelser/restSanityBegrunnelser.json
+            src/test/resources/cucumber/gyldigeBegrunnelser/restSanityEØSBegrunnelser.json
+          commit-message: Oppdater Sanity-mock for begrunnelser
+          title: Oppdater Sanity-mock for begrunnelser
+          body: Siste endringer fra Sanity etter at begrunnelser ble publisert
