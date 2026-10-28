@@ -237,6 +237,34 @@ class VilkårServiceEnhetTest {
         }
 
         @Test
+        fun `skal kun nullstille kompetanse i månedene til en ny periode som legges inn midt i en eksisterende periode`() {
+            // Arrange
+            val vilkårsvurdering =
+                opprettVilkårsvurderingMedKompetanse(
+                    søkersBosattIRiket =
+                        listOf(
+                            oppfyltBosattIRiket(id = 1, fom = LocalDate.of(2025, 1, 1), tom = null, utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.OMFATTET_AV_NORSK_LOVGIVNING),
+                            ikkeVurdertBosattIRiket(id = 2),
+                        ),
+                )
+
+            // Act
+            endreVilkår(vilkårsvurdering, søker, vilkårId = 2) {
+                it.copy(
+                    periodeFom = LocalDate.of(2025, 6, 30),
+                    periodeTom = LocalDate.of(2025, 8, 31),
+                    resultat = Resultat.OPPFYLT,
+                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.SØKER_OMFATTET_AV_UTENLANDSK_LOVGIVNING_BOSATT_I_NORGE),
+                )
+            }
+
+            // Assert
+            assertThat(nullstilteKompetanser).containsExactly(
+                Kompetanse.NULL.copy(fom = YearMonth.of(2025, 7), tom = YearMonth.of(2025, 8), barnAktører = setOf(barn, barnUtenVilkårsvurdering)),
+            )
+        }
+
+        @Test
         fun `skal kun nullstille kompetanse i månedene som får ny utdypende vilkårsvurdering når fom flyttes tidligere`() {
             // Arrange
             val vilkårsvurdering =
