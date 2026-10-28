@@ -1,22 +1,32 @@
-﻿# Fiks feil med globbing (feil tolkning av * i url)
-unsetopt glob
+#!/usr/bin/env bash
+# Gjør at bash stopper ved feil i stedet for å fortsette stille
+set -euo pipefail
 
-# Sjekk om vi er i riktig mappe. Gå til root om vi er i src/test/resources.
-if [[ $PWD == *src/test/resources* ]]
-then
-  cd ../../..
-fi
+cd "$(dirname "$0")/../../.."
 
-# URL for å hente begrunnelser og eøs-begrunnelser fra sanity
-# Hentes ved å gjøre queryene fra no/nav/familie/ba/sak/integrasjoner/sanity/SanityQueries.kt i Vision
-# URL til Vision: https://familie-brev.sanity.studio/ba-brev/vision
-HENT_BEGRUNNELSER_URL="https://xsrv1mh6.api.sanity.io/v2022-03-07/data/query/ba-brev?query=*%5B_type+%3D%3D+%22begrunnelse%22+%26%26+regelverk+%21%3D+%22E%C3%98S%22+%26%26+apiNavn+%21%3D+null+%26%26+navnISystem+%21%3D+null%5D"
-HENT_EØS_BEGRUNNELSER_URL="https://xsrv1mh6.api.sanity.io/v2022-03-07/data/query/ba-brev?query=*%5B_type+%3D%3D+%22begrunnelse%22+%26%26+regelverk+%3D%3D+%22E%C3%98S%22+%26%26+apiNavn+%21%3D+null+%26%26+navnISystem+%21%3D+null%5D"
+SANITY_API_VERSJON="v2021-06-07"
+SANITY_QUERY_URL="https://xsrv1mh6.api.sanity.io/${SANITY_API_VERSJON}/data/query/ba-brev"
+
+HENT_BEGRUNNELSER_QUERY='*[_type == "begrunnelse" && regelverk != "EØS" && apiNavn != null && navnISystem != null]'
+HENT_EOS_BEGRUNNELSER_QUERY='*[_type == "begrunnelse" && regelverk == "EØS" && apiNavn != null && navnISystem != null]'
 SANITY_BEGRUNNELSER_MOCK_PATH="src/test/resources/cucumber/gyldigeBegrunnelser/restSanityBegrunnelser.json"
-SANITY_EØS_BEGRUNNELSER_MOCK_PATH="src/test/resources/cucumber/gyldigeBegrunnelser/restSanityEØSBegrunnelser.json"
+SANITY_EOS_BEGRUNNELSER_MOCK_PATH="src/test/resources/cucumber/gyldigeBegrunnelser/restSanityEØSBegrunnelser.json"
 
-# Hent ikke-eøs-begrunnelser fra sanity og lagre i fil
-curl -XGET "$HENT_BEGRUNNELSER_URL" | jq -S '.result | sort_by(.apiNavn)' > "$SANITY_BEGRUNNELSER_MOCK_PATH"
+hent_og_lagre() {
+  local query="$1"
+  local fil="$2"
+  local tmp="${fil}.tmp"
 
-# Hent eøs-begrunnelser fra sanity og lagre i fil
-curl -XGET "$HENT_EØS_BEGRUNNELSER_URL" | jq -S '.result | sort_by(.apiNavn)' > "$SANITY_EØS_BEGRUNNELSER_MOCK_PATH"
+  if curl -fsS --get "$SANITY_QUERY_URL" --data-urlencode "query=${query}" \
+    | jq -S -e '.result | if type == "array" and length > 0 then sort_by(.apiNavn) else error("Tomt eller ugyldig svar fra Sanity") end' \
+      > "$tmp"; then
+    mv "$tmp" "$fil"
+  else
+    rm -f "$tmp"
+    echo "Klarte ikke å hente begrunnelser til $fil" >&2
+    exit 1
+  fi
+}
+
+hent_og_lagre "$HENT_BEGRUNNELSER_QUERY" "$SANITY_BEGRUNNELSER_MOCK_PATH"
+hent_og_lagre "$HENT_EOS_BEGRUNNELSER_QUERY" "$SANITY_EOS_BEGRUNNELSER_MOCK_PATH"
