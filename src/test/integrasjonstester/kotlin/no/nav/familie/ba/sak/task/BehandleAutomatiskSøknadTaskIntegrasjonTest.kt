@@ -376,7 +376,7 @@ class BehandleAutomatiskSøknadTaskIntegrasjonTest(
             it.id != task.id &&
                 (
                     it.metadata.getProperty("fagsakId") == fagsakId ||
-                        it.metadata.getProperty("behandlingId")?.toLong() in behandlingIder ||
+                        it.metadata.getProperty("behandlingId")?.toLongOrNull() in behandlingIder ||
                         (it.type == OpprettOppgaveTask.TASK_STEP_TYPE && jsonMapper.readValue(it.payload, OpprettOppgaveTaskDTO::class.java).behandlingId in behandlingIder)
                 )
         }
