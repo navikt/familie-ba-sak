@@ -29,6 +29,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.EndringIPreutfyltVi
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.EndringIPreutfyltVilkårLoggRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -187,7 +189,7 @@ class VilkårService(
     private fun PersonResultat.tilUtdypendeVilkårsvurderingerForBosattIRiketTidslinje(): Tidslinje<Set<UtdypendeVilkårsvurdering>> =
         vilkårResultater
             .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOSATT_I_RIKET)
-            .mapIkkeNull { it.utdypendeVilkårsvurderinger.toSet() }
+            .mapIkkeNull { it.utdypendeVilkårsvurderinger.toSet() - UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG }
 
     private fun erEndringIVilkårSomPåvirkerResultat(
         vilkårResultat: VilkårResultat,
@@ -351,6 +353,7 @@ class VilkårService(
     companion object {
         const val FANT_IKKE_AKTIV_VILKÅRSVURDERING_FEILMELDING = "Fant ikke aktiv vilkårsvurdering"
         const val FANT_IKKE_VILKÅRSVURDERING_FOR_PERSON_FEILMELDING = "Fant ikke vilkårsvurdering for person"
+        private val UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG = setOf(BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD)
     }
 }
 

@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
@@ -296,6 +297,28 @@ class VilkårServiceEnhetTest {
 
             // Act
             endreVilkår(vilkårsvurdering, barn, vilkårId = 11) { it.copy(periodeTom = LocalDate.of(2024, 6, 30)) }
+
+            // Assert
+            assertThat(nullstilteKompetanser).isEmpty()
+            verify(exactly = 1) { tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id) }
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = UtdypendeVilkårsvurdering::class, names = ["BOSATT_I_FINNMARK_NORD_TROMS", "BOSATT_PÅ_SVALBARD"])
+        fun `skal ikke nullstille kompetanse når kun Finnmark- eller Svalbard-markering endres`(markering: UtdypendeVilkårsvurdering) {
+            // Arrange
+            val vilkårsvurdering =
+                opprettVilkårsvurderingMedKompetanse(
+                    barnetsBosattIRiket =
+                        listOf(
+                            oppfyltBosattIRiket(id = 11, fom = LocalDate.of(2024, 1, 1), tom = null, utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BARN_BOR_I_EØS),
+                        ),
+                )
+
+            // Act
+            endreVilkår(vilkårsvurdering, barn, vilkårId = 11) {
+                it.copy(utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_EØS, markering))
+            }
 
             // Assert
             assertThat(nullstilteKompetanser).isEmpty()
