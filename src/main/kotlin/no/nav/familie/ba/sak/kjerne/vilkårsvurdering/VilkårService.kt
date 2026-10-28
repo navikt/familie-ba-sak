@@ -123,11 +123,11 @@ class VilkårService(
             endringIPreutfyltVilkårLoggRepository.save(logg)
         }
 
-        val erBosattIRiketVilkårIBehandlingMedKompetanse =
+        val skalVurdereNullstillingAvKompetanse =
             eksisterendeVilkårResultat.vilkårType == Vilkår.BOSATT_I_RIKET &&
                 kompetanseService.hentKompetanser(BehandlingId(behandlingId)).isNotEmpty()
         val utdypendeVilkårsvurderingerFørEndringTidslinje =
-            if (erBosattIRiketVilkårIBehandlingMedKompetanse) {
+            if (skalVurdereNullstillingAvKompetanse) {
                 personResultat.tilUtdypendeVilkårsvurderingerForBosattIRiketTidslinje()
             } else {
                 null
@@ -169,8 +169,11 @@ class VilkårService(
     ) {
         val perioderMedNyEllerEndretUtdypendeVilkårsvurdering =
             utdypendeVilkårsvurderingerFørEndringTidslinje
-                .kombinerMed(personResultat.tilUtdypendeVilkårsvurderingerForBosattIRiketTidslinje()) { før, etter -> etter != null && før != etter }
-                .tilPerioderIkkeNull()
+                .kombinerMed(personResultat.tilUtdypendeVilkårsvurderingerForBosattIRiketTidslinje()) { før, etter ->
+                    val erBosattIRiketOppfyltEtterEndring = etter != null
+                    val erUtdypendeVilkårsvurderingEndret = før != etter
+                    erBosattIRiketOppfyltEtterEndring && erUtdypendeVilkårsvurderingEndret
+                }.tilPerioderIkkeNull()
                 .filter { it.verdi }
 
         val barnAktører =
@@ -189,7 +192,7 @@ class VilkårService(
     private fun PersonResultat.tilUtdypendeVilkårsvurderingerForBosattIRiketTidslinje(): Tidslinje<Set<UtdypendeVilkårsvurdering>> =
         vilkårResultater
             .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOSATT_I_RIKET)
-            .mapIkkeNull { it.utdypendeVilkårsvurderinger.toSet() - UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG }
+            .mapIkkeNull { it.utdypendeVilkårsvurderinger.toSet() - UTDYPENDE_VILKÅRSVURDERINGER_SOM_IKKE_PÅVIRKER_KOMPETANSE }
 
     private fun erEndringIVilkårSomPåvirkerResultat(
         vilkårResultat: VilkårResultat,
@@ -353,7 +356,7 @@ class VilkårService(
     companion object {
         const val FANT_IKKE_AKTIV_VILKÅRSVURDERING_FEILMELDING = "Fant ikke aktiv vilkårsvurdering"
         const val FANT_IKKE_VILKÅRSVURDERING_FOR_PERSON_FEILMELDING = "Fant ikke vilkårsvurdering for person"
-        private val UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG = setOf(BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD)
+        private val UTDYPENDE_VILKÅRSVURDERINGER_SOM_IKKE_PÅVIRKER_KOMPETANSE = setOf(BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD)
     }
 }
 
