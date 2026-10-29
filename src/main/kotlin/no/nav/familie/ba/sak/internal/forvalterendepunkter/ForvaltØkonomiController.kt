@@ -56,17 +56,6 @@ class ForvaltØkonomiController(
         return ResponseEntity.ok("OK")
     }
 
-    /*
-Stig
-
-PR: https://github.com/navikt/familie-ba-sak/pull/3792
-
-Har en del validering som gjør at dette ikke skal skje noe særlig lenger, men kan i teorien fortsatt skje fra tid til annen?
-
-satsendring
-
-Behold - kjøres ofte etter satsendring - kan slettes og så kan man heller følge med på logger
-     */
     @PostMapping("/identifiser-utbetalinger-over-100-prosent")
     @Operation(
         summary = "Identifiser utbetalinger over 100 prosent",

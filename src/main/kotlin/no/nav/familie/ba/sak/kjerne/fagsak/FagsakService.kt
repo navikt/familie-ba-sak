@@ -321,8 +321,6 @@ class FagsakService(
 
     fun hentLøpendeFagsaker(): List<Fagsak> = fagsakRepository.finnLøpendeFagsaker()
 
-    fun hentIdPåLøpendeFagsaker(): List<Long> = fagsakRepository.finnIdPåLøpendeFagsaker()
-
     fun finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
         aktør: Aktør,
         ytelseTyper: List<YtelseType>,
@@ -352,8 +350,6 @@ class FagsakService(
 
         return (alleLøpendeFagsakerPåAktør + fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd).distinct()
     }
-
-    fun finnOrgnummerForLøpendeFagsaker(): List<String> = fagsakRepository.finnOrgnummerForLøpendeFagsaker()
 
     fun låsOppFagsak(
         fagsakId: Long,
