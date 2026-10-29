@@ -54,20 +54,16 @@ class TilbakestillBehandlingTilBehandlingsresultatServiceTest {
     fun `skal ikke flytte behandlingen fram til behandlingsresultat når behandlingen står på vilkårsvurdering`() {
         // Arrange
         val behandling = lagBehandling(førsteSteg = StegType.VILKÅRSVURDERING)
-        val vedtak = lagVedtak(behandling = behandling)
 
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
-        every { vedtakRepository.findByBehandlingAndAktiv(behandling.id) } returns vedtak
-        justRun { vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak) }
-        every { tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id) } returns Unit
 
         // Act
         val resultat = tilbakestillBehandlingTilBehandlingsresultatService.tilbakestillBehandlingTilBehandlingsresultat(behandling.id)
 
         // Assert
         assertThat(resultat.steg).isEqualTo(StegType.VILKÅRSVURDERING)
-        verify(exactly = 1) { vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak) }
-        verify(exactly = 1) { tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id) }
         verify(exactly = 0) { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(any(), any()) }
+        verify(exactly = 0) { vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(any()) }
+        verify(exactly = 0) { tilbakekrevingService.slettTilbakekrevingPåBehandling(any()) }
     }
 }
