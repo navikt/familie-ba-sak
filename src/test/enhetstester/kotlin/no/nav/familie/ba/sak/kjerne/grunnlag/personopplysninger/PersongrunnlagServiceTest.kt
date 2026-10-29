@@ -27,10 +27,14 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -50,13 +54,14 @@ class PersongrunnlagServiceTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val kodeverkService = mockk<KodeverkService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val statsborgerskapService = mockk<StatsborgerskapService>()
 
     private val persongrunnlagService =
         spyk(
             PersongrunnlagService(
                 personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
                 personopplysningGrunnlagLagreService = personopplysningGrunnlagLagreService,
-                statsborgerskapService = mockk(),
+                statsborgerskapService = statsborgerskapService,
                 arbeidsfordelingService = mockk(relaxed = true),
                 personopplysningerService = personopplysningerService,
                 personidentService = personidentService,
@@ -140,6 +145,75 @@ class PersongrunnlagServiceTest {
 
     @Nested
     inner class HentOgLagreSøkerOgBarnINyttGrunnlag {
+        @Test
+        fun `skal bruke søkers fødselsdato som cutoff for opphold ved ukrainsk statsborgerskap`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 1))
+            val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 1, 1))
+            val behandling = lagBehandling()
+
+            val ukrainskStatsborgerskap =
+                Statsborgerskap(
+                    land = "UKR",
+                    gyldigFraOgMed = LocalDate.of(2000, 1, 1),
+                    gyldigTilOgMed = null,
+                    bekreftelsesdato = null,
+                )
+            val oppholdFørBarnetsFødsel = Opphold(OPPHOLDSTILLATELSE.MIDLERTIDIG, LocalDate.of(2010, 1, 1), LocalDate.of(2015, 1, 1))
+            val gjeldendeOpphold = Opphold(OPPHOLDSTILLATELSE.PERMANENT, LocalDate.of(2019, 1, 1), null)
+            val opphold = listOf(oppholdFørBarnetsFødsel, gjeldendeOpphold)
+
+            every { persongrunnlagService.hentAktiv(behandling.id) } returns null
+            every { persongrunnlagService.lagreOgSlettGammelt(any()) } answers { firstArg() }
+            every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
+            every { statsborgerskapService.hentStatsborgerskapMedMedlemskap(any(), any()) } returns emptyList()
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør, any()) } returns
+                PersonInfo(søker.fødselsdato, opphold = opphold, statsborgerskap = listOf(ukrainskStatsborgerskap))
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn.aktør, any()) } returns
+                PersonInfo(barn.fødselsdato)
+
+            // Act
+            val grunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(barn.aktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            // Assert
+            assertThat(grunnlag.søker.opphold.map { it.gyldigPeriode?.tom }).containsExactly(oppholdFørBarnetsFødsel.oppholdTil, gjeldendeOpphold.oppholdTil)
+        }
+
+        @Test
+        fun `skal bruke eldste barns fødselsdato som cutoff for søker uten statsborgerskap`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 1))
+            val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 1, 1))
+            val behandling = lagBehandling()
+            val gammeltOpphold = Opphold(OPPHOLDSTILLATELSE.MIDLERTIDIG, LocalDate.of(2010, 1, 1), LocalDate.of(2015, 1, 1))
+            val nyereOpphold = Opphold(OPPHOLDSTILLATELSE.PERMANENT, LocalDate.of(2019, 1, 1), barn.fødselsdato)
+
+            every { persongrunnlagService.hentAktiv(behandling.id) } returns null
+            every { persongrunnlagService.lagreOgSlettGammelt(any()) } answers { firstArg() }
+            every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør, any()) } returns
+                PersonInfo(søker.fødselsdato, opphold = listOf(gammeltOpphold, nyereOpphold), statsborgerskap = null)
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn.aktør, any()) } returns PersonInfo(barn.fødselsdato)
+
+            // Act
+            val grunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(barn.aktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            // Assert
+            assertThat(grunnlag.søker.opphold.map { it.gyldigPeriode?.tom }).containsExactly(nyereOpphold.oppholdTil)
+        }
+
         @Test
         fun `skal på inst- og EM-saker kun lagre èn instans av barnet, med personType BARN`() {
             val barnet = lagPerson()
