@@ -21,7 +21,6 @@ class AutovedtakSøknadMåBehandlesManueltFeil(
 }
 
 enum class AutovedtakSøknadMåBehandlesManueltÅrsak {
-    SØKER_VILKÅR_GIFT_PARTNERSKAP,
     SØKER_VILKÅR_BOSATT_I_RIKET,
     SØKER_VILKÅR_LOVLIG_OPPHOLD,
     SØKER_VILKÅR_UTVIDET_BARNETRYGD,
@@ -30,7 +29,6 @@ enum class AutovedtakSøknadMåBehandlesManueltÅrsak {
     BARN_VILKÅR_GIFT_PARTNERSKAP,
     BARN_VILKÅR_BOSATT_I_RIKET,
     BARN_VILKÅR_LOVLIG_OPPHOLD,
-    BARN_VILKÅR_UTVIDET_BARNETRYGD,
     BEHANDLINGSRESULTAT_IKKE_INNVILGET,
     ENDREDE_ANDELER_FOR_BARN_UTEN_FREMSTILT_KRAV,
     OVERLAPP_TIDLIGERE_UTBETALING,
@@ -49,11 +47,10 @@ enum class AutovedtakSøknadMåBehandlesManueltÅrsak {
         ): AutovedtakSøknadMåBehandlesManueltÅrsak =
             if (erSøker) {
                 when (vilkår) {
-                    GIFT_PARTNERSKAP -> SØKER_VILKÅR_GIFT_PARTNERSKAP
                     BOSATT_I_RIKET -> SØKER_VILKÅR_BOSATT_I_RIKET
                     LOVLIG_OPPHOLD -> SØKER_VILKÅR_LOVLIG_OPPHOLD
                     UTVIDET_BARNETRYGD -> SØKER_VILKÅR_UTVIDET_BARNETRYGD
-                    UNDER_18_ÅR, BOR_MED_SØKER -> throw Feil("Ugyldig vilkårstype $vilkår for søker ved automatisk behandling av søknad")
+                    UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP -> throw Feil("Ugyldig vilkårstype $vilkår for søker ved automatisk behandling av søknad")
                 }
             } else {
                 when (vilkår) {
@@ -62,7 +59,7 @@ enum class AutovedtakSøknadMåBehandlesManueltÅrsak {
                     GIFT_PARTNERSKAP -> BARN_VILKÅR_GIFT_PARTNERSKAP
                     BOSATT_I_RIKET -> BARN_VILKÅR_BOSATT_I_RIKET
                     LOVLIG_OPPHOLD -> BARN_VILKÅR_LOVLIG_OPPHOLD
-                    UTVIDET_BARNETRYGD -> BARN_VILKÅR_UTVIDET_BARNETRYGD
+                    UTVIDET_BARNETRYGD -> throw Feil("Ugyldig vilkårstype $vilkår for barn ved automatisk behandling av søknad")
                 }
             }
     }
