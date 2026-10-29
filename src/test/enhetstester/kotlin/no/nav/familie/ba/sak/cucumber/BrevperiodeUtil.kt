@@ -3,14 +3,16 @@ package no.nav.familie.ba.sak.cucumber
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
+import no.nav.familie.ba.sak.cucumber.domeneparser.Tabellrad
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
+import no.nav.familie.ba.sak.cucumber.domeneparser.tilTabellrader
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
 
 fun parseBrevPerioder(dataTable: DataTable): List<BrevPeriode> =
-    dataTable.asMaps().map { rad: Tabellrad ->
+    dataTable.tilTabellrader().map { rad: Tabellrad ->
 
         val beløp = parseValgfriString(BrevPeriodeParser.DomenebegrepBrevPeriode.BELØP, rad)?.replace(' ', ' ') ?: ""
         val antallBarn = parseValgfriInt(BrevPeriodeParser.DomenebegrepBrevPeriode.ANTALL_BARN, rad) ?: -1

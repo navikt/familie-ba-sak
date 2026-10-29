@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
+import no.nav.familie.ba.sak.cucumber.domeneparser.tilTabellrader
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockAutovedtakFinnmarkstilleggService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockAutovedtakSatsendringRollbackService
@@ -210,7 +211,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     fun `med personer fremstilt krav for`(dataTable: DataTable) {
         personerFremstiltKravFor =
             dataTable
-                .asMaps()
+                .tilTabellrader()
                 .map { rad ->
                     val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
                     val person = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { parseAktørId(rad) == it.aktør.aktørId } ?: throw Feil("Person fremstilt krav for finnes ikke i persongrunnlag")
@@ -235,7 +236,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         dataTable: DataTable,
     ) {
         val vilkårResultaterPerPerson =
-            dataTable.asMaps().groupBy { parseAktørId(it) }
+            dataTable.tilTabellrader().groupBy { parseAktørId(it) }
         val personResultatForBehandling =
             vilkårsvurderinger[behandlingId]?.personResultater
                 ?: throw Feil("Finner ikke personresultater for behandling med id $behandlingId")
@@ -280,7 +281,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
      */
     @Og("med kompetanser")
     fun `med kompetanser`(dataTable: DataTable) {
-        val nyeKompetanserPerBarn = dataTable.asMaps()
+        val nyeKompetanserPerBarn = dataTable.tilTabellrader()
         kompetanser = lagKompetanser(nyeKompetanserPerBarn, persongrunnlag)
     }
 
@@ -291,7 +292,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
 
     @Og("med valutakurser")
     fun `med valutakurser`(dataTable: DataTable) {
-        val nyeValutakursPerBarn = dataTable.asMaps()
+        val nyeValutakursPerBarn = dataTable.tilTabellrader()
         valutakurs = lagValutakurs(nyeValutakursPerBarn, persongrunnlag)
     }
 
@@ -301,7 +302,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
      */
     @Og("med utenlandsk periodebeløp")
     fun `med utenlandsk periodebeløp`(dataTable: DataTable) {
-        val nyeUtenlandskPeriodebeløpPerBarn = dataTable.asMaps()
+        val nyeUtenlandskPeriodebeløpPerBarn = dataTable.tilTabellrader()
         utenlandskPeriodebeløp = lagUtenlandskperiodeBeløp(nyeUtenlandskPeriodebeløpPerBarn, persongrunnlag)
     }
 
@@ -310,7 +311,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
      */
     @Og("med endrede utbetalinger")
     fun `med endrede utbetalinger`(dataTable: DataTable) {
-        val nyeEndredeUtbetalingAndeler = dataTable.asMaps()
+        val nyeEndredeUtbetalingAndeler = dataTable.tilTabellrader()
         endredeUtbetalinger = lagEndredeUtbetalinger(nyeEndredeUtbetalingAndeler, persongrunnlag)
     }
 
@@ -581,7 +582,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         behandlingId: Long,
         dataTable: DataTable,
     ) {
-        val forventedeAktører = dataTable.asMaps().map { Aktør(aktørId = parseAktørId(it)) }.sortedBy { it.aktørId }
+        val forventedeAktører = dataTable.tilTabellrader().map { Aktør(aktørId = parseAktørId(it)) }.sortedBy { it.aktørId }
         val faktiskeAktører =
             persongrunnlag
                 .finnPersonGrunnlagForBehandling(behandlingId)
@@ -604,7 +605,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val fagsak = fagsaker[fagsakId]!!
         val internePerioderOvergangsstønad =
             dataTable
-                .asMaps()
+                .tilTabellrader()
                 .map { rad ->
                     InternPeriodeOvergangsstønad(
                         fomDato = parseDato(Domenebegrep.FRA_DATO, rad),
@@ -688,7 +689,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     ) {
         val forventedeVilkårResultaterPerAktør =
             dataTable
-                .asMaps()
+                .tilTabellrader()
                 .groupBy { parseAktørId(it) }
                 .mapValues { (aktørId, vilkårResultatRaderForAktør) ->
                     parseVilkårResultaterForAktør(
@@ -751,7 +752,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     ) {
         val aktørTilDødsfall: Map<String, LocalDate> =
             dataTable
-                .asMaps()
+                .tilTabellrader()
                 .map { rad ->
                     val aktørId = parseAktørId(rad)
                     val dødsfallDato =
@@ -823,7 +824,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         behandlingId: Long,
         dataTable: DataTable,
     ) {
-        val forventedeValutakurser = lagValutakurs(dataTable.asMaps(), persongrunnlag)
+        val forventedeValutakurser = lagValutakurs(dataTable.tilTabellrader(), persongrunnlag)
 
         assertThat(valutakurs[behandlingId]!!.sortedBy { it.fom })
             .usingRecursiveComparison()
@@ -877,7 +878,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         behandlingId: Long,
         dataTable: DataTable,
     ) {
-        val utenlandskPeriodebeløp = lagUtenlandskperiodeBeløp(dataTable.asMaps(), persongrunnlag)[behandlingId]!!
+        val utenlandskPeriodebeløp = lagUtenlandskperiodeBeløp(dataTable.tilTabellrader(), persongrunnlag)[behandlingId]!!
 
         val mock =
             CucumberMock(

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.cucumber
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
+import no.nav.familie.ba.sak.cucumber.domeneparser.Tabellrad
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.norskDatoFormatter
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
@@ -10,6 +11,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
+import no.nav.familie.ba.sak.cucumber.domeneparser.tilTabellrader
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.SøkersRettTilUtvidet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -22,15 +24,13 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetan
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataUtenKompetanse
 import java.time.LocalDate
 
-typealias Tabellrad = Map<String, String>
-
 enum class Begrunnelsetype {
     EØS,
     STANDARD,
 }
 
 fun parseBegrunnelser(dataTable: DataTable): List<BegrunnelseMedData> =
-    dataTable.asMaps().map { rad: Tabellrad ->
+    dataTable.tilTabellrader().map { rad: Tabellrad ->
 
         val type =
             parseValgfriEnum<Begrunnelsetype>(

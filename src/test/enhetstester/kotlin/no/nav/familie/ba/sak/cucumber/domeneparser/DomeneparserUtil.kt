@@ -2,6 +2,20 @@ package no.nav.familie.ba.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
 
+typealias Tabellrad = Map<String, String?>
+
+fun DataTable.tilTabellrader(): List<Tabellrad> {
+    cells().firstOrNull()?.forEachIndexed { indeks, kolonnenavn ->
+        require(!kolonnenavn.isNullOrBlank()) { "Kolonne ${indeks + 1} mangler navn i Cucumber-tabellen" }
+    }
+
+    return asMaps().map { rad ->
+        rad.mapKeys { (kolonnenavn, _) ->
+            requireNotNull(kolonnenavn) { "Kolonnenavn kan ikke være null i Cucumber-tabellen" }
+        }
+    }
+}
+
 interface Domenenøkkel {
     val nøkkel: String
 }
@@ -35,5 +49,5 @@ enum class Domenebegrep(
 }
 
 object DomeneparserUtil {
-    fun DataTable.groupByBehandlingId(): Map<Long, List<Map<String, String>>> = this.asMaps().groupBy { rad -> parseLong(Domenebegrep.BEHANDLING_ID, rad) }
+    fun DataTable.groupByBehandlingId(): Map<Long, List<Tabellrad>> = this.tilTabellrader().groupBy { rad -> parseLong(Domenebegrep.BEHANDLING_ID, rad) }
 }

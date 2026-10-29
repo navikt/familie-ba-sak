@@ -4,6 +4,7 @@ import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
+import no.nav.familie.ba.sak.cucumber.domeneparser.tilTabellrader
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 
 object ValideringUtil {
@@ -16,7 +17,7 @@ object ValideringUtil {
                 .filter {
                     it.value.utbetalingsperiode.isNotEmpty()
                 }.keys
-        val forventedeBehandlingId = dataTable.asMaps().map { parseLong(Domenebegrep.BEHANDLING_ID, it) }.toSet()
+        val forventedeBehandlingId = dataTable.tilTabellrader().map { parseLong(Domenebegrep.BEHANDLING_ID, it) }.toSet()
         val ukontrollerteBehandlingId = eksisterendeBehandlingId.filterNot { forventedeBehandlingId.contains(it) }
         if (ukontrollerteBehandlingId.isNotEmpty() &&
             erUkontrollerteUtbetalingsoppdragTomme(
