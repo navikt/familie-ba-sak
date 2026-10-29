@@ -24,6 +24,10 @@ class TilbakestillBehandlingTilBehandlingsresultatService(
     fun tilbakestillBehandlingTilBehandlingsresultat(behandlingId: Long): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
+        if (StegType.BEHANDLINGSRESULTAT.kommerEtter(behandling.steg)) {
+            return behandling
+        }
+
         if (behandling.erTilbakestiltTilBehandlingsresultat()) {
             return behandling
         }
