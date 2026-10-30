@@ -4,12 +4,13 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseBigDecimal
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
+import no.nav.familie.ba.sak.cucumber.domeneparser.tilTabellrader
 import java.math.BigDecimal
 import java.time.LocalDate
 
 fun lagSvarFraEcbMock(dataTable: DataTable): Map<Pair<String, LocalDate>, BigDecimal> =
     dataTable
-        .asMaps()
+        .tilTabellrader()
         .map { rad ->
             val valutakursdato =
                 parseValgfriDato(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VALUTAKURSDATO, rad)

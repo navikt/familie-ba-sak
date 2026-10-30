@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
 object BrevBegrunnelseParser {
     fun mapBegrunnelser(dataTable: DataTable): List<SammenlignbarBegrunnelse> =
-        dataTable.asMaps().map { rad ->
+        dataTable.tilTabellrader().map { rad ->
             val regelverkForInkluderteBegrunnelser =
                 parseValgfriEnum<Regelverk>(DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser.REGELVERK_INKLUDERTE_BEGRUNNELSER, rad)
                     ?: Regelverk.NASJONALE_REGLER
@@ -43,7 +43,7 @@ object BrevBegrunnelseParser {
     private fun hentForventedeBegrunnelser(
         vurderesEtter: Regelverk,
         inkludertEllerEkskludert: DomenebegrepUtvidetVedtaksperiodeMedBegrunnelser,
-        rad: Map<String, String>,
+        rad: Tabellrad,
     ): Set<IVedtakBegrunnelse> =
         when (vurderesEtter) {
             Regelverk.NASJONALE_REGLER -> {

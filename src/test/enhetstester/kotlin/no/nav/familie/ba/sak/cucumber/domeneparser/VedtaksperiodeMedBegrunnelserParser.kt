@@ -11,7 +11,7 @@ object VedtaksperiodeMedBegrunnelserParser {
         dataTable: DataTable,
         vedtak: Vedtak,
     ): List<VedtaksperiodeMedBegrunnelser> =
-        dataTable.asMaps().map { rad ->
+        dataTable.tilTabellrader().map { rad ->
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad),
@@ -32,9 +32,9 @@ object VedtaksperiodeMedBegrunnelserParser {
             }
         }
 
-    fun parseAktørId(rad: MutableMap<String, String>) = parseString(DomenebegrepPersongrunnlag.AKTØR_ID, rad).padEnd(13, '0')
+    fun parseAktørId(rad: Tabellrad) = parseString(DomenebegrepPersongrunnlag.AKTØR_ID, rad).padEnd(13, '0')
 
-    fun parseAktørIdListe(rad: MutableMap<String, String>) = parseStringList(DomenebegrepPersongrunnlag.AKTØR_ID, rad).map { it.padEnd(13, '0') }
+    fun parseAktørIdListe(rad: Tabellrad) = parseStringList(DomenebegrepPersongrunnlag.AKTØR_ID, rad).map { it.padEnd(13, '0') }
 
     enum class DomenebegrepPersongrunnlag(
         override val nøkkel: String,

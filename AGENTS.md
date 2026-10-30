@@ -96,6 +96,8 @@ Use `secureLogger` when logging national identity numbers (fødselsnummer) or ot
 - **End-to-end tests** extend `AbstractVerdikjedetest` with `@Tag("verdikjedetest")`. Note it also inherits `@Tag("integration")` via `WebSpringAuthTestRunner` — this is why the `integrasjonstest` profile explicitly excludes `verdikjedetest`. Uses WireMock via `@EnableWireMock`.
 - **Test data generators** live in `src/test/testdata/kotlin/.../datagenerator/`. Use these instead of creating ad-hoc test objects.
 - **Cucumber tests** are in `src/test/resources/cucumber/` with step defs in enhetstester. Run as unit tests (no DB needed). Controlled by `RunCucumberTest.kt`.
+- Cucumber-tabeller leses med `DataTable.tilTabellrader()`, som validerer kolonnenavn og bevarer nullbare celleverdier. Bruk `Tabellrad` (`Map<String, String?>`) i parserne.
+- `RunCucumberTest` avgrenser søket etter stegdefinisjoner til `no.nav.familie.ba.sak.cucumber`, slik at Cucumber ikke skanner øvrige Kotlin-testklasser.
 - All three test source roots (`enhetstester`, `integrasjonstester`, `testdata`) are registered via `build-helper-maven-plugin`.
 - Test execution order is randomized (`runOrder=random`).
 - Integration tests require Docker (Testcontainers, JDBC `jdbc:tc:postgresql:` URL under profile `testcontainers`). They will fail without a running Docker daemon.
