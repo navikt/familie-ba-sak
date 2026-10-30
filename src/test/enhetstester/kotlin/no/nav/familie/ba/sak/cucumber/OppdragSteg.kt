@@ -86,11 +86,9 @@ class OppdragSteg {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             loggService = mockk(),
             arbeidsfordelingService = mockk(),
-            infotrygdService = mockk(),
             vedtaksperiodeService = mockk(),
             taskRepository = mockk(),
             vilkårsvurderingService = mockk(),
-            featureToggleService = featureToggleService,
             eksternBehandlingRelasjonService = mockk(),
             fagsakLåsingService = mockk(),
         )

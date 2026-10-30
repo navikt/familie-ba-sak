@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
@@ -37,28 +36,5 @@ class InfotrygdService(
                 .filter { it.gruppe == "FOLKEREGISTERIDENT" }
                 .map { it.ident }
         return infotrygdBarnetrygdKlient.hentStønader(søkerIdenter, emptyList(), historikk)
-    }
-
-    fun harÅpenSakIInfotrygd(
-        søkerIdenter: List<String>,
-        barnasIdenter: List<String> = emptyList(),
-    ): Boolean = infotrygdBarnetrygdKlient.harÅpenSakIInfotrygd(søkerIdenter, barnasIdenter)
-
-    fun harLøpendeSakIInfotrygd(
-        søkerIdenter: List<String>,
-        barnasIdenter: List<String> = emptyList(),
-    ): Boolean = infotrygdBarnetrygdKlient.harLøpendeSakIInfotrygd(søkerIdenter, barnasIdenter)
-
-    fun harSendtbrev(
-        søkerIdenter: List<String>,
-        brevkoder: List<InfotrygdBrevkode>,
-    ): Boolean {
-        if (brevkoder.isEmpty()) {
-            return false
-        }
-
-        val infotrygdbrevrespons = infotrygdBarnetrygdKlient.harNyligSendtBrevFor(søkerIdenter, brevkoder)
-        secureLogger.info("InfotrygdBrevRespons  $infotrygdbrevrespons")
-        return infotrygdbrevrespons.harSendtBrev
     }
 }

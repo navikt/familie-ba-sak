@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.fake
 import io.mockk.mockk
 import no.nav.familie.ba.sak.ekstern.pensjon.BarnetrygdTilPensjonResponse
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdKlient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBrevkode
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
@@ -12,15 +11,8 @@ import java.net.URI
 import java.time.LocalDate
 
 class FakeInfotrygdBarnetrygdKlient : InfotrygdBarnetrygdKlient(URI.create("http://fake-infotrygd-barnetrygd"), mockk<RestClient>(relaxed = true), 1) {
-    val løpendeSakerIInfotrygd = mutableMapOf<Pair<String, List<String>>, Boolean>()
     val stønaderIInfotrygd = mutableMapOf<Pair<String, List<String>>, InfotrygdSøkResponse<Stønad>>()
     val barnerygdTilPensjon = mutableMapOf<String, BarnetrygdTilPensjonResponse>()
-    val åpneSakerIInfotrygd = mutableMapOf<Pair<String, List<String>>, Boolean>()
-
-    override fun harLøpendeSakIInfotrygd(
-        søkersIdenter: List<String>,
-        barnasIdenter: List<String>,
-    ): Boolean = løpendeSakerIInfotrygd[Pair(søkersIdenter.first(), barnasIdenter)] ?: false
 
     override fun hentSaker(
         søkersIdenter: List<String>,
@@ -41,28 +33,10 @@ class FakeInfotrygdBarnetrygdKlient : InfotrygdBarnetrygdKlient(URI.create("http
             emptyList(),
         )
 
-    override fun harÅpenSakIInfotrygd(
-        søkersIdenter: List<String>,
-        barnasIdenter: List<String>,
-    ): Boolean = åpneSakerIInfotrygd[Pair(søkersIdenter.first(), barnasIdenter)] ?: false
-
-    override fun harNyligSendtBrevFor(
-        søkersIdenter: List<String>,
-        brevkoder: List<InfotrygdBrevkode>,
-    ): SendtBrevResponse = SendtBrevResponse(false, emptyList())
-
     override fun hentBarnetrygdTilPensjon(
         personIdent: String,
         fraDato: LocalDate,
     ): BarnetrygdTilPensjonResponse = barnerygdTilPensjon[personIdent] ?: BarnetrygdTilPensjonResponse(emptyList())
-
-    fun leggTilLøpendeSakIInfotrygd(
-        søkersIdent: String,
-        barnasIdenter: List<String>,
-        harLøpendeSakIInfotrygd: Boolean,
-    ) {
-        løpendeSakerIInfotrygd[Pair(søkersIdent, barnasIdenter)] = harLøpendeSakIInfotrygd
-    }
 
     fun leggTilStønaderIInfotrygd(
         søkersIdent: String,
@@ -77,13 +51,5 @@ class FakeInfotrygdBarnetrygdKlient : InfotrygdBarnetrygdKlient(URI.create("http
         barnetrygdTilPensjonResponse: BarnetrygdTilPensjonResponse,
     ) {
         barnerygdTilPensjon[søkersIdent] = barnetrygdTilPensjonResponse
-    }
-
-    fun leggTilÅpenSakIInfotrygd(
-        søkersIdent: String,
-        barnasIdenter: List<String>,
-        harÅpenSakIInfotrygd: Boolean,
-    ) {
-        åpneSakerIInfotrygd[Pair(søkersIdent, barnasIdenter)] = harÅpenSakIInfotrygd
     }
 }

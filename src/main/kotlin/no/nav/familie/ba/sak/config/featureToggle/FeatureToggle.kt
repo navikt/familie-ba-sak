@@ -8,7 +8,6 @@ enum class FeatureToggle(
     TEKNISK_ENDRING("familie-ba-sak.behandling.teknisk-endring"),
     HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD("familie-ba-sak.hent-identer-til-psys-fra-infotrygd"),
     KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER("familie-ba-sak.kan-opprette-og-endre-sammensatte-kontrollsaker"),
-    SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA("familie-ba-sak.infotrygd-replika-sak-aktiv"),
 
     // satsendring
     // Oppretter satsendring-tasker for de som ikke har fått ny task

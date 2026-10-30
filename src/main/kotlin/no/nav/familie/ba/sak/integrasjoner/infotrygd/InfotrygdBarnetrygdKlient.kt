@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
-import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
@@ -32,50 +31,6 @@ class InfotrygdBarnetrygdKlient(
     @Qualifier("infotrygdBarnetrygdRestClient") private val restClient: RestClient,
     @Value("$RETRY_BACKOFF_3_MIN") private val retryBackoffDelay: Long,
 ) {
-    fun harLøpendeSakIInfotrygd(
-        søkersIdenter: List<String>,
-        barnasIdenter: List<String> = emptyList(),
-    ): Boolean {
-        val uri = URI.create("$klientUri/infotrygd/barnetrygd/lopende-barnetrygd")
-
-        val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
-
-        return try {
-            restClient
-                .post()
-                .uri(uri)
-                .body(request)
-                .retrieve()
-                .body<InfotrygdLøpendeBarnetrygdResponse>()!!
-                .harLøpendeBarnetrygd
-        } catch (ex: Exception) {
-            loggFeil(ex, uri)
-            throw ex
-        }
-    }
-
-    fun harÅpenSakIInfotrygd(
-        søkersIdenter: List<String>,
-        barnasIdenter: List<String> = emptyList(),
-    ): Boolean {
-        val uri = URI.create("$klientUri/infotrygd/barnetrygd/aapen-sak")
-
-        val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
-
-        return try {
-            restClient
-                .post()
-                .uri(uri)
-                .body(request)
-                .retrieve()
-                .body<InfotrygdÅpenSakResponse>()!!
-                .harÅpenSak
-        } catch (ex: Exception) {
-            loggFeil(ex, uri)
-            throw ex
-        }
-    }
-
     fun hentSaker(
         søkersIdenter: List<String>,
         barnasIdenter: List<String> = emptyList(),
@@ -188,49 +143,6 @@ class InfotrygdBarnetrygdKlient(
         }
     }
 
-    fun harNyligSendtBrevFor(
-        søkersIdenter: List<String>,
-        brevkoder: List<InfotrygdBrevkode>,
-    ): SendtBrevResponse {
-        val uri = URI.create("$klientUri/infotrygd/barnetrygd/brev")
-        return try {
-            restClient
-                .post()
-                .uri(uri)
-                .body(SendtBrevRequest(søkersIdenter, brevkoder.map { it.kode }))
-                .retrieve()
-                .body()!!
-        } catch (ex: Exception) {
-            loggFeil(ex, uri)
-            throw RuntimeException(
-                "Sjekk mot infotrygd for å sjekke om brev er sendt feilet . Gav feil: ${ex.message}",
-                ex,
-            )
-        }
-    }
-
-    class SendtBrevRequest(
-        val personidenter: List<String>,
-        val brevkoder: List<String>,
-    )
-
-    data class SendtBrevResponse(
-        val harSendtBrev: Boolean,
-        val listeBrevhendelser: List<InfotrygdHendelse> = emptyList(),
-    )
-
-    data class InfotrygdHendelse(
-        val id: Long,
-        val personKey: Long,
-        val saksblokk: String,
-        val saksnummer: String,
-        val aksjonsdatoSeq: Long,
-        val tekstKode1: String,
-        val fnr: FoedselsNr,
-        val tkNr: String,
-        val region: String,
-    )
-
     private fun loggFeil(
         ex: Throwable,
         uri: URI,
@@ -254,15 +166,4 @@ class InfotrygdBarnetrygdKlient(
         const val RETRY_BACKOFF_3_MIN = "\${retry.backoff.delay:180000}"
         private val logger: Logger = LoggerFactory.getLogger(InfotrygdBarnetrygdKlient::class.java)
     }
-}
-
-enum class InfotrygdBrevkode(
-    val kode: String,
-) {
-    BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG("BA04"),
-    BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG("BA05"),
-    BREV_BATCH_OMREGNING_BARN_18_ÅR("BA37"),
-    BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG("B001"),
-    BREV_MANUELL_INNVILGET_SMÅBARNSTILLEGG("B002"),
-    BREV_MANUELL_OMREGNING_BARN_18_ÅR("B003"),
 }

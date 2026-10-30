@@ -28,16 +28,6 @@ class VelgFagsystemIntegrasjonTest(
     @Autowired val fakeInfotrygdBarnetrygdKlient: FakeInfotrygdBarnetrygdKlient,
 ) : AbstractSpringIntegrationTest() {
     @Test
-    fun `sjekk om mor har løpende utbetalinger i infotrygd`() {
-        // Arrange
-        val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
-        fakeInfotrygdBarnetrygdKlient.leggTilLøpendeSakIInfotrygd(søkerFnr, emptyList(), true)
-
-        // Act & Assert
-        assertEquals(true, velgFagSystemService.morEllerBarnHarLøpendeSakIInfotrygd(søkerFnr, emptyList()))
-    }
-
-    @Test
     fun `skal IKKE velge ba-sak når mor har stønadhistorikk i Infotrygd`() {
         // Arrange
         val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())

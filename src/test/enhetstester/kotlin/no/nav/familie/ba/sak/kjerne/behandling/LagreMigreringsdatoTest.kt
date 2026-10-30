@@ -4,9 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
@@ -40,12 +38,10 @@ class LagreMigreringsdatoTest {
     private val loggService = mockk<LoggService>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
     private val saksstatistikkEventPublisher = mockk<SaksstatistikkEventPublisher>()
-    private val infotrygdService = mockk<InfotrygdService>()
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val taskRepository = mockk<TaskRepositoryWrapper>()
     private val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
-    private val mockFeatureToggleService = mockk<FeatureToggleService>()
     private val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
 
     private val behandlingService =
@@ -61,11 +57,9 @@ class LagreMigreringsdatoTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             loggService = loggService,
             arbeidsfordelingService = arbeidsfordelingService,
-            infotrygdService = infotrygdService,
             vedtaksperiodeService = vedtaksperiodeService,
             taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
-            featureToggleService = mockFeatureToggleService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
             fagsakLåsingService = mockk(),
         )
