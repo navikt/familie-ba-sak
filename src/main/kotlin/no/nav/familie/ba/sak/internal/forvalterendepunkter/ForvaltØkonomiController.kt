@@ -5,9 +5,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.internal.ForvalterService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -32,6 +35,7 @@ class ForvaltØkonomiController(
     private val økonomiService: ØkonomiService,
     private val opprettTaskService: OpprettTaskService,
     private val taskService: TaskService,
+    private val simuleringService: SimuleringService,
 ) {
     @PostMapping(path = ["/lag-og-send-utbetalingsoppdrag-til-økonomi"])
     fun lagOgSendUtbetalingsoppdragTilØkonomi(
@@ -134,5 +138,18 @@ class ForvaltØkonomiController(
 
         taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask(maksAntallTasker))
         return ResponseEntity.ok(Ressurs.success("Intern konsistensavstemming startet"))
+    }
+
+    @GetMapping(path = ["/behandling/{behandlingId}/simulering"])
+    fun hentSimuleringPåBehandling(
+        @PathVariable behandlingId: Long,
+    ): List<ØkonomiSimuleringMottaker> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Hent simulering på behandling",
+        )
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+
+        return simuleringService.hentSimuleringPåBehandling(behandlingId)
     }
 }
