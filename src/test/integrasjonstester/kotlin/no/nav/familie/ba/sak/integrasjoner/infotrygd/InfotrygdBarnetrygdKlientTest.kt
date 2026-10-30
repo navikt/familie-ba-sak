@@ -30,7 +30,6 @@ import java.net.URI
 class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
     val sakerURL = "/api/infotrygd/barnetrygd/saker"
     val stønaderURL = "/api/infotrygd/barnetrygd/stonad?historikk=false"
-    val brevURL = "/api/infotrygd/barnetrygd/brev"
 
     private val søkersIdenter = listOf(randomFnr(), randomFnr(), randomFnr())
     private val barnasIdenter = listOf(randomBarnFnr(), randomBarnFnr())
@@ -150,25 +149,5 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
         assertThrows<Feil> {
             klient.hentSaker(søkersIdenter, barnasIdenter)
         }
-    }
-
-    @Test
-    fun `harNyligSendtBrevFor skal returnerer true for personIdent`() {
-        // Arrange
-        wireMockServer.stubFor(
-            post(brevURL).willReturn(
-                okJson(jsonMapper.writeValueAsString(InfotrygdBarnetrygdKlient.SendtBrevResponse(true, emptyList()))),
-            ),
-        )
-
-        // Act
-        val harNyligSendtBrev =
-            klient.harNyligSendtBrevFor(
-                søkersIdenter,
-                listOf(InfotrygdBrevkode.BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG),
-            )
-
-        // Assert
-        Assertions.assertEquals(true, harNyligSendtBrev.harSendtBrev)
     }
 }

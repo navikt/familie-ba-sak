@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBrevkode
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
@@ -14,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -26,14 +23,12 @@ import java.time.YearMonth
 
 @Service
 class AutovedtakBrevService(
-    private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val autovedtakService: AutovedtakService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val infotrygdService: InfotrygdService,
     private val behandlingRepository: BehandlingRepository,
 ) : AutovedtakBehandlingService<OmregningBrevData> {
     override fun kjørBehandling(
@@ -68,10 +63,6 @@ class AutovedtakBrevService(
     ): Boolean {
         if (!behandlingsårsak.erOmregningsårsak()) {
             throw Feil("Sjekk om autobrevbehandling skal opprettes sjekker på årsak som ikke er omregning.")
-        }
-
-        if (harSendtBrevFraInfotrygd(fagsakId, behandlingsårsak)) {
-            return false
         }
 
         if (behandlingService.harBehandlingsårsakAlleredeKjørt(
@@ -110,22 +101,6 @@ class AutovedtakBrevService(
         return true
     }
 
-    fun harSendtBrevFraInfotrygd(
-        fagsakId: Long,
-        behandlingsårsak: BehandlingÅrsak,
-    ): Boolean {
-        val personidenter = fagsakService.hentAktør(fagsakId).personidenter
-        val harSendtBrev =
-            infotrygdService.harSendtbrev(personidenter.map { it.fødselsnummer }, behandlingsårsak.tilBrevkoder())
-        return if (harSendtBrev) {
-            logger.info("Har sendt autobrev fra infotrygd, dropper å lage behandling for å sende brev fra ba-sak. fagsakId=$fagsakId behandlingsårsak=$behandlingsårsak")
-            true
-        } else {
-            logger.info("Har ikke sendt autobrev fra infotrygd, lager ny behandling og sender brev på vanlig måte. fagsakId=$fagsakId behandlingsårsak=$behandlingsårsak")
-            false
-        }
-    }
-
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
         val task =
             Task(
@@ -141,24 +116,3 @@ class AutovedtakBrevService(
 
     override fun skalAutovedtakBehandles(behandlingsdata: OmregningBrevData): Boolean = true
 }
-
-private fun BehandlingÅrsak.tilBrevkoder(): List<InfotrygdBrevkode> =
-    when (this) {
-        BehandlingÅrsak.OMREGNING_18ÅR -> {
-            listOf(
-                InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_18_ÅR,
-                InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_18_ÅR,
-            )
-        }
-
-        BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> {
-            listOf(
-                InfotrygdBrevkode.BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG,
-                InfotrygdBrevkode.BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG,
-            )
-        }
-
-        else -> {
-            emptyList()
-        }
-    }
