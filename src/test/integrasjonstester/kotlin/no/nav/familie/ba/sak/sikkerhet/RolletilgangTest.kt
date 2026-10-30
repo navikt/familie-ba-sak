@@ -1,13 +1,18 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.MinimalFagsakDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.jsonMapper
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -43,6 +48,12 @@ import tools.jackson.module.kotlin.readValue
 class RolletilgangTest(
     @Autowired
     private val fagsakService: FagsakService,
+    @Autowired
+    private val aktørIdRepository: AktørIdRepository,
+    @Autowired
+    private val fagsakRepository: FagsakRepository,
+    @Autowired
+    private val behandlingRepository: BehandlingRepository,
 ) : WebSpringAuthTestRunner() {
     @Test
     fun `Skal kaste feil når innlogget veileder prøver å opprette fagsak gjennom rest-endepunkt`() {
@@ -257,5 +268,78 @@ class RolletilgangTest(
 
         // Assert
         assertEquals(HttpStatus.OK, response.statusCode)
+    }
+
+    @Test
+    fun `Skal kaste feil når innlogget veileder prøver å hente simulering gjennom forvalterendepunkt`() {
+        // Arrange
+        val header = HttpHeaders()
+        header.setBearerAuth(
+            token(
+                mapOf(
+                    "groups" to listOf("VEILEDER"),
+                    "name" to "Mock McMockface",
+                    "NAVident" to "Z0000",
+                ),
+            ),
+        )
+
+        // Act & Assert
+        val error =
+            assertThrows<HttpClientErrorException> {
+                restClient
+                    .get()
+                    .uri(hentUrl("/api/forvalter/behandling/1/simulering"))
+                    .headers { h -> h.addAll(header) }
+                    .retrieve()
+                    .toEntity<String>()
+            }
+
+        // Assert
+        val ressurs: Ressurs<Any> = jsonMapper.readValue(error.responseBodyAsString)
+
+        assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
+        assertEquals(Ressurs.Status.IKKE_TILGANG, ressurs.status)
+        assertEquals(
+            "Mock McMockface har ikke tilgang til å Hent simulering på behandling. Krever FORVALTER",
+            ressurs.melding,
+        )
+    }
+
+    @Test
+    fun `Skal få 200 OK når innlogget forvalter henter simulering gjennom forvalterendepunkt`() {
+        // Arrange
+        val behandling = opprettBehandling()
+
+        val header = HttpHeaders()
+        header.setBearerAuth(
+            token(
+                mapOf(
+                    "groups" to listOf("FORVALTER"),
+                    "azp" to "azp-test",
+                    "name" to "Mock McMockface Forvalter",
+                    "NAVident" to "Z0000",
+                ),
+            ),
+        )
+
+        // Act
+        val response =
+            restClient
+                .get()
+                .uri(hentUrl("/api/forvalter/behandling/${behandling.id}/simulering"))
+                .headers { h -> h.addAll(header) }
+                .retrieve()
+                .toEntity(String::class.java)
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.statusCode)
+    }
+
+    private fun opprettBehandling(): Behandling {
+        val søker = aktørIdRepository.save(randomAktør())
+        val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
+
+        return behandlingRepository.save(lagBehandlingUtenId(fagsak))
     }
 }
