@@ -39,10 +39,40 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
             // Assert
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         }
+
+        @Test
+        fun `prometheus er tilgjengelig uten token`() {
+            // Act
+            val response =
+                restClient
+                    .get()
+                    .uri(hentUrl("/internal/prometheus"))
+                    .accept(MediaType.TEXT_PLAIN)
+                    .retrieve()
+                    .toEntity(String::class.java)
+
+            // Assert
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        }
     }
 
     @Nested
     inner class UtenToken {
+        @Test
+        fun `øvrige internal-endepunkter uten token returnerer 401`() {
+            // Act & Assert
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restClient
+                        .get()
+                        .uri(hentUrl("/internal/autobrev"))
+                        .retrieve()
+                        .toEntity(String::class.java)
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
+        }
+
         @Test
         fun `api-kall uten token returnerer 401`() {
             // Act & Assert
