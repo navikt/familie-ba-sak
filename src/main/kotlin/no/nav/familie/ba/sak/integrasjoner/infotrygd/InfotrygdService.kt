@@ -39,16 +39,6 @@ class InfotrygdService(
         return infotrygdBarnetrygdKlient.hentStønader(søkerIdenter, emptyList(), historikk)
     }
 
-    fun harÅpenSakIInfotrygd(
-        søkerIdenter: List<String>,
-        barnasIdenter: List<String> = emptyList(),
-    ): Boolean = infotrygdBarnetrygdKlient.harÅpenSakIInfotrygd(søkerIdenter, barnasIdenter)
-
-    fun harLøpendeSakIInfotrygd(
-        søkerIdenter: List<String>,
-        barnasIdenter: List<String> = emptyList(),
-    ): Boolean = infotrygdBarnetrygdKlient.harLøpendeSakIInfotrygd(søkerIdenter, barnasIdenter)
-
     fun harSendtbrev(
         søkerIdenter: List<String>,
         brevkoder: List<InfotrygdBrevkode>,

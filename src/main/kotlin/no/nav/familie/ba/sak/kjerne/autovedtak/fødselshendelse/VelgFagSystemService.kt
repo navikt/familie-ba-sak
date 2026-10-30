@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVu
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.LØPENDE_SAK_I_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.STØTTET_I_BA_SAK
@@ -71,26 +70,6 @@ class VelgFagSystemService(
         return stønader.isNotEmpty()
     }
 
-    internal fun morEllerBarnHarLøpendeSakIInfotrygd(
-        morsIdent: String,
-        barnasIdenter: List<String>,
-    ): Boolean {
-        val morsIdenter =
-            personidentService
-                .hentIdenter(personIdent = morsIdent, historikk = true)
-                .filter { it.gruppe == "FOLKEREGISTERIDENT" }
-                .map { it.ident }
-        val alleBarnasIdenter =
-            barnasIdenter.flatMap {
-                personidentService
-                    .hentIdenter(personIdent = it, historikk = true)
-                    .filter { identinfo -> identinfo.gruppe == "FOLKEREGISTERIDENT" }
-                    .map { identinfo -> identinfo.ident }
-            }
-
-        return infotrygdService.harLøpendeSakIInfotrygd(morsIdenter, alleBarnasIdenter)
-    }
-
     internal fun harMorGyldigStatsborgerskapForAutomatiskVurdering(morsAktør: Aktør): Boolean {
         val gjeldendeStatsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(morsAktør)
         val medlemskap = statsborgerskapService.hentSterkesteMedlemskapVedTidspunkt(statsborgerskap = gjeldendeStatsborgerskap)
@@ -118,16 +97,6 @@ class VelgFagSystemService(
                     Pair(
                         IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                         SEND_TIL_BA,
-                    )
-                }
-
-                morEllerBarnHarLøpendeSakIInfotrygd(
-                    nyBehandlingHendelse.morsIdent,
-                    nyBehandlingHendelse.barnasIdenter,
-                ) -> {
-                    Pair(
-                        LØPENDE_SAK_I_INFOTRYGD,
-                        SEND_TIL_INFOTRYGD,
                     )
                 }
 
@@ -181,7 +150,6 @@ enum class FagsystemUtfall(
     val beskrivelse: String,
 ) {
     IVERKSATTE_BEHANDLINGER_I_BA_SAK("Mor har fagsak med tidligere eller løpende utbetalinger i ba-sak"),
-    LØPENDE_SAK_I_INFOTRYGD("Mor har løpende sak i infotrygd"),
     FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK("Mor har fagsak uten iverksatte behandlinger"),
     SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER("Mor har saker i infotrygd, men ikke løpende utbetalinger"),
     MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING("Mor har ikke gyldig medlemskap for automatisk vurdering"),

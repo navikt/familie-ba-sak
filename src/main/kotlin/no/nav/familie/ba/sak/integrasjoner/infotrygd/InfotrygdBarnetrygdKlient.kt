@@ -32,50 +32,6 @@ class InfotrygdBarnetrygdKlient(
     @Qualifier("infotrygdBarnetrygdRestClient") private val restClient: RestClient,
     @Value("$RETRY_BACKOFF_3_MIN") private val retryBackoffDelay: Long,
 ) {
-    fun harLøpendeSakIInfotrygd(
-        søkersIdenter: List<String>,
-        barnasIdenter: List<String> = emptyList(),
-    ): Boolean {
-        val uri = URI.create("$klientUri/infotrygd/barnetrygd/lopende-barnetrygd")
-
-        val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
-
-        return try {
-            restClient
-                .post()
-                .uri(uri)
-                .body(request)
-                .retrieve()
-                .body<InfotrygdLøpendeBarnetrygdResponse>()!!
-                .harLøpendeBarnetrygd
-        } catch (ex: Exception) {
-            loggFeil(ex, uri)
-            throw ex
-        }
-    }
-
-    fun harÅpenSakIInfotrygd(
-        søkersIdenter: List<String>,
-        barnasIdenter: List<String> = emptyList(),
-    ): Boolean {
-        val uri = URI.create("$klientUri/infotrygd/barnetrygd/aapen-sak")
-
-        val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
-
-        return try {
-            restClient
-                .post()
-                .uri(uri)
-                .body(request)
-                .retrieve()
-                .body<InfotrygdÅpenSakResponse>()!!
-                .harÅpenSak
-        } catch (ex: Exception) {
-            loggFeil(ex, uri)
-            throw ex
-        }
-    }
-
     fun hentSaker(
         søkersIdenter: List<String>,
         barnasIdenter: List<String> = emptyList(),
