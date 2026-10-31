@@ -109,7 +109,7 @@ object OrdinærBarnetrygdUtil {
     ) = this.associate { personResultat ->
         val person =
             personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør }
-                ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av andeler tilkjent ytelse")
+                ?: throw Feil("Finner ikke person for personResultat ${personResultat.id} i persongrunnlag ${personopplysningGrunnlag.id} ved generering av andeler tilkjent ytelse")
         person to
             personResultat.tilTidslinjeMedRettTilProsentForPerson(
                 person = person,

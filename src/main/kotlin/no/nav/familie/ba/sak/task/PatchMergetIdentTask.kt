@@ -52,8 +52,8 @@ class PatchMergetIdentTask(
                     ?.map { it.aktør.aktørId } ?: emptyList()
             ).toSet()
 
-        if (aktørerForIdentSomSkalPatches.size > 1) throw Feil("Fant flere aktører for ident som skal patches. fagsak=${dto.fagsakId} aktører=$aktørerForIdentSomSkalPatches")
-        val aktørSomSkalPatches = aktørerForIdentSomSkalPatches.firstOrNull() ?: throw Feil("Fant ikke ident som skal patches på fagsak=${dto.fagsakId} aktører=$aktørerForIdentSomSkalPatches")
+        if (aktørerForIdentSomSkalPatches.size > 1) throw Feil("Fant ${aktørerForIdentSomSkalPatches.size} aktører for ident som skal patches. fagsak=${dto.fagsakId}")
+        val aktørSomSkalPatches = aktørerForIdentSomSkalPatches.firstOrNull() ?: throw Feil("Fant ikke ident som skal patches på fagsak=${dto.fagsakId}")
 
         val identer = pdlIdentRestKlient.hentIdenter(personIdent = dto.nyIdent.ident, historikk = true)
         if (dto.skalSjekkeAtGammelIdentErHistoriskAvNyIdent) {
