@@ -165,7 +165,7 @@ class ForvalterService(
 
                 val person =
                     personerPåBehandling?.singleOrNull { it.aktør == personResultat.aktør }
-                        ?: throw Feil("Finner ikke person på behandling med aktørId ${personResultat.aktør.aktørId}.")
+                        ?: throw Feil("Finner ikke person på behandling $behandlingId for personResultat ${personResultat.id}.")
 
                 validerKunEttVilkårResultatFørFødselsdato(personResultat, vilkårResultat.vilkårType, person.fødselsdato)
 
@@ -218,7 +218,7 @@ class ForvalterService(
     fun slettAktørId(aktørId: String) {
         val aktør =
             aktørIdRepository.findByAktørIdOrNull(aktørId)
-                ?: throw Feil("Fant ikke aktør med aktørId $aktørId som skal slettes")
+                ?: throw Feil("Fant ikke aktør som skal slettes")
 
         val fødselsnummer = if (aktør.personidenter.isNotEmpty()) aktør.aktivFødselsnummer() else null
         aktørIdRepository.delete(aktør)

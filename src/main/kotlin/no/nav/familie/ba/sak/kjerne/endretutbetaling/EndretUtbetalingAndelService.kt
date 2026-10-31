@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -219,9 +220,14 @@ class EndretUtbetalingAndelService(
 
         if (droppedeAktører.isNotEmpty()) {
             logger.warn(
-                "Dropper aktør(er) med aktørId ${droppedeAktører.joinToString(", ") { it.aktørId }} fra EndretUtbetalingAndel " +
+                "Dropper ${droppedeAktører.size} aktør(er) fra EndretUtbetalingAndel " +
                     "${forrigeEndretUtbetalingAndel.id} ved kopiering fra behandling ${forrigeBehandling.id} " +
                     "til behandling ${behandling.id}: finnes ikke i det nye persongrunnlaget",
+            )
+            secureLogger.warn(
+                "Dropper aktør(er) med aktørId ${droppedeAktører.joinToString(", ") { it.aktørId }} fra EndretUtbetalingAndel " +
+                    "${forrigeEndretUtbetalingAndel.id} ved kopiering fra behandling ${forrigeBehandling.id} " +
+                    "til behandling ${behandling.id}",
             )
         }
 

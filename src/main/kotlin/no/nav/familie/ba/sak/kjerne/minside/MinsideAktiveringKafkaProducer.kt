@@ -81,10 +81,10 @@ class MockMinsideAktiveringKafkaProducer : MinsideAktiveringKafkaProducer {
     private val logger = LoggerFactory.getLogger(MockMinsideAktiveringKafkaProducer::class.java)
 
     override fun aktiver(aktør: Aktør) {
-        logger.info("Sender aktiver til minside for aktør ${aktør.aktørId}")
+        logger.info("Sender aktiver til minside (mock)")
     }
 
     override fun deaktiver(aktør: Aktør) {
-        logger.info("Sender deaktiver til minside for aktør ${aktør.aktørId}")
+        logger.info("Sender deaktiver til minside (mock)")
     }
 }

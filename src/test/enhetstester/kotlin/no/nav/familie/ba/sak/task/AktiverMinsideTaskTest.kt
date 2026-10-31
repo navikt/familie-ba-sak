@@ -48,7 +48,7 @@ class AktiverMinsideTaskTest {
                     aktiverMinsideTask.doTask(task)
                 }
 
-            assertThat(exception.message).isEqualTo("Aktør med aktørId $aktørId finnes ikke")
+            assertThat(exception.message).isEqualTo("Aktør i payload til task ${task.id} finnes ikke")
         }
 
         @Test

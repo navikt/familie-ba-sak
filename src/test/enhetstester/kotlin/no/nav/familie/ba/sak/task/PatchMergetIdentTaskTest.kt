@@ -111,7 +111,7 @@ class PatchMergetIdentTaskTest {
 
         // Act & Assert
         assertThrows<Feil> { task.doTask(Task(payload = jsonMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
-            assertThat(it.message).isEqualTo("Fant ikke ident som skal patches på fagsak=${fagsak.id} aktører=[]")
+            assertThat(it.message).isEqualTo("Fant ikke ident som skal patches på fagsak=${fagsak.id}")
         }
     }
 
