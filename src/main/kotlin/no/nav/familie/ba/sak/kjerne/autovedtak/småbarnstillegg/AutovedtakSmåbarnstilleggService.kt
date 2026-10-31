@@ -103,7 +103,7 @@ class AutovedtakSmåbarnstilleggService(
         val aktør = behandlingsdata.aktør
         val fagsak =
             fagsakService.hentNormalFagsak(aktør)
-                ?: throw Feil(message = "Fant ikke fagsak av typen NORMAL for aktør ${aktør.aktørId}")
+                ?: throw Feil(message = "Fant ikke fagsak av typen NORMAL for aktør ved vedtak om overgangsstønad")
         val forrigeBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id)
         val perioderMedFullOvergangsstønadForrigeBehandling = forrigeBehandling?.let { overgangsstønadService.hentPerioderMedFullOvergangsstønad(forrigeBehandling) } ?: emptyList()
         val perioderMedFullOvergangsstønad = overgangsstønadService.hentPerioderMedFullOvergangsstønad(aktør)

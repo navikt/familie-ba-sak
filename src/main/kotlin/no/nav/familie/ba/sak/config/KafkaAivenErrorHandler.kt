@@ -41,7 +41,7 @@ class KafkaAivenErrorHandler : CommonContainerStoppingErrorHandler() {
         } else {
             records.first().run {
                 logger.error(
-                    "Feil ved konsumering av melding fra ${this.topic()}. id ${this.key()}, " +
+                    "Feil ved konsumering av melding fra ${this.topic()}. " +
                         "offset: ${this.offset()}, partition: ${this.partition()}",
                 )
                 secureLogger.error("${this.topic()} - Problemer med prosessering av $records", e)
