@@ -73,6 +73,20 @@ data class EndretUtbetalingAndel(
     @Column(name = "er_automatisk_generert")
     var erAutomatiskGenerert: Boolean? = null,
 ) : BaseEntitet() {
+    // aktører utelates bevisst: aktørId skal ikke havne i vanlige logger via feilmeldinger som interpolerer $this
+    override fun toString(): String =
+        "EndretUtbetalingAndel(" +
+            "id=$id, " +
+            "behandlingId=$behandlingId, " +
+            "prosent=$prosent, " +
+            "fom=$fom, " +
+            "tom=$tom, " +
+            "årsak=$årsak, " +
+            "avtaletidspunktDeltBosted=$avtaletidspunktDeltBosted, " +
+            "søknadstidspunkt=$søknadstidspunkt, " +
+            "begrunnelse=$begrunnelse, " +
+            "erAutomatiskGenerert=$erAutomatiskGenerert)"
+
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode)
 
     val periode

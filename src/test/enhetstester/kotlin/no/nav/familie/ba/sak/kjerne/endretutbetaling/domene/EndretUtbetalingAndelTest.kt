@@ -22,6 +22,20 @@ import java.time.YearMonth
 
 internal class EndretUtbetalingAndelTest {
     @Test
+    fun `toString skal ikke inneholde aktørId`() {
+        // Arrange
+        val aktør = lagAktør()
+        val endretUtbetalingAndel = lagEndretUtbetalingAndel(id = 1, behandlingId = 2, aktører = setOf(aktør))
+
+        // Act
+        val tekst = endretUtbetalingAndel.toString()
+
+        // Assert
+        assertThat(tekst).doesNotContain(aktør.aktørId)
+        assertThat(tekst).contains("id=1", "behandlingId=2")
+    }
+
+    @Test
     fun `Sjekk validering med tomme felt`() {
         // Arrange
         val behandling = lagBehandling()
