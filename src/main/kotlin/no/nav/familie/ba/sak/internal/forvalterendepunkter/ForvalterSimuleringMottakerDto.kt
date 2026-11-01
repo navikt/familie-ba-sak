@@ -15,7 +15,9 @@ data class ForvalterSimuleringMottakerDto(
     val mottakerNummer: String?,
     val mottakerType: MottakerType,
     val posteringer: List<ForvalterSimuleringPosteringDto>,
-)
+) {
+    override fun toString(): String = "ForvalterSimuleringMottakerDto(id=$id, behandlingId=$behandlingId, mottakerType=$mottakerType, posteringer=$posteringer)"
+}
 
 data class ForvalterSimuleringPosteringDto(
     val id: Long,
