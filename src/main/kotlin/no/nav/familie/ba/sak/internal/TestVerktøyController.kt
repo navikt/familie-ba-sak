@@ -1,16 +1,12 @@
 package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
-import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
-import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
@@ -18,6 +14,7 @@ import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
+import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+@Profile("!prod")
 @RestController
 @RequestMapping(value = ["/internal"])
 class TestVerktøyController(
@@ -34,8 +32,6 @@ class TestVerktøyController(
     private val envService: EnvService,
     private val autovedtakStegService: AutovedtakStegService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val tilgangService: TilgangService,
-    private val simuleringService: SimuleringService,
     private val opprettTaskService: OpprettTaskService,
 ) {
     @GetMapping(path = ["/autobrev"])
@@ -96,15 +92,6 @@ class TestVerktøyController(
         } else {
             ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
-
-    @GetMapping(path = ["/hent-simulering-pa-behandling/{behandlingId}"])
-    fun hentSimuleringPåBehandling(
-        @PathVariable behandlingId: Long,
-    ): List<ØkonomiSimuleringMottaker> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
-
-        return simuleringService.hentSimuleringPåBehandling(behandlingId)
-    }
 
     companion object {
         const val ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING = "Endepunktet gjør ingenting i prod."
