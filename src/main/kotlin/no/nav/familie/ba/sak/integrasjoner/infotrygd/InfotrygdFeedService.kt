@@ -10,11 +10,6 @@ class InfotrygdFeedService(
     val opprettTaskService: OpprettTaskService,
 ) {
     @Transactional
-    fun sendTilInfotrygdFeed(barnsIdenter: List<String>) {
-        opprettTaskService.opprettSendFeedTilInfotrygdTask(barnsIdenter)
-    }
-
-    @Transactional
     fun sendStartBehandlingTilInfotrygdFeed(aktørStoenadsmottaker: Aktør) {
         opprettTaskService.opprettSendStartBehandlingTilInfotrygdTask(aktørStoenadsmottaker)
     }

@@ -8,8 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedTaskDto
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.StartBehandlingDto
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.NavHttpHeaders
@@ -48,19 +47,17 @@ class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
 
     @Test
     @Tag("integration")
-    fun `skal legge til fødselsnummer i infotrygd feed`() {
+    fun `skal sende startbehandlingsmelding til Infotrygd feed`() {
         // Arrange
         wireMockServer.stubFor(
-            post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(
+            post("/api/barnetrygd/v1/feed/startbehandlingsmelding").willReturn(
                 okJson(jsonMapper.writeValueAsString(success("Create"))),
             ),
         )
-        val request = InfotrygdFødselhendelsesFeedTaskDto(listOf("fnr"))
+        val request = StartBehandlingDto("fnr")
 
         // Act
-        request.fnrBarn.forEach {
-            klient.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(fnrBarn = it))
-        }
+        klient.sendStartBehandlingTilInfotrygd(request)
 
         // Assert
         wireMockServer.verify(
@@ -68,7 +65,7 @@ class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
                 .withRequestBody(
                     equalToJson(
-                        jsonMapper.writeValueAsString(InfotrygdFødselhendelsesFeedDto(fnrBarn = request.fnrBarn.first())),
+                        jsonMapper.writeValueAsString(request),
                     ),
                 ),
         )
@@ -78,11 +75,11 @@ class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
     @Tag("integration")
     fun `Invokering av Infotrygd feed genererer http feil`() {
         // Arrange
-        wireMockServer.stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withStatus(401)))
+        wireMockServer.stubFor(post("/api/barnetrygd/v1/feed/startbehandlingsmelding").willReturn(aResponse().withStatus(401)))
 
         // Act & Assert
         assertThrows<HttpClientErrorException> {
-            klient.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto("fnr"))
+            klient.sendStartBehandlingTilInfotrygd(StartBehandlingDto("fnr"))
         }
     }
 
@@ -90,11 +87,11 @@ class InfotrygdFeedKlientTest : AbstractSpringIntegrationTest() {
     @Tag("integration")
     fun `Invokering av Infotrygd returnerer ulovlig response format`() {
         // Arrange
-        wireMockServer.stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withBody("Create")))
+        wireMockServer.stubFor(post("/api/barnetrygd/v1/feed/startbehandlingsmelding").willReturn(aResponse().withBody("Create")))
 
         // Act & Assert
         assertThrows<RuntimeException> {
-            klient.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto("fnr"))
+            klient.sendStartBehandlingTilInfotrygd(StartBehandlingDto("fnr"))
         }
     }
 }
