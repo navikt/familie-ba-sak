@@ -27,8 +27,17 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
     @Nested
     inner class PermitAll {
         @ParameterizedTest
-        @ValueSource(strings = ["/internal/health", "/internal/health/liveness", "/internal/health/readyness"])
-        fun `health-endepunkter er tilgjengelige uten token`(
+        @ValueSource(
+            strings = [
+                "/internal",
+                "/internal/health",
+                "/internal/health/liveness",
+                "/internal/health/readyness",
+                "/internal/info",
+                "/internal/metrics",
+            ],
+        )
+        fun `actuator-endepunkter er tilgjengelige uten token`(
             path: String,
         ) {
             // Act
