@@ -4953,9 +4953,9 @@
   {
     "_createdAt": "2022-11-30T14:03:43Z",
     "_id": "begrunnelse-bbdd8222-df7e-49ac-a10f-3f8df0a02d76",
-    "_rev": "QMVkWzcvcolX4yVIBlsxyW",
+    "_rev": "gB5MOe35iyZ11Q5PH3Ze6Z",
     "_type": "begrunnelse",
-    "_updatedAt": "2025-04-08T10:01:18Z",
+    "_updatedAt": "2026-10-27T08:18:20Z",
     "annenForeldersAktivitet": [
       "I_ARBEID",
       "MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN",
@@ -5047,7 +5047,7 @@
             "_key": "2a5b9462f0f3",
             "_type": "span",
             "marks": [],
-            "text": "  i "
+            "text": " i "
           },
           {
             "_key": "e0fe4fb5c78d",
@@ -5161,21 +5161,10 @@
             }
           },
           {
-            "_key": "c89024bfe6e8",
-            "_type": "span",
-            "marks": [],
-            "text": ""
-          },
-          {
-            "_key": "f8e635a0d0c9",
-            "_type": "eosFlettefelt",
-            "flettefelt": "annenForeldersAktivitetsland"
-          },
-          {
             "_key": "20fbabd86c51",
             "_type": "span",
             "marks": [],
-            "text": "  i "
+            "text": " i "
           },
           {
             "_key": "021d07863ea1",
@@ -13940,9 +13929,9 @@
   {
     "_createdAt": "2024-02-23T12:36:37Z",
     "_id": "begrunnelse-53f21b7a-c07d-49fa-a2eb-84aa80f81c7c",
-    "_rev": "noFWea4ltu1yIlSS5Lk98U",
+    "_rev": "CjZAtTdG26dkX6WgyOVPpH",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-02-26T12:53:49Z",
+    "_updatedAt": "2026-10-27T08:15:28Z",
     "annenForeldersAktivitet": [
       "I_ARBEID",
       "MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN",
@@ -13987,7 +13976,7 @@
             "_key": "6477c3e59299",
             "_type": "span",
             "marks": [],
-            "text": "  i Norge. Du "
+            "text": " i Norge. Du "
           },
           {
             "_key": "bc733ef8ba8c",
@@ -14002,7 +13991,7 @@
             "_key": "d8d0977f46e7",
             "_type": "span",
             "marks": [],
-            "text": " . Barnet bor i "
+            "text": ". Barnet bor i "
           },
           {
             "_key": "46738ea1d2ea",
@@ -14060,7 +14049,7 @@
             "_key": "35b5e6593a8b",
             "_type": "span",
             "marks": [],
-            "text": ". Den andre forelderen er utsendt arbeidstakar frå  "
+            "text": ". Den andre forelderen er utsendt arbeidstakar frå "
           },
           {
             "_key": "32b1f5594f17",
@@ -14071,7 +14060,7 @@
             "_key": "ced2308f499b",
             "_type": "span",
             "marks": [],
-            "text": "  i Noreg. Du "
+            "text": " i Noreg. Du "
           },
           {
             "_key": "d33c6e121502",
@@ -14086,7 +14075,7 @@
             "_key": "d169f56396cf",
             "_type": "span",
             "marks": [],
-            "text": " . Barnet bur i "
+            "text": ". Barnet bur i "
           },
           {
             "_key": "271422e9afd2",

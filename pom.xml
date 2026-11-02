@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.1.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -24,7 +24,7 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20261026155201_99f3bfc</prosessering.version>
+        <prosessering.version>2.20261027150838_57ccae7</prosessering.version>
         <felles.version>4.20261026180911_c3ff6d9</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20261026123216_f55dd20</eksterne-kontrakter-bisys.version>
         <familie.kontrakter.saksstatistikk>2.0_20261026123216_f55dd20</familie.kontrakter.saksstatistikk>
@@ -38,7 +38,7 @@
         <springdoc.version>3.1.1</springdoc.version>
         <kotlinx.version>1.11.0</kotlinx.version>
         <kotlinx-kover.version>0.9.11</kotlinx-kover.version>
-        <mock-oauth2-server.version>6.0.2</mock-oauth2-server.version>
+        <mock-oauth2-server.version>6.1.2</mock-oauth2-server.version>
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <unleash.version>12.3.1</unleash.version>
@@ -72,7 +72,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>4.1.1</version>
+                <version>4.1.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

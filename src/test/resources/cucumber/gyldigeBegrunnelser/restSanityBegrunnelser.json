@@ -28164,11 +28164,17 @@
   {
     "_createdAt": "2022-04-28T13:58:48Z",
     "_id": "9b64cac0-5f5c-4464-9854-4bb604900f40",
-    "_rev": "UhBmwd6E4TMdvn0JYlMVg6",
+    "_rev": "s5bO7mmdcSAEOIvzeF07UU",
+    "_system": {
+      "base": {
+        "id": "9b64cac0-5f5c-4464-9854-4bb604900f40",
+        "rev": "s5bO7mmdcSAEOIvzeEwdQx"
+      }
+    },
     "_type": "begrunnelse",
-    "_updatedAt": "2023-10-30T09:37:08Z",
+    "_updatedAt": "2026-10-28T14:53:48Z",
     "apiNavn": "innvilgetTilleggstekstOpphorUtvidetNyfoedtBarn",
-    "begrunnelseTypeForPerson": "INNVILGET",
+    "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
       {
         "_key": "9e725d55737f",
@@ -28191,6 +28197,7 @@
       "9",
       "11"
     ],
+    "ikkeIBruk": true,
     "mappe": [
       "INNVILGET"
     ],
@@ -28211,7 +28218,7 @@
         "style": "normal"
       }
     ],
-    "periodeResultatForPerson": "INNVILGET_ELLER_ØKNING",
+    "periodeResultatForPerson": "IKKE_RELEVANT",
     "regelverk": "FELLES",
     "valgbarhet": "TILLEGGSTEKST",
     "visningsnavn": "[Utgått] Tilleggstekst opphør utvidet nyfødt barn"

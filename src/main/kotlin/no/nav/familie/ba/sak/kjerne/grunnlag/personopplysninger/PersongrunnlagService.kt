@@ -385,6 +385,9 @@ class PersongrunnlagService(
 
         lagreHistoriskeIdenter(personInfo.historiskeIdenter, aktør)
 
+        val erUkrainskSøker = personType == PersonType.SØKER && personInfo.statsborgerskap?.any { it.land == "UKR" } == true
+        val cutoffDatoForOpphold = if (erUkrainskSøker) personInfo.fødselsdato else eldsteBarnsFødselsdato
+
         return Person(
             type = personType,
             personopplysningGrunnlag = personopplysningGrunnlag,
@@ -396,7 +399,7 @@ class PersongrunnlagService(
         ).also { person ->
             person.opphold =
                 personInfo.opphold
-                    ?.filtrerBortOppholdFørEldsteBarn(eldsteBarnsFødselsdato)
+                    ?.filtrerBortOppholdFørEldsteBarn(cutoffDatoForOpphold)
                     ?.map { GrOpphold.fraOpphold(it, person) }
                     ?.toMutableList() ?: mutableListOf()
             person.bostedsadresser =

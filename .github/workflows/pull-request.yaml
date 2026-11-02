@@ -63,6 +63,15 @@ jobs:
       profile: 'verdikjedetest-feature-toggle-paa'
       java-version: '25'
 
+  varsle-slack-sanity-mock:
+    name: Slack-melding ved feil i Sanity-mock-PR
+    if: failure() && github.event_name == 'pull_request' && github.head_ref == 'sanity-bot'
+    permissions: {}
+    needs: [ ktlint, enhetstest, integrasjonstest, verdikjedetest-feature-toggle-av, verdikjedetest-feature-toggle-paa ]
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/notify-failed-workflow.yaml@main # ratchet:exclude
+    secrets:
+      BAKS_DEPLOYMENTS_SLACK_WEBHOOK: ${{ secrets.BAKS_DEPLOYMENTS_SLACK_WEBHOOK }}
+
   sonar:
     if: github.actor != 'dependabot[bot]' && github.event_name != 'merge_group'
     name: Sonar
