@@ -2,11 +2,13 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.fake.FakePdlRestKlient.Companion.leggTilBostedsadresseIPDL
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilBostedsadresserIPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilOppholdsadresserIPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
+import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.settPersonInfoStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -28,14 +30,21 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse.INNV
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.KommunerIFinnmarkOgNordTroms.ALTA
+import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
+import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -52,6 +61,8 @@ class FødselshendelseTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val beregningService: BeregningService,
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+    @Autowired private val fakeInfotrygdBarnetrygdKlient: FakeInfotrygdBarnetrygdKlient,
 ) : AbstractSpringIntegrationTest() {
     private val vegadresseIFinnmark =
         Vegadresse(
@@ -76,6 +87,52 @@ class FødselshendelseTest(
             tilleggsnavn = "Under broen",
             postnummer = "0562",
         )
+
+    @ParameterizedTest
+    @ValueSource(strings = ["infotrygdhistorikk", "ukjent statsborgerskap"])
+    fun `skal behandle fødselshendelse i ba-sak uten eksisterende fagsak`(tilfelle: String) {
+        // Arrange
+        val barnFødselsdato = LocalDate.now()
+        val barnFnr = leggTilPersonInfo(barnFødselsdato)
+        val søkerFnr = leggTilPersonInfo(barnFødselsdato.minusYears(30))
+        val søkerAktør = personidentService.hentAktør(søkerFnr)
+        val bostedsadresse =
+            Bostedsadresse(
+                gyldigFraOgMed = barnFødselsdato.minusMonths(6),
+                vegadresse = vegadresseUtenforFinnmark,
+            )
+        leggTilRelasjonIPersonInfo(søkerFnr, barnFnr, FORELDERBARNRELASJONROLLE.BARN)
+        leggTilBostedsadresserIPersonInfo(listOf(søkerFnr, barnFnr), listOf(bostedsadresse))
+        leggTilBostedsadresseIPDL(listOf(søkerFnr, barnFnr), bostedsadresse)
+        when (tilfelle) {
+            "infotrygdhistorikk" -> {
+                fakeInfotrygdBarnetrygdKlient.leggTilStønaderIInfotrygd(
+                    søkerFnr,
+                    emptyList(),
+                    InfotrygdSøkResponse(listOf(Stønad(opphørtFom = "012020")), emptyList()),
+                )
+            }
+
+            "ukjent statsborgerskap" -> {
+                settPersonInfoStatsborgerskap(
+                    søkerFnr,
+                    Statsborgerskap(land = "XUK", gyldigFraOgMed = null, gyldigTilOgMed = null, bekreftelsesdato = null),
+                )
+            }
+        }
+        val task =
+            BehandleFødselshendelseTask.opprettTask(
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(søkerFnr, listOf(barnFnr))),
+            )
+        assertThat(fagsakService.hentFagsakerPåPerson(søkerAktør)).isEmpty()
+
+        // Act
+        behandleFødselshendelseTask.doTask(task)
+
+        // Assert
+        val fagsak = fagsakService.hentFagsakerPåPerson(søkerAktør).single()
+        assertThat(behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)).hasSize(1)
+    }
 
     @Test
     fun `Skal innvilge barnetrygd i fødselshendelse førstegangsbehandling hvis mor har bodd minst 6 mnd i Norge og barn bor i Norge ved fødsel`() {
