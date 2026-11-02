@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import no.nav.familie.ba.sak.integrasjoner.RETRY_BACKOFF_5000MS
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.StartBehandlingDto
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -22,16 +21,6 @@ class InfotrygdFeedKlient(
     @Qualifier("infotrygdFeedRestClient") private val restClient: RestClient,
     @Value("$RETRY_BACKOFF_5000MS") private val retryBackoffDelay: Long,
 ) {
-    fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) =
-        try {
-            sendFeedTilInfotrygd(
-                URI.create("$klientUri/barnetrygd/v1/feed/foedselsmelding"),
-                infotrygdFødselhendelsesFeedDto,
-            )
-        } catch (e: Exception) {
-            loggOgKastException(e)
-        }
-
     fun sendVedtakFeedTilInfotrygd(infotrygdVedtakFeedDto: InfotrygdVedtakFeedDto) {
         try {
             sendFeedTilInfotrygd(URI.create("$klientUri/barnetrygd/v1/feed/vedtaksmelding"), infotrygdVedtakFeedDto)

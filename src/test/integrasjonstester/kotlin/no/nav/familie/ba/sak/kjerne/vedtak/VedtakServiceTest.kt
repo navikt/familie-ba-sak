@@ -3,13 +3,11 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -80,15 +78,11 @@ class VedtakServiceTest(
     @Autowired
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     @Autowired
-    private val infotrygdService: InfotrygdService,
-    @Autowired
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired
     private val taskRepository: TaskRepositoryWrapper,
     @Autowired
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
-    @Autowired
-    private val featureToggleService: FeatureToggleService,
     @Autowired
     private val eksternBehandlingRelasjonService: EksternBehandlingRelasjonService,
     @Autowired
@@ -119,11 +113,9 @@ class VedtakServiceTest(
                 andelTilkjentYtelseRepository,
                 loggService,
                 arbeidsfordelingService,
-                infotrygdService,
                 vedtaksperiodeService,
                 taskRepository,
                 vilkårsvurderingService,
-                featureToggleService,
                 eksternBehandlingRelasjonService,
                 fagsakLåsingService,
             )

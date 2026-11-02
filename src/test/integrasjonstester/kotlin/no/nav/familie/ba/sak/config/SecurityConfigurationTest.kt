@@ -26,13 +26,40 @@ import tools.jackson.module.kotlin.readValue
 class SecurityConfigurationTest : WebSpringAuthTestRunner() {
     @Nested
     inner class PermitAll {
-        @Test
-        fun `internal endepunkt er tilgjengelig uten token`() {
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "/internal",
+                "/internal/health",
+                "/internal/health/liveness",
+                "/internal/health/readyness",
+                "/internal/info",
+                "/internal/metrics",
+            ],
+        )
+        fun `actuator-endepunkter er tilgjengelige uten token`(
+            path: String,
+        ) {
             // Act
             val response =
                 restClient
                     .get()
-                    .uri(hentUrl("/internal/health/liveness"))
+                    .uri(hentUrl(path))
+                    .retrieve()
+                    .toEntity(String::class.java)
+
+            // Assert
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        }
+
+        @Test
+        fun `prometheus er tilgjengelig uten token`() {
+            // Act
+            val response =
+                restClient
+                    .get()
+                    .uri(hentUrl("/internal/prometheus"))
+                    .accept(MediaType.TEXT_PLAIN)
                     .retrieve()
                     .toEntity(String::class.java)
 
@@ -43,6 +70,21 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
     @Nested
     inner class UtenToken {
+        @Test
+        fun `øvrige internal-endepunkter uten token returnerer 401`() {
+            // Act & Assert
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restClient
+                        .get()
+                        .uri(hentUrl("/internal/autobrev"))
+                        .retrieve()
+                        .toEntity(String::class.java)
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
+        }
+
         @Test
         fun `api-kall uten token returnerer 401`() {
             // Act & Assert

@@ -11,9 +11,6 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -84,15 +81,6 @@ internal class BehandleFødselshendelseTaskTest {
                             )
                         } returns ""
                     },
-                velgFagsystemService =
-                    mockk<VelgFagSystemService>().apply {
-                        every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns
-                            Pair(
-                                FagsystemRegelVurdering.SEND_TIL_BA,
-                                FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
-                            )
-                    },
-                infotrygdFeedService = mockk(),
                 personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() },
                 startSatsendring =
                     mockk<StartSatsendring>().apply {
@@ -127,15 +115,6 @@ internal class BehandleFødselshendelseTaskTest {
             taskRepositoryWrapper = taskRepositoryWrapper,
             personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns randomAktør },
             autovedtakStegService = mockk(),
-            velgFagsystemService =
-                mockk<VelgFagSystemService>().apply {
-                    every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns
-                        Pair(
-                            FagsystemRegelVurdering.SEND_TIL_BA,
-                            FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
-                        )
-                },
-            infotrygdFeedService = mockk(),
             startSatsendring =
                 mockk<StartSatsendring>().apply {
                     every {
@@ -221,15 +200,6 @@ internal class BehandleFødselshendelseTaskTest {
         BehandleFødselshendelseTask(
             taskRepositoryWrapper = mockk(),
             autovedtakStegService = autovedtakStegService,
-            velgFagsystemService =
-                mockk<VelgFagSystemService>().apply {
-                    every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns
-                        Pair(
-                            FagsystemRegelVurdering.SEND_TIL_BA,
-                            FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
-                        )
-                },
-            infotrygdFeedService = mockk(),
             personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() },
             startSatsendring =
                 mockk<StartSatsendring>().apply {

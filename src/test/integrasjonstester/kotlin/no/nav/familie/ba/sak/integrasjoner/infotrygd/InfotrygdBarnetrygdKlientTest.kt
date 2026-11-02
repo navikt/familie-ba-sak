@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -14,6 +15,7 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.jsonMapper
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -22,15 +24,12 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.env.Environment
-import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClient
 import java.net.URI
 
 class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
-    val løpendeBarnetrygdURL = "/api/infotrygd/barnetrygd/lopende-barnetrygd"
     val sakerURL = "/api/infotrygd/barnetrygd/saker"
     val stønaderURL = "/api/infotrygd/barnetrygd/stonad?historikk=false"
-    val brevURL = "/api/infotrygd/barnetrygd/brev"
 
     private val søkersIdenter = listOf(randomFnr(), randomFnr(), randomFnr())
     private val barnasIdenter = listOf(randomBarnFnr(), randomBarnFnr())
@@ -63,15 +62,6 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr og barns fødselsnummer`() {
         // Arrange
         wireMockServer.stubFor(
-            post(løpendeBarnetrygdURL).willReturn(
-                okJson(
-                    jsonMapper.writeValueAsString(
-                        InfotrygdLøpendeBarnetrygdResponse(false),
-                    ),
-                ),
-            ),
-        )
-        wireMockServer.stubFor(
             post(sakerURL).willReturn(
                 okJson(
                     jsonMapper.writeValueAsString(
@@ -93,20 +83,10 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
         val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
 
         // Act
-        val finnesIkkeHosInfotrygd = klient.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
         val hentsakerResponse = klient.hentSaker(søkersIdenter, barnasIdenter)
         val hentstønaderResponse = klient.hentStønader(søkersIdenter, barnasIdenter)
 
         // Assert
-        wireMockServer.verify(
-            anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
-                equalToJson(
-                    jsonMapper.writeValueAsString(
-                        infotrygdSøkRequest,
-                    ),
-                ),
-            ),
-        )
         wireMockServer.verify(
             anyRequestedFor(urlEqualTo(sakerURL)).withRequestBody(
                 equalToJson(
@@ -125,7 +105,6 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
                 ),
             ),
         )
-        Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
         Assertions.assertEquals(hentsakerResponse.bruker[0].status, "IP")
         Assertions.assertEquals(hentstønaderResponse.bruker.size, 1)
     }
@@ -134,10 +113,10 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr`() {
         // Arrange
         wireMockServer.stubFor(
-            post(løpendeBarnetrygdURL).willReturn(
+            post(sakerURL).willReturn(
                 okJson(
                     jsonMapper.writeValueAsString(
-                        InfotrygdLøpendeBarnetrygdResponse(false),
+                        InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList()),
                     ),
                 ),
             ),
@@ -146,11 +125,11 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
         val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter, emptyList())
 
         // Act
-        val finnesIkkeHosInfotrygd = klient.harLøpendeSakIInfotrygd(søkersIdenter, emptyList())
+        val saker = klient.hentSaker(søkersIdenter)
 
         // Assert
         wireMockServer.verify(
-            anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
+            anyRequestedFor(urlEqualTo(sakerURL)).withRequestBody(
                 equalToJson(
                     jsonMapper.writeValueAsString(
                         infotrygdSøkRequest,
@@ -158,37 +137,17 @@ class InfotrygdBarnetrygdKlientTest : AbstractSpringIntegrationTest() {
                 ),
             ),
         )
-        Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
+        assertThat(saker.bruker.single().status).isEqualTo("IP")
     }
 
     @Test
     fun `Invokering av Infotrygd-Barnetrygd genererer http feil`() {
         // Arrange
-        wireMockServer.stubFor(post(løpendeBarnetrygdURL).willReturn(aResponse().withStatus(401)))
+        wireMockServer.stubFor(post(sakerURL).willReturn(aResponse().withStatus(401)))
 
         // Act & Assert
-        assertThrows<HttpClientErrorException> {
-            klient.harLøpendeSakIInfotrygd(søkersIdenter, barnasIdenter)
+        assertThrows<Feil> {
+            klient.hentSaker(søkersIdenter, barnasIdenter)
         }
-    }
-
-    @Test
-    fun `harNyligSendtBrevFor skal returnerer true for personIdent`() {
-        // Arrange
-        wireMockServer.stubFor(
-            post(brevURL).willReturn(
-                okJson(jsonMapper.writeValueAsString(InfotrygdBarnetrygdKlient.SendtBrevResponse(true, emptyList()))),
-            ),
-        )
-
-        // Act
-        val harNyligSendtBrev =
-            klient.harNyligSendtBrevFor(
-                søkersIdenter,
-                listOf(InfotrygdBrevkode.BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG),
-            )
-
-        // Assert
-        Assertions.assertEquals(true, harNyligSendtBrev.harSendtBrev)
     }
 }

@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategi
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
@@ -287,11 +286,9 @@ class CucumberMock(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             loggService = loggService,
             arbeidsfordelingService = arbeidsfordelingService,
-            infotrygdService = mockk<InfotrygdService>(),
             vedtaksperiodeService = vedtaksperiodeService,
             taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
-            featureToggleService = featureToggleService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
             fagsakLåsingService = mockk(relaxed = true),
         )
