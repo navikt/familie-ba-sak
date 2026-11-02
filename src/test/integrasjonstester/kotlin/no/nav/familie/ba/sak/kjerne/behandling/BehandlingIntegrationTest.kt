@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.randomSøkerFødselsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonerMedAndelerDto
-import no.nav.familie.ba.sak.fake.FakeInfotrygdBarnetrygdKlient
 import no.nav.familie.ba.sak.fake.FakePersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.fake.FakeTaskRepositoryWrapper
 import no.nav.familie.ba.sak.fake.tilPayload
@@ -101,8 +100,6 @@ class BehandlingIntegrationTest(
     @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
-    private val fakeInfotrygdBarnetrygdKlient: FakeInfotrygdBarnetrygdKlient,
-    @Autowired
     private val personidentService: PersonidentService,
     @Autowired
     private val fakeTaskRepositoryWrapper: FakeTaskRepositoryWrapper,
@@ -172,29 +169,10 @@ class BehandlingIntegrationTest(
     }
 
     @Test
-    fun `Kast feil ved opprettelse av behandling for ny person med åpen sak i Infotrygd`() {
+    fun `skal opprette revurdering etter migrering fra Infotrygd`() {
         // Arrange
         val fnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-
-        fakeInfotrygdBarnetrygdKlient.leggTilÅpenSakIInfotrygd(fnr, emptyList(), true)
-
-        // Act & Assert
-        assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak)) }
-            .hasMessageContaining("sak i Infotrygd")
-    }
-
-    @Test
-    fun `Kast feil ved opprettelse av behandling for ny person med løpende sak i Infotrygd, utenom migrering`() {
-        // Arrange
-        val fnr = randomFnr()
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-
-        fakeInfotrygdBarnetrygdKlient.leggTilLøpendeSakIInfotrygd(fnr, emptyList(), true)
-
-        // Act & Assert
-        assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak)) }
-            .hasMessageContaining("sak i Infotrygd")
 
         val behandling =
             behandlingService.opprettBehandling(
@@ -208,6 +186,8 @@ class BehandlingIntegrationTest(
             )
         assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.id))
         markerBehandlingSomAvsluttet(behandling)
+
+        // Act & Assert
         assertDoesNotThrow {
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
                 lagBehandlingUtenId(
