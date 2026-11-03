@@ -10,7 +10,6 @@ fun main(args: Array<String>) {
             "postgres",
             "mock-brev-klient",
             "fake-økonomi-klient",
-            "mock-infotrygd-feed",
             "mock-infotrygd-barnetrygd",
             "mock-pdl",
             "mock-ident-klient",

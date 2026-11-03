@@ -54,8 +54,6 @@ FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.intern.dev.nav.no
 FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd/.default
 FAMILIE_EF_SAK_URL: https://familie-ef-sak.intern.dev.nav.no
 FAMILIE_EF_SAK_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
-FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.intern.dev,nav.no
-FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd.feed/.default
 
 
 CREDENTIAL_USERNAME: not-a-real-srvuser

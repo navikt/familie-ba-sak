@@ -67,7 +67,6 @@ class StegServiceTest {
             beregningService = beregningService,
             søknadGrunnlagService = mockk(),
             tilgangService = tilgangService,
-            infotrygdFeedService = mockk(),
             satsendringService = satsendringService,
             personopplysningerService = personopplysningerService,
             automatiskBeslutningService = mockk(),
