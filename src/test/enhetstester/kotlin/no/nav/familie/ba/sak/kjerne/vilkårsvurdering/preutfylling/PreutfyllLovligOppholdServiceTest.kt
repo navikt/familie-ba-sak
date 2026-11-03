@@ -393,6 +393,15 @@ class PreutfyllLovligOppholdServiceTest {
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
                 lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
                     søker.apply {
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "AFG",
+                                    gyldigPeriode = sisteTiÅr,
+                                    medlemskap = Medlemskap.TREDJELANDSBORGER,
+                                    person = this,
+                                ),
+                            )
                         opphold =
                             mutableListOf(
                                 GrOpphold(
@@ -426,6 +435,15 @@ class PreutfyllLovligOppholdServiceTest {
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
                 lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
                     søker.apply {
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "AFG",
+                                    gyldigPeriode = sisteTiÅr,
+                                    medlemskap = Medlemskap.TREDJELANDSBORGER,
+                                    person = this,
+                                ),
+                            )
                         opphold =
                             mutableListOf(
                                 GrOpphold(
@@ -466,6 +484,15 @@ class PreutfyllLovligOppholdServiceTest {
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
                 lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
                     søker.apply {
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "AFG",
+                                    gyldigPeriode = sisteTiÅr,
+                                    medlemskap = Medlemskap.TREDJELANDSBORGER,
+                                    person = this,
+                                ),
+                            )
                         opphold =
                             mutableListOf(
                                 GrOpphold(
