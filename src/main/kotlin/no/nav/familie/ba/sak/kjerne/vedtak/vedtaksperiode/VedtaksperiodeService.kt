@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.GenererVedtaksperioderForOverstyrtEndringstidspunktDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PutVedtaksperiodeMedFriteksterDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
@@ -82,7 +81,6 @@ class VedtaksperiodeService(
     private val kodeverkService: KodeverkService,
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
-    private val featureToggleService: FeatureToggleService,
     private val strengtFortroligService: StrengtFortroligService,
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
@@ -111,13 +109,11 @@ class VedtaksperiodeService(
     fun finnEndringstidspunktForBehandling(behandlingId: Long): LocalDate {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        val forrigeBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
         return utledEndringstidspunkt(
             behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
             behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
-            featureToggleService = featureToggleService,
         )
     }
 
@@ -240,7 +236,6 @@ class VedtaksperiodeService(
             grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
             vedtak = vedtak,
             nåDato = LocalDate.now(),
-            featureToggleService = featureToggleService,
         )
     }
 

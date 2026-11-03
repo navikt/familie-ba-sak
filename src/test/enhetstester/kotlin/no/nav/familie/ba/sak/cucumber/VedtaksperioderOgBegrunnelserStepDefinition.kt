@@ -388,7 +388,6 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                 grunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
                 grunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
                 nåDato = dagensDato,
-                featureToggleService = mockFeatureToggleService(),
             )
 
         val utvidedeVedtaksperioderMedBegrunnelser =
@@ -845,7 +844,6 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             utledEndringstidspunkt(
                 behandlingsGrunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
                 behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-                featureToggleService = mockFeatureToggleService(),
             )
 
         val forventetEndringstidspunkt =
