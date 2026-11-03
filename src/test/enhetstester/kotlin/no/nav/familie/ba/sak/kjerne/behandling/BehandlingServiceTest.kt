@@ -34,6 +34,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
+import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
+import no.nav.familie.kontrakter.felles.jsonMapper
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -271,6 +276,57 @@ class BehandlingServiceTest {
             val opprettetLogg = behandlingLoggRequestSlot.captured
 
             assertThat(opprettetLogg.begrunnelse).isEqualTo("Opprettet behandling i test")
+        }
+
+        @Test
+        fun `skal opprette BehandleSak-oppgave med oppgavebeskrivelsen fra ny behandling`() {
+            // Arrange
+            val fagsak = lagFagsak()
+
+            val førstegangsbehandling =
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.SØKNAD,
+                )
+
+            val nyBehandling =
+                lagNyBehandling(
+                    fagsakId = fagsak.id,
+                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                ).copy(oppgavebeskrivelse = "Vilkårsvurderingen har vilkår som ikke er oppfylt.")
+
+            val lagredeTasker = mutableListOf<Task>()
+
+            every { fagsakRepository.finnFagsak(nyBehandling.fagsakId) } returns fagsak
+            every { behandlingHentOgPersisterService.finnAktivForFagsak(nyBehandling.fagsakId) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns førstegangsbehandling
+            every { behandlingstemaService.finnBehandlingKategori(nyBehandling.fagsakId) } returns BehandlingKategori.NASJONAL
+            every { behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(nyBehandling.fagsakId) } returns BehandlingUnderkategori.ORDINÆR
+            every { behandlingstemaService.finnUnderkategoriFraAktivBehandling(nyBehandling.fagsakId) } returns BehandlingUnderkategori.ORDINÆR
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(any(), any()) } returnsArgument 0
+            every { arbeidsfordelingService.fastsettBehandlendeEnhet(any(), any()) } just runs
+            every { behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(any()) } just runs
+            every { behandlingSøknadsinfoService.lagreSøknadsinfo(any(), any(), any()) } just runs
+            every { saksstatistikkEventPublisher.publiserBehandlingsstatistikk(any()) } just runs
+            every { vedtakRepository.findByBehandlingAndAktivOptional(any()) } returns null
+            every { vedtaksperiodeService.kopierOverVedtaksperioder(any(), any()) } just runs
+            every { vedtakRepository.save(any()) } returnsArgument 0
+            every { loggService.opprettBehandlingLogg(any()) } just runs
+            every { taskRepository.save(capture(lagredeTasker)) } returnsArgument 0
+
+            // Act
+            behandlingService.opprettBehandling(nyBehandling)
+
+            // Assert
+            val opprettOppgaveTask =
+                jsonMapper.readValue(
+                    lagredeTasker.single { it.type == OpprettOppgaveTask.TASK_STEP_TYPE }.payload,
+                    OpprettOppgaveTaskDTO::class.java,
+                )
+            assertThat(opprettOppgaveTask.oppgavetype).isEqualTo(Oppgavetype.BehandleSak)
+            assertThat(opprettOppgaveTask.beskrivelse).isEqualTo("Vilkårsvurderingen har vilkår som ikke er oppfylt.")
         }
 
         @Test

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
@@ -19,8 +18,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.automatiskbehandlingavSoknadStatistikk.AutovedtakSøknadStatistikkService
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
 
@@ -32,7 +29,6 @@ class AutovedtakSøknadService(
     private val autovedtakSøknadBegrunnelseService: AutovedtakSøknadBegrunnelseService,
     private val autovedtakSøknadValideringService: AutovedtakSøknadValideringService,
     private val stegService: StegService,
-    private val oppgaveService: OppgaveService,
     private val autovedtakSøknadStatistikkService: AutovedtakSøknadStatistikkService,
 ) : AutovedtakBehandlingService<SøknadData> {
     override fun skalAutovedtakBehandles(behandlingsdata: SøknadData): Boolean = true
@@ -126,7 +122,7 @@ class AutovedtakSøknadService(
         automatiskBehandling: Behandling,
         behandlingsdata: SøknadData,
         begrunnelse: String,
-        begrunnelseIOppgave: String = "",
+        begrunnelseIOppgave: String? = null,
     ): String {
         stegService.håndterHenleggBehandling(
             behandling = automatiskBehandling,
@@ -137,16 +133,11 @@ class AutovedtakSøknadService(
                 ),
         )
 
-        val manuellBehandling =
-            stegService.håndterNyBehandlingOgSendInfotrygdFeed(
-                behandlingsdata.nyBehandling.copy(behandlingÅrsak = BehandlingÅrsak.SØKNAD),
-            )
-
-        oppgaveService.opprettOppgaveForManuellBehandling(
-            behandlingId = manuellBehandling.id,
-            begrunnelse = begrunnelseIOppgave,
-            manuellOppgaveType = ManuellOppgaveType.SØKNAD,
-            oppgavetype = Oppgavetype.BehandleSak,
+        stegService.håndterNyBehandlingOgSendInfotrygdFeed(
+            behandlingsdata.nyBehandling.copy(
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                oppgavebeskrivelse = begrunnelseIOppgave,
+            ),
         )
 
         return "Automatisk behandling av søknad er henlagt og sendt til manuell behandling: $begrunnelse"

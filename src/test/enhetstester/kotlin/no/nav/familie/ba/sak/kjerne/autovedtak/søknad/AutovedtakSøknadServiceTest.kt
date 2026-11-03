@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.SøknadData
@@ -37,8 +36,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.statistikk.automatiskbehandlingavSoknadStatistikk.AutovedtakSøknadStatistikkService
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -55,7 +52,6 @@ class AutovedtakSøknadServiceTest {
     private val autovedtakSøknadBegrunnelseService = mockk<AutovedtakSøknadBegrunnelseService>()
     private val autovedtakSøknadValideringService = mockk<AutovedtakSøknadValideringService>()
     private val stegService = mockk<StegService>()
-    private val oppgaveService = mockk<OppgaveService>()
     private val statistikkService = mockk<AutovedtakSøknadStatistikkService>()
 
     private val autovedtakSøknadService =
@@ -66,7 +62,6 @@ class AutovedtakSøknadServiceTest {
             autovedtakSøknadBegrunnelseService = autovedtakSøknadBegrunnelseService,
             autovedtakSøknadValideringService = autovedtakSøknadValideringService,
             stegService = stegService,
-            oppgaveService = oppgaveService,
             autovedtakSøknadStatistikkService = statistikkService,
         )
 
@@ -138,7 +133,6 @@ class AutovedtakSøknadServiceTest {
             every { taskService.save(any()) } returns mockk()
             every { stegService.håndterHenleggBehandling(any(), any()) } returns behandling
             every { stegService.håndterNyBehandlingOgSendInfotrygdFeed(any()) } returns lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
-            every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) } returns "Oppgave opprettet"
             justRun { statistikkService.lagreÅrsaker(any(), any()) }
         }
 
@@ -157,7 +151,6 @@ class AutovedtakSøknadServiceTest {
                 statistikkService.lagreÅrsaker(automatiskBehandling.id, årsaker)
                 stegService.håndterHenleggBehandling(automatiskBehandling, any())
                 stegService.håndterNyBehandlingOgSendInfotrygdFeed(any())
-                oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any())
             }
             verify(exactly = 1) { statistikkService.lagreÅrsaker(any(), any()) }
         }
@@ -246,7 +239,7 @@ class AutovedtakSøknadServiceTest {
             verify(exactly = 1) { stegService.håndterHenleggBehandling(automatiskBehandling, capture(henleggBehandlingInfoSlot)) }
             assertThat(henleggBehandlingInfoSlot.captured.årsak).isEqualTo(HenleggÅrsak.AUTOMATISK_HENLAGT)
             assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Vilkårsvurderingen har vilkår som ikke er oppfylt.")
-            verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling) }
+            verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling.copy(oppgavebeskrivelse = "Vilkårsvurderingen har vilkår som ikke er oppfylt.")) }
             verify(exactly = 0) {
                 stegService.håndterBehandlingsresultat(any())
                 autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(any())
@@ -269,15 +262,7 @@ class AutovedtakSøknadServiceTest {
             verify(exactly = 1) { stegService.håndterHenleggBehandling(automatiskBehandling, capture(henleggBehandlingInfoSlot)) }
             assertThat(henleggBehandlingInfoSlot.captured.årsak).isEqualTo(HenleggÅrsak.AUTOMATISK_HENLAGT)
             assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.")
-            verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling) }
-            verify(exactly = 1) {
-                oppgaveService.opprettOppgaveForManuellBehandling(
-                    behandlingId = any(),
-                    begrunnelse = "Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.",
-                    manuellOppgaveType = ManuellOppgaveType.SØKNAD,
-                    oppgavetype = Oppgavetype.BehandleSak,
-                )
-            }
+            verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling.copy(oppgavebeskrivelse = "Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.")) }
             verify(exactly = 0) {
                 simuleringService.oppdaterSimuleringPåBehandling(any())
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
@@ -298,7 +283,9 @@ class AutovedtakSøknadServiceTest {
             verifyOrder {
                 statistikkService.lagreÅrsaker(automatiskBehandling.id, listOf(UTBETALING_OVER_100_PROSENT_BARN))
                 stegService.håndterHenleggBehandling(automatiskBehandling, any())
-                stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
+                stegService.håndterNyBehandlingOgSendInfotrygdFeed(
+                    nyBehandling.copy(oppgavebeskrivelse = "Automatisk behandling av søknad gir utbetaling som overstiger 100% for ett eller flere barn."),
+                )
             }
             verify(exactly = 0) {
                 simuleringService.oppdaterSimuleringPåBehandling(any())
@@ -318,7 +305,6 @@ class AutovedtakSøknadServiceTest {
             verify(exactly = 0) {
                 stegService.håndterHenleggBehandling(any(), any())
                 stegService.håndterNyBehandlingOgSendInfotrygdFeed(any())
-                oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any())
                 statistikkService.lagreÅrsaker(any(), any())
             }
         }
@@ -334,7 +320,6 @@ class AutovedtakSøknadServiceTest {
             verify(exactly = 0) {
                 stegService.håndterHenleggBehandling(any(), any())
                 stegService.håndterNyBehandlingOgSendInfotrygdFeed(any())
-                oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any())
                 statistikkService.lagreÅrsaker(any(), any())
             }
         }
@@ -352,7 +337,7 @@ class AutovedtakSøknadServiceTest {
             // Assert
             verify(exactly = 1) { stegService.håndterHenleggBehandling(automatiskBehandling, capture(henleggBehandlingInfoSlot)) }
             assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Automatisk behandling av søknad gir endring i andeler for 1 person(er) det ikke er fremstilt krav for.")
-            verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling) }
+            verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling.copy(oppgavebeskrivelse = "Automatisk behandling av søknad gir endring i andeler for 1 person(er) det ikke er fremstilt krav for.")) }
             verify(exactly = 0) {
                 simuleringService.oppdaterSimuleringPåBehandling(any())
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
@@ -373,7 +358,7 @@ class AutovedtakSøknadServiceTest {
             // Assert
             verify(exactly = 1) { stegService.håndterHenleggBehandling(automatiskBehandling, capture(henleggBehandlingInfoSlot)) }
             assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Behandling av søknad må håndteres manuelt.")
-            verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling) }
+            verify(exactly = 1) { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling.copy(oppgavebeskrivelse = "Behandling av søknad må håndteres manuelt.")) }
             verify(exactly = 0) {
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
                 taskService.save(any())
@@ -432,7 +417,6 @@ class AutovedtakSøknadServiceTest {
                 every { stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(any(), any()) } returns behandlingStoppetAvFiltrering
                 every { stegService.håndterHenleggBehandling(any(), any()) } returns behandlingStoppetAvFiltrering
                 every { stegService.håndterNyBehandlingOgSendInfotrygdFeed(any()) } returns manuellBehandling
-                every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any(), any()) } returns "Oppgave opprettet"
             }
 
             @Test
@@ -451,7 +435,7 @@ class AutovedtakSøknadServiceTest {
             }
 
             @Test
-            fun `skal opprette manuell behandling med BehandleSak-oppgave etter henleggelsen`() {
+            fun `skal opprette manuell behandling uten beskrivelse i oppgaven etter henleggelsen`() {
                 // Act
                 val resultat = autovedtakSøknadService.kjørBehandling(søknadData)
 
@@ -460,11 +444,6 @@ class AutovedtakSøknadServiceTest {
                 verifyOrder {
                     stegService.håndterHenleggBehandling(behandlingStoppetAvFiltrering, any())
                     stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
-                    oppgaveService.opprettOppgaveForManuellBehandling(
-                        behandlingId = manuellBehandling.id,
-                        manuellOppgaveType = ManuellOppgaveType.SØKNAD,
-                        oppgavetype = Oppgavetype.BehandleSak,
-                    )
                 }
             }
 

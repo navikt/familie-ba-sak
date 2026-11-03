@@ -153,6 +153,7 @@ class BehandlingService(
                         oppgavetype = Oppgavetype.BehandleSak,
                         fristForFerdigstillelse = LocalDate.now(),
                         tilordnetRessurs = nyBehandling.navIdent,
+                        beskrivelse = nyBehandling.oppgavebeskrivelse,
                     ),
                 )
             }

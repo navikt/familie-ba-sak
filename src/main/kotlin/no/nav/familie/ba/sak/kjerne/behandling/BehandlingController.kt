@@ -160,6 +160,7 @@ data class NyBehandling(
     val fagsakId: Long,
     val nyEksternBehandlingRelasjon: NyEksternBehandlingRelasjon? = null,
     val begrunnelse: String? = null,
+    val oppgavebeskrivelse: String? = null,
 ) {
     init { // Initiell validering på request
         when {
