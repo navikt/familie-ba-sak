@@ -6,12 +6,9 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
@@ -35,8 +32,6 @@ import java.util.Properties
 )
 class BehandleFødselshendelseTask(
     private val autovedtakStegService: AutovedtakStegService,
-    private val velgFagsystemService: VelgFagSystemService,
-    private val infotrygdFeedService: InfotrygdFeedService,
     private val personidentService: PersonidentService,
     private val startSatsendring: StartSatsendring,
     private val taskRepositoryWrapper: TaskRepositoryWrapper,
@@ -64,30 +59,22 @@ class BehandleFødselshendelseTask(
         }
 
         try {
-            when (velgFagsystemService.velgFagsystem(nyBehandling).first) {
-                FagsystemRegelVurdering.SEND_TIL_BA -> {
-                    val harOpprettetSatsendring =
-                        startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(nyBehandling.morsIdent)
-                    if (harOpprettetSatsendring) {
-                        throw RekjørSenereException(
-                            "Satsendring skal kjøre ferdig før man behandler fødselsehendelse",
-                            LocalDateTime.now().plusMinutes(60),
-                        )
-                    }
-                    autovedtakStegService.kjørBehandlingFødselshendelse(
-                        mottakersAktør =
-                            personidentService.hentAktør(
-                                nyBehandling.morsIdent,
-                            ),
-                        nyBehandlingHendelse = nyBehandling,
-                        førstegangKjørt = task.opprettetTid,
-                    )
-                }
-
-                FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> {
-                    infotrygdFeedService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-                }
+            val harOpprettetSatsendring =
+                startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(nyBehandling.morsIdent)
+            if (harOpprettetSatsendring) {
+                throw RekjørSenereException(
+                    "Satsendring skal kjøre ferdig før man behandler fødselsehendelse",
+                    LocalDateTime.now().plusMinutes(60),
+                )
             }
+            autovedtakStegService.kjørBehandlingFødselshendelse(
+                mottakersAktør =
+                    personidentService.hentAktør(
+                        nyBehandling.morsIdent,
+                    ),
+                nyBehandlingHendelse = nyBehandling,
+                førstegangKjørt = task.opprettetTid,
+            )
         } catch (e: FunksjonellFeil) {
             val aktør = personidentService.hentAktør(nyBehandling.morsIdent)
             taskRepositoryWrapper.save(

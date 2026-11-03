@@ -9,14 +9,11 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagNyBehandling
 import no.nav.familie.ba.sak.datagenerator.lagNyEksternBehandlingRelasjon
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -58,11 +55,9 @@ class BehandlingServiceTest {
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
     private val loggService: LoggService = mockk()
     private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
-    private val infotrygdService: InfotrygdService = mockk()
     private val vedtaksperiodeService: VedtaksperiodeService = mockk()
     private val taskRepository: TaskRepositoryWrapper = mockk()
     private val vilkårsvurderingService: VilkårsvurderingService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
     private val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
     private val fagsakLåsingService: FagsakLåsingService = mockk()
 
@@ -79,11 +74,9 @@ class BehandlingServiceTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             loggService = loggService,
             arbeidsfordelingService = arbeidsfordelingService,
-            infotrygdService = infotrygdService,
             vedtaksperiodeService = vedtaksperiodeService,
             taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
-            featureToggleService = featureToggleService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
             fagsakLåsingService = fagsakLåsingService,
         )
@@ -166,7 +159,6 @@ class BehandlingServiceTest {
             every { vedtakRepository.save(any()) } returnsArgument 0
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
-            every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
 
             // Act
             val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)
@@ -217,7 +209,6 @@ class BehandlingServiceTest {
             every { vedtakRepository.save(any()) } returnsArgument 0
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
-            every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
 
             // Act
             val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)
@@ -272,7 +263,6 @@ class BehandlingServiceTest {
             every { vedtakRepository.save(any()) } returnsArgument 0
             every { loggService.opprettBehandlingLogg(capture(behandlingLoggRequestSlot)) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
-            every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
 
             // Act
             behandlingService.opprettBehandling(nyBehandling)
@@ -335,7 +325,6 @@ class BehandlingServiceTest {
             every { vedtakRepository.save(any()) } returnsArgument 0
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
-            every { featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
 
             // Act
             val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)

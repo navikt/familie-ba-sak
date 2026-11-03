@@ -5,9 +5,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategoriVedOpprettelse
@@ -60,11 +57,9 @@ class BehandlingService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val loggService: LoggService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val infotrygdService: InfotrygdService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val featureToggleService: FeatureToggleService,
     private val eksternBehandlingRelasjonService: EksternBehandlingRelasjonService,
     private val fagsakLåsingService: FagsakLåsingService,
 ) {
@@ -221,16 +216,12 @@ class BehandlingService(
 
     @Transactional
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
-        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)
-
-        if (aktivBehandling != null) {
-            behandlingHentOgPersisterService.lagreOgFlush(aktivBehandling.also { it.aktiv = false })
-        } else if (harAktivInfotrygdSak(behandling)) {
-            throw FunksjonellFeil(
-                "Kan ikke lage behandling på person med aktiv sak i Infotrygd",
-                "Kan ikke lage behandling på person med aktiv sak i Infotrygd",
-            )
-        }
+        behandlingHentOgPersisterService
+            .finnAktivForFagsak(fagsakId = behandling.fagsak.id)
+            ?.let {
+                it.aktiv = false
+                behandlingHentOgPersisterService.lagreOgFlush(it)
+            }
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
         return behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false).also {
@@ -242,18 +233,6 @@ class BehandlingService(
                 behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(it)
             }
         }
-    }
-
-    fun harAktivInfotrygdSak(behandling: Behandling): Boolean {
-        if (featureToggleService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true)) {
-            val søkerIdenter =
-                behandling.fagsak.aktør.personidenter
-                    .map { it.fødselsnummer }
-            return infotrygdService.harÅpenSakIInfotrygd(søkerIdenter) ||
-                (!behandling.erMigrering() && infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter))
-        }
-        logger.warn("Infotrygd-sjekk er skrudd av")
-        return false
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {
