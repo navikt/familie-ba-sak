@@ -50,7 +50,7 @@ class OppdaterUtdypendeVilkårForBosattIRiketMedFinnmarkOgSvalbardService(
             .filter { it.aktør.aktivFødselsnummer() in identer }
             .forEach { personResultat ->
                 val personOpplysningsgrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
-                val person = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("PersonResultat ${personResultat.id} på behandling ${behandling.id} har ikke person i persongrunnlaget")
+                val person = personOpplysningsgrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Fant ikke person for personresultat i persongrunnlag ${personOpplysningsgrunnlag.id} på behandling ${behandling.id}")
 
                 val nyeBosattIRiketVilkårResultater =
                     oppdaterUtdypendeVilkårForEttEnkeltVilkårResultat(

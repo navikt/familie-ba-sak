@@ -116,6 +116,7 @@ object BehandlingsresultatEndringUtils {
 
                 if (erMinstEnEndringForPerson) {
                     loggEndringerVedEndringForPerson(
+                        behandlingId = behandling.id,
                         erEndringIBeløpForPerson = erEndringIBeløpForPerson,
                         erEndringIKompetanseForPerson = erEndringIKompetanseForPerson,
                         erEndringIUtenlandskPeriodebeløpForPerson = erEndringIUtenlandskPeriodebeløpForPerson,
@@ -152,6 +153,7 @@ object BehandlingsresultatEndringUtils {
     }
 
     private fun loggEndringerVedEndringForPerson(
+        behandlingId: Long,
         erEndringIBeløpForPerson: Boolean,
         erEndringIKompetanseForPerson: Boolean,
         erEndringIUtenlandskPeriodebeløpForPerson: Boolean,
@@ -165,7 +167,7 @@ object BehandlingsresultatEndringUtils {
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
     ) {
         logger.info(
-            "Endringer for person: " +
+            "Endringer for person i behandling $behandlingId: " +
                 "erEndringIBeløp=$erEndringIBeløpForPerson, " +
                 "erEndringIKompetanse=$erEndringIKompetanseForPerson, " +
                 "erEndringIUtenlandskPeriodebeløpForPerson=$erEndringIUtenlandskPeriodebeløpForPerson, " +

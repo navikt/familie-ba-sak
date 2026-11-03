@@ -34,7 +34,7 @@ class AktiverMinsideTask(
 
         val aktør =
             aktørIdRepository.findByAktørIdOrNull(minsideDTO.aktørId)
-                ?: throw Feil("Aktør i payload til task ${task.id} finnes ikke")
+                ?: throw Feil("Aktør med aktørId ${minsideDTO.aktørId} finnes ikke")
 
         val kanAktivereMinsideForAktør = minsideAktiveringAktørValidator.kanAktivereMinsideForAktør(aktør)
 
