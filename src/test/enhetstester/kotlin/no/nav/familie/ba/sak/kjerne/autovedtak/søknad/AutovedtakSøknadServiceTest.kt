@@ -117,7 +117,7 @@ class AutovedtakSøknadServiceTest {
     inner class KjørBehandling {
         @BeforeEach
         fun setup() {
-            every { stegService.håndterNyBehandling(any()) } returns automatiskBehandling
+            every { stegService.håndterNyBehandling(match { it.behandlingÅrsak == BehandlingÅrsak.AUTOMATISK_BEHANDLING_AV_SØKNAD }) } returns automatiskBehandling
             every { stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(any(), any()) } returns automatiskBehandling
             every { stegService.håndterVilkårsvurdering(automatiskBehandling) } returns behandlingEtterVilkårsvurdering
             justRun { autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(any()) }
@@ -132,7 +132,7 @@ class AutovedtakSøknadServiceTest {
             every { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling) } returns lagVedtak(behandling = behandling)
             every { taskService.save(any()) } returns mockk()
             every { stegService.håndterHenleggBehandling(any(), any()) } returns behandling
-            every { stegService.håndterNyBehandling(any()) } returns lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
+            every { stegService.håndterNyBehandling(match { it.behandlingÅrsak == BehandlingÅrsak.SØKNAD }) } returns lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
             justRun { statistikkService.lagreÅrsaker(any(), any()) }
         }
 
@@ -304,7 +304,7 @@ class AutovedtakSøknadServiceTest {
             assertThrows<Feil> { autovedtakSøknadService.kjørBehandling(søknadData) }
             verify(exactly = 0) {
                 stegService.håndterHenleggBehandling(any(), any())
-                stegService.håndterNyBehandling(any())
+                stegService.håndterNyBehandling(match { it.behandlingÅrsak == BehandlingÅrsak.SØKNAD })
                 statistikkService.lagreÅrsaker(any(), any())
             }
         }
@@ -319,7 +319,7 @@ class AutovedtakSøknadServiceTest {
             assertThrows<Feil> { autovedtakSøknadService.kjørBehandling(søknadData) }
             verify(exactly = 0) {
                 stegService.håndterHenleggBehandling(any(), any())
-                stegService.håndterNyBehandling(any())
+                stegService.håndterNyBehandling(match { it.behandlingÅrsak == BehandlingÅrsak.SØKNAD })
                 statistikkService.lagreÅrsaker(any(), any())
             }
         }
@@ -416,7 +416,7 @@ class AutovedtakSøknadServiceTest {
             fun setup() {
                 every { stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(any(), any()) } returns behandlingStoppetAvFiltrering
                 every { stegService.håndterHenleggBehandling(any(), any()) } returns behandlingStoppetAvFiltrering
-                every { stegService.håndterNyBehandling(any()) } returns manuellBehandling
+                every { stegService.håndterNyBehandling(match { it.behandlingÅrsak == BehandlingÅrsak.SØKNAD }) } returns manuellBehandling
             }
 
             @Test
