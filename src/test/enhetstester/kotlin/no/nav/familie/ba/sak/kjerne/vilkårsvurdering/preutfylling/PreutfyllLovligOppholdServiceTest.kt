@@ -388,11 +388,32 @@ class PreutfyllLovligOppholdServiceTest {
         @Test
         fun `skal ikke oppfylle lovlig opphold hvis oppholdstillatelse mangler fom`() {
             // Arrange
-            val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = behandling,
+                    lagPersonResultater = { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søkerAktør,
+                                lagVilkårResultater = { emptySet() },
+                            ),
+                        )
+                    },
+                )
 
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
                 lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
                     søker.apply {
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "AFG",
+                                    gyldigPeriode = sisteTiÅr,
+                                    medlemskap = Medlemskap.TREDJELANDSBORGER,
+                                    person = this,
+                                ),
+                            )
                         opphold =
                             mutableListOf(
                                 GrOpphold(
@@ -426,6 +447,15 @@ class PreutfyllLovligOppholdServiceTest {
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
                 lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
                     søker.apply {
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "AFG",
+                                    gyldigPeriode = sisteTiÅr,
+                                    medlemskap = Medlemskap.TREDJELANDSBORGER,
+                                    person = this,
+                                ),
+                            )
                         opphold =
                             mutableListOf(
                                 GrOpphold(
@@ -466,6 +496,15 @@ class PreutfyllLovligOppholdServiceTest {
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
                 lagPersonopplysningGrunnlagMedSøkerOgBarn { søker ->
                     søker.apply {
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "AFG",
+                                    gyldigPeriode = sisteTiÅr,
+                                    medlemskap = Medlemskap.TREDJELANDSBORGER,
+                                    person = this,
+                                ),
+                            )
                         opphold =
                             mutableListOf(
                                 GrOpphold(
