@@ -35,6 +35,8 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.defaultBostedsadresseHistorikk
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -499,7 +501,7 @@ class PersongrunnlagIntegrationTest(
     @Nested
     inner class HentOgLagreSøkerOgBarnINyttGrunnlag {
         @Test
-        fun `Skal lagre og returnere nytt personopplysninggrunnlag selv om ingenting er endret`() {
+        fun `Skal returnere aktivt personopplysninggrunnlag når nytt personopplysninggrunnlag er uendret`() {
             // Arrange
             val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
             val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
@@ -532,9 +534,55 @@ class PersongrunnlagIntegrationTest(
                 )
 
             // Assert
-            assertThat(nyttPersonopplysningGrunnlag.id).isNotEqualTo(forrigePersonopplysningGrunnlag.id)
-            assertThat(personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id)).isEmpty()
-            assertThat(personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)?.id).isEqualTo(nyttPersonopplysningGrunnlag.id)
+            assertThat(nyttPersonopplysningGrunnlag).isEqualTo(forrigePersonopplysningGrunnlag)
+            assertThat(nyttPersonopplysningGrunnlag.id).isEqualTo(forrigePersonopplysningGrunnlag.id)
+            assertThat(personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id)).isPresent()
+        }
+
+        @Test
+        fun `Skal returnere aktivt personopplysninggrunnlag når opphold uten datoer er uendret`() {
+            // Arrange
+            val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
+            val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
+            val barnFnr = leggTilPersonInfo(randomBarnFødselsdato())
+            val barnAktør = personidentService.hentOgLagreAktør(barnFnr, true)
+
+            fakePersonopplysningerService.hentPersoninfoEnkel(søkerAktør).also {
+                leggTilPersonInfo(
+                    fødselsdato = it.fødselsdato,
+                    egendefinertMock = it.copy(opphold = listOf(Opphold(type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER, oppholdFra = null, oppholdTil = null))),
+                    personIdent = søkerFnr,
+                )
+            }
+
+            val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
+            val behandling =
+                behandlingService.opprettBehandling(
+                    nyOrdinærBehandling(
+                        fagsakId = fagsak.data!!.id,
+                    ),
+                )
+
+            val forrigePersonopplysningGrunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søkerAktør,
+                    barnFraInneværendeBehandling = listOf(barnAktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            // Act
+            val nyttPersonopplysningGrunnlag =
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søkerAktør,
+                    barnFraInneværendeBehandling = listOf(barnAktør),
+                    behandling = behandling,
+                    målform = Målform.NB,
+                )
+
+            // Assert
+            assertThat(forrigePersonopplysningGrunnlag.søker.opphold).hasSize(1)
+            assertThat(nyttPersonopplysningGrunnlag.id).isEqualTo(forrigePersonopplysningGrunnlag.id)
         }
 
         @Test
