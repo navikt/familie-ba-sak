@@ -16,6 +16,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.NyEksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
@@ -43,6 +45,7 @@ class BehandlingController(
     private val tilgangService: TilgangService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
     @GetMapping(path = ["fagsak/{fagsakId}"])
     fun hentBehandlinger(
@@ -110,12 +113,25 @@ class BehandlingController(
         )
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
+        val behandlingFørEndring = behandlingHentOgPersisterService.hent(behandlingId)
+        // Behandlingstema utledes i vilkårsvurderingssteget, så en endring tilbakestiller behandlingen dit
+        val skalTilbakestilles =
+            behandlingFørEndring.steg.kommerEtter(StegType.VILKÅRSVURDERING) &&
+                (
+                    behandlingFørEndring.kategori != endreBehandlingstema.behandlingKategori ||
+                        behandlingFørEndring.underkategori != endreBehandlingstema.behandlingUnderkategori
+                )
+
         val behandling =
             behandlingstemaService.oppdaterSaksbehandletBehandlingstema(
-                behandling = behandlingHentOgPersisterService.hent(behandlingId),
+                behandling = behandlingFørEndring,
                 nyUnderkategori = endreBehandlingstema.behandlingUnderkategori,
                 nyKategori = endreBehandlingstema.behandlingKategori,
             )
+
+        if (skalTilbakestilles) {
+            tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id)
+        }
 
         return ResponseEntity.ok(
             Ressurs.success(
