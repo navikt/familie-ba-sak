@@ -273,6 +273,7 @@ class AutovedtakSøknadServiceTest {
             verify(exactly = 1) {
                 oppgaveService.opprettOppgaveForManuellBehandling(
                     behandlingId = any(),
+                    begrunnelse = "Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.",
                     manuellOppgaveType = ManuellOppgaveType.SØKNAD,
                     oppgavetype = Oppgavetype.BehandleSak,
                 )
