@@ -62,6 +62,7 @@ class AutovedtakSøknadService(
                 automatiskBehandling = automatiskBehandling,
                 behandlingsdata = behandlingsdata,
                 begrunnelse = feil.beskrivelse,
+                begrunnelseIOppgave = feil.beskrivelse,
             )
         }
     }
@@ -125,6 +126,7 @@ class AutovedtakSøknadService(
         automatiskBehandling: Behandling,
         behandlingsdata: SøknadData,
         begrunnelse: String,
+        begrunnelseIOppgave: String = "",
     ): String {
         stegService.håndterHenleggBehandling(
             behandling = automatiskBehandling,
@@ -142,6 +144,7 @@ class AutovedtakSøknadService(
 
         oppgaveService.opprettOppgaveForManuellBehandling(
             behandlingId = manuellBehandling.id,
+            begrunnelse = begrunnelseIOppgave,
             manuellOppgaveType = ManuellOppgaveType.SØKNAD,
             oppgavetype = Oppgavetype.BehandleSak,
         )
