@@ -174,7 +174,7 @@ class PreutfyllBosattIRiketService(
                 IkkeVurdertVilkår(evalueringÅrsaker = setOf(VilkårKanskjeOppfyltÅrsak.BOSATT_I_RIKET_IKKE_MULIG_Å_FASTSETTE_SKAL_BO_LENGRE_ENN_12_MND))
             }
 
-            erBosattINorgePeriode.omfatter(LocalDate.now()) && digitalSøknad != null && erOppgittAtPlanleggerÅBoINorge12Måneder(digitalSøknad, personResultat) -> {
+            erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(digitalSøknad, personResultat) -> {
                 OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.", INFORMASJON_FRA_SØKNAD)
             }
 
