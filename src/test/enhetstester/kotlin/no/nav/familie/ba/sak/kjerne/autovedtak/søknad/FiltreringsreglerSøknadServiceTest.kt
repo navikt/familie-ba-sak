@@ -74,7 +74,7 @@ class FiltreringsreglerSøknadServiceTest {
     }
 
     @Test
-    fun `skal hente begrunnelsene til alle filtreringsregler som ikke er oppfylt på samme måte som i historikken`() {
+    fun `skal nummerere begrunnelsene til alle filtreringsregler som ikke er oppfylt`() {
         // Arrange
         val behandlingId = 1L
         every { filtreringResultatRepository.finnFiltreringResultater(behandlingId) } returns
@@ -104,6 +104,6 @@ class FiltreringsreglerSøknadServiceTest {
         val begrunnelse = filtreringsreglerSøknadService.hentBegrunnelseForStoppIFiltreringsreglene(behandlingId)
 
         // Assert
-        assertThat(begrunnelse).isEqualTo("Behandlingen stoppet i filtreringsreglene: Søker har EØS-barnetrygd og Søknaden inneholder vedlegg")
+        assertThat(begrunnelse).isEqualTo("1) Søker har EØS-barnetrygd 2) Søknaden inneholder vedlegg")
     }
 }

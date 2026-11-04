@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregl
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsreglerFaktaFødselshendelse
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.slåSammenIkkeOppfylteBegrunnelser
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
@@ -97,28 +98,7 @@ class FiltreringsreglerFødselshendelseService(
 
     fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FiltreringResultat> = filtreringResultatRepository.finnFiltreringResultater(behandlingId = behandlingId)
 
-    fun finnBegrunnelseForHenleggingAvBehandling(behandlingId: Long): String {
-        val ikkeOppfylteBegrunnelser =
-            hentFødselshendelsefiltreringResultater(behandlingId)
-                .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                .map { it.begrunnelse }
-
-        return when (ikkeOppfylteBegrunnelser.size) {
-            0 -> {
-                throw Feil("Fant ingen ikke oppfylte filtreringsregler for behandling $behandlingId")
-            }
-
-            1 -> {
-                ikkeOppfylteBegrunnelser.single()
-            }
-
-            else -> {
-                ikkeOppfylteBegrunnelser
-                    .mapIndexed { index, begrunnelse -> "${index + 1}) $begrunnelse" }
-                    .joinToString(" ")
-            }
-        }
-    }
+    fun finnBegrunnelseForHenleggingAvBehandling(behandlingId: Long): String = hentFødselshendelsefiltreringResultater(behandlingId).slåSammenIkkeOppfylteBegrunnelser(behandlingId)
 
     fun kjørFiltreringsregler(
         filtrerAutomatiskBehandlingData: FiltrerAutomatiskBehandlingData,

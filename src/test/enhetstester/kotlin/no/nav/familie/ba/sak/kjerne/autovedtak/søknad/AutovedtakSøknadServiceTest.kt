@@ -420,7 +420,7 @@ class AutovedtakSøknadServiceTest {
                 every { stegService.håndterHenleggBehandling(any(), any()) } returns behandlingStoppetAvFiltrering
                 every { stegService.håndterNyBehandling(match { it.behandlingÅrsak == BehandlingÅrsak.SØKNAD }) } returns manuellBehandling
                 every { filtreringsreglerSøknadService.hentBegrunnelseForStoppIFiltreringsreglene(behandlingStoppetAvFiltrering.id) } returns
-                    "Behandlingen stoppet i filtreringsreglene: Søker har EØS-barnetrygd og Søknaden inneholder vedlegg"
+                    "1) Søker har EØS-barnetrygd 2) Søknaden inneholder vedlegg"
             }
 
             @Test
@@ -448,7 +448,7 @@ class AutovedtakSøknadServiceTest {
                 verifyOrder {
                     stegService.håndterHenleggBehandling(behandlingStoppetAvFiltrering, any())
                     stegService.håndterNyBehandling(
-                        nyBehandling.copy(oppgavebeskrivelse = "Behandlingen stoppet i filtreringsreglene: Søker har EØS-barnetrygd og Søknaden inneholder vedlegg"),
+                        nyBehandling.copy(oppgavebeskrivelse = "1) Søker har EØS-barnetrygd 2) Søknaden inneholder vedlegg"),
                     )
                 }
             }

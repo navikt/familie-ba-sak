@@ -63,7 +63,7 @@ class AutomatiskBehandlingAvSøknadHenleggelseTest(
         assertThat(behandleSakOppgaver).hasSize(1)
         val behandleSakOppgave = behandleSakOppgaver.single()
         assertThat(behandleSakOppgave.behandlingId).isEqualTo(manuellBehandling.id)
-        assertThat(behandleSakOppgave.beskrivelse).isEqualTo("Behandlingen stoppet i filtreringsreglene: Søknaden inneholder vedlegg")
+        assertThat(behandleSakOppgave.beskrivelse).isEqualTo("Søknaden inneholder vedlegg")
     }
 
     @Test

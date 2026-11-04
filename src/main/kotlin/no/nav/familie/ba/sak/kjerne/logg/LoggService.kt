@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.erOppfylt
-import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.tilBegrunnelseForStoppIFiltreringsreglene
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -204,7 +204,9 @@ class LoggService(
                     if (erOppfylt) {
                         "Alle filtreringsreglene er oppfylt. Behandlingen fortsetter automatisk."
                     } else {
-                        filtreringResultater.tilBegrunnelseForStoppIFiltreringsreglene()
+                        "Behandlingen stoppet i filtreringsreglene: ${
+                            filtreringResultater.filter { it.resultat == Resultat.IKKE_OPPFYLT }.map { it.begrunnelse }.slåSammen()
+                        }"
                     },
             ),
         )
