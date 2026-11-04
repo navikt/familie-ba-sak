@@ -181,12 +181,19 @@ class VedtaksperiodeMedBegrunnelserController(
     @GetMapping(path = ["/behandling/{behandlingId}/hent-vedtaksperioder"])
     fun hentUtvidetVedtaksperiodeMedBegrunnelserDto(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<List<UtvidetVedtaksperiodeMedBegrunnelserDto>>> =
-        ResponseEntity.ok(
+    ): ResponseEntity<Ressurs<List<UtvidetVedtaksperiodeMedBegrunnelserDto>>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "hente vedtaksperioder",
+        )
+
+        return ResponseEntity.ok(
             Ressurs.success(
                 vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelserDto(behandlingId),
             ),
         )
+    }
 
     companion object {
         const val OPPDATERE_BEGRUNNELSER_HANDLING = "oppdatere vedtaksperiode med begrunnelser"
