@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FILTRERINGSREGL
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsregelEvaluator
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.tilBegrunnelseForStoppIFiltreringsreglene
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerFødselshendelseService.Companion.logger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -38,4 +39,6 @@ class FiltreringsreglerSøknadService(
 
         return filtreringResultatRepository.saveAll(filtreringsresultater)
     }
+
+    fun hentBegrunnelseForStoppIFiltreringsreglene(behandlingId: Long): String = filtreringResultatRepository.finnFiltreringResultater(behandlingId).tilBegrunnelseForStoppIFiltreringsreglene()
 }

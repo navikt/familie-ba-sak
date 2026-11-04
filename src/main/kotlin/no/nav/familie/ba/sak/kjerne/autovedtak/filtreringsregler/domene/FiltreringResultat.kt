@@ -13,6 +13,7 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.StringListConverter
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsreglerFakta
@@ -74,3 +75,5 @@ class FiltreringResultat(
 }
 
 fun List<FiltreringResultat>.erOppfylt() = this.all { it.resultat == Resultat.OPPFYLT }
+
+fun List<FiltreringResultat>.tilBegrunnelseForStoppIFiltreringsreglene() = "Behandlingen stoppet i filtreringsreglene: ${this.filter { it.resultat == Resultat.IKKE_OPPFYLT }.map { it.begrunnelse }.slåSammen()}"
