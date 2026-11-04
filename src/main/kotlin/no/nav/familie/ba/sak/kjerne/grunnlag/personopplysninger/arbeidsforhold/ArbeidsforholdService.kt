@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.validering.OrganisasjonsnummerValidator
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsgiverType
@@ -89,7 +90,11 @@ class ArbeidsforholdService(
                         ansettelsesperiodeFom = medlemskapPeriode.fom ?: cutOffFomDato,
                         ansettelsesperiodeTom = medlemskapPeriode.tom,
                     ).associateWith { arbeidsforhold ->
-                        arbeidsforhold.arbeidsgiver?.organisasjonsnummer?.let { hentOrganisasjonMedFallback(it) }
+                        // Ugyldige organisasjonsnummer, f.eks. fra eldre arbeidsforhold før dagens 9-sifrede format, kan ikke slås opp i EREG.
+                        arbeidsforhold.arbeidsgiver
+                            ?.organisasjonsnummer
+                            ?.takeIf { OrganisasjonsnummerValidator.isValid(it) }
+                            ?.let { hentOrganisasjonMedFallback(it) }
                     }.map { (arbeidsforhold, organisasjon) ->
                         arbeidsforhold.tilGrArbeidsforhold(person, organisasjon)
                     }

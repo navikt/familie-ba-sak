@@ -83,12 +83,15 @@ class SendMeldingTilBisysTask(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(forrigeIverksatteBehandling.id)
 
+        // Bisys skal ikke varsles om endringer i Finnmarks- og Svalbardtillegg, siden disse ikke påvirker bidrag eller forskudd
         val andelTilkjentYtelseTidslinjerPerAktørOgType =
             tilkjentYtelse.andelerTilkjentYtelse
+                .filterNot { it.erFinnmarkEllerSvalbardtillegg() }
                 .tilTidslinjerPerAktørOgType()
 
         val forrigeAndelTilkjentYtelseTidslinjerPerAktørOgType =
             forrigeTilkjentYtelse.andelerTilkjentYtelse
+                .filterNot { it.erFinnmarkEllerSvalbardtillegg() }
                 .tilTidslinjerPerAktørOgType()
 
         val opphørEllerReduksjonPerAktør =

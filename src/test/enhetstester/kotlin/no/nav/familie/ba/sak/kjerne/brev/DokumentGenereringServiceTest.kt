@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
-import no.nav.familie.ba.sak.internal.TestVerktøyService
+import no.nav.familie.ba.sak.internal.tabulærtest.GenererTabulærTestService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -35,7 +35,7 @@ class DokumentGenereringServiceTest {
     private val integrasjonKlient = mockk<IntegrasjonKlient>()
     private val saksbehandlerContext = mockk<SaksbehandlerContext>()
     private val sammensattKontrollsakService = mockk<SammensattKontrollsakService>()
-    private val testVerktøyService = mockk<TestVerktøyService>()
+    private val genererTabulærTestService = mockk<GenererTabulærTestService>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val organisasjonService = mockk<OrganisasjonService>()
 
@@ -47,7 +47,7 @@ class DokumentGenereringServiceTest {
             kodeverkService = KodeverkService(integrasjonKlient = integrasjonKlient),
             saksbehandlerContext = saksbehandlerContext,
             sammensattKontrollsakService = sammensattKontrollsakService,
-            testVerktøyService = testVerktøyService,
+            genererTabulærTestService = genererTabulærTestService,
             personopplysningerService = personopplysningerService,
             organisasjonService = organisasjonService,
         )

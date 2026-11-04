@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigSøker
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
@@ -29,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -51,8 +49,6 @@ internal class AutobrevOmregningPgaAlderServiceTest {
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val fagsakService = mockk<FagsakService>(relaxed = true)
-    private val infotrygdService = mockk<InfotrygdService>(relaxed = true)
     private val stegService = mockk<StegService>()
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
@@ -66,10 +62,8 @@ internal class AutobrevOmregningPgaAlderServiceTest {
         AutovedtakBrevService(
             behandlingService = behandlingService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            fagsakService = fagsakService,
             autovedtakService = autovedtakService,
             vedtakService = vedtakService,
-            infotrygdService = infotrygdService,
             vedtaksperiodeService = vedtaksperiodeService,
             taskRepository = taskRepository,
             behandlingRepository = behandlingRepository,
@@ -270,7 +264,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
     }
 
     @Test
-    fun `Verifiser at vi ikke oppretter behandling hvis brev er sendt fra infotrygd`() {
+    fun `Verifiser at vi ikke oppretter behandling hvis brev allerede er sendt fra ba-sak`() {
         // Arrange
         val behandling = initMock(alder = 18, medSøsken = true).first
 
@@ -281,7 +275,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
                 årMåned = inneværendeMåned(),
             )
 
-        every { infotrygdService.harSendtbrev(any(), any()) } returns true
+        every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns true
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
         every { stegService.håndterNyBehandling(any()) } returns behandling
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
@@ -439,7 +433,6 @@ internal class AutobrevOmregningPgaAlderServiceTest {
                 )
         }
 
-        every { infotrygdService.harSendtbrev(any(), any()) } returns false
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns behandling
         every { behandlingService.opprettBehandling(any()) } returns behandling
         every { behandlingHentOgPersisterService.hentBehandlinger(any()) } returns emptyList()

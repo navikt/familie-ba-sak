@@ -45,7 +45,6 @@ fun genererVedtaksperioder(
     grunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
     vedtak: Vedtak,
     nåDato: LocalDate,
-    featureToggleService: FeatureToggleService,
 ): List<VedtaksperiodeMedBegrunnelser> {
     if (vedtak.behandling.opprettetÅrsak.erOmregningsårsak()) {
         return lagPeriodeForOmregningsbehandling(
@@ -61,10 +60,10 @@ fun genererVedtaksperioder(
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
         grunnlagForVedtaksperioderForrigeBehandling
-            ?.let { grunnlagForVedtaksperioderForrigeBehandling.utledGrunnlagTidslinjePerPerson(skalSplittePåValutakursendringer = false, featureToggleService = featureToggleService) }
+            ?.let { grunnlagForVedtaksperioderForrigeBehandling.utledGrunnlagTidslinjePerPerson(skalSplittePåValutakursendringer = false) }
             ?: emptyMap()
 
-    val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson(skalSplittePåValutakursendringer = false, featureToggleService = featureToggleService)
+    val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson(skalSplittePåValutakursendringer = false)
 
     val perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling =
         finnPerioderSomSkalBegrunnes(
@@ -74,7 +73,6 @@ fun genererVedtaksperioder(
                 vedtak.behandling.overstyrtEndringstidspunkt ?: utledEndringstidspunkt(
                     behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtaksperioder,
                     behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperioderForrigeBehandling,
-                    featureToggleService = featureToggleService,
                 ),
             personerFremstiltKravFor = grunnlagForVedtaksperioder.personerFremstiltKravFor,
         )
@@ -227,6 +225,7 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling>>.slåSammenU
         .kombiner { grunnlagTidslinje ->
             grunnlagTidslinje.toList().takeIf { it.isNotEmpty() }
         }.tilPerioderIkkeNull()
+        .map { periode -> periode.copy(verdi = periode.verdi.map { it.fjernAvslagsbegrunnelserSomHørerTilAvslagsperioden(personerFremstiltKravFor) }) }
 }
 
 private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling>>.utledEksplisitteAvslagsperioder(personerFremstiltKravFor: List<Aktør>): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>> {
@@ -290,6 +289,21 @@ private fun GrunnlagForGjeldendeOgForrigeBehandling.medVilkårSomHarEksplisitteA
                         .filter { it.erEksplisittAvslagPåSøknad },
             ),
     )
+
+private fun GrunnlagForGjeldendeOgForrigeBehandling.fjernAvslagsbegrunnelserSomHørerTilAvslagsperioden(personerFremstiltKravFor: List<Aktør>): GrunnlagForGjeldendeOgForrigeBehandling =
+    if (gjeldende?.erEksplisittAvslag(personerFremstiltKravFor) == true) {
+        copy(
+            gjeldende =
+                gjeldende.kopier(
+                    vilkårResultaterForVedtaksperiode =
+                        gjeldende.vilkårResultaterForVedtaksperiode.map {
+                            if (it.erEksplisittAvslagPåSøknad) it.copy(standardbegrunnelser = emptyList()) else it
+                        },
+                ),
+        )
+    } else {
+        this
+    }
 
 /**
  * Ønsker å dra med informasjon om forrige behandling i perioder der forrige behandling var oppfylt, men gjeldende

@@ -21,7 +21,6 @@ import org.springframework.test.context.ActiveProfiles
     "mock-infotrygd-barnetrygd",
     "fake-tilbakekreving-klient",
     "mock-brev-klient",
-    "mock-infotrygd-feed",
     "mock-localdate-service",
     "mock-sanity-klient",
     "mock-unleash",

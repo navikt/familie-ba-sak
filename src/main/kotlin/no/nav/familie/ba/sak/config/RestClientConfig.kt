@@ -96,14 +96,6 @@ class RestClientConfig(
             .medJsonContentType()
     }
 
-    @Bean("infotrygdFeedRestClient")
-    fun infotrygdFeedRestClient(
-        @Value("\${FAMILIE_BA_INFOTRYGD_FEED_SCOPE}") scope: String,
-    ): RestClient =
-        entraIDRestClientFactory
-            .lagMaskinTilMaskinRestKlient(scope)
-            .medJsonContentType()
-
     @Bean("efSakRestClient")
     fun efSakRestClient(
         @Value("\${FAMILIE_EF_SAK_SCOPE}") scope: String,

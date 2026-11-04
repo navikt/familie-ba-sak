@@ -109,8 +109,6 @@ spec:
         - application: populasjonstilgangskontroll
           namespace: tilgangsmaskin
           cluster: dev-gcp
-        - application: familie-ba-infotrygd-feed
-          cluster: dev-fss
         - application: familie-ba-infotrygd
           cluster: dev-fss
         - application: familie-ef-sak
@@ -130,7 +128,6 @@ spec:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
         - host: familie-ba-infotrygd.dev-fss-pub.nais.io
-        - host: familie-ba-infotrygd-feed.dev-fss-pub.nais.io
         - host: sdw-wsrest.ecb.europa.eu
         - host: data-api.ecb.europa.eu
         - host: teamfamilie-unleash-api.nav.cloud.nais.io

@@ -5,7 +5,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.clearAllCaches
+import no.nav.familie.ba.sak.datagenerator.lagPersonTilgangAvvistGrunnetHabilitet
 import no.nav.familie.ba.sak.datagenerator.lagPersonTilgangAvvistGrunnetSkjerming
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelsePerson
 import no.nav.familie.ba.sak.integrasjoner.tilgangsmaskin.TilgangsmaskinTilgangskontrollKlient
@@ -13,6 +15,7 @@ import no.nav.familie.ba.sak.mock.FakeTilgangsmaskinTilgangskontrollKlient
 import no.nav.familie.ba.sak.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
+import no.nav.familie.tilgangsmaskin.Avvisningskode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -172,6 +175,24 @@ class PersonTilgangServiceTest {
         // Assert
         assertThat(tilgang.harTilgang).isTrue
         verify(exactly = 2) { tilgangsmaskinTilgangskontrollKlient.sjekkTilgangTilPersoner(setOf("1")) }
+    }
+
+    @Test
+    fun `skal returnere maskert personinfo med avvisningskode når saksbehandler ikke har tilgang til personen`() {
+        // Arrange
+        val aktør = randomAktør()
+        fakeTilgangsmaskinTilgangskontrollKlient.leggTilTilganger(listOf(lagPersonTilgangAvvistGrunnetHabilitet(aktør.aktivFødselsnummer())))
+        every { systemOnlyPdlRestKlient.hentAdressebeskyttelse(aktør) } returns
+            listOf(Adressebeskyttelse(ADRESSEBESKYTTELSEGRADERING.UGRADERT))
+
+        // Act
+        val maskertPersonInfo = testWithBrukerContext { service.hentMaskertPersonInfoVedManglendeTilgang(aktør) }
+
+        // Assert
+        assertThat(maskertPersonInfo).isNotNull
+        assertThat(maskertPersonInfo!!.harTilgang).isFalse
+        assertThat(maskertPersonInfo.avvisningskode).isEqualTo(Avvisningskode.AVVIST_HABILITET)
+        assertThat(maskertPersonInfo.adressebeskyttelseGradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
     }
 
     @Test

@@ -29,10 +29,8 @@ FAMILIE_INTEGRASJONER_SCOPE: api://prod-fss.teamfamilie.familie-integrasjoner/.d
 
 TILGANGSMASKIN_SCOPE: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
 
-FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://prod-fss.teamfamilie.familie-ba-infotrygd-feed/.default
 FAMILIE_BA_INFOTRYGD_SCOPE: api://prod-fss.teamfamilie.familie-ba-infotrygd/.default
 FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.prod-fss-pub.nais.io
-FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.prod-fss-pub.nais.io/api
 
 FAMILIE_OPPDRAG_BACKEND_SCOPE: api://prod-gcp.teamfamilie.familie-oppdrag-backend/.default
 

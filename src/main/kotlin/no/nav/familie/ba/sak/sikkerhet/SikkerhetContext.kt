@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
@@ -9,7 +10,9 @@ object SikkerhetContext {
     const val SYSTEM_FORKORTELSE = "VL"
     const val SYSTEM_NAVN = "System"
 
-    fun erSystemKontekst() = hentSaksbehandler() == SYSTEM_FORKORTELSE
+    fun erSystemKontekst() =
+        hentSaksbehandler() == SYSTEM_FORKORTELSE &&
+            SecurityContextHolder.getContext().authentication !is AnonymousAuthenticationToken
 
     fun erMaskinTilMaskinToken(): Boolean {
         val oid = hentClaimFraToken<String>("oid")

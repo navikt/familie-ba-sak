@@ -91,14 +91,6 @@ class OpprettTaskService(
         )
     }
 
-    fun opprettSendFeedTilInfotrygdTask(barnasIdenter: List<String>) {
-        taskRepository.save(SendFødselsmeldingTilInfotrygdTask.opprettTask(barnasIdenter))
-    }
-
-    fun opprettSendStartBehandlingTilInfotrygdTask(aktørStoenadsmottaker: Aktør) {
-        taskRepository.save(SendStartBehandlingTilInfotrygdTask.opprettTask(aktørStoenadsmottaker))
-    }
-
     fun opprettSendAutobrevPgaAlderTask(
         fagsakId: Long,
         alder: Int,

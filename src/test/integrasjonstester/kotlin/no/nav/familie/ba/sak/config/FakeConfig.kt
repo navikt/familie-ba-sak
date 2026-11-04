@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.fake.FakeTilbakekrevingKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestKlient
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestKlient
-import no.nav.familie.ba.sak.internal.TestVerktøyService
+import no.nav.familie.ba.sak.internal.tabulærtest.GenererTabulærTestService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
@@ -86,7 +86,7 @@ class FakeConfig {
     @Bean
     @Primary
     @Profile("mock-brev-klient")
-    fun fakeBrevKlient(testVerktøyService: TestVerktøyService): FakeBrevKlient = FakeBrevKlient(testVerktøyService)
+    fun fakeBrevKlient(genererTabulærTestService: GenererTabulærTestService): FakeBrevKlient = FakeBrevKlient(genererTabulærTestService)
 
     @Bean
     @Primary

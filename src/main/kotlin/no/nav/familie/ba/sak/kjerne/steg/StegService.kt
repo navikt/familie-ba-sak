@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
@@ -41,7 +40,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.falskidentitet.FalskIdentitetService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -67,7 +65,6 @@ class StegService(
     private val beregningService: BeregningService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilgangService: TilgangService,
-    private val infotrygdFeedService: InfotrygdFeedService,
     private val satsendringService: SatsendringService,
     private val personopplysningerService: PersonopplysningerService,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
@@ -81,17 +78,6 @@ class StegService(
 
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
     private val stegFunksjonellFeilMetrics: Map<StegType, Counter> = initStegMetrikker("funksjonell-feil")
-
-    @Transactional
-    fun håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling: NyBehandling): Behandling {
-        val behandling = håndterNyBehandling(nyBehandling)
-        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(
-                behandling.fagsak.aktør,
-            )
-        }
-        return behandling
-    }
 
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
@@ -236,7 +222,7 @@ class StegService(
                 throw exception
             }
 
-        return håndterNyBehandlingOgSendInfotrygdFeed(
+        return håndterNyBehandling(
             NyBehandling(
                 behandlingType =
                     if (fagsak.status == FagsakStatus.LØPENDE) {
@@ -506,12 +492,11 @@ class StegService(
     @Transactional
     fun håndterRegistrerInstitusjon(
         behandling: Behandling,
-        institusjon: Institusjon,
     ): Behandling {
         val behandlingSteg: RegistrerInstitusjon = hentBehandlingSteg(StegType.REGISTRERE_INSTITUSJON) as RegistrerInstitusjon
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, institusjon)
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
     }
 

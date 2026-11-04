@@ -13,13 +13,13 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingSøknads
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockOppdragBackendKlient
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockPensjonService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockSystemOnlyPdlRestKlient
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockTilbakekrevingsvedtakMotregningRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategiForValutakurserRepository
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
@@ -151,6 +151,7 @@ class CucumberMock(
     val tilbakekrevingService = mockTilbakekrevingService()
     val taskRepository = MockTasker().mockTaskRepositoryWrapper(this, scope)
     val featureToggleService = mockFeatureToggleService()
+    val pensjonService = mockPensjonService()
     val mockPåVentService = mockk<SettPåVentService>()
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
     val brevmottakerService = mockk<BrevmottakerService>()
@@ -243,14 +244,6 @@ class CucumberMock(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vilkårService = vilkårService,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            endretUtbetalingRepository = endretUtbetalingAndelRepository,
-            vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-            vedtakRepository = vedtakRepository,
-            kompetanseRepository = kompetanseRepository,
-            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
-            valutakursRepository = valutakursRepository,
-            søknadGrunnlagService = søknadGrunnlagService,
         )
 
     val strengtFortroligService =
@@ -278,7 +271,6 @@ class CucumberMock(
             kodeverkService = mockk(),
             valutakursRepository = valutakursRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
-            featureToggleService = featureToggleService,
             strengtFortroligService = strengtFortroligService,
         )
 
@@ -295,11 +287,9 @@ class CucumberMock(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             loggService = loggService,
             arbeidsfordelingService = arbeidsfordelingService,
-            infotrygdService = mockk<InfotrygdService>(),
             vedtaksperiodeService = vedtaksperiodeService,
             taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
-            featureToggleService = featureToggleService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
             fagsakLåsingService = mockk(relaxed = true),
         )
@@ -521,12 +511,10 @@ class CucumberMock(
 
     val håndterIverksettMotØkonomiSteg =
         IverksettMotOppdrag(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             økonomiService = økonomiService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             totrinnskontrollService = totrinnskontrollService,
-            taskRepository = taskRepository,
         )
 
     val statusFraOppdrag =
@@ -669,6 +657,8 @@ class CucumberMock(
             behandlingMetrikker = behandlingMetrikker,
             loggService = loggService,
             snikeIKøenService = snikeIKøenService,
+            pensjonService = pensjonService,
+            featureToggleService = featureToggleService,
         )
 
     val automatiskBeslutningService = AutomatiskBeslutningService(simuleringService)
@@ -741,7 +731,6 @@ class CucumberMock(
                 beregningService = beregningService,
                 søknadGrunnlagService = søknadGrunnlagService,
                 tilgangService = tilgangService,
-                infotrygdFeedService = mockk(),
                 satsendringService = mockk(),
                 personopplysningerService = personopplysningerService,
                 automatiskBeslutningService = mockk(),

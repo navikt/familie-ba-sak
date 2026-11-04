@@ -96,8 +96,8 @@ object PersonopplysningsgrunnlagFiltreringUtils {
     }
 
     fun List<Opphold>.filtrerBortOppholdFørEldsteBarn(
-        eldsteBarnsFødselsdato: LocalDate,
-    ): List<Opphold> = this.filter { it.oppholdTil?.isSameOrAfter(eldsteBarnsFødselsdato) ?: true }
+        cutoffDato: LocalDate,
+    ): List<Opphold> = this.filter { it.oppholdTil?.isSameOrAfter(cutoffDato) ?: true }
 
     fun List<Sivilstand>.filtrerBortIkkeRelevanteSivilstander(
         behandlingKategori: BehandlingKategori,
