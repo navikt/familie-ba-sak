@@ -49,7 +49,6 @@ class AzureAdAuthenticationManager(
     private fun convert(jwt: Jwt): JwtAuthenticationToken {
         val grupper = jwt.getClaimAsStringList("groups") ?: emptyList()
         val applicationName = jwt.getClaimAsString("azp_name") ?: ""
-        val erMaskinTilMaskinToken = SikkerhetContext.erMaskinTilMaskinToken(jwt)
 
         val teamfamilieNamespaceRegex = Regex(".*:teamfamilie:.*")
         val familieKlageRegex = Regex(".*:teamfamilie:familie-klage")
@@ -63,10 +62,13 @@ class AzureAdAuthenticationManager(
                 if (grupper.contains(rolleConfig.SAKSBEHANDLER_ROLLE)) add(Rolle.SAKSBEHANDLER)
                 if (grupper.contains(rolleConfig.BESLUTTER_ROLLE)) add(Rolle.BESLUTTER)
 
-                if (erMaskinTilMaskinToken && applicationName.matches(teamfamilieNamespaceRegex)) add(Rolle.TEAMFAMILIE_APPLIKASJON)
                 if (applicationName.matches(familieKlageRegex)) add(Rolle.KLAGE_APPLIKASJON)
-                if (erMaskinTilMaskinToken && applicationName.matches(pensjonRegex)) add(Rolle.PENSJON_APPLIKASJON)
-                if (erMaskinTilMaskinToken && applicationName.matches(bidragRegex)) add(Rolle.BISYS_APPLIKASJON)
+
+                if (SikkerhetContext.erMaskinTilMaskinToken(jwt)) {
+                    if (applicationName.matches(teamfamilieNamespaceRegex)) add(Rolle.TEAMFAMILIE_APPLIKASJON)
+                    if (applicationName.matches(pensjonRegex)) add(Rolle.PENSJON_APPLIKASJON)
+                    if (applicationName.matches(bidragRegex)) add(Rolle.BISYS_APPLIKASJON)
+                }
             }
 
         if (roller.isEmpty()) {

@@ -18,7 +18,7 @@ object SikkerhetContext {
 
     fun erMaskinTilMaskinToken(jwt: Jwt): Boolean {
         val oid = jwt.getClaimAsString("oid")
-        val roles = runCatching { jwt.getClaimAsStringList("roles") }.getOrNull().orEmpty()
+        val roles = jwt.getClaimAsStringList("roles").orEmpty()
         return oid != null && oid == jwt.subject && roles.contains("access_as_application")
     }
 
