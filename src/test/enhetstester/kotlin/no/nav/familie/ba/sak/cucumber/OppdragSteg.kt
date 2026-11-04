@@ -127,7 +127,7 @@ class OppdragSteg {
                 .groupByBehandlingId()
                 .mapValues {
                     it.value
-                        .map { entry: Map<String, String> -> BehandlingMigreringsinfo(behandling = lagBehandling(id = it.key), migreringsdato = parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!).toLocalDate()) }
+                        .map { entry: Map<String, String?> -> BehandlingMigreringsinfo(behandling = lagBehandling(id = it.key), migreringsdato = parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!).toLocalDate()) }
                         .single()
                 }.toMutableMap()
     }
