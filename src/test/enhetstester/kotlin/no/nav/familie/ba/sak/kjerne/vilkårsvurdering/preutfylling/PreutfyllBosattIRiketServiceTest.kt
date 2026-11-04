@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -1914,12 +1915,16 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal gi oppfylt når bosatt under 12 mnd og har permanent oppholdstillatelse uten tom`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold = listOf(PERMANENT to DatoIntervallEntitet(fom = iDag.minusMonths(3))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -1930,12 +1935,16 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal gi oppfylt når midlertidig oppholdstillatelse varer i mer enn 12 mnd`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold = listOf(MIDLERTIDIG to DatoIntervallEntitet(fom = iDag.minusMonths(1), tom = iDag.plusMonths(23))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -1943,12 +1952,16 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal ikke gi oppfylt når oppholdstillatelsen varer i mindre enn 12 mnd selv om det er mer enn 12 mnd fra bosatt fom til tom`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold = listOf(MIDLERTIDIG to DatoIntervallEntitet(fom = iDag.minusMonths(1), tom = iDag.plusMonths(10))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertIkkeOppfyltPåOppholdstillatelse(vilkårResultat)
@@ -1956,12 +1969,16 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal gi oppfylt når oppholdstillatelsen varer i mer enn 12 mnd selv om det er under 12 mnd fra bosatt fom til tom`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold = listOf(MIDLERTIDIG to DatoIntervallEntitet(fom = iDag.minusMonths(14), tom = iDag.plusMonths(8))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -1970,12 +1987,16 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal ikke gi oppfylt når oppholdstillatelsen er utløpt`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold = listOf(MIDLERTIDIG to DatoIntervallEntitet(fom = iDag.minusMonths(24), tom = iDag.minusDays(1))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertIkkeOppfyltPåOppholdstillatelse(vilkårResultat)
@@ -1983,12 +2004,16 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal ikke gi oppfylt når oppholdstillatelsen starter frem i tid`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold = listOf(PERMANENT to DatoIntervallEntitet(fom = iDag.plusMonths(1))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertIkkeOppfyltPåOppholdstillatelse(vilkårResultat)
@@ -1996,9 +2021,9 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal slå sammen oppholdstillatelser som følger hverandre når ingen av dem alene varer i mer enn 12 mnd`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold =
                         listOf(
@@ -2007,6 +2032,10 @@ class PreutfyllBosattIRiketServiceTest {
                         ),
                 )
 
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
+
             // Assert
             assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
             assertThat(vilkårResultat.begrunnelseForManuellKontroll).isEqualTo(BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_OPPHOLDSTILLATELSE)
@@ -2014,13 +2043,17 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal ikke gi oppfylt når bosatt-perioden har tom-dato`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     bosattTom = iDag.plusMonths(2),
                     opphold = listOf(PERMANENT to DatoIntervallEntitet(fom = iDag.minusMonths(3))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertIkkeOppfyltPåOppholdstillatelse(vilkårResultat)
@@ -2028,12 +2061,16 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal ignorere oppholdstillatelse med type OPPLYSNING_MANGLER`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold = listOf(OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER to DatoIntervallEntitet(fom = iDag.minusMonths(3))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertIkkeOppfyltPåOppholdstillatelse(vilkårResultat)
@@ -2043,13 +2080,15 @@ class PreutfyllBosattIRiketServiceTest {
         fun `skal ikke gi oppfylt på oppholdstillatelse når toggle er av`() {
             // Arrange
             every { featureToggleService.isEnabled(FeatureToggle.OPPFYLL_BOSATT_I_RIKET_BASERT_PÅ_OPPHOLDSTILLATELSE) } returns false
-
-            // Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold = listOf(PERMANENT to DatoIntervallEntitet(fom = iDag.minusMonths(3))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertIkkeOppfyltPåOppholdstillatelse(vilkårResultat)
@@ -2057,13 +2096,17 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal ikke gi oppfylt når norsk bostedsadresse avsluttes i dag på grunn av utflytting selv om oppholdstillatelsen varer lenge`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(10),
                     bosattTom = iDag,
                     opphold = listOf(MIDLERTIDIG to DatoIntervallEntitet(fom = iDag.minusMonths(10), tom = iDag.plusYears(2))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertIkkeOppfyltPåOppholdstillatelse(vilkårResultat)
@@ -2073,13 +2116,15 @@ class PreutfyllBosattIRiketServiceTest {
         fun `skal ikke gi oppfylt når oppholdstillatelsen varer i nøyaktig 12 mnd`() {
             // Arrange
             val oppholdFom = iDag.withDayOfMonth(1).minusMonths(3)
-
-            // Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = oppholdFom,
                     opphold = listOf(MIDLERTIDIG to DatoIntervallEntitet(fom = oppholdFom, tom = oppholdFom.plusMonths(12))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertIkkeOppfyltPåOppholdstillatelse(vilkårResultat)
@@ -2089,13 +2134,15 @@ class PreutfyllBosattIRiketServiceTest {
         fun `skal gi oppfylt når oppholdstillatelsen varer i 12 mnd og én dag`() {
             // Arrange
             val oppholdFom = iDag.withDayOfMonth(1).minusMonths(3)
-
-            // Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = oppholdFom,
                     opphold = listOf(MIDLERTIDIG to DatoIntervallEntitet(fom = oppholdFom, tom = oppholdFom.plusMonths(12).plusDays(1))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -2103,12 +2150,16 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal ikke gi oppfylt når oppholdstillatelsen mangler fom`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold = listOf(MIDLERTIDIG to DatoIntervallEntitet(fom = null, tom = iDag.plusMonths(2))),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertIkkeOppfyltPåOppholdstillatelse(vilkårResultat)
@@ -2116,12 +2167,16 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal ikke gi oppfylt når oppholdstillatelsen mangler både fom og tom`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold = listOf(PERMANENT to DatoIntervallEntitet(fom = null, tom = null)),
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertIkkeOppfyltPåOppholdstillatelse(vilkårResultat)
@@ -2129,13 +2184,17 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal gi oppfylt basert på oppholdstillatelse selv om søker har oppgitt i søknad at hen ikke planlegger å bo i Norge i 12 mnd`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold = listOf(PERMANENT to DatoIntervallEntitet(fom = iDag.minusMonths(3))),
                     søkerPlanleggerÅBoINorge12Mnd = false,
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -2144,13 +2203,17 @@ class PreutfyllBosattIRiketServiceTest {
 
         @Test
         fun `skal prioritere oppholdstillatelse foran søknad når søker planlegger å bo i Norge i 12 mnd`() {
-            // Arrange & Act
-            val vilkårResultat =
-                preutfyllSøkerMedOpphold(
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
                     bosattFom = iDag.minusMonths(3),
                     opphold = listOf(PERMANENT to DatoIntervallEntitet(fom = iDag.minusMonths(3))),
                     søkerPlanleggerÅBoINorge12Mnd = true,
                 )
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+            val vilkårResultat = vilkårsvurdering.hentPreutfyltBosattIRiket()
 
             // Assert
             assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -2163,12 +2226,12 @@ class PreutfyllBosattIRiketServiceTest {
             assertThat(vilkårResultat.begrunnelseForManuellKontroll).isNull()
         }
 
-        private fun preutfyllSøkerMedOpphold(
+        private fun lagVilkårsvurderingForSøkerMedOpphold(
             bosattFom: LocalDate,
             opphold: List<Pair<OPPHOLDSTILLATELSE, DatoIntervallEntitet>>,
             bosattTom: LocalDate? = null,
             søkerPlanleggerÅBoINorge12Mnd: Boolean? = null,
-        ): VilkårResultat {
+        ): Vilkårsvurdering {
             val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
             val søkerAktør = lagAktør()
             val persongrunnlag =
@@ -2204,13 +2267,14 @@ class PreutfyllBosattIRiketServiceTest {
             every { søknadService.finnDigitalSøknad(behandling.id) } returns
                 søkerPlanleggerÅBoINorge12Mnd?.let { lagSøknad(søkerPlanleggerÅBoINorge12Mnd = it) }
 
-            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, listOf(søkerAktør))
+            return vilkårsvurdering
+        }
 
-            return vilkårsvurdering.personResultater
-                .single { it.aktør == søkerAktør }
+        private fun Vilkårsvurdering.hentPreutfyltBosattIRiket(): VilkårResultat =
+            personResultater
+                .single()
                 .vilkårResultater
                 .filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
                 .minBy { it.periodeFom!! }
-        }
     }
 }
