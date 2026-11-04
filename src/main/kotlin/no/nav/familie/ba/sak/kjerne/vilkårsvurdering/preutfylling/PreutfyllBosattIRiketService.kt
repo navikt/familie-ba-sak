@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
@@ -175,7 +174,7 @@ class PreutfyllBosattIRiketService(
                 IkkeVurdertVilkår(evalueringÅrsaker = setOf(VilkårKanskjeOppfyltÅrsak.BOSATT_I_RIKET_IKKE_MULIG_Å_FASTSETTE_SKAL_BO_LENGRE_ENN_12_MND))
             }
 
-            erBosattINorgePeriode.omfatter(LocalDate.now()) && digitalSøknad != null && erOppgittAtPlanleggerÅBoINorge12Måneder(digitalSøknad!!, personResultat) -> {
+            erBosattINorgePeriode.omfatter(LocalDate.now()) && digitalSøknad != null && erOppgittAtPlanleggerÅBoINorge12Måneder(digitalSøknad, personResultat) -> {
                 OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.", INFORMASJON_FRA_SØKNAD)
             }
 
@@ -191,14 +190,19 @@ class PreutfyllBosattIRiketService(
         erBosattINorgePeriode.omfatter(LocalDate.now()) &&
             erBosattINorgePeriode.tom == null &&
             person.opphold
-                .filter { it.type in setOf(PERMANENT, MIDLERTIDIG) }
-                .map { Periode(verdi = true, fom = it.gyldigPeriode?.fom, tom = it.gyldigPeriode?.tom) }
-                .slåSammenPerioderInnenforSammeMåned()
+                .filter { it.type in setOf(PERMANENT, MIDLERTIDIG) && it.gyldigPeriode?.fom != null }
+                .map {
+                    Periode(
+                        verdi = true,
+                        fom = it.gyldigPeriode?.fom,
+                        tom = it.gyldigPeriode?.tom,
+                    )
+                }.slåSammenPerioderInnenforSammeMåned()
                 .filter { it.omfatter(LocalDate.now()) }
                 .any { oppholdstillatelse ->
                     val fom = oppholdstillatelse.fom
                     val tom = oppholdstillatelse.tom
-                    fom == null || tom == null || tom.isAfter(fom.plusMonths(12))
+                    fom != null && (tom == null || tom.isAfter(fom.plusMonths(12)))
                 }
 
     private fun erOppgittAtPlanleggerÅBoINorge12Måneder(

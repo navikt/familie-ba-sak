@@ -2102,7 +2102,7 @@ class PreutfyllBosattIRiketServiceTest {
         }
 
         @Test
-        fun `skal gi oppfylt når oppholdstillatelsen mangler fom og varer mindre enn 12 mnd frem i tid`() {
+        fun `skal ikke gi oppfylt når oppholdstillatelsen mangler fom`() {
             // Arrange & Act
             val vilkårResultat =
                 preutfyllSøkerMedOpphold(
@@ -2111,7 +2111,20 @@ class PreutfyllBosattIRiketServiceTest {
                 )
 
             // Assert
-            assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
+            assertIkkeOppfyltPåOppholdstillatelse(vilkårResultat)
+        }
+
+        @Test
+        fun `skal ikke gi oppfylt når oppholdstillatelsen mangler både fom og tom`() {
+            // Arrange & Act
+            val vilkårResultat =
+                preutfyllSøkerMedOpphold(
+                    bosattFom = iDag.minusMonths(3),
+                    opphold = listOf(PERMANENT to DatoIntervallEntitet(fom = null, tom = null)),
+                )
+
+            // Assert
+            assertIkkeOppfyltPåOppholdstillatelse(vilkårResultat)
         }
 
         @Test
