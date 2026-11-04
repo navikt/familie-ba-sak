@@ -12,8 +12,11 @@ import java.time.LocalDate
 
 class FakeSystemOnlyIntegrasjonKlient :
     SystemOnlyIntegrasjonKlient(
-        integrasjonUri = URI("http://dummy-uri"),
-        restClient = mockk<RestClient>(relaxed = true),
+        integrasjonFssUri = URI("http://dummy-uri"),
+        restClientFss = mockk<RestClient>(relaxed = true),
+        integrasjonGcpUri = URI("http://dummy-gcp-uri"),
+        restClientGcp = mockk<RestClient>(relaxed = true),
+        featureToggleService = mockk(relaxed = true),
         retryBackoffDelay = 1L,
     ) {
     override fun hentArbeidsforholdMedSystembruker(
