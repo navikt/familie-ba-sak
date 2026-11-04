@@ -106,4 +106,65 @@ class FiltreringsreglerSøknadServiceTest {
         // Assert
         assertThat(begrunnelse).isEqualTo("1) Søker har EØS-barnetrygd 2) Søknaden inneholder vedlegg")
     }
+
+    @Test
+    fun `skal utelate filtreringsregler om adressebeskyttelse fra begrunnelsen`() {
+        // Arrange
+        val behandlingId = 1L
+        every { filtreringResultatRepository.finnFiltreringResultater(behandlingId) } returns
+            listOf(
+                lagFiltreringResultat(
+                    behandlingId = behandlingId,
+                    filtreringsregel = Filtreringsregel.Identifikator.SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    begrunnelse = "Søker har adressebeskyttelse gradering 6 eller 19",
+                ),
+                lagFiltreringResultat(
+                    behandlingId = behandlingId,
+                    filtreringsregel = Filtreringsregel.Identifikator.BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    begrunnelse = "Barn har adressebeskyttelse gradering 6 eller 19",
+                ),
+                lagFiltreringResultat(
+                    behandlingId = behandlingId,
+                    filtreringsregel = Filtreringsregel.Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    begrunnelse = "Søknaden inneholder vedlegg",
+                ),
+            )
+
+        // Act
+        val begrunnelse = filtreringsreglerSøknadService.hentBegrunnelseForStoppIFiltreringsreglene(behandlingId)
+
+        // Assert
+        assertThat(begrunnelse).isEqualTo("Søknaden inneholder vedlegg")
+    }
+
+    @Test
+    fun `skal ikke gi begrunnelse når bare filtreringsregler om adressebeskyttelse ikke er oppfylt`() {
+        // Arrange
+        val behandlingId = 1L
+        every { filtreringResultatRepository.finnFiltreringResultater(behandlingId) } returns
+            listOf(
+                lagFiltreringResultat(behandlingId = behandlingId, resultat = Resultat.OPPFYLT),
+                lagFiltreringResultat(
+                    behandlingId = behandlingId,
+                    filtreringsregel = Filtreringsregel.Identifikator.BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    begrunnelse = "Barn har adressebeskyttelse gradering 6 eller 19",
+                ),
+                lagFiltreringResultat(
+                    behandlingId = behandlingId,
+                    filtreringsregel = Filtreringsregel.Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG,
+                    resultat = Resultat.IKKE_VURDERT,
+                    begrunnelse = "Ikke vurdert",
+                ),
+            )
+
+        // Act
+        val begrunnelse = filtreringsreglerSøknadService.hentBegrunnelseForStoppIFiltreringsreglene(behandlingId)
+
+        // Assert
+        assertThat(begrunnelse).isNull()
+    }
 }

@@ -454,6 +454,18 @@ class AutovedtakSøknadServiceTest {
             }
 
             @Test
+            fun `skal opprette manuell behandling uten beskrivelse i oppgaven når filtreringsreglene ikke gir noen begrunnelse`() {
+                // Arrange
+                every { filtreringsreglerSøknadService.hentBegrunnelseForStoppIFiltreringsreglene(behandlingStoppetAvFiltrering.id) } returns null
+
+                // Act
+                autovedtakSøknadService.kjørBehandling(søknadData)
+
+                // Assert
+                verify(exactly = 1) { stegService.håndterNyBehandling(nyBehandling.copy(oppgavebeskrivelse = null)) }
+            }
+
+            @Test
             fun `skal opprette den manuelle behandlingen med årsak SØKNAD selv om baks-mottak sendte årsak AUTOMATISK_BEHANDLING_AV_SØKNAD`() {
                 // Arrange
                 val søknadDataFraMottak =

@@ -3,10 +3,12 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FILTRERINGSREGLER_SØKNAD
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsregelEvaluator
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.slåSammenIkkeOppfylteBegrunnelser
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerFødselshendelseService.Companion.logger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -40,5 +42,25 @@ class FiltreringsreglerSøknadService(
         return filtreringResultatRepository.saveAll(filtreringsresultater)
     }
 
-    fun hentBegrunnelseForStoppIFiltreringsreglene(behandlingId: Long): String = filtreringResultatRepository.finnFiltreringResultater(behandlingId).slåSammenIkkeOppfylteBegrunnelser(behandlingId)
+    fun hentBegrunnelseForStoppIFiltreringsreglene(behandlingId: Long): String? {
+        // Oppgaven fordeles før barna er med i persongrunnlaget, så den kan havne hos en enhet uten tilgang til adressebeskyttede personer
+        val ikkeOppfylteResultaterUtenAdressebeskyttelse =
+            filtreringResultatRepository
+                .finnFiltreringResultater(behandlingId)
+                .filter { it.resultat == Resultat.IKKE_OPPFYLT && it.filtreringsregel !in FILTRERINGSREGLER_OM_ADRESSEBESKYTTELSE }
+
+        return if (ikkeOppfylteResultaterUtenAdressebeskyttelse.isEmpty()) {
+            null
+        } else {
+            ikkeOppfylteResultaterUtenAdressebeskyttelse.slåSammenIkkeOppfylteBegrunnelser(behandlingId)
+        }
+    }
+
+    companion object {
+        private val FILTRERINGSREGLER_OM_ADRESSEBESKYTTELSE =
+            setOf(
+                Filtreringsregel.Identifikator.SØKER_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19,
+                Filtreringsregel.Identifikator.BARN_HAR_IKKE_ADRESSEBESKYTTELSE_GRADERING_6_ELLER_19,
+            )
+    }
 }
