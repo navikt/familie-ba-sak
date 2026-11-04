@@ -12,7 +12,6 @@ object DevLauncher {
                     "dev",
                     "mock-brev-klient",
                     "fake-økonomi-klient",
-                    "mock-infotrygd-feed",
                     "mock-infotrygd-barnetrygd",
                     "mock-pdl",
                     "mock-ident-klient",

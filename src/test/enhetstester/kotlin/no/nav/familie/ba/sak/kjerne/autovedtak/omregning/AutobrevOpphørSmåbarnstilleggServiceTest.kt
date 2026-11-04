@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
@@ -21,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -42,11 +40,9 @@ import java.time.LocalDate
 internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     private val autovedtakService = mockk<AutovedtakService>()
     private val autovedtakStegService = mockk<AutovedtakStegService>()
-    private val fagsakService = mockk<FagsakService>(relaxed = true)
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val behandlingService = mockk<BehandlingService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val infotrygdService = mockk<InfotrygdService>(relaxed = true)
     private val stegService = mockk<StegService>()
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
@@ -57,10 +53,8 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
 
     private val autovedtakBrevService =
         AutovedtakBrevService(
-            fagsakService = fagsakService,
             behandlingService = behandlingService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            infotrygdService = infotrygdService,
             autovedtakService = autovedtakService,
             vedtakService = vedtakService,
             vedtaksperiodeService = vedtaksperiodeService,

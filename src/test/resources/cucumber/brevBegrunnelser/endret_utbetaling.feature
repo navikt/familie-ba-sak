@@ -64,12 +64,12 @@ Egenskap: Brevbegrunnelse ved endret utbetaling
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.03.2022 til 30.04.2022
       | Begrunnelse                                             | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING | STANDARD | Nei           | 16.06.16             | 1           | februar 2022                         | NB      | 1 676 | 02.02.22         | SØKER_FÅR_UTVIDET       | 02.02.22                    |
+      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING | STANDARD | Nei           | 16.06.16             | 1           | februar 2022                         | NB      | 1 676 | 2. februar 2022  | SØKER_FÅR_UTVIDET       | 2. februar 2022             |
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.05.2022 til 31.05.2022
       | Begrunnelse                                             | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING | STANDARD | Nei           | 16.06.16             | 1           | april 2022                           | NB      | 1 676 | 02.02.22         | SØKER_FÅR_UTVIDET       | 02.02.22                    |
-      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING | STANDARD | Nei           | 15.06.12             | 1           | april 2022                           | NB      | 1 054 | 04.04.22         | SØKER_FÅR_UTVIDET       | 04.04.22                    |
+      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING | STANDARD | Nei           | 16.06.16             | 1           | april 2022                           | NB      | 1 676 | 2. februar 2022  | SØKER_FÅR_UTVIDET       | 2. februar 2022             |
+      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING | STANDARD | Nei           | 15.06.12             | 1           | april 2022                           | NB      | 1 054 | 4. april 2022    | SØKER_FÅR_UTVIDET       | 4. april 2022               |
 
 
   Scenario: Skal flette inn to barn med endret utbetaling delt bosted 100% hvor ett av barna også har redusert sats pga 6år
@@ -185,7 +185,7 @@ Egenskap: Brevbegrunnelse ved endret utbetaling
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.12.2023 til 31.12.2023
       | Begrunnelse                                                         | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING_FØR_SOKNAD_NY | STANDARD | Nei           | 07.05.15 og 03.12.17 | 2           | november 2023                        | NB      | 2 620 | 06.12.23         |                         |                             |
+      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING_FØR_SOKNAD_NY | STANDARD | Nei           | 07.05.15 og 03.12.17 | 2           | november 2023                        | NB      | 2 620 | 6. desember 2023 |                         |                             |
 
   Scenario: Skal ikke flette inn barn som ikke har utbetaling pga allerede utbetalt i begrunnelse som gjelder søker
     Gitt følgende fagsaker
@@ -280,8 +280,8 @@ Egenskap: Brevbegrunnelse ved endret utbetaling
       | INNVILGET_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER | STANDARD | Ja            | 13.04.21             | 1           | september 2023                       | NB      | 1 766 |
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 2 i periode 01.01.2024 til 31.03.2027
-      | Begrunnelse                            | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt |
-      | ETTER_ENDRET_UTBETALING_ENDRE_MOTTAKER | STANDARD | Nei           | 22.12.22             | 1           | desember 2023                        | NB      | 1 766 | 14.12.23         |
+      | Begrunnelse                            | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt  |
+      | ETTER_ENDRET_UTBETALING_ENDRE_MOTTAKER | STANDARD | Nei           | 22.12.22             | 1           | desember 2023                        | NB      | 1 766 | 14. desember 2023 |
 
   Scenario: Skal flette inn barn som ikke har utbetaling pga allerede utbetalt i begrunnelse for utvidet dersom søker bare har ett barn
     Gitt følgende fagsaker
@@ -336,9 +336,9 @@ Egenskap: Brevbegrunnelse ved endret utbetaling
       | UTBETALING      | juli 2019 | til februar 2023 | 1054  | 1                          | 23.06.15            | du                     |
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.07.2019 til 28.02.2023
-      | Begrunnelse                                                  | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
-      | INNVILGET_SKILT                                              | STANDARD | Ja            | 23.06.15             | 1           | juni 2019                            | 1 054 |                  | SØKER_FÅR_UTVIDET       |
-      | ENDRET_UTBETALING_SELVSTENDIG_RETT_ETTERBETALING_UTVIDET_DEL | STANDARD | Nei           | 23.06.15             | 1           | juni 2019                            | 0     | 17.11.19         | SØKER_FÅR_UTVIDET       |
+      | Begrunnelse                                                  | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp | Søknadstidspunkt  | Søkers rett til utvidet |
+      | INNVILGET_SKILT                                              | STANDARD | Ja            | 23.06.15             | 1           | juni 2019                            | 1 054 |                   | SØKER_FÅR_UTVIDET       |
+      | ENDRET_UTBETALING_SELVSTENDIG_RETT_ETTERBETALING_UTVIDET_DEL | STANDARD | Nei           | 23.06.15             | 1           | juni 2019                            | 0     | 17. november 2019 | SØKER_FÅR_UTVIDET       |
 
   Scenario: Skal kun flette inn barn som har utbetaling i begrunnelse for utvidet dersom søker har ett barn med utbetaling og ett barn som ikke har utbetaling pga allerede utbetalt
     Gitt følgende fagsaker

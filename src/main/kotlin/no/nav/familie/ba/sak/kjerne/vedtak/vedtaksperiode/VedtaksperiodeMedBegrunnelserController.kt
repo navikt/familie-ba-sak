@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.PutVedtaksperiodeMedFriteksterDt
 import no.nav.familie.ba.sak.ekstern.restDomene.PutVedtaksperiodeMedStandardbegrunnelserDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
-import no.nav.familie.ba.sak.internal.TestVerktøyService
+import no.nav.familie.ba.sak.internal.tabulærtest.GenererTabulærTestService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
@@ -42,7 +42,7 @@ class VedtaksperiodeMedBegrunnelserController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val kodeverkService: KodeverkService,
-    private val testVerktøyService: TestVerktøyService,
+    private val genererTabulærTestService: GenererTabulærTestService,
 ) {
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
     fun oppdaterVedtaksperiodeStandardbegrunnelser(
@@ -162,7 +162,7 @@ class VedtaksperiodeMedBegrunnelserController(
                     "Brevbegrunnelsefeil for behandling $behandlingId, " +
                         "fagsak ${vedtaksperiode.vedtak.behandling.fagsak.id} " +
                         "på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom}. " +
-                        "\nAutogenerert test:\n" + testVerktøyService.hentBegrunnelsetest(behandlingId),
+                        "\nAutogenerert testgrunnlag:\n" + genererTabulærTestService.genererTestMedAlleGrunnlagsdata(behandlingId),
                 )
                 throw e
             }

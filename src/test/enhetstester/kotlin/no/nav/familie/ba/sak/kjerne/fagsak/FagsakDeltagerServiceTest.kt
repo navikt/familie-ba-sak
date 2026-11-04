@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.tilgangsmaskin.Avvisningskode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -78,6 +79,7 @@ class FagsakDeltagerServiceTest {
             PersonInfoDto(
                 personIdent = barnAktør.aktivFødselsnummer(),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
+                avvisningskode = Avvisningskode.AVVIST_STRENGT_FORTROLIG_ADRESSE,
             )
 
         // Act
@@ -87,6 +89,7 @@ class FagsakDeltagerServiceTest {
         assertThat(resultat).hasSize(1)
         assertThat(resultat.single().adressebeskyttelseGradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
         assertThat(resultat.single().harTilgang).isFalse()
+        assertThat(resultat.single().avvisningskode).isEqualTo(Avvisningskode.AVVIST_STRENGT_FORTROLIG_ADRESSE)
         assertThat(resultat.single().rolle).isEqualTo(FagsakDeltagerRolle.UKJENT)
     }
 

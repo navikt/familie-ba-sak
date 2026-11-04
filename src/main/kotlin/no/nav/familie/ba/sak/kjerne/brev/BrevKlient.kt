@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.internal.TestVerktøyService
+import no.nav.familie.ba.sak.internal.tabulærtest.GenererTabulærTestService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -25,7 +25,7 @@ class BrevKlient(
     @Value("\${FAMILIE_BREV_API_URL}") private val familieBrevUri: String,
     @Value("\${SANITY_DATASET}") private val sanityDataset: String,
     @Qualifier("utenAuthRestClient") private val restClient: RestClient,
-    private val testVerktøyService: TestVerktøyService,
+    private val genererTabulærTestService: GenererTabulærTestService,
 ) {
     fun genererBrev(
         målform: String,
@@ -73,12 +73,12 @@ class BrevKlient(
             }
         } catch (exception: HttpClientErrorException.BadRequest) {
             log.warn("En bad request oppstod ved henting av begrunneelsetekst for behandlingId=$behandlingId. Se SecureLogs for detaljer,")
-            secureLogger.warn("En bad request oppstod ved henting av begrunnelsetekst for behandlingId=$behandlingId. Autogenerert test:" + testVerktøyService.hentBegrunnelsetest(behandlingId), exception)
+            secureLogger.warn("En bad request oppstod ved henting av begrunnelsetekst for behandlingId=$behandlingId. Autogenerert testgrunnlag:" + genererTabulærTestService.genererTestMedAlleGrunnlagsdata(behandlingId), exception)
             throw FunksjonellFeil(
                 "Begrunnelsen ${begrunnelseData.apiNavn} passer ikke vedtaksperioden. Hvis du mener dette er feil, ta kontakt med team BAKS.",
             )
         } catch (e: Exception) {
-            secureLogger.info("Kall for å hente begrunnelsetekst feilet for behandlingId=$behandlingId. Autogenerert test:\"" + testVerktøyService.hentBegrunnelsetest(behandlingId))
+            secureLogger.info("Kall for å hente begrunnelsetekst feilet for behandlingId=$behandlingId. Autogenerert testgrunnlag:\n" + genererTabulærTestService.genererTestMedAlleGrunnlagsdata(behandlingId))
             throw e
         }
     }

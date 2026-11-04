@@ -499,7 +499,7 @@ class PersongrunnlagIntegrationTest(
     @Nested
     inner class HentOgLagreSøkerOgBarnINyttGrunnlag {
         @Test
-        fun `Skal returnere aktivt personopplysninggrunnlag når nytt personopplysninggrunnlag er uendret`() {
+        fun `Skal lagre og returnere nytt personopplysninggrunnlag selv om ingenting er endret`() {
             // Arrange
             val søkerFnr = leggTilPersonInfo(randomSøkerFødselsdato())
             val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
@@ -532,9 +532,9 @@ class PersongrunnlagIntegrationTest(
                 )
 
             // Assert
-            assertThat(nyttPersonopplysningGrunnlag).isEqualTo(forrigePersonopplysningGrunnlag)
-            assertThat(nyttPersonopplysningGrunnlag.id).isEqualTo(forrigePersonopplysningGrunnlag.id)
-            assertThat(personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id)).isPresent()
+            assertThat(nyttPersonopplysningGrunnlag.id).isNotEqualTo(forrigePersonopplysningGrunnlag.id)
+            assertThat(personopplysningGrunnlagRepository.findById(forrigePersonopplysningGrunnlag.id)).isEmpty()
+            assertThat(personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)?.id).isEqualTo(nyttPersonopplysningGrunnlag.id)
         }
 
         @Test

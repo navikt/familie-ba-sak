@@ -61,7 +61,7 @@ class BrevServiceTest {
             saksbehandlerContext = saksbehandlerContext,
             brevmalService = brevmalService,
             kodeverkService = mockk(),
-            testVerktøyService = mockk(),
+            genererTabulærTestService = mockk(),
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utenlandskPeriodebeløpRepository = mockk(),
             valutakursRepository = mockk(),

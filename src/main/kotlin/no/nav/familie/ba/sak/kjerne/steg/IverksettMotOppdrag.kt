@@ -2,26 +2,19 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.task.SendVedtakTilInfotrygdTask
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.springframework.stereotype.Service
 
 @Service
 class IverksettMotOppdrag(
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val økonomiService: ØkonomiService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
-    private val taskRepository: TaskRepositoryWrapper,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
 ) : BehandlingSteg<IverksettingTaskDTO> {
     private val iverksattOppdrag = Metrics.counter("familie.ba.sak.oppdrag.iverksatt")
@@ -63,23 +56,8 @@ class IverksettMotOppdrag(
             saksbehandlerId = data.saksbehandlerId,
         )
         iverksattOppdrag.increment()
-        val forrigeIverksatteBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
-        if (forrigeIverksatteBehandling == null ||
-            forrigeIverksatteBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT ||
-            behandling.erManuellMigrering()
-        ) {
-            taskRepository.save(
-                SendVedtakTilInfotrygdTask.opprettTask(
-                    hentFnrStoenadsmottaker(behandling.fagsak),
-                    behandling.id,
-                ),
-            )
-        }
         return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType = StegType.IVERKSETT_MOT_OPPDRAG
-
-    private fun hentFnrStoenadsmottaker(fagsak: Fagsak) = fagsak.aktør.aktivFødselsnummer()
 }

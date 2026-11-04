@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import org.slf4j.LoggerFactory
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 class StønadsstatistikkController(
     private val stønadsstatistikkService: StønadsstatistikkService,
     private val taskRepository: TaskRepositoryWrapper,
+    private val tilgangService: TilgangService,
 ) {
     private val logger = LoggerFactory.getLogger(StønadsstatistikkController::class.java)
 
@@ -21,6 +24,11 @@ class StønadsstatistikkController(
     fun hentVedtakDvhV2(
         @RequestBody(required = true) behandlinger: List<Long>,
     ): List<VedtakDVHV2> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Hente Vedtak DVH",
+        )
+
         try {
             return behandlinger.map { stønadsstatistikkService.hentVedtakV2(it) }
         } catch (e: Exception) {
@@ -33,6 +41,11 @@ class StønadsstatistikkController(
     fun sendTilStønadsstatistikkManuell(
         @RequestBody(required = true) behandlinger: List<Long>,
     ) {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Sender vedtakDVH til stønadsstatistikk manuelt",
+        )
+
         behandlinger.forEach {
             val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(it)
             val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, it)

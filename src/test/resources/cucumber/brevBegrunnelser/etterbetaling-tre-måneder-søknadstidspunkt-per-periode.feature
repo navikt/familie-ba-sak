@@ -141,9 +141,9 @@ Egenskap: Brevbegrunnelser for etterbetaling tre måneder skal splittes per søk
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.11.2013 til 30.11.2018
       | Begrunnelse                                                   | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_SED | STANDARD |               | 25.11.09             | 1           | oktober 2013                         | NB      | 0     | 28.01.26         |                         |                             |
-      | ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_SED | STANDARD |               | 05.10.11             | 1           | oktober 2013                         | NB      | 0     | 28.04.26         |                         |                             |
+      | ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_SED | STANDARD |               | 25.11.09             | 1           | oktober 2013                         | NB      | 0     | 28. januar 2026  |                         |                             |
+      | ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_SED | STANDARD |               | 05.10.11             | 1           | oktober 2013                         | NB      | 0     | 28. april 2026   |                         |                             |
 
     Så forvent følgende brevbegrunnelser i rekkefølge for behandling 1 i periode 01.12.2018 til 30.09.2025
       | Begrunnelse                                               | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID | STANDARD |               | 16.11.18             | 1           | november 2018                        | NB      | 0     | 28.04.26         |                         |                             |
+      | ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID | STANDARD |               | 16.11.18             | 1           | november 2018                        | NB      | 0     | 28. april 2026   |                         |                             |

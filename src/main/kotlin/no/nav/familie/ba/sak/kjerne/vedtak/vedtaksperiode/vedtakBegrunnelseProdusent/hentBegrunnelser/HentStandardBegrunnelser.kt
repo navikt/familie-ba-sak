@@ -60,6 +60,7 @@ internal fun hentStandardBegrunnelser(
         filtrertPåRolleOgFagsaktype
             .filterValues { it.periodeResultat in relevantePeriodeResultater || it.periodeResultat == SanityPeriodeResultat.IKKE_RELEVANT }
             .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
+            .filterNot { (_, begrunnelse) -> begrunnelse.erInnvilgetTilleggForPersonUtenRett(begrunnelseGrunnlag) }
             .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
             .filterValues { !it.begrunnelseSkalTriggesForReduksjonFraForrigeBehandling() && !it.begrunnelseSkalTriggesForOpphørFraForrigeBehandling() }
 
@@ -241,6 +242,16 @@ private fun SanityBegrunnelse.erGjeldendeForFinnmarkstillegg(
 
     return (begrunnelseMatcherPeriodeResultat && erEndringIFinnmarkstillegg) || erEndringIFinnmarkstilleggFraForrigeBehandling
 }
+
+private fun SanityBegrunnelse.erInnvilgetTilleggForPersonUtenRett(
+    begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
+): Boolean =
+    periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING &&
+        when {
+            gjelderFinnmarkstillegg -> !begrunnelseGrunnlag.sjekkOmHarKravPåFinnmarkstilleggDennePeriode()
+            gjelderSvalbardtillegg -> !begrunnelseGrunnlag.sjekkOmHarKravPåSvalbardtilleggDennePeriode()
+            else -> false
+        }
 
 private fun SanityBegrunnelse.erGjeldendeForSvalbardtillegg(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,

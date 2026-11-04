@@ -23,8 +23,13 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
 
 class BehandlingStegControllerTest {
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -138,6 +143,56 @@ class BehandlingStegControllerTest {
                 minimumBehandlerRolle = BehandlerRolle.BESLUTTER,
                 handling = "iverksette vedtak",
             )
+        }
+    }
+
+    @Nested
+    inner class RegistrerInstitusjon {
+        private val mockMvc: MockMvc =
+            MockMvcBuilders
+                .standaloneSetup(
+                    BehandlingStegController(
+                        behandlingHentOgPersisterService = behandlingHentOgPersisterServiceMock,
+                        utvidetBehandlingService = mockk(relaxed = true),
+                        stegService = stegServiceMock,
+                        tilgangService = tilgangServiceMock,
+                        featureToggleService = featureToggleService,
+                        totrinnskontrollService = totrinnskontrollServiceMock,
+                    ),
+                ).build()
+
+        @Test
+        fun `skal ignorere body fra gammel frontend og bruke institusjonen på fagsaken`() {
+            // Arrange
+            val behandling = lagBehandling()
+            every { behandlingHentOgPersisterServiceMock.hent(behandling.id) } returns behandling
+            every { stegServiceMock.håndterRegistrerInstitusjon(behandling) } returns behandling
+
+            // Act
+            mockMvc
+                .post("/api/behandlinger/${behandling.id}/steg/registrer-institusjon") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = """{"orgNummer":"889640782","tssEksternId":"80000999999"}"""
+                }.andExpect { status { isOk() } }
+
+            // Assert
+            verify(exactly = 1) { stegServiceMock.håndterRegistrerInstitusjon(behandling) }
+        }
+
+        @Test
+        fun `skal fungere uten body`() {
+            // Arrange
+            val behandling = lagBehandling()
+            every { behandlingHentOgPersisterServiceMock.hent(behandling.id) } returns behandling
+            every { stegServiceMock.håndterRegistrerInstitusjon(behandling) } returns behandling
+
+            // Act
+            mockMvc
+                .post("/api/behandlinger/${behandling.id}/steg/registrer-institusjon")
+                .andExpect { status { isOk() } }
+
+            // Assert
+            verify(exactly = 1) { stegServiceMock.håndterRegistrerInstitusjon(behandling) }
         }
     }
 }

@@ -37,8 +37,11 @@ import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.net.SocketException
+import java.net.SocketTimeoutException
+import java.net.http.HttpTimeoutException
 import java.nio.channels.ClosedChannelException
 import java.time.format.DateTimeParseException
+import java.util.concurrent.TimeoutException
 
 @ControllerAdvice
 class ApiExceptionHandler {
@@ -51,7 +54,7 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(IOException::class, ClosedChannelException::class, EOFException::class)
     fun handleNettverksfeil(
-        e: Exception,
+        e: Throwable,
         request: HttpServletRequest,
     ): ResponseEntity<Ressurs<Nothing>> {
         val cause = NestedExceptionUtils.getMostSpecificCause(e)
@@ -139,7 +142,18 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(IntegrasjonException::class)
-    fun handleIntegrasjonException(integrasjonException: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> = illegalState(integrasjonException.message.toString(), integrasjonException)
+    fun handleIntegrasjonException(
+        integrasjonException: IntegrasjonException,
+        request: HttpServletRequest,
+    ): ResponseEntity<Ressurs<Nothing>> {
+        val årsak = NestedExceptionUtils.getMostSpecificCause(integrasjonException)
+
+        if (NettverksfeilType.fraException(årsak) != NettverksfeilType.UKJENT) {
+            return handleNettverksfeil(årsak, request)
+        }
+
+        return illegalState(integrasjonException.message.toString(), integrasjonException)
+    }
 
     @ExceptionHandler(PdlPersonKanIkkeBehandlesIFagsystem::class)
     fun handlePdlPersonKanIkkeBehandlesIFagsystem(feil: PdlPersonKanIkkeBehandlesIFagsystem): ResponseEntity<Ressurs<Nothing>> {
@@ -223,12 +237,14 @@ enum class NettverksfeilType(
     CLOSED_CHANNEL("closed_channel"),
     CONNECTION_RESET("connection_reset"),
     EOF("eof"),
+    TIMEOUT("timeout"),
     UKJENT("ukjent"),
     ;
 
     companion object {
         fun fraException(e: Throwable): NettverksfeilType =
             when {
+                e is SocketTimeoutException || e is HttpTimeoutException || e is TimeoutException -> TIMEOUT
                 e is ClosedChannelException -> CLOSED_CHANNEL
                 e is EOFException -> EOF
                 e is IOException && e.message?.lowercase()?.contains("broken pipe") == true -> BROKEN_PIPE

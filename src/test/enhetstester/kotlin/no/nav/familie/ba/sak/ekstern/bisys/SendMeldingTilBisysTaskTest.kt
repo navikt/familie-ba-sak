@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.statistikk.producer.DefaultKafkaProducer
@@ -350,5 +351,178 @@ class SendMeldingTilBisysTaskTest {
 
         // Assert
         verify(exactly = 0) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
+    }
+
+    @Test
+    fun `Skal ikke sende melding til bisys hvis bare Finnmarks- eller Svalbardtillegg opphører`() {
+        // Arrange
+        val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, _, behandling) = setupMocks()
+        val sendMeldingTilBisysTask =
+            SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseRepository, behandlingRepository)
+
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+
+        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns
+            lagInitiellTilkjentYtelse().also {
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn2,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn2,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
+                    ),
+                )
+            }
+        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns
+            lagInitiellTilkjentYtelse().also {
+                // Ordinær barnetrygd fortsetter, tilleggene opphører fra 04/2022
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2022, 3),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn2,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2022, 3),
+                        prosent = BigDecimal(100),
+                        person = barn2,
+                        ytelseType = YtelseType.SVALBARDTILLEGG,
+                    ),
+                )
+            }
+
+        // Act
+        sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].id))
+
+        // Assert
+        verify(exactly = 0) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
+    }
+
+    @Test
+    fun `Skal sende reduksjon av ordinær barnetrygd og ikke opphør av Finnmarkstillegg til bisys`() {
+        // Arrange
+        val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, kafkaResult, behandling) = setupMocks()
+        val sendMeldingTilBisysTask =
+            SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseRepository, behandlingRepository)
+
+        val barn1 = lagPerson(type = PersonType.BARN)
+
+        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns
+            lagInitiellTilkjentYtelse().also {
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ),
+                )
+            }
+        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns
+            lagInitiellTilkjentYtelse().also {
+                // Finnmarkstillegg opphører fra 02/2022 og ordinær barnetrygd reduseres fra 04/2022
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2022, 3),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2022, 4),
+                        tom = YearMonth.of(2037, 12),
+                        prosent = BigDecimal(50),
+                        person = barn1,
+                    ),
+                )
+                it.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2022, 1),
+                        prosent = BigDecimal(100),
+                        person = barn1,
+                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ),
+                )
+            }
+
+        val meldingSlot = slot<String>()
+        every {
+            kafkaProducer.kafkaAivenTemplate.send(
+                OPPHOER_BARNETRYGD_BISYS_TOPIC,
+                behandling[1].id.toString(),
+                capture(meldingSlot),
+            )
+        } returns kafkaResult
+
+        // Act
+        sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].id))
+
+        // Assert
+        verify(exactly = 1) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
+        val jsonMelding = jsonMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
+        assertThat(jsonMelding.barn).hasSize(1)
+        assertThat(jsonMelding.barn[0].ident).isEqualTo(barn1.aktør.aktivFødselsnummer())
+        assertThat(jsonMelding.barn[0].årsakskode).isEqualTo(BarnetrygdEndretType.RR)
+        assertThat(jsonMelding.barn[0].fom).isEqualTo(YearMonth.of(2022, 4))
     }
 }

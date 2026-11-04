@@ -58,10 +58,6 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f.id from Fagsak f WHERE f.status = 'LØPENDE'  AND f.arkivert = false")
-    fun finnIdPåLøpendeFagsaker(): List<Long>
-
-    @Lock(LockModeType.NONE)
-    @Query(value = "SELECT f.id from Fagsak f WHERE f.status = 'LØPENDE'  AND f.arkivert = false")
     fun finnLøpendeFagsaker(page: Pageable): Slice<Long>
 
     @Query(
@@ -79,16 +75,6 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         satsTidspunkt: LocalDate,
         page: Pageable,
     ): Page<Long>
-
-    @Query(
-        value = """SELECT distinct f.institusjon.orgNummer
-            FROM   Fagsak f
-            WHERE  f.status = 'LØPENDE' 
-            AND f.institusjon is not null
-            AND f.arkivert = false""",
-        nativeQuery = false,
-    )
-    fun finnOrgnummerForLøpendeFagsaker(): List<String>
 
     @Query(
         value = """

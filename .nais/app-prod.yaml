@@ -112,8 +112,6 @@ spec:
         - application: populasjonstilgangskontroll
           namespace: tilgangsmaskin
           cluster: prod-gcp
-        - application: familie-ba-infotrygd-feed
-          cluster: prod-fss
         - application: familie-ba-infotrygd
           cluster: prod-fss
         - application: familie-ef-sak
@@ -135,7 +133,6 @@ spec:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: familie-integrasjoner.prod-fss-pub.nais.io
         - host: familie-ba-infotrygd.prod-fss-pub.nais.io
-        - host: familie-ba-infotrygd-feed.prod-fss-pub.nais.io
         - host: sdw-wsrest.ecb.europa.eu
         - host: data-api.ecb.europa.eu
         - host: teamfamilie-unleash-api.nav.cloud.nais.io

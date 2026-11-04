@@ -30,7 +30,6 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     "mock-localdate-service",
     "fake-tilbakekreving-klient",
     "mock-brev-klient",
-    "mock-infotrygd-feed",
     "mock-ef-klient",
     "mock-task-repository",
     "mock-task-service",

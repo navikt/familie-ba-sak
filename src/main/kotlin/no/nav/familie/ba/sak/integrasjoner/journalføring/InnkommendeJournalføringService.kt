@@ -103,7 +103,7 @@ class InnkommendeJournalføringService(
         søknadsinfo: Søknadsinfo? = null,
         fagsakId: Long,
     ): Behandling =
-        stegService.håndterNyBehandlingOgSendInfotrygdFeed(
+        stegService.håndterNyBehandling(
             NyBehandling(
                 kategori = kategori,
                 underkategori = underkategori,

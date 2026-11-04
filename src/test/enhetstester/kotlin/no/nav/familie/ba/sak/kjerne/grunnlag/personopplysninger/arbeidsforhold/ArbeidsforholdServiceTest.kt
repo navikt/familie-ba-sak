@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.lagGrStatsborgerskap
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
@@ -17,6 +18,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClientResponseException
@@ -30,12 +33,12 @@ class ArbeidsforholdServiceTest {
     val person = lagPerson()
     val nåværendeArbeidsforhold =
         Arbeidsforhold(
-            arbeidsgiver = Arbeidsgiver(organisasjonsnummer = "123456789", type = ArbeidsgiverType.Organisasjon),
+            arbeidsgiver = Arbeidsgiver(organisasjonsnummer = "889640782", type = ArbeidsgiverType.Organisasjon),
             ansettelsesperiode = Ansettelsesperiode(Periode(LocalDate.now().minusYears(5))),
         )
     val eldreArbeidsforhold =
         Arbeidsforhold(
-            arbeidsgiver = Arbeidsgiver(organisasjonsnummer = "234567891", type = ArbeidsgiverType.Organisasjon),
+            arbeidsgiver = Arbeidsgiver(organisasjonsnummer = "310028142", type = ArbeidsgiverType.Organisasjon),
             ansettelsesperiode = Ansettelsesperiode(Periode(LocalDate.now().minusYears(8), LocalDate.now().minusYears(5))),
         )
     val privatArbeidsforhold =
@@ -317,6 +320,48 @@ class ArbeidsforholdServiceTest {
         assertThat(arbeidsforhold).hasSize(2)
         val ukjent = arbeidsforhold.single { it.arbeidsgiverId == "302268428" }
         assertThat(ukjent.organisasjonNavn).isEqualTo("Ukjent navn")
+        val kjent = arbeidsforhold.single { it.arbeidsgiverId == nåværendeArbeidsforhold.arbeidsgiver?.organisasjonsnummer }
+        assertThat(kjent.organisasjonNavn).isEqualTo("Nåværende AS")
+    }
+
+    @ParameterizedTest(name = "={0}")
+    @ValueSource(strings = ["12345678901", "123456789"])
+    fun `skal ikke slå opp organisasjon når organisasjonsnummer er ugyldig`(ugyldigOrganisasjonsnummer: String) {
+        // Arrange
+        val ugyldigOrgnummerArbeidsforhold =
+            Arbeidsforhold(
+                arbeidsgiver = Arbeidsgiver(organisasjonsnummer = ugyldigOrganisasjonsnummer, type = ArbeidsgiverType.Organisasjon),
+                ansettelsesperiode = Ansettelsesperiode(Periode(LocalDate.now().minusYears(2))),
+            )
+        every {
+            systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker(person.aktør.aktivFødselsnummer(), any(), any())
+        } returns listOf(nåværendeArbeidsforhold, ugyldigOrgnummerArbeidsforhold)
+
+        val statsborgerskap =
+            listOf(
+                lagGrStatsborgerskap(
+                    gyldigFraOgMed = LocalDate.now().minusYears(1),
+                    gyldigTilOgMed = null,
+                    landkode = "POL",
+                    medlemskap = Medlemskap.EØS,
+                    person = person,
+                ),
+            )
+
+        // Act
+        val arbeidsforhold =
+            arbeidsforholdService.hentArbeidsforholdPerioderMedSterkesteMedlemskapIEØS(
+                statsborgerskap,
+                person,
+                LocalDate.now().minusYears(20),
+            )
+
+        // Assert
+        verify(exactly = 0) { integrasjonKlient.hentOrganisasjon(ugyldigOrganisasjonsnummer) }
+        assertThat(arbeidsforhold).hasSize(2)
+        val ugyldig = arbeidsforhold.single { it.arbeidsgiverId == ugyldigOrganisasjonsnummer }
+        assertThat(ugyldig.arbeidsgiverType).isEqualTo(ArbeidsgiverType.Organisasjon.name)
+        assertThat(ugyldig.organisasjonNavn).isNull()
         val kjent = arbeidsforhold.single { it.arbeidsgiverId == nåværendeArbeidsforhold.arbeidsgiver?.organisasjonsnummer }
         assertThat(kjent.organisasjonNavn).isEqualTo("Nåværende AS")
     }

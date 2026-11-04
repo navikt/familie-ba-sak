@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBarnVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagSøkerVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomBarnFødselsdato
@@ -39,6 +40,7 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
@@ -88,6 +90,8 @@ class VilkårServiceIntegrasjonTest(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     @Autowired
     private val brevmalService: BrevmalService,
+    @Autowired
+    private val vedtakRepository: VedtakRepository,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `Manuell vilkårsvurdering skal få erAutomatiskVurdert på enkelte vilkår`() {
@@ -488,7 +492,7 @@ class VilkårServiceIntegrasjonTest(
             }
         }
 
-        behandling = markerBehandlingSomAvsluttet(behandling)
+        behandling = markerBehandlingSomAvsluttet(behandlingHentOgPersisterService.hent(behandling.id))
 
         val barnFnr2 = randomFnr()
 
@@ -845,6 +849,7 @@ class VilkårServiceIntegrasjonTest(
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
             )
         persongrunnlagService.lagreOgSlettGammelt(personopplysningGrunnlag)
+        vedtakRepository.save(lagVedtak(behandling = behandling))
         val vilkårsvurdering =
             vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false, null)
         assertEquals(
