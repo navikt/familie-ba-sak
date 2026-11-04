@@ -164,7 +164,7 @@ class PreutfyllLovligOppholdService(
         oppholdstillatelse: List<GrOpphold>,
     ): Tidslinje<Boolean> =
         oppholdstillatelse
-            .filter { it.type in setOf(PERMANENT, MIDLERTIDIG) }
+            .filter { it.type in setOf(PERMANENT, MIDLERTIDIG) && it.gyldigPeriode?.fom != null }
             .map {
                 Periode(
                     verdi = true,
