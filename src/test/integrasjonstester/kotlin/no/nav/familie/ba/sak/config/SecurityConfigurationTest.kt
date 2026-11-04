@@ -133,7 +133,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
-                    setBearerAuth(token(mapOf("azp_name" to "dev-gcp:teamfamilie:tilfeldig-applikasjon")))
+                    setBearerAuth(hentMaskinTilMaskinToken("dev-gcp:teamfamilie:tilfeldig-applikasjon"))
                 }
 
             // Act & Assert
@@ -155,7 +155,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
             val headers =
                 HttpHeaders().apply {
                     contentType = MediaType.APPLICATION_JSON
-                    setBearerAuth(token(mapOf("azp_name" to "dev-gcp:ukjent-namespace:ukjent-applikasjon")))
+                    setBearerAuth(hentMaskinTilMaskinToken("dev-gcp:ukjent-namespace:ukjent-applikasjon"))
                 }
 
             // Act & Assert
@@ -170,6 +170,67 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
                 }
 
             assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "dev-gcp:teamfamilie:familie-ba-sak-frontend",
+                "dev-gcp:teamfamilie:familie-ba-sak",
+                "dev-gcp:teamfamilie:familie-prosessering",
+            ],
+        )
+        fun `skal ikke gi tilgang til brukertoken fra teamfamilie-app når bruker mangler barnetrygd-rolle`(
+            azpName: String,
+        ) {
+            // Arrange
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(hentBrukerToken(azpName = azpName, groups = listOf("0000-GA-Strengt_Fortrolig_Adresse")))
+                }
+
+            // Act & Assert
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restClient
+                        .post()
+                        .uri(hentUrl("/api/feature/er-toggler-enabled"))
+                        .headers { h -> h.addAll(headers) }
+                        .body(listOf("en-toggle"))
+                        .retrieve()
+                        .toEntity(String::class.java)
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+
+        @Test
+        fun `skal gi tilgang til brukertoken fra frontend når bruker har barnetrygd-rolle`() {
+            // Arrange
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(
+                        hentBrukerToken(
+                            azpName = "dev-gcp:teamfamilie:familie-ba-sak-frontend",
+                            groups = listOf(Rolle.SAKSBEHANDLER.name),
+                        ),
+                    )
+                }
+
+            // Act
+            val response =
+                restClient
+                    .post()
+                    .uri(hentUrl("/api/feature/er-toggler-enabled"))
+                    .headers { h -> h.addAll(headers) }
+                    .body(listOf("en-toggle"))
+                    .retrieve()
+                    .toEntity(String::class.java)
+
+            // Assert
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         }
     }
 
@@ -225,7 +286,35 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
     @Nested
     inner class EksternPensjonstilgang {
-        private fun pensjonToken(applikasjonNavn: String) = token(mapOf("azp_name" to "dev-gcp:pensjonopptjening:$applikasjonNavn"))
+        private fun pensjonToken(applikasjonNavn: String) = hentMaskinTilMaskinToken("dev-gcp:pensjonopptjening:$applikasjonNavn")
+
+        @Test
+        fun `skal ikke gi tilgang til pensjon-endepunkt for brukertoken fra pensjon-app`() {
+            // Arrange
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(
+                        hentBrukerToken(
+                            azpName = "dev-gcp:pensjonopptjening:omsorgsopptjening-start-innlesning",
+                            groups = listOf("0000-GA-Strengt_Fortrolig_Adresse"),
+                        ),
+                    )
+                }
+
+            // Act & Assert
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restClient
+                        .get()
+                        .uri(hentUrl("/api/ekstern/pensjon/bestill-personer-med-barnetrygd/2023"))
+                        .headers { h -> h.addAll(headers) }
+                        .retrieve()
+                        .toEntity(String::class.java)
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
 
         @Test
         fun `pensjon-token har ikke tilgang til generelt api-endepunkt`() {
@@ -278,7 +367,35 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
     @Nested
     inner class EksternBisystilgang {
-        private fun bisysToken(applikasjonNavn: String) = token(mapOf("azp_name" to "dev-gcp:bidrag:$applikasjonNavn"))
+        private fun bisysToken(applikasjonNavn: String) = hentMaskinTilMaskinToken("dev-gcp:bidrag:$applikasjonNavn")
+
+        @Test
+        fun `skal ikke gi tilgang til bisys-endepunkt for brukertoken fra bisys-app`() {
+            // Arrange
+            val headers =
+                HttpHeaders().apply {
+                    contentType = MediaType.APPLICATION_JSON
+                    setBearerAuth(
+                        hentBrukerToken(
+                            azpName = "dev-gcp:bidrag:bidrag-grunnlag",
+                            groups = listOf("0000-GA-Strengt_Fortrolig_Adresse"),
+                        ),
+                    )
+                }
+
+            // Act & Assert
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restClient
+                        .post()
+                        .uri(hentUrl("/api/bisys/hent-utvidet-barnetrygd"))
+                        .headers { h -> h.addAll(headers) }
+                        .retrieve()
+                        .toEntity(String::class.java)
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
 
         @Test
         fun `bisys-token har ikke tilgang til generelt api-endepunkt`() {
