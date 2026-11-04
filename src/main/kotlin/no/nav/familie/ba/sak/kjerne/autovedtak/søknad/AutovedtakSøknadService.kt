@@ -133,7 +133,7 @@ class AutovedtakSøknadService(
                 ),
         )
 
-        stegService.håndterNyBehandlingOgSendInfotrygdFeed(
+        stegService.håndterNyBehandling(
             behandlingsdata.nyBehandling.copy(
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 oppgavebeskrivelse = begrunnelseIOppgave,

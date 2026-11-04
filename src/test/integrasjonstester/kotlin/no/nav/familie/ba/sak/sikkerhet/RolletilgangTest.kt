@@ -35,7 +35,6 @@ import tools.jackson.module.kotlin.readValue
     "fake-tilbakekreving-klient",
     "mock-brev-klient",
     "fake-økonomi-klient",
-    "mock-infotrygd-feed",
     "mock-task-repository",
     "mock-task-service",
     "mock-unleash",

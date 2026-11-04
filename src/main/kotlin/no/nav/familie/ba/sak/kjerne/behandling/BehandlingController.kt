@@ -67,7 +67,7 @@ class BehandlingController(
             handling = "opprette behandling",
         )
         // Basert på hvilke personer som ble hentet inn på behandlingen kan saksbehandler ha mistet tilgangen til behandlingen
-        val behandling = stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
+        val behandling = stegService.håndterNyBehandling(nyBehandling)
 
         // Basert på hvilke personer som ble hentet inn på behandlingen kan saksbehandler ha mistet tilgangen til behandlingen
         tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id, AuditLoggerEvent.UPDATE)

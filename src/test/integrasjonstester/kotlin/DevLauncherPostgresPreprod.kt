@@ -15,7 +15,6 @@ fun main(args: Array<String>) {
     val springBuilder =
         SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
             "fake-økonomi-klient",
-            "mock-infotrygd-feed",
             "fake-tilbakekreving-klient",
             "task-scheduling",
             "mock-infotrygd-barnetrygd",

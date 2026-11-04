@@ -511,12 +511,10 @@ class CucumberMock(
 
     val håndterIverksettMotØkonomiSteg =
         IverksettMotOppdrag(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             økonomiService = økonomiService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             totrinnskontrollService = totrinnskontrollService,
-            taskRepository = taskRepository,
         )
 
     val statusFraOppdrag =
@@ -732,7 +730,6 @@ class CucumberMock(
                 beregningService = beregningService,
                 søknadGrunnlagService = søknadGrunnlagService,
                 tilgangService = tilgangService,
-                infotrygdFeedService = mockk(),
                 satsendringService = mockk(),
                 personopplysningerService = personopplysningerService,
                 automatiskBeslutningService = mockk(),
