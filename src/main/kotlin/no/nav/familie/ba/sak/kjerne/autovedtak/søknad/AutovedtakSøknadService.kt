@@ -124,7 +124,7 @@ class AutovedtakSøknadService(
         automatiskBehandling: Behandling,
         behandlingsdata: SøknadData,
         begrunnelse: String,
-        begrunnelseIOppgave: String?,
+        begrunnelseIOppgave: String,
     ): String {
         stegService.håndterHenleggBehandling(
             behandling = automatiskBehandling,
