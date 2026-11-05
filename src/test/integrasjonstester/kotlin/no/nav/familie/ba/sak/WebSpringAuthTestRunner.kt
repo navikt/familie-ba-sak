@@ -86,8 +86,7 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
                     "azp_name" to ":teamfamilie:azp-test",
                     "name" to SYSTEM_FORKORTELSE,
                     "preferred_username" to SYSTEM_FORKORTELSE,
-                    "oid" to DEFAULT_SUBJECT,
-                    "roles" to listOf("access_as_application"),
+                    "idtyp" to "app",
                 ),
             ),
         )
@@ -98,8 +97,7 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
         token(
             mapOf(
                 "azp_name" to azpName,
-                "oid" to DEFAULT_SUBJECT,
-                "roles" to listOf("access_as_application"),
+                "idtyp" to "app",
             ),
         )
 
@@ -111,7 +109,6 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
             mapOf(
                 "azp_name" to azpName,
                 "groups" to groups,
-                "oid" to "brukerens-oid",
                 "NAVident" to "Z0000",
                 "name" to "Mock McMockface",
             ),
