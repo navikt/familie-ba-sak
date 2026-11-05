@@ -257,6 +257,29 @@ class FagsakServiceTest {
             assertThat(utbetalingsperioder).containsExactly(anonymisertUtbetalingsperiode)
         }
 
+        @Test
+        fun `skal sette anonymiserte utbetalingsperioder på fagsakDto`() {
+            // Arrange
+            val fagsak = lagFagsak()
+            val sisteBehandlingSomErVedtatt = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
+            val utbetalingsperiode = lagUtbetalingsperiode(utbetaltPerMnd = 3000)
+            val anonymisertUtbetalingsperiode = lagUtbetalingsperiode(utbetaltPerMnd = 1000)
+
+            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
+            every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteBehandlingSomErVedtatt
+            every { behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id) } returns emptyList()
+            every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
+            every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns listOf(utbetalingsperiode)
+            every { strengtFortroligService.anonymiserUtbetalingsperioder(listOf(utbetalingsperiode), fagsak) } returns listOf(anonymisertUtbetalingsperiode)
+
+            // Act
+            val fagsakDto = fagsakService.hentFagsakDto(fagsak.id)
+
+            // Assert
+            assertThat(fagsakDto.data?.gjeldendeUtbetalingsperioder).containsExactly(anonymisertUtbetalingsperiode)
+        }
+
         private fun lagUtbetalingsperiode(utbetaltPerMnd: Int) =
             Utbetalingsperiode(
                 periodeFom = LocalDate.now().minusYears(1),

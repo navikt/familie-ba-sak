@@ -22,8 +22,6 @@ import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilFagsakDto
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -55,7 +53,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -119,22 +116,6 @@ class BeregningServiceTest {
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
 
-        every { fagsakService.hentFagsakDto(any()) } answers {
-            Ressurs.success(
-                BaseFagsakDto(
-                    opprettetTidspunkt = fagsak.opprettetTidspunkt,
-                    id = fagsak.id,
-                    fagsakeier = fagsak.aktør.aktivFødselsnummer(),
-                    søkerFødselsnummer = fagsak.aktør.aktivFødselsnummer(),
-                    status = fagsak.status,
-                    underBehandling = false,
-                    løpendeKategori = null,
-                    løpendeUnderkategori = null,
-                    fagsakType = fagsak.type,
-                    finnesStrengtFortroligPersonIFagsak = false,
-                ).tilFagsakDto(utvidetBehandlingerDto = emptyList(), gjeldendeUtbetalingsperioder = emptyList()),
-            )
-        }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } answers { emptyList() }
         every { endretUtbetalingAndelRepository.saveAllAndFlush(any<Collection<EndretUtbetalingAndel>>()) } answers { emptyList() }
