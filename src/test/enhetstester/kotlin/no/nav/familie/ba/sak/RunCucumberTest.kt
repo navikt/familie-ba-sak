@@ -9,6 +9,7 @@ import org.junit.platform.suite.api.Suite
 @Suite(failIfNoTests = false)
 @IncludeEngines("cucumber")
 @SelectClasspathResource("/cucumber")
+@ConfigurationParameter(key = Constants.GLUE_PROPERTY_NAME, value = "no.nav.familie.ba.sak.cucumber")
 @ConfigurationParameter(key = Constants.PLUGIN_PROPERTY_NAME, value = "summary")
 @ConfigurationParameter(key = Constants.FILTER_TAGS_PROPERTY_NAME, value = "not @Disabled")
 class RunCucumberTest

@@ -20,7 +20,7 @@ fun parseAdresser(
     persongrunnlag: Map<Long, PersonopplysningGrunnlag>,
 ): Map<String, PdlAdresserPerson> =
     dataTable
-        .asMaps()
+        .tilRader()
         .flatMap {
             parseAktørIdListe(it).map { aktørId ->
                 it.toMutableMap().apply { put(AKTØR_ID.nøkkel, aktørId) }
