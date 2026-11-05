@@ -459,6 +459,16 @@ class VedtaksperiodeService(
         vedtaksperiodeHentOgPersisterService.lagre(fortsattInnvilgetPeriode)
     }
 
+    fun hentGjeldendeUtbetalingsperioder(fagsakId: Long): List<Utbetalingsperiode> {
+        val sistVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId) ?: return emptyList()
+
+        return strengtFortroligService.anonymiserUtbetalingsperioder(
+            utbetalingsperioder = hentUtbetalingsperioder(behandling = sistVedtatteBehandling),
+            fagsak = sistVedtatteBehandling.fagsak,
+        )
+    }
+
     fun hentUtbetalingsperioder(
         behandling: Behandling,
     ): List<Utbetalingsperiode> {

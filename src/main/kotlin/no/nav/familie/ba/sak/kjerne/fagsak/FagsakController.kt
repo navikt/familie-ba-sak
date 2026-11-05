@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Fødselsnummer
@@ -37,6 +38,7 @@ class FagsakController(
     private val personidentService: PersonidentService,
     private val tilgangService: TilgangService,
     private val tilbakekrevingService: TilbakekrevingService,
+    private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentEllerOpprettFagsak(
@@ -91,7 +93,7 @@ class FagsakController(
             handling = "hente gjeldende utbetalingsperioder",
         )
 
-        return ResponseEntity.ok(Ressurs.success(fagsakService.hentGjeldendeUtbetalingsperioder(fagsakId)))
+        return ResponseEntity.ok(Ressurs.success(vedtaksperiodeService.hentGjeldendeUtbetalingsperioder(fagsakId)))
     }
 
     @PostMapping(path = ["/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
