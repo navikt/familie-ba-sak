@@ -234,9 +234,9 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
         ),
         SØKER_HAR_IKKE_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN(
             oppfyltNavn = "SØKER_HAR_IKKE_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN",
-            oppfyltBeskrivelse = "Søker har ikke krysset for at søker selv eller noen av barna er asylsøker i søknaden",
+            oppfyltBeskrivelse = "Søker har ikke krysset for at søker selv er asylsøker eller at det er søkt om asyl for noen av barna i søknaden",
             ikkeOppfyltNavn = "SØKER_HAR_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN",
-            ikkeOppfyltBeskrivelse = "Søker har krysset for at søker selv eller minst ett av barna er asylsøker i søknaden",
+            ikkeOppfyltBeskrivelse = "Søker har krysset for at søker selv er asylsøker eller at det er søkt om asyl for minst ett av barna i søknaden",
         ),
         SØKER_HAR_IKKE_KRYSSET_FOR_ADOPTERT_FRA_UTLANDET_I_SØKNADEN(
             oppfyltNavn = "SØKER_HAR_IKKE_KRYSSET_FOR_ADOPTERT_FRA_UTLANDET_I_SØKNADEN",

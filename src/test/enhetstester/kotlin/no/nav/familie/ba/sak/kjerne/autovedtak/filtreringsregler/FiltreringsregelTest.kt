@@ -414,12 +414,12 @@ internal class FiltreringsregelTest {
                 PersistertUtfall(
                     "SØKER_HAR_IKKE_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN",
                     "SØKER_HAR_IKKE_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN",
-                    "Søker har ikke krysset for at søker selv eller noen av barna er asylsøker i søknaden",
+                    "Søker har ikke krysset for at søker selv er asylsøker eller at det er søkt om asyl for noen av barna i søknaden",
                 ),
                 PersistertUtfall(
                     "SØKER_HAR_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN",
                     "SØKER_HAR_IKKE_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN",
-                    "Søker har krysset for at søker selv eller minst ett av barna er asylsøker i søknaden",
+                    "Søker har krysset for at søker selv er asylsøker eller at det er søkt om asyl for minst ett av barna i søknaden",
                 ),
                 PersistertUtfall(
                     "SØKER_HAR_IKKE_KRYSSET_FOR_ADOPTERT_FRA_UTLANDET_I_SØKNADEN",
