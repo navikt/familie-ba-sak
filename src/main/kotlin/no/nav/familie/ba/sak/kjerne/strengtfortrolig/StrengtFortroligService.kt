@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.strengtfortrolig
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -166,32 +165,6 @@ class StrengtFortroligService(
         return vedtaksperioder.filterNot { periode ->
             periode.utbetalingsperiodeDetaljer.any { it.person.personIdent in skjermedeIdenter }
         }
-    }
-
-    fun anonymiserFagsakDto(
-        baseFagsakDto: BaseFagsakDto,
-        fagsak: Fagsak,
-    ): BaseFagsakDto {
-        val skjermedeIdenter =
-            hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak).takeIf { it.isNotEmpty() } ?: return baseFagsakDto
-
-        val anonymiserteUtbetalingsperioder =
-            baseFagsakDto.gjeldendeUtbetalingsperioder.anonymiser(byggAnonymiserteNavn(skjermedeIdenter))
-
-        return BaseFagsakDto(
-            opprettetTidspunkt = baseFagsakDto.opprettetTidspunkt,
-            id = baseFagsakDto.id,
-            fagsakeier = baseFagsakDto.fagsakeier,
-            søkerFødselsnummer = baseFagsakDto.søkerFødselsnummer,
-            status = baseFagsakDto.status,
-            underBehandling = baseFagsakDto.underBehandling,
-            løpendeKategori = baseFagsakDto.løpendeKategori,
-            løpendeUnderkategori = baseFagsakDto.løpendeUnderkategori,
-            gjeldendeUtbetalingsperioder = anonymiserteUtbetalingsperioder,
-            fagsakType = baseFagsakDto.fagsakType,
-            institusjon = baseFagsakDto.institusjon,
-            finnesStrengtFortroligPersonIFagsak = baseFagsakDto.finnesStrengtFortroligPersonIFagsak,
-        )
     }
 
     fun anonymiserUtbetalingsperioder(

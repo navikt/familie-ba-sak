@@ -118,26 +118,12 @@ class FagsakServiceTest {
                     aktiv = false,
                 )
 
-            val utbetalingsperiode =
-                Utbetalingsperiode(
-                    periodeFom = LocalDate.now().minusYears(1),
-                    periodeTom = LocalDate.now().plusYears(1),
-                    vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
-                    utbetalingsperiodeDetaljer = emptyList(),
-                    ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
-                    antallBarn = 1,
-                    utbetaltPerMnd = 3000,
-                )
-
             every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns null
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteBehandlingSomErVedtatt
-            every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns listOf(utbetalingsperiode)
             every { behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsak.id) } returns listOf(visningsbehandling1, visningsbehandling2)
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
-            every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns emptySet()
             every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
-            every { strengtFortroligService.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
             every { fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id) } returns null
 
             // Act
@@ -151,8 +137,6 @@ class FagsakServiceTest {
             assertThat(restMinimalFagsak.status).isEqualTo(fagsak.status)
             assertThat(restMinimalFagsak.løpendeKategori).isEqualTo(sisteBehandlingSomErVedtatt.kategori)
             assertThat(restMinimalFagsak.løpendeUnderkategori).isEqualTo(sisteBehandlingSomErVedtatt.underkategori)
-            assertThat(restMinimalFagsak.gjeldendeUtbetalingsperioder).hasSize(1)
-            assertThat(restMinimalFagsak.gjeldendeUtbetalingsperioder).containsExactly(utbetalingsperiode)
             assertThat(restMinimalFagsak.underBehandling).isFalse()
             assertThat(restMinimalFagsak.migreringsdato).isNull()
             assertThat(restMinimalFagsak.fagsakType).isEqualTo(FagsakType.NORMAL)
@@ -225,13 +209,10 @@ class FagsakServiceTest {
             every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns null
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteBehandlingSomErVedtatt
-            every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns emptyList()
             every { behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsak.id) } returns listOf(visningsbehandling)
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
             every { fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id) } returns fagsakLåsing
             every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
-            every { strengtFortroligService.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
-            every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns emptySet()
 
             // Act
             val restMinimalFagsak = fagsakService.lagMinimalFagsakDto(fagsak.id)

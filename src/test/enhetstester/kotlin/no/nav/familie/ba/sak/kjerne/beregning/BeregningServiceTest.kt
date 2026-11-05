@@ -130,10 +130,9 @@ class BeregningServiceTest {
                     underBehandling = false,
                     løpendeKategori = null,
                     løpendeUnderkategori = null,
-                    gjeldendeUtbetalingsperioder = emptyList(),
                     fagsakType = fagsak.type,
                     finnesStrengtFortroligPersonIFagsak = false,
-                ).tilFagsakDto(emptyList()),
+                ).tilFagsakDto(utvidetBehandlingerDto = emptyList(), gjeldendeUtbetalingsperioder = emptyList()),
             )
         }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }

@@ -235,7 +235,10 @@ class FagsakService(
                 .hentBehandlinger(fagsakId = fagsakId)
                 .map { utvidetBehandlingService.lagUtvidetBehandlingDto(it.id) }
 
-        return restBaseFagsak.tilFagsakDto(utvidedeBehandlinger)
+        return restBaseFagsak.tilFagsakDto(
+            utvidetBehandlingerDto = utvidedeBehandlinger,
+            gjeldendeUtbetalingsperioder = hentGjeldendeUtbetalingsperioder(fagsakId),
+        )
     }
 
     private fun lagRestBaseFagsak(fagsakId: Long): BaseFagsakDto {
@@ -245,48 +248,37 @@ class FagsakService(
 
         val sistVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
 
-        val gjeldendeUtbetalingsperioder =
-            if (sistVedtatteBehandling != null) {
-                vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistVedtatteBehandling)
-            } else {
-                emptyList()
-            }
-
-        val baseFagsakDto =
-            BaseFagsakDto(
-                opprettetTidspunkt = fagsak.opprettetTidspunkt,
-                id = fagsak.id,
-                fagsakeier = fagsak.aktør.aktivFødselsnummer(),
-                søkerFødselsnummer = hentSøkersFødselsnummer(fagsak),
-                status = fagsak.status,
-                underBehandling =
-                    if (aktivBehandling == null) {
-                        false
-                    } else {
-                        aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET)
-                    },
-                løpendeKategori = (aktivBehandling ?: sistVedtatteBehandling)?.kategori,
-                løpendeUnderkategori = (aktivBehandling ?: sistVedtatteBehandling)?.underkategori,
-                gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
-                fagsakType = fagsak.type,
-                institusjon =
-                    fagsak.institusjon?.let {
-                        InstitusjonDto(
-                            orgNummer = it.orgNummer,
-                            tssEksternId = it.tssEksternId,
-                            navn = organisasjonService.hentOrganisasjon(it.orgNummer).navn,
-                        )
-                    },
-                finnesStrengtFortroligPersonIFagsak = strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak),
-                låstTidspunkt =
-                    if (fagsak.status == FagsakStatus.LÅST) {
-                        fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id)?.opprettetTidspunkt
-                    } else {
-                        null
-                    },
-            )
-
-        return strengtFortroligService.anonymiserFagsakDto(baseFagsakDto, fagsak)
+        return BaseFagsakDto(
+            opprettetTidspunkt = fagsak.opprettetTidspunkt,
+            id = fagsak.id,
+            fagsakeier = fagsak.aktør.aktivFødselsnummer(),
+            søkerFødselsnummer = hentSøkersFødselsnummer(fagsak),
+            status = fagsak.status,
+            underBehandling =
+                if (aktivBehandling == null) {
+                    false
+                } else {
+                    aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET)
+                },
+            løpendeKategori = (aktivBehandling ?: sistVedtatteBehandling)?.kategori,
+            løpendeUnderkategori = (aktivBehandling ?: sistVedtatteBehandling)?.underkategori,
+            fagsakType = fagsak.type,
+            institusjon =
+                fagsak.institusjon?.let {
+                    InstitusjonDto(
+                        orgNummer = it.orgNummer,
+                        tssEksternId = it.tssEksternId,
+                        navn = organisasjonService.hentOrganisasjon(it.orgNummer).navn,
+                    )
+                },
+            finnesStrengtFortroligPersonIFagsak = strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak),
+            låstTidspunkt =
+                if (fagsak.status == FagsakStatus.LÅST) {
+                    fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id)?.opprettetTidspunkt
+                } else {
+                    null
+                },
+        )
     }
 
     private fun hentSøkersFødselsnummer(fagsak: Fagsak): String {
