@@ -256,7 +256,10 @@ class FagsakServiceTest {
             // Assert
             assertThat(utbetalingsperioder).containsExactly(anonymisertUtbetalingsperiode)
         }
+    }
 
+    @Nested
+    inner class HentFagsakDto {
         @Test
         fun `skal sette anonymiserte utbetalingsperioder på fagsakDto`() {
             // Arrange
@@ -279,17 +282,6 @@ class FagsakServiceTest {
             // Assert
             assertThat(fagsakDto.data?.gjeldendeUtbetalingsperioder).containsExactly(anonymisertUtbetalingsperiode)
         }
-
-        private fun lagUtbetalingsperiode(utbetaltPerMnd: Int) =
-            Utbetalingsperiode(
-                periodeFom = LocalDate.now().minusYears(1),
-                periodeTom = LocalDate.now().plusYears(1),
-                vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
-                utbetalingsperiodeDetaljer = emptyList(),
-                ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
-                antallBarn = 1,
-                utbetaltPerMnd = utbetaltPerMnd,
-            )
     }
 
     @Nested
@@ -419,4 +411,15 @@ class FagsakServiceTest {
             assertThat(returnertFagsak).isEqualTo(fagsak)
         }
     }
+
+    private fun lagUtbetalingsperiode(utbetaltPerMnd: Int) =
+        Utbetalingsperiode(
+            periodeFom = LocalDate.now().minusYears(1),
+            periodeTom = LocalDate.now().plusYears(1),
+            vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+            utbetalingsperiodeDetaljer = emptyList(),
+            ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+            antallBarn = 1,
+            utbetaltPerMnd = utbetaltPerMnd,
+        )
 }
