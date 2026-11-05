@@ -124,6 +124,7 @@ Use `secureLogger` when logging national identity numbers (fødselsnummer) or ot
 ## Auth Model
 
 - **Inbound**: Azure AD (from frontend `familie-ba-sak-frontend`, mottak, klage, pensjon, bidrag). TokenX on `/api/minside/**` for `familie-ba-minside-frontend` (citizen self-service).
+- **App roles**: `AzureAdAuthenticationManager` grants the `*_APPLIKASJON` roles from `azp_name` only to machine-to-machine tokens (`idtyp == "app"`, see `SikkerhetContext.erMaskinTilMaskinToken`). User tokens get roles from their groups only. The exception is `KLAGE_APPLIKASJON`, because familie-klage always calls with OBO.
 - **Outbound**: Azure AD on-behalf-of / client_credentials (via Texas / `token-klient`) to integrasjoner, brev, klage, oppdrag, PDL, and the Tilgangsmaskin (OBO only).
 - **Person access control**: Saksbehandler access to persons is exposed as `sikkerhet/PersonTilgang` (denials carry `avvisning.avvisningskode` + `begrunnelse`) via `sikkerhet/PersonTilgangService`, cached per saksbehandler. Access is decided by the Tilgangsmaskin (`integrasjoner/tilgangsmaskin/TilgangsmaskinTilgangskontrollKlient`, kjerneregler). Branch on `avvisningskode` (e.g. `erAvvistGrunnetStrengtFortrolig()`), never on `begrunnelse` text. Missing/5xx answers throw instead of being treated as denials. System context always has access.
 - Role groups configured in Nais manifest (veileder, saksbehandler, beslutter, forvaltning, strengt fortrolig, fortrolig).
