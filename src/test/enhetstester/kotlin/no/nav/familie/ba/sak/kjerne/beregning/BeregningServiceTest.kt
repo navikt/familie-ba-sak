@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
@@ -100,7 +99,6 @@ class BeregningServiceTest {
     @BeforeEach
     fun setUp() {
         val fagsakService = mockk<FagsakService>()
-        val fagsak = defaultFagsak()
 
         beregningService =
             BeregningService(
