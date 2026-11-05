@@ -72,6 +72,9 @@ enum class FeatureToggle(
     // NAV-31020
     SIMULER_KUN_ENDREDE_PERIODER("familie-ba-sak.simuler-kun-endrede-perioder"),
 
+    // NAV-31452
+    OPPFYLL_BOSATT_I_RIKET_BASERT_PÅ_OPPHOLDSTILLATELSE("familie-ba-sak.oppfyll-bosatt-i-riket-basert-paa-oppholdstillatelse"),
+
     // NAV-30770
     FERDIGSTILL_BEHANDLING_MELDING_TIL_PENSJON("familie-ba-sak.ferdigstill-behandling-melding-til-pensjon"),
 }
