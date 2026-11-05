@@ -242,6 +242,53 @@ class FagsakServiceTest {
     }
 
     @Nested
+    inner class HentGjeldendeUtbetalingsperioder {
+        @Test
+        fun `skal returnere tom liste når fagsaken ikke har en vedtatt behandling`() {
+            // Arrange
+            val fagsak = lagFagsak()
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+
+            // Act
+            val utbetalingsperioder = fagsakService.hentGjeldendeUtbetalingsperioder(fagsak.id)
+
+            // Assert
+            assertThat(utbetalingsperioder).isEmpty()
+        }
+
+        @Test
+        fun `skal returnere anonymiserte utbetalingsperioder fra siste vedtatte behandling`() {
+            // Arrange
+            val fagsak = lagFagsak()
+            val sisteBehandlingSomErVedtatt = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
+            val utbetalingsperiode = lagUtbetalingsperiode(utbetaltPerMnd = 3000)
+            val anonymisertUtbetalingsperiode = lagUtbetalingsperiode(utbetaltPerMnd = 1000)
+
+            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteBehandlingSomErVedtatt
+            every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns listOf(utbetalingsperiode)
+            every { strengtFortroligService.anonymiserUtbetalingsperioder(listOf(utbetalingsperiode), fagsak) } returns listOf(anonymisertUtbetalingsperiode)
+
+            // Act
+            val utbetalingsperioder = fagsakService.hentGjeldendeUtbetalingsperioder(fagsak.id)
+
+            // Assert
+            assertThat(utbetalingsperioder).containsExactly(anonymisertUtbetalingsperiode)
+        }
+
+        private fun lagUtbetalingsperiode(utbetaltPerMnd: Int) =
+            Utbetalingsperiode(
+                periodeFom = LocalDate.now().minusYears(1),
+                periodeTom = LocalDate.now().plusYears(1),
+                vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+                utbetalingsperiodeDetaljer = emptyList(),
+                ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+                antallBarn = 1,
+                utbetaltPerMnd = utbetaltPerMnd,
+            )
+    }
+
+    @Nested
     inner class HentEllerOpprettFagsakTest {
         @Test
         fun `Skal kaste funksjonell feil dersom man forsøker å lage en fagsak med type skjermet barn i automatiske løyper`() {

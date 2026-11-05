@@ -30,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -204,6 +205,15 @@ class FagsakService(
     fun hentFagsakDto(fagsakId: Long): Ressurs<FagsakDto> = Ressurs.success(data = lagFagsakDto(fagsakId))
 
     fun hentMinimalFagsakDto(fagsakId: Long): Ressurs<MinimalFagsakDto> = Ressurs.success(data = lagMinimalFagsakDto(fagsakId))
+
+    fun hentGjeldendeUtbetalingsperioder(fagsakId: Long): List<Utbetalingsperiode> {
+        val sistVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId) ?: return emptyList()
+
+        val utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistVedtatteBehandling)
+
+        return strengtFortroligService.anonymiserUtbetalingsperioder(utbetalingsperioder, hentPåFagsakId(fagsakId))
+    }
 
     fun lagMinimalFagsakerDto(fagsaker: List<Fagsak>): List<MinimalFagsakDto> = fagsaker.map { lagMinimalFagsakDto(it.id) }
 

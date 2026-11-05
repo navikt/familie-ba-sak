@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
 import no.nav.familie.ba.sak.sikkerhet.PersonTilgang
 import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
@@ -174,19 +175,8 @@ class StrengtFortroligService(
         val skjermedeIdenter =
             hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak).takeIf { it.isNotEmpty() } ?: return baseFagsakDto
 
-        val anonymiserteNavnForIdent = byggAnonymiserteNavn(skjermedeIdenter)
-
         val anonymiserteUtbetalingsperioder =
-            baseFagsakDto.gjeldendeUtbetalingsperioder.map { periode ->
-                periode.copy(
-                    utbetalingsperiodeDetaljer =
-                        periode.utbetalingsperiodeDetaljer.map { detalj ->
-                            detalj.person.personIdent.anonymiserHvisSkjermet(anonymiserteNavnForIdent)?.let {
-                                detalj.copy(person = detalj.person.anonymiser(it))
-                            } ?: detalj
-                        },
-                )
-            }
+            baseFagsakDto.gjeldendeUtbetalingsperioder.anonymiser(byggAnonymiserteNavn(skjermedeIdenter))
 
         return BaseFagsakDto(
             opprettetTidspunkt = baseFagsakDto.opprettetTidspunkt,
@@ -202,6 +192,16 @@ class StrengtFortroligService(
             institusjon = baseFagsakDto.institusjon,
             finnesStrengtFortroligPersonIFagsak = baseFagsakDto.finnesStrengtFortroligPersonIFagsak,
         )
+    }
+
+    fun anonymiserUtbetalingsperioder(
+        utbetalingsperioder: List<Utbetalingsperiode>,
+        fagsak: Fagsak,
+    ): List<Utbetalingsperiode> {
+        val skjermedeIdenter =
+            hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak).takeIf { it.isNotEmpty() } ?: return utbetalingsperioder
+
+        return utbetalingsperioder.anonymiser(byggAnonymiserteNavn(skjermedeIdenter))
     }
 
     /**
@@ -304,6 +304,18 @@ class StrengtFortroligService(
             harFalskIdentitet = false,
             skjermesForBruker = true,
         )
+
+    private fun List<Utbetalingsperiode>.anonymiser(anonymiserteNavnForIdent: Map<String, String>) =
+        map { periode ->
+            periode.copy(
+                utbetalingsperiodeDetaljer =
+                    periode.utbetalingsperiodeDetaljer.map { detalj ->
+                        detalj.person.personIdent.anonymiserHvisSkjermet(anonymiserteNavnForIdent)?.let {
+                            detalj.copy(person = detalj.person.anonymiser(it))
+                        } ?: detalj
+                    },
+            )
+        }
 
     private fun String.anonymiserHvisSkjermet(identerSomSkalAnonymiseres: Map<String, String>) = identerSomSkalAnonymiseres[this]
 
