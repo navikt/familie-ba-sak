@@ -30,6 +30,7 @@ class AutovedtakSøknadService(
     private val autovedtakSøknadValideringService: AutovedtakSøknadValideringService,
     private val stegService: StegService,
     private val autovedtakSøknadStatistikkService: AutovedtakSøknadStatistikkService,
+    private val filtreringsreglerSøknadService: FiltreringsreglerSøknadService,
 ) : AutovedtakBehandlingService<SøknadData> {
     override fun skalAutovedtakBehandles(behandlingsdata: SøknadData): Boolean = true
 
@@ -41,6 +42,7 @@ class AutovedtakSøknadService(
                 automatiskBehandling = automatiskBehandling,
                 behandlingsdata = behandlingsdata,
                 begrunnelse = "Søknaden oppfyller ikke filtreringsreglene for automatisk behandling.",
+                begrunnelseIOppgave = filtreringsreglerSøknadService.hentBegrunnelseForStoppIFiltreringsreglene(automatiskBehandling.id),
             )
         }
 
@@ -122,7 +124,7 @@ class AutovedtakSøknadService(
         automatiskBehandling: Behandling,
         behandlingsdata: SøknadData,
         begrunnelse: String,
-        begrunnelseIOppgave: String? = null,
+        begrunnelseIOppgave: String,
     ): String {
         stegService.håndterHenleggBehandling(
             behandling = automatiskBehandling,

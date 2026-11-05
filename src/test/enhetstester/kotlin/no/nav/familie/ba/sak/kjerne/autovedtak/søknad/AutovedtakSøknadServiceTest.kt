@@ -53,6 +53,7 @@ class AutovedtakSøknadServiceTest {
     private val autovedtakSøknadValideringService = mockk<AutovedtakSøknadValideringService>()
     private val stegService = mockk<StegService>()
     private val statistikkService = mockk<AutovedtakSøknadStatistikkService>()
+    private val filtreringsreglerSøknadService = mockk<FiltreringsreglerSøknadService>()
 
     private val autovedtakSøknadService =
         AutovedtakSøknadService(
@@ -63,6 +64,7 @@ class AutovedtakSøknadServiceTest {
             autovedtakSøknadValideringService = autovedtakSøknadValideringService,
             stegService = stegService,
             autovedtakSøknadStatistikkService = statistikkService,
+            filtreringsreglerSøknadService = filtreringsreglerSøknadService,
         )
 
     private val fagsak = lagFagsak()
@@ -417,6 +419,8 @@ class AutovedtakSøknadServiceTest {
                 every { stegService.håndterFiltreringsreglerForAutomatiskeBehandlinger(any(), any()) } returns behandlingStoppetAvFiltrering
                 every { stegService.håndterHenleggBehandling(any(), any()) } returns behandlingStoppetAvFiltrering
                 every { stegService.håndterNyBehandling(match { it.behandlingÅrsak == BehandlingÅrsak.SØKNAD }) } returns manuellBehandling
+                every { filtreringsreglerSøknadService.hentBegrunnelseForStoppIFiltreringsreglene(behandlingStoppetAvFiltrering.id) } returns
+                    "1) Søker har EØS-barnetrygd 2) Søknaden inneholder vedlegg"
             }
 
             @Test
@@ -435,7 +439,7 @@ class AutovedtakSøknadServiceTest {
             }
 
             @Test
-            fun `skal opprette manuell behandling uten beskrivelse i oppgaven etter henleggelsen`() {
+            fun `skal opprette manuell behandling med filtreringsreglene som ikke er oppfylt i oppgaven etter henleggelsen`() {
                 // Act
                 val resultat = autovedtakSøknadService.kjørBehandling(søknadData)
 
@@ -443,7 +447,9 @@ class AutovedtakSøknadServiceTest {
                 assertThat(resultat).isEqualTo("Automatisk behandling av søknad er henlagt og sendt til manuell behandling: Søknaden oppfyller ikke filtreringsreglene for automatisk behandling.")
                 verifyOrder {
                     stegService.håndterHenleggBehandling(behandlingStoppetAvFiltrering, any())
-                    stegService.håndterNyBehandling(nyBehandling)
+                    stegService.håndterNyBehandling(
+                        nyBehandling.copy(oppgavebeskrivelse = "1) Søker har EØS-barnetrygd 2) Søknaden inneholder vedlegg"),
+                    )
                 }
             }
 

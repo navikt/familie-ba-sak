@@ -6,9 +6,11 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFiltreringResultat
 import no.nav.familie.ba.sak.datagenerator.lagFiltreringsreglerFaktaSøknad
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FILTRERINGSREGLER_SØKNAD
+import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.FiltreringsregelEvaluator
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
@@ -69,5 +71,39 @@ class FiltreringsreglerSøknadServiceTest {
         assertThat(resultater).hasSize(1)
         assertThat(lagredeResultaterSlot.captured).hasSize(1)
         assertThat(lagredeResultaterSlot.captured.single().behandlingId).isEqualTo(behandling.id)
+    }
+
+    @Test
+    fun `skal nummerere begrunnelsene til alle filtreringsregler som ikke er oppfylt`() {
+        // Arrange
+        val behandlingId = 1L
+        every { filtreringResultatRepository.finnFiltreringResultater(behandlingId) } returns
+            listOf(
+                lagFiltreringResultat(behandlingId = behandlingId, resultat = Resultat.OPPFYLT),
+                lagFiltreringResultat(
+                    behandlingId = behandlingId,
+                    filtreringsregel = Filtreringsregel.Identifikator.SØKER_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    begrunnelse = "Søker har EØS-barnetrygd",
+                ),
+                lagFiltreringResultat(
+                    behandlingId = behandlingId,
+                    filtreringsregel = Filtreringsregel.Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    begrunnelse = "Søknaden inneholder vedlegg",
+                ),
+                lagFiltreringResultat(
+                    behandlingId = behandlingId,
+                    filtreringsregel = Filtreringsregel.Identifikator.SØKER_HAR_IKKE_VERGE,
+                    resultat = Resultat.IKKE_VURDERT,
+                    begrunnelse = "Ikke vurdert",
+                ),
+            )
+
+        // Act
+        val begrunnelse = filtreringsreglerSøknadService.hentBegrunnelseForStoppIFiltreringsreglene(behandlingId)
+
+        // Assert
+        assertThat(begrunnelse).isEqualTo("1) Søker har EØS-barnetrygd 2) Søknaden inneholder vedlegg")
     }
 }
