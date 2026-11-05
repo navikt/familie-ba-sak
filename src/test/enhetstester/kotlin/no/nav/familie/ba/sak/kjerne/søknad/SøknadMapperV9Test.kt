@@ -36,6 +36,10 @@ class SøknadMapperV9Test {
                             erFosterbarn = true,
                             erIBeredskapshjem = true,
                             harKryssetForDeltBosted = true,
+                            oppholderSegIInstitusjon = true,
+                            søkerErAsylsøker = true,
+                            barnErAsylsøker = true,
+                            erAdoptertFraUtland = true,
                         ),
                 )
 
@@ -53,6 +57,34 @@ class SøknadMapperV9Test {
             assertThat(søknad.barn.map { it.erFosterbarn }).containsOnly(true)
             assertThat(søknad.barn.map { it.erIBeredskapshjem }).containsOnly(true)
             assertThat(søknad.barn.map { it.harKryssetForDeltBosted }).containsOnly(true)
+            assertThat(søknad.barn.map { it.oppholderSegIInstitusjon }).containsOnly(true)
+            assertThat(søknad.barn.map { it.erAsylsøker }).containsOnly(true)
+            assertThat(søknad.barn.map { it.erAdoptertFraUtland }).containsOnly(true)
+            assertThat(søknad.søker.erAsylsøker).isTrue()
+        }
+
+        @Test
+        fun `skal mappe hvert svar om institusjon, asyl og adopsjon til riktig felt`() {
+            // Arrange
+            val versjonertBarnetrygdSøknadV9 =
+                VersjonertBarnetrygdSøknadV9(
+                    barnetrygdSøknad =
+                        lagBarnetrygdSøknadV9(
+                            oppholderSegIInstitusjon = true,
+                            søkerErAsylsøker = true,
+                            barnErAsylsøker = false,
+                            erAdoptertFraUtland = false,
+                        ),
+                )
+
+            // Act
+            val søknad = SøknadMapperV9().mapTilSøknad(versjonertBarnetrygdSøknadV9)
+
+            // Assert
+            assertThat(søknad.barn.map { it.oppholderSegIInstitusjon }).containsOnly(true)
+            assertThat(søknad.søker.erAsylsøker).isTrue()
+            assertThat(søknad.barn.map { it.erAsylsøker }).containsOnly(false)
+            assertThat(søknad.barn.map { it.erAdoptertFraUtland }).containsOnly(false)
         }
 
         @Test

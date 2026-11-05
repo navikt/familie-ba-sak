@@ -772,6 +772,87 @@ class FaktaOppretterTest {
     }
 
     @Nested
+    inner class SøkerHarKryssetForInstitusjonISøknaden {
+        @Test
+        fun `skal sette søkerHarKryssetForInstitusjonISøknaden til true når søker har krysset for at søknadsbarnet oppholder seg i institusjon`() {
+            // Arrange
+            every {
+                søknadService.finnDigitalSøknad(behandling.id)
+            } returns
+                lagSøknad(
+                    barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true),
+                    barneIdenterTilOppholderSegIInstitusjon = mapOf(barnsIdent to true),
+                )
+
+            // Act
+            val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
+
+            // Assert
+            assertThat(fakta.søkerHarKryssetForInstitusjonISøknaden).isTrue()
+        }
+    }
+
+    @Nested
+    inner class SøkerHarKryssetForAsylsøkerISøknaden {
+        @Test
+        fun `skal sette søkerHarKryssetForAsylsøkerISøknaden til true når søker har krysset for at søker selv er asylsøker`() {
+            // Arrange
+            every {
+                søknadService.finnDigitalSøknad(behandling.id)
+            } returns
+                lagSøknad(
+                    barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true),
+                    søkerErAsylsøker = true,
+                )
+
+            // Act
+            val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
+
+            // Assert
+            assertThat(fakta.søkerHarKryssetForAsylsøkerISøknaden).isTrue()
+        }
+
+        @Test
+        fun `skal sette søkerHarKryssetForAsylsøkerISøknaden til true når søker har krysset for at søknadsbarnet er asylsøker`() {
+            // Arrange
+            every {
+                søknadService.finnDigitalSøknad(behandling.id)
+            } returns
+                lagSøknad(
+                    barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true),
+                    barneIdenterTilErAsylsøker = mapOf(barnsIdent to true),
+                )
+
+            // Act
+            val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
+
+            // Assert
+            assertThat(fakta.søkerHarKryssetForAsylsøkerISøknaden).isTrue()
+        }
+    }
+
+    @Nested
+    inner class SøkerHarKryssetForAdoptertFraUtlandetISøknaden {
+        @Test
+        fun `skal sette søkerHarKryssetForAdoptertFraUtlandetISøknaden til true når søker har krysset for at søknadsbarnet er adoptert fra utlandet`() {
+            // Arrange
+            every {
+                søknadService.finnDigitalSøknad(behandling.id)
+            } returns
+                lagSøknad(
+                    barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true),
+                    barneIdenterTilErAdoptertFraUtland = mapOf(barnsIdent to true),
+                )
+
+            // Act
+            val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
+
+            // Assert
+            assertThat(fakta.søkerHarKryssetForAdoptertFraUtlandetISøknaden).isTrue()
+        }
+    }
+
+    @Nested
     inner class SøknadenInneholderVedlegg {
         @Test
         fun `skal sette søknadenInneholderVedlegg til true når søknaden inneholder vedlegg`() {
