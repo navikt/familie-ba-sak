@@ -223,64 +223,26 @@ class FagsakServiceTest {
     }
 
     @Nested
-    inner class HentGjeldendeUtbetalingsperioder {
-        @Test
-        fun `skal returnere tom liste når fagsaken ikke har en vedtatt behandling`() {
-            // Arrange
-            val fagsak = lagFagsak()
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
-
-            // Act
-            val utbetalingsperioder = fagsakService.hentGjeldendeUtbetalingsperioder(fagsak.id)
-
-            // Assert
-            assertThat(utbetalingsperioder).isEmpty()
-        }
-
-        @Test
-        fun `skal returnere anonymiserte utbetalingsperioder fra siste vedtatte behandling`() {
-            // Arrange
-            val fagsak = lagFagsak()
-            val sisteBehandlingSomErVedtatt = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
-            val utbetalingsperiode = lagUtbetalingsperiode(utbetaltPerMnd = 3000)
-            val anonymisertUtbetalingsperiode = lagUtbetalingsperiode(utbetaltPerMnd = 1000)
-
-            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteBehandlingSomErVedtatt
-            every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns listOf(utbetalingsperiode)
-            every { strengtFortroligService.anonymiserUtbetalingsperioder(listOf(utbetalingsperiode), fagsak) } returns listOf(anonymisertUtbetalingsperiode)
-
-            // Act
-            val utbetalingsperioder = fagsakService.hentGjeldendeUtbetalingsperioder(fagsak.id)
-
-            // Assert
-            assertThat(utbetalingsperioder).containsExactly(anonymisertUtbetalingsperiode)
-        }
-    }
-
-    @Nested
     inner class HentFagsakDto {
         @Test
-        fun `skal sette anonymiserte utbetalingsperioder på fagsakDto`() {
+        fun `skal sette gjeldende utbetalingsperioder på fagsakDto`() {
             // Arrange
             val fagsak = lagFagsak()
             val sisteBehandlingSomErVedtatt = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
             val utbetalingsperiode = lagUtbetalingsperiode(utbetaltPerMnd = 3000)
-            val anonymisertUtbetalingsperiode = lagUtbetalingsperiode(utbetaltPerMnd = 1000)
 
             every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns null
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteBehandlingSomErVedtatt
             every { behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id) } returns emptyList()
             every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
-            every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns listOf(utbetalingsperiode)
-            every { strengtFortroligService.anonymiserUtbetalingsperioder(listOf(utbetalingsperiode), fagsak) } returns listOf(anonymisertUtbetalingsperiode)
+            every { vedtaksperiodeService.hentGjeldendeUtbetalingsperioder(fagsak.id) } returns listOf(utbetalingsperiode)
 
             // Act
             val fagsakDto = fagsakService.hentFagsakDto(fagsak.id)
 
             // Assert
-            assertThat(fagsakDto.data?.gjeldendeUtbetalingsperioder).containsExactly(anonymisertUtbetalingsperiode)
+            assertThat(fagsakDto.data?.gjeldendeUtbetalingsperioder).containsExactly(utbetalingsperiode)
         }
     }
 
