@@ -229,7 +229,7 @@ class FagsakServiceTest {
             // Arrange
             val fagsak = lagFagsak()
             val sisteBehandlingSomErVedtatt = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
-            val utbetalingsperiode = lagUtbetalingsperiode(utbetaltPerMnd = 3000)
+            val utbetalingsperiode = lagUtbetalingsperiode()
 
             every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns null
@@ -374,7 +374,7 @@ class FagsakServiceTest {
         }
     }
 
-    private fun lagUtbetalingsperiode(utbetaltPerMnd: Int) =
+    private fun lagUtbetalingsperiode() =
         Utbetalingsperiode(
             periodeFom = LocalDate.now().minusYears(1),
             periodeTom = LocalDate.now().plusYears(1),
@@ -382,6 +382,6 @@ class FagsakServiceTest {
             utbetalingsperiodeDetaljer = emptyList(),
             ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
             antallBarn = 1,
-            utbetaltPerMnd = utbetaltPerMnd,
+            utbetaltPerMnd = 3000,
         )
 }
