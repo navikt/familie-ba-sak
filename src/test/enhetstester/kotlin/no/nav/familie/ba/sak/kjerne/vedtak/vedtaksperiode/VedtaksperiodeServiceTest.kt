@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
+import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
@@ -310,6 +311,7 @@ class VedtaksperiodeServiceTest {
 
             // Assert
             assertThat(utbetalingsperioder).containsExactly(anonymisertUtbetalingsperiode)
+            verify { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(forrigeBehandling.fagsak.id) }
         }
 
         private fun lagUtbetalingsperiode(utbetaltPerMnd: Int) =
