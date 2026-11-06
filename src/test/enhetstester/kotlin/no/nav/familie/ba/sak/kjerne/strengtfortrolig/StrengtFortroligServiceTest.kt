@@ -576,31 +576,80 @@ class StrengtFortroligServiceTest {
                 gjeldendeUtbetalingsperioder = utbetalingsperioder,
                 finnesStrengtFortroligPersonIFagsak = true,
             )
-
-        private fun lagUtbetalingsperiode(detaljer: List<UtbetalingsperiodeDetalj>) =
-            Utbetalingsperiode(
-                periodeFom = LocalDate.of(2023, 6, 1),
-                periodeTom = LocalDate.of(2023, 6, 30),
-                vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
-                utbetalingsperiodeDetaljer = detaljer,
-                ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
-                antallBarn = detaljer.count { it.person.type == PersonType.BARN },
-                utbetaltPerMnd = detaljer.sumOf { it.utbetaltPerMnd },
-            )
-
-        private fun lagUtbetalingsperiodeDetalj(
-            personIdent: String,
-            type: PersonType,
-            utbetalt: Int,
-        ) = UtbetalingsperiodeDetalj(
-            person = lagPersonDto(personIdent, type = type),
-            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-            utbetaltPerMnd = utbetalt,
-            erPåvirketAvEndring = false,
-            endringsårsak = null,
-            prosent = BigDecimal.valueOf(100),
-        )
     }
+
+    @Nested
+    inner class AnonymiserUtbetalingsperioderTest {
+        @Test
+        fun `skal anonymisere skjermet barn i utbetalingsperiodene`() {
+            // Arrange
+            mockSaksbehandlerHarTilgangTilSøkerMenIkkeBarn()
+            mockBarnUtenLøpendeAndeler()
+
+            val søkerIdent = søkerAktør.aktivFødselsnummer()
+            val utbetalingsperioder =
+                listOf(
+                    lagUtbetalingsperiode(
+                        listOf(
+                            lagUtbetalingsperiodeDetalj(barnAktør.aktivFødselsnummer(), PersonType.BARN, 2012),
+                            lagUtbetalingsperiodeDetalj(søkerIdent, PersonType.SØKER, 1740),
+                        ),
+                    ),
+                )
+
+            // Act
+            val resultat = strengtFortroligService.anonymiserUtbetalingsperioder(utbetalingsperioder, fagsak)
+
+            // Assert
+            val detaljer = resultat.single().utbetalingsperiodeDetaljer
+            assertThat(detaljer.first().person.personIdent).isEqualTo("$SKJERMET_BARN 1")
+            assertThat(detaljer.first().person.registerhistorikk).isNull()
+            assertThat(detaljer.last().person.personIdent).isEqualTo(søkerIdent)
+        }
+
+        @Test
+        fun `skal returnere utbetalingsperiodene uendret når saksbehandler har tilgang til alle personer`() {
+            // Arrange
+            mockSaksbehandlerHarTilgangTilAllePersoner()
+
+            val utbetalingsperioder =
+                listOf(
+                    lagUtbetalingsperiode(
+                        listOf(lagUtbetalingsperiodeDetalj(barnAktør.aktivFødselsnummer(), PersonType.BARN, 2012)),
+                    ),
+                )
+
+            // Act
+            val resultat = strengtFortroligService.anonymiserUtbetalingsperioder(utbetalingsperioder, fagsak)
+
+            // Assert
+            assertThat(resultat).isEqualTo(utbetalingsperioder)
+        }
+    }
+
+    private fun lagUtbetalingsperiode(detaljer: List<UtbetalingsperiodeDetalj>) =
+        Utbetalingsperiode(
+            periodeFom = LocalDate.of(2023, 6, 1),
+            periodeTom = LocalDate.of(2023, 6, 30),
+            vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+            utbetalingsperiodeDetaljer = detaljer,
+            ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+            antallBarn = detaljer.count { it.person.type == PersonType.BARN },
+            utbetaltPerMnd = detaljer.sumOf { it.utbetaltPerMnd },
+        )
+
+    private fun lagUtbetalingsperiodeDetalj(
+        personIdent: String,
+        type: PersonType,
+        utbetalt: Int,
+    ) = UtbetalingsperiodeDetalj(
+        person = lagPersonDto(personIdent, type = type),
+        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+        utbetaltPerMnd = utbetalt,
+        erPåvirketAvEndring = false,
+        endringsårsak = null,
+        prosent = BigDecimal.valueOf(100),
+    )
 
     private fun lagUtvidetVedtaksperiodeDto(
         id: Long,
