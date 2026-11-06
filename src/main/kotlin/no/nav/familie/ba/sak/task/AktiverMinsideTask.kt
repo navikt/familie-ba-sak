@@ -40,20 +40,20 @@ class AktiverMinsideTask(
 
         if (minsideAktiveringService.harAktivertMinsideAktivering(aktør)) {
             if (!kanAktivereMinsideForAktør) {
-                logger.info("Minside er aktivert for aktør: ${aktør.aktørId}, men skulle ikke vært det. Deaktiverer derfor minside.")
+                logger.info("Minside er aktivert for aktør i task ${task.id}, men skulle ikke vært det. Deaktiverer derfor minside.")
                 minsideAktiveringService.deaktiverMinsideAktivering(aktør)
                 return
             }
-            logger.info("Minside er allerede aktivert for aktør: ${aktør.aktørId}")
+            logger.info("Minside er allerede aktivert for aktør i task ${task.id}")
             return
         }
 
         if (!kanAktivereMinsideForAktør) {
-            logger.info("Kan ikke aktivere minside for aktør: ${aktør.aktørId} - ingen fagsaker eller kun skjermet barn/institusjon")
+            logger.info("Kan ikke aktivere minside for aktør i task ${task.id} - ingen fagsaker eller kun skjermet barn/institusjon")
             return
         }
 
-        logger.info("Aktiverer minside for aktør: ${aktør.aktørId}")
+        logger.info("Aktiverer minside for aktør i task ${task.id}")
         minsideAktiveringService.aktiverMinsideAktivering(aktør)
     }
 
