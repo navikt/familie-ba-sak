@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Fødselsnummer
@@ -35,6 +36,7 @@ class PersonController(
     private val personTilgangService: PersonTilgangService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilgangService: TilgangService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
     @PostMapping
     fun hentPerson(
@@ -97,6 +99,7 @@ class PersonController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
 
         val personopplysningGrunnlag = persongrunnlagService.oppdaterRegisteropplysninger(behandlingId)
+        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
@@ -111,6 +114,7 @@ class PersonController(
         @RequestBody manuellDødsfallDto: ManuellDødsfallDto,
     ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         persongrunnlagService.registrerManuellDødsfallPåPerson(
             behandlingId = BehandlingId(behandlingId),
@@ -118,6 +122,7 @@ class PersonController(
             dødsfallDato = manuellDødsfallDto.dødsfallDato,
             begrunnelse = manuellDødsfallDto.begrunnelse,
         )
+        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
 
         return ResponseEntity.ok(
             Ressurs.success(
