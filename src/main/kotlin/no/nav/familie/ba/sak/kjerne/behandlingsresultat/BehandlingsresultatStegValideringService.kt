@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValid
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils.rekjørNesteMånedHvisYtelseTypeErInnvilgetToMånederFramITid
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -74,7 +75,61 @@ class BehandlingsresultatStegValideringService(
     private val clockProvider: ClockProvider,
     private val satsendringEøsKjøringService: SatsendringEøsKjøringService,
 ) {
-    fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
+    fun validerBehandlingFørBehandlingsresultat(behandling: Behandling) {
+        if (!behandling.erSatsendringMånedligValutajusteringEllerRegionstillegg() && behandling.skalBehandlesAutomatisk) {
+            return
+        }
+
+        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+
+        validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+            tilkjentYtelse = tilkjentYtelse,
+            søkerOgBarn = søkerOgBarn,
+        )
+
+        validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(behandling = behandling)
+
+        if (behandling.erSatsendringNasjonal()) {
+            validerSatsendring(tilkjentYtelse)
+        }
+
+        if (behandling.erFinnmarkstillegg()) {
+            validerFinnmarkstilleggBehandling(tilkjentYtelse)
+        }
+
+        if (behandling.erSvalbardtillegg()) {
+            validerSvalbardtilleggBehandling(tilkjentYtelse)
+        }
+
+        if (!behandling.erSatsendringMånedligValutajusteringEllerRegionstillegg()) {
+            validerEndredeUtbetalingsandeler(tilkjentYtelse)
+            validerKompetanse(behandling.id)
+            validerSekundærlandKompetanse(behandling.id)
+            validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(behandling)
+            validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(behandling)
+        }
+
+        if (behandling.erMånedligValutajustering()) {
+            validerIngenEndringTilbakeITid(tilkjentYtelse)
+            validerSatsErUendret(tilkjentYtelse)
+        }
+
+        if (behandling.erSatsendringEøs()) {
+            validerAtMinstEttUtenlandskPeriodebeløpErEndret(behandling)
+            validerIngenEndringIAndelerFørSatsendringstidspunkt(tilkjentYtelse)
+        }
+
+        if (behandling.erEndreMigreringsdato()) {
+            validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)
+        }
+
+        if (behandling.erFalskIdentitet()) {
+            validerFalskIdentitetBehandling(tilkjentYtelse)
+        }
+    }
+
+    internal fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
         if (behandling.status == BehandlingStatus.AVSLUTTET) return
 
         val endringIUtbetalingTidslinje =
@@ -115,7 +170,7 @@ class BehandlingsresultatStegValideringService(
         }
     }
 
-    fun validerSatsendring(tilkjentYtelse: TilkjentYtelse) {
+    internal fun validerSatsendring(tilkjentYtelse: TilkjentYtelse) {
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(tilkjentYtelse.behandling)
                 ?: throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
@@ -128,14 +183,14 @@ class BehandlingsresultatStegValideringService(
         )
     }
 
-    fun validerFinnmarkstilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
+    internal fun validerFinnmarkstilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
         validerFinnmarksOgSvalbardtilleggBehandling(
             tilkjentYtelse = tilkjentYtelse,
             ytelseType = FINNMARKSTILLEGG,
         )
     }
 
-    fun validerSvalbardtilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
+    internal fun validerSvalbardtilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
         validerFinnmarksOgSvalbardtilleggBehandling(
             tilkjentYtelse = tilkjentYtelse,
             ytelseType = SVALBARDTILLEGG,
@@ -199,7 +254,7 @@ class BehandlingsresultatStegValideringService(
         )
     }
 
-    fun validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(behandling: Behandling) {
+    internal fun validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(behandling: Behandling) {
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandling.id)
         val valutakurser by lazy { valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id) }
 
@@ -208,13 +263,13 @@ class BehandlingsresultatStegValideringService(
         }
     }
 
-    fun validerKompetanse(behandlingId: Long) {
+    internal fun validerKompetanse(behandlingId: Long) {
         val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId)
 
         BehandlingsresultatValideringUtils.validerKompetanse(kompetanser)
     }
 
-    fun validerEndredeUtbetalingsandeler(
+    internal fun validerEndredeUtbetalingsandeler(
         tilkjentYtelse: TilkjentYtelse,
     ) {
         val endretUtbetalingAndelMedAndelerTilkjentYtelse =
@@ -230,7 +285,7 @@ class BehandlingsresultatStegValideringService(
         validerÅrsak(endretUtbetalingAndeler, vilkårsvurdering)
     }
 
-    fun validerIngenEndringTilbakeITid(
+    internal fun validerIngenEndringTilbakeITid(
         tilkjentYtelse: TilkjentYtelse,
     ) {
         val andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse
@@ -243,7 +298,7 @@ class BehandlingsresultatStegValideringService(
         )
     }
 
-    fun validerSatsErUendret(
+    internal fun validerSatsErUendret(
         tilkjentYtelse: TilkjentYtelse,
     ) {
         val andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse
@@ -255,14 +310,14 @@ class BehandlingsresultatStegValideringService(
         )
     }
 
-    fun validerAtMinstEttUtenlandskPeriodebeløpErEndret(behandling: Behandling) {
+    internal fun validerAtMinstEttUtenlandskPeriodebeløpErEndret(behandling: Behandling) {
         val utbetalingsland = satsendringEøsKjøringService.hentSatsendringEøsKjøring(behandling.id).utbetalingsland
         if (finnEndredeUtenlandskePeriodebeløp(behandling, utbetalingsland).isEmpty()) {
             throw Feil("Forventet endring i minst ett utenlandsk periodebeløp for satsendring EØS i behandling ${behandling.id} i fagsak ${behandling.fagsak.id}.")
         }
     }
 
-    fun validerIngenEndringIAndelerFørSatsendringstidspunkt(tilkjentYtelse: TilkjentYtelse) {
+    internal fun validerIngenEndringIAndelerFørSatsendringstidspunkt(tilkjentYtelse: TilkjentYtelse) {
         val satsTidspunkt = satsendringEøsKjøringService.hentSatsendringEøsKjøring(tilkjentYtelse.behandling.id).satsTidspunkt
         val andelerForrigeBehandling = beregningService.hentAndelerFraForrigeVedtatteBehandling(tilkjentYtelse.behandling)
         BehandlingsresultatValideringUtils.validerIngenEndringFørMåned(
@@ -298,7 +353,7 @@ class BehandlingsresultatStegValideringService(
             }.flatMap { it.value.tilPerioderIkkeNull().verdier() }
     }
 
-    fun validerSekundærlandKompetanse(
+    internal fun validerSekundærlandKompetanse(
         behandlingId: Long,
     ) {
         val kompetansePerBarn = kompetanseRepository.finnFraBehandlingId(behandlingId).tilSeparateTidslinjerForBarna()
@@ -330,7 +385,7 @@ class BehandlingsresultatStegValideringService(
             }
     }
 
-    fun validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(behandling: Behandling) {
+    internal fun validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(behandling: Behandling) {
         val skjermedeBarnSaksbehandlerIkkeHarTilgangTil = strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(behandling.fagsak)
         if (skjermedeBarnSaksbehandlerIkkeHarTilgangTil.isEmpty()) return
 
@@ -390,7 +445,7 @@ class BehandlingsresultatStegValideringService(
         }
     }
 
-    fun validerFalskIdentitetBehandling(tilkjentYtelse: TilkjentYtelse) {
+    internal fun validerFalskIdentitetBehandling(tilkjentYtelse: TilkjentYtelse) {
         val andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse.tilTidslinjerPerAktørOgType()
         val andelerForrigeBehandling = beregningService.hentAndelerFraForrigeVedtatteBehandling(tilkjentYtelse.behandling).tilTidslinjerPerAktørOgType()
 
@@ -402,7 +457,7 @@ class BehandlingsresultatStegValideringService(
         }
     }
 
-    fun validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(behandling: Behandling) {
+    internal fun validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(behandling: Behandling) {
         val forrigeIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) ?: return
 
         val aktørerMedAndelerIForrigeIverksatteBehandling =
