@@ -86,11 +86,33 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
                     "azp_name" to ":teamfamilie:azp-test",
                     "name" to SYSTEM_FORKORTELSE,
                     "preferred_username" to SYSTEM_FORKORTELSE,
+                    "idtyp" to "app",
                 ),
             ),
         )
         return httpHeaders
     }
+
+    fun hentMaskinTilMaskinToken(azpName: String): String =
+        token(
+            mapOf(
+                "azp_name" to azpName,
+                "idtyp" to "app",
+            ),
+        )
+
+    fun hentBrukerToken(
+        azpName: String,
+        groups: List<String>,
+    ): String =
+        token(
+            mapOf(
+                "azp_name" to azpName,
+                "groups" to groups,
+                "NAVident" to "Z0000",
+                "name" to "Mock McMockface",
+            ),
+        )
 
     /** Genererer et TokenX-token. [fnr] legges inn som `pid`-claim; null utelater claimet. */
     fun hentTokenForTokenX(fnr: String? = null): String =
