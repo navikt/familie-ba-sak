@@ -26,6 +26,8 @@ FAMILIE_KLAGE_SCOPE: api://prod-gcp.teamfamilie.familie-klage/.default
 
 FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.prod-fss-pub.nais.io/api
 FAMILIE_INTEGRASJONER_SCOPE: api://prod-fss.teamfamilie.familie-integrasjoner/.default
+FAMILIE_INTEGRASJONER_GCP_API_URL: http://familie-integrasjoner/api
+FAMILIE_INTEGRASJONER_GCP_SCOPE: api://prod-gcp.teamfamilie.familie-integrasjoner/.default
 
 TILGANGSMASKIN_SCOPE: api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
 

@@ -27,6 +27,14 @@ class RestClientConfig(
             .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
             .medJsonContentType()
 
+    @Bean("integrasjonerGcpRestClient")
+    fun integrasjonerGcpRestClient(
+        @Value("\${FAMILIE_INTEGRASJONER_GCP_SCOPE}") scope: String,
+    ): RestClient =
+        entraIDRestClientFactory
+            .lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }
+            .medJsonContentType()
+
     @Bean(TilgangsmaskinKlientConfig.TILGANGSMASKIN_OBO_REST_CLIENT)
     fun tilgangsmaskinOboRestClient(
         @Value("\${TILGANGSMASKIN_SCOPE}") scope: String,
@@ -49,6 +57,14 @@ class RestClientConfig(
     @Bean("integrasjonerM2mRestClient")
     fun integrasjonerM2mRestClient(
         @Value("\${FAMILIE_INTEGRASJONER_SCOPE}") scope: String,
+    ): RestClient =
+        entraIDRestClientFactory
+            .lagMaskinTilMaskinRestKlient(scope)
+            .medJsonContentType()
+
+    @Bean("integrasjonerGcpM2mRestClient")
+    fun integrasjonerGcpM2mRestClient(
+        @Value("\${FAMILIE_INTEGRASJONER_GCP_SCOPE}") scope: String,
     ): RestClient =
         entraIDRestClientFactory
             .lagMaskinTilMaskinRestKlient(scope)
