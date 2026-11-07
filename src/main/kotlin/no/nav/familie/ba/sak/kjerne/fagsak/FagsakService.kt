@@ -30,7 +30,6 @@ import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -48,7 +47,6 @@ class FagsakService(
     private val behandlingService: BehandlingService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val skyggesakService: SkyggesakService,
-    private val vedtaksperiodeService: VedtaksperiodeService,
     private val institusjonService: InstitusjonService,
     private val organisasjonService: OrganisasjonService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -225,10 +223,7 @@ class FagsakService(
                 .hentBehandlinger(fagsakId = fagsakId)
                 .map { utvidetBehandlingService.lagUtvidetBehandlingDto(it.id) }
 
-        return restBaseFagsak.tilFagsakDto(
-            utvidetBehandlingerDto = utvidedeBehandlinger,
-            gjeldendeUtbetalingsperioder = vedtaksperiodeService.hentGjeldendeUtbetalingsperioder(fagsakId),
-        )
+        return restBaseFagsak.tilFagsakDto(utvidedeBehandlinger)
     }
 
     private fun lagRestBaseFagsak(fagsakId: Long): BaseFagsakDto {

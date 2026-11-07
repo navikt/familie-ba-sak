@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForRevurderingÅrligKontroll
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -329,5 +330,17 @@ class VedtaksperiodeServiceIntegrationTest(
             "Begrunnelsestype INNVILGET passer ikke med typen 'FORTSATT_INNVILGET' som er satt på perioden.",
             feil.message,
         )
+    }
+
+    @Test
+    fun `skal hente gjeldende utbetalingsperioder for fagsaken`() {
+        // Arrange
+        val revurdering = kjørFørstegangsbehandlingOgRevurderingÅrligKontroll()
+
+        // Act
+        val gjeldendeUtbetalingsperioder = vedtaksperiodeService.hentGjeldendeUtbetalingsperioder(fagsakId = revurdering.fagsak.id)
+
+        // Assert
+        assertThat(gjeldendeUtbetalingsperioder).isNotEmpty
     }
 }

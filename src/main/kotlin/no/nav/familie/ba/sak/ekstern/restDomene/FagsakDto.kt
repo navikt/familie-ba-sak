@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -32,7 +31,6 @@ data class FagsakDto(
     override val underBehandling: Boolean,
     override val løpendeKategori: BehandlingKategori?,
     override val løpendeUnderkategori: BehandlingUnderkategori?,
-    val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     val behandlinger: List<UtvidetBehandlingDto>,
     override val fagsakType: FagsakType = FagsakType.NORMAL,
     override val finnesStrengtFortroligPersonIFagsak: Boolean,
@@ -53,7 +51,6 @@ data class FagsakDto(
 
 fun BaseFagsakDto.tilFagsakDto(
     utvidetBehandlingerDto: List<UtvidetBehandlingDto>,
-    gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
 ) = FagsakDto(
     opprettetTidspunkt = this.opprettetTidspunkt,
     id = this.id,
@@ -63,7 +60,6 @@ fun BaseFagsakDto.tilFagsakDto(
     underBehandling = this.underBehandling,
     løpendeKategori = this.løpendeKategori,
     løpendeUnderkategori = this.løpendeUnderkategori,
-    gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
     behandlinger = utvidetBehandlingerDto,
     fagsakType = this.fagsakType,
     finnesStrengtFortroligPersonIFagsak = this.finnesStrengtFortroligPersonIFagsak,

@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsHendelse
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsing
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingService
@@ -32,15 +31,11 @@ import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 class FagsakServiceTest {
@@ -52,7 +47,6 @@ class FagsakServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val saksstatistikkEventPublisher = mockk<SaksstatistikkEventPublisher>()
     private val skyggesakService = mockk<SkyggesakService>()
-    private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val institusjonService = mockk<InstitusjonService>()
     private val organisasjonService = mockk<OrganisasjonService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
@@ -70,7 +64,6 @@ class FagsakServiceTest {
             behandlingService = behandlingService,
             saksstatistikkEventPublisher = saksstatistikkEventPublisher,
             skyggesakService = skyggesakService,
-            vedtaksperiodeService = vedtaksperiodeService,
             institusjonService = institusjonService,
             organisasjonService = organisasjonService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -223,30 +216,6 @@ class FagsakServiceTest {
     }
 
     @Nested
-    inner class HentFagsakDto {
-        @Test
-        fun `skal sette gjeldende utbetalingsperioder på fagsakDto`() {
-            // Arrange
-            val fagsak = lagFagsak()
-            val sisteBehandlingSomErVedtatt = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
-            val utbetalingsperiode = lagUtbetalingsperiode()
-
-            every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
-            every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns null
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteBehandlingSomErVedtatt
-            every { behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id) } returns emptyList()
-            every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
-            every { vedtaksperiodeService.hentGjeldendeUtbetalingsperioder(fagsak.id) } returns listOf(utbetalingsperiode)
-
-            // Act
-            val fagsakDto = fagsakService.hentFagsakDto(fagsak.id)
-
-            // Assert
-            assertThat(fagsakDto.data?.gjeldendeUtbetalingsperioder).containsExactly(utbetalingsperiode)
-        }
-    }
-
-    @Nested
     inner class HentEllerOpprettFagsakTest {
         @Test
         fun `Skal kaste funksjonell feil dersom man forsøker å lage en fagsak med type skjermet barn i automatiske løyper`() {
@@ -373,15 +342,4 @@ class FagsakServiceTest {
             assertThat(returnertFagsak).isEqualTo(fagsak)
         }
     }
-
-    private fun lagUtbetalingsperiode() =
-        Utbetalingsperiode(
-            periodeFom = LocalDate.now().minusYears(1),
-            periodeTom = LocalDate.now().plusYears(1),
-            vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
-            utbetalingsperiodeDetaljer = emptyList(),
-            ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
-            antallBarn = 1,
-            utbetaltPerMnd = 3000,
-        )
 }
