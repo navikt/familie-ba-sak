@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
+import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
@@ -16,10 +17,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaRepository
@@ -29,6 +32,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -44,6 +48,7 @@ class VedtaksperiodeServiceTest {
     private val refusjonEøsRepository = mockk<RefusjonEøsRepository>()
     private val integrasjonKlient = mockk<IntegrasjonKlient>()
     private val kompetanseRepository = mockk<KompetanseRepository>()
+    private val strengtFortroligService = mockk<StrengtFortroligService>(relaxed = true)
 
     private val vedtaksperiodeService =
         spyk(
@@ -65,7 +70,7 @@ class VedtaksperiodeServiceTest {
                 kodeverkService = KodeverkService(integrasjonKlient = integrasjonKlient),
                 valutakursRepository = mockk(),
                 utenlandskPeriodebeløpRepository = mockk(),
-                strengtFortroligService = mockk(relaxed = true),
+                strengtFortroligService = strengtFortroligService,
             ),
         )
 
@@ -274,5 +279,50 @@ class VedtaksperiodeServiceTest {
         // Assert
         assertThat(perioder?.size).isEqualTo(1)
         assertThat(perioder?.single()).isEqualTo("Fra januar 2020 til januar 2022 blir ikke etterbetaling på 200 kroner per måned utbetalt nå siden det er utbetalt barnetrygd i Norge.")
+    }
+
+    @Nested
+    inner class HentGjeldendeUtbetalingsperioder {
+        @Test
+        fun `skal returnere tom liste når fagsaken ikke har en vedtatt behandling`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
+
+            // Act
+            val utbetalingsperioder = vedtaksperiodeService.hentGjeldendeUtbetalingsperioder(behandling.fagsak.id)
+
+            // Assert
+            assertThat(utbetalingsperioder).isEmpty()
+        }
+
+        @Test
+        fun `skal returnere anonymiserte utbetalingsperioder fra siste vedtatte behandling`() {
+            // Arrange
+            val utbetalingsperiode = lagUtbetalingsperiode(utbetaltPerMnd = 3000)
+            val anonymisertUtbetalingsperiode = lagUtbetalingsperiode(utbetaltPerMnd = 1000)
+
+            every { vedtaksperiodeService.hentUtbetalingsperioder(forrigeBehandling) } returns listOf(utbetalingsperiode)
+            every {
+                strengtFortroligService.anonymiserUtbetalingsperioder(listOf(utbetalingsperiode), forrigeBehandling.fagsak)
+            } returns listOf(anonymisertUtbetalingsperiode)
+
+            // Act
+            val utbetalingsperioder = vedtaksperiodeService.hentGjeldendeUtbetalingsperioder(forrigeBehandling.fagsak.id)
+
+            // Assert
+            assertThat(utbetalingsperioder).containsExactly(anonymisertUtbetalingsperiode)
+            verify { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(forrigeBehandling.fagsak.id) }
+        }
+
+        private fun lagUtbetalingsperiode(utbetaltPerMnd: Int) =
+            Utbetalingsperiode(
+                periodeFom = LocalDate.now().minusYears(1),
+                periodeTom = LocalDate.now().plusYears(1),
+                vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+                utbetalingsperiodeDetaljer = emptyList(),
+                ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+                antallBarn = 1,
+                utbetaltPerMnd = utbetaltPerMnd,
+            )
     }
 }
