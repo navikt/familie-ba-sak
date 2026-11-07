@@ -226,6 +226,24 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
             ikkeOppfyltNavn = "SØKER_HAR_KRYSSET_FOR_FOSTERHJEM_ELLER_BEREDSKAPSHJEM_I_SØKNADEN",
             ikkeOppfyltBeskrivelse = "Søker har krysset for at minst ett av barna er i fosterhjem eller beredskapshjem i søknaden",
         ),
+        SØKER_HAR_IKKE_KRYSSET_FOR_INSTITUSJON_I_SØKNADEN(
+            oppfyltNavn = "SØKER_HAR_IKKE_KRYSSET_FOR_INSTITUSJON_I_SØKNADEN",
+            oppfyltBeskrivelse = "Søker har ikke krysset for at noen av barna er i barneverninstitusjon eller annen institusjon i søknaden",
+            ikkeOppfyltNavn = "SØKER_HAR_KRYSSET_FOR_INSTITUSJON_I_SØKNADEN",
+            ikkeOppfyltBeskrivelse = "Søker har krysset for at minst ett av barna er i barneverninstitusjon eller annen institusjon i søknaden",
+        ),
+        SØKER_HAR_IKKE_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN(
+            oppfyltNavn = "SØKER_HAR_IKKE_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN",
+            oppfyltBeskrivelse = "Søker har ikke krysset for at søker selv er asylsøker eller at det er søkt om asyl for noen av barna i søknaden",
+            ikkeOppfyltNavn = "SØKER_HAR_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN",
+            ikkeOppfyltBeskrivelse = "Søker har krysset for at søker selv er asylsøker eller at det er søkt om asyl for minst ett av barna i søknaden",
+        ),
+        SØKER_HAR_IKKE_KRYSSET_FOR_ADOPTERT_FRA_UTLANDET_I_SØKNADEN(
+            oppfyltNavn = "SØKER_HAR_IKKE_KRYSSET_FOR_ADOPTERT_FRA_UTLANDET_I_SØKNADEN",
+            oppfyltBeskrivelse = "Søker har ikke krysset for at noen av barna er adoptert fra utlandet i søknaden",
+            ikkeOppfyltNavn = "SØKER_HAR_KRYSSET_FOR_ADOPTERT_FRA_UTLANDET_I_SØKNADEN",
+            ikkeOppfyltBeskrivelse = "Søker har krysset for at minst ett av barna er adoptert fra utlandet i søknaden",
+        ),
         SØKNADEN_INNEHOLDER_IKKE_VEDLEGG(
             oppfyltNavn = "SØKNADEN_INNEHOLDER_IKKE_VEDLEGG",
             oppfyltBeskrivelse = "Søknaden inneholder ikke vedlegg",
@@ -338,6 +356,21 @@ private val søkerHarIkkeKryssetForFosterhjemEllerBeredskapshjemISøknaden =
         !it.søkerHarKryssetForFosterhjemEllerBeredskapshjemISøknaden
     }
 
+private val søkerHarIkkeKryssetForInstitusjonISøknaden =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_INSTITUSJON_I_SØKNADEN) {
+        !it.søkerHarKryssetForInstitusjonISøknaden
+    }
+
+private val søkerHarIkkeKryssetForAsylsøkerISøknaden =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN) {
+        !it.søkerHarKryssetForAsylsøkerISøknaden
+    }
+
+private val søkerHarIkkeKryssetForAdoptertFraUtlandetISøknaden =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_ADOPTERT_FRA_UTLANDET_I_SØKNADEN) {
+        !it.søkerHarKryssetForAdoptertFraUtlandetISøknaden
+    }
+
 private val søknadenInneholderIkkeVedlegg =
     Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG) {
         !it.søknadenInneholderVedlegg
@@ -421,6 +454,9 @@ val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøkn
         søkerHarIkkeKryssetPåEøsSpørsmålISøknaden,
         søkerHarIkkeKryssetForDeltBostedISøknaden,
         søkerHarIkkeKryssetForFosterhjemEllerBeredskapshjemISøknaden,
+        søkerHarIkkeKryssetForInstitusjonISøknaden,
+        søkerHarIkkeKryssetForAsylsøkerISøknaden,
+        søkerHarIkkeKryssetForAdoptertFraUtlandetISøknaden,
         søknadenInneholderIkkeVedlegg,
         søkerHarAktivNorskBostedsadresse,
         barnHarAktivNorskBostedsadresse,

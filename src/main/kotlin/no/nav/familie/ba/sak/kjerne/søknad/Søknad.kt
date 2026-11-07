@@ -17,6 +17,12 @@ data class Søknad(
     fun harKryssetForDeltBostedForMinstEttBarn(): Boolean = barn.any { it.harKryssetForDeltBosted }
 
     fun harKryssetForFosterhjemEllerBeredskapshjemForMinstEttBarn(): Boolean = barn.any { it.erFosterbarn || it.erIBeredskapshjem }
+
+    fun harKryssetForInstitusjonForMinstEttBarn(): Boolean = barn.any { it.oppholderSegIInstitusjon }
+
+    fun harKryssetForAsylsøkerForSøkerEllerMinstEttBarn(): Boolean = søker.erAsylsøker || barn.any { it.erAsylsøker }
+
+    fun harKryssetForAdoptertFraUtlandetForMinstEttBarn(): Boolean = barn.any { it.erAdoptertFraUtland }
 }
 
 data class Barn(
@@ -25,9 +31,13 @@ data class Barn(
     val erFosterbarn: Boolean,
     val erIBeredskapshjem: Boolean,
     val harKryssetForDeltBosted: Boolean,
+    val oppholderSegIInstitusjon: Boolean,
+    val erAsylsøker: Boolean,
+    val erAdoptertFraUtland: Boolean,
 )
 
 data class Søker(
     val fnr: String,
     val planleggerÅBoINorge12Mnd: Boolean,
+    val erAsylsøker: Boolean,
 )

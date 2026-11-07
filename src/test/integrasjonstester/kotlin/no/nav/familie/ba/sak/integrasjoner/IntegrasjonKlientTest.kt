@@ -22,6 +22,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.HENT_ARBEIDSFORDELING_MED_BEHANDLINGSTYPE
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
@@ -100,8 +101,11 @@ class IntegrasjonKlientTest : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun setUp() {
+        every { featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_INTEGRASJONER_I_GCP, defaultValue = false) } returns false
         integrasjonKlient =
             IntegrasjonKlient(
+                URI.create(wireMockServer.baseUrl() + "/api"),
+                restClient,
                 URI.create(wireMockServer.baseUrl() + "/api"),
                 restClient,
                 featureToggleService,

@@ -12,6 +12,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.Filtreringsregel
@@ -74,3 +75,26 @@ class FiltreringResultat(
 }
 
 fun List<FiltreringResultat>.erOppfylt() = this.all { it.resultat == Resultat.OPPFYLT }
+
+fun List<FiltreringResultat>.slåSammenIkkeOppfylteBegrunnelser(behandlingId: Long): String {
+    val ikkeOppfylteBegrunnelser =
+        this
+            .filter { it.resultat == Resultat.IKKE_OPPFYLT }
+            .map { it.begrunnelse }
+
+    return when (ikkeOppfylteBegrunnelser.size) {
+        0 -> {
+            throw Feil("Fant ingen ikke oppfylte filtreringsregler for behandling $behandlingId")
+        }
+
+        1 -> {
+            ikkeOppfylteBegrunnelser.single()
+        }
+
+        else -> {
+            ikkeOppfylteBegrunnelser
+                .mapIndexed { index, begrunnelse -> "${index + 1}) $begrunnelse" }
+                .joinToString(" ")
+        }
+    }
+}

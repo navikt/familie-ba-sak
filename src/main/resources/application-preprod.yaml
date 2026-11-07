@@ -22,6 +22,8 @@ FAMILIE_EF_SAK_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
 
 FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.dev-fss-pub.nais.io/api
 FAMILIE_INTEGRASJONER_SCOPE: api://dev-fss.teamfamilie.familie-integrasjoner/.default
+FAMILIE_INTEGRASJONER_GCP_API_URL: http://familie-integrasjoner/api
+FAMILIE_INTEGRASJONER_GCP_SCOPE: api://dev-gcp.teamfamilie.familie-integrasjoner/.default
 
 TILGANGSMASKIN_SCOPE: api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default
 
