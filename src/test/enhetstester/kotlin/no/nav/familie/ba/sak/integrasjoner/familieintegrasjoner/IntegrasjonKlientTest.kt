@@ -3,7 +3,11 @@ package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Fagsystem
@@ -15,24 +19,120 @@ import no.nav.familie.kontrakter.felles.dokarkiv.GjenåpneSakRequest
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClient
 import java.net.URI
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class IntegrasjonKlientTest {
     private lateinit var wiremockServerItem: WireMockServer
     private lateinit var integrasjonKlient: IntegrasjonKlient
+    private lateinit var systemOnlyIntegrasjonKlient: SystemOnlyIntegrasjonKlient
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     @BeforeEach
     fun initClass() {
         wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
         wiremockServerItem.start()
-        integrasjonKlient = IntegrasjonKlient(URI.create(wiremockServerItem.baseUrl()), RestClient.create(), mockk(), 1)
+        every { featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_INTEGRASJONER_I_GCP, defaultValue = false) } returns false
+        val fssUri = URI.create(wiremockServerItem.baseUrl())
+        val gcpUri = URI.create("${wiremockServerItem.baseUrl()}/gcp")
+        val restClientFss = RestClient.builder().defaultHeader("X-Test-Cluster", "fss").build()
+        val restClientGcp = RestClient.builder().defaultHeader("X-Test-Cluster", "gcp").build()
+        integrasjonKlient = IntegrasjonKlient(fssUri, restClientFss, gcpUri, restClientGcp, featureToggleService, 1)
+        systemOnlyIntegrasjonKlient = SystemOnlyIntegrasjonKlient(fssUri, restClientFss, gcpUri, restClientGcp, featureToggleService, 1)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        wiremockServerItem.stop()
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `skal velge URL og klient fra samme cluster ut fra togglen`(brukGcp: Boolean) {
+        // Arrange
+        every { featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_INTEGRASJONER_I_GCP, defaultValue = false) } returns brukGcp
+        val sti = if (brukGcp) "/gcp/kodeverk/landkoder/NOR" else "/kodeverk/landkoder/NOR"
+        val cluster = if (brukGcp) "gcp" else "fss"
+        wiremockServerItem.stubFor(
+            WireMock
+                .get(WireMock.urlEqualTo(sti))
+                .withHeader("X-Test-Cluster", WireMock.equalTo(cluster))
+                .willReturn(WireMock.okJson("""{"data":"Norge","status":"SUKSESS","melding":"OK"}""")),
+        )
+
+        // Act
+        val land = integrasjonKlient.hentLand("NOR")
+
+        // Assert
+        assertThat(land).isEqualTo("Norge")
+        wiremockServerItem.verify(WireMock.getRequestedFor(WireMock.urlEqualTo(sti)).withHeader("X-Test-Cluster", WireMock.equalTo(cluster)))
+        verify(exactly = 1) { featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_INTEGRASJONER_I_GCP, defaultValue = false) }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `skal velge URL og systemklient fra samme cluster ut fra togglen`(brukGcp: Boolean) {
+        // Arrange
+        every { featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_INTEGRASJONER_I_GCP, defaultValue = false) } returns brukGcp
+        val sti = if (brukGcp) "/gcp/aareg/arbeidsforhold" else "/aareg/arbeidsforhold"
+        val cluster = if (brukGcp) "gcp" else "fss"
+        wiremockServerItem.stubFor(
+            WireMock
+                .post(WireMock.urlEqualTo(sti))
+                .withHeader("X-Test-Cluster", WireMock.equalTo(cluster))
+                .willReturn(WireMock.okJson("""{"data":[],"status":"SUKSESS","melding":"OK"}""")),
+        )
+
+        // Act
+        val arbeidsforhold = systemOnlyIntegrasjonKlient.hentArbeidsforholdMedSystembruker("test-ident", LocalDate.of(2026, 1, 1))
+
+        // Assert
+        assertThat(arbeidsforhold).isEmpty()
+        wiremockServerItem.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(sti)).withHeader("X-Test-Cluster", WireMock.equalTo(cluster)))
+        verify(exactly = 1) { featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_INTEGRASJONER_I_GCP, defaultValue = false) }
+    }
+
+    @Test
+    fun `skal kunne bytte til GCP og tilbake til FSS uten omstart`() {
+        // Arrange
+        every {
+            featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_INTEGRASJONER_I_GCP, defaultValue = false)
+        } returnsMany listOf(false, true, false)
+        listOf("/kodeverk/landkoder/NOR", "/gcp/kodeverk/landkoder/NOR").forEach { sti ->
+            wiremockServerItem.stubFor(
+                WireMock.get(WireMock.urlEqualTo(sti)).willReturn(WireMock.okJson("""{"data":"Norge","status":"SUKSESS","melding":"OK"}""")),
+            )
+        }
+
+        // Act
+        repeat(3) { integrasjonKlient.hentLand("NOR") }
+
+        // Assert
+        wiremockServerItem.verify(2, WireMock.getRequestedFor(WireMock.urlEqualTo("/kodeverk/landkoder/NOR")).withHeader("X-Test-Cluster", WireMock.equalTo("fss")))
+        wiremockServerItem.verify(1, WireMock.getRequestedFor(WireMock.urlEqualTo("/gcp/kodeverk/landkoder/NOR")).withHeader("X-Test-Cluster", WireMock.equalTo("gcp")))
+        verify(exactly = 3) { featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_INTEGRASJONER_I_GCP, defaultValue = false) }
+    }
+
+    @Test
+    fun `skal ikke falle tilbake til FSS når et kall til GCP feiler`() {
+        // Arrange
+        every { featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_INTEGRASJONER_I_GCP, defaultValue = false) } returns true
+        wiremockServerItem.stubFor(WireMock.get(WireMock.urlEqualTo("/gcp/kodeverk/landkoder/NOR")).willReturn(WireMock.serverError()))
+
+        // Act & Assert
+        assertThrows<IntegrasjonException> { integrasjonKlient.hentLand("NOR") }
+        wiremockServerItem.verify(0, WireMock.getRequestedFor(WireMock.urlEqualTo("/kodeverk/landkoder/NOR")))
+        wiremockServerItem.verify(1, WireMock.getRequestedFor(WireMock.urlEqualTo("/gcp/kodeverk/landkoder/NOR")))
     }
 
     @Test

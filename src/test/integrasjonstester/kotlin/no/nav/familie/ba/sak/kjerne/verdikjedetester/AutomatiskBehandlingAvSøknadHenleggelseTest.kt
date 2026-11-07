@@ -47,7 +47,7 @@ class AutomatiskBehandlingAvSøknadHenleggelseTest(
     }
 
     @Test
-    fun `skal opprette én BehandleSak-oppgave uten beskrivelse når filtreringsreglene stopper automatisk behandling av søknad`() {
+    fun `skal opprette én BehandleSak-oppgave med filtreringsreglene som ikke er oppfylt når filtreringsreglene stopper automatisk behandling av søknad`() {
         // Arrange
         val nyBehandling = opprettFagsakMedSøknad(søknadInneholderVedlegg = true)
 
@@ -63,7 +63,7 @@ class AutomatiskBehandlingAvSøknadHenleggelseTest(
         assertThat(behandleSakOppgaver).hasSize(1)
         val behandleSakOppgave = behandleSakOppgaver.single()
         assertThat(behandleSakOppgave.behandlingId).isEqualTo(manuellBehandling.id)
-        assertThat(behandleSakOppgave.beskrivelse).isNull()
+        assertThat(behandleSakOppgave.beskrivelse).isEqualTo("Søknaden inneholder vedlegg")
     }
 
     @Test

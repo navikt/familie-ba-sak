@@ -2,10 +2,13 @@ package no.nav.familie.ba.sak.kjerne.søknad
 
 import no.nav.familie.ba.sak.datagenerator.lagStringSøknadsfelt
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erAdoptertFraUtland
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erAsylsøker
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erFosterbarn
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erIBeredskapshjem
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harKryssetForDeltBosted
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.inneholderVedlegg
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.oppholderSegIInstitusjon
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.tilBehandlingUnderkategori
 import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
 import no.nav.familie.kontrakter.ba.søknad.v7.Dokumentasjonsbehov
@@ -110,6 +113,96 @@ class SøknadMapperTest {
             val spørsmål = emptyMap<String, Søknadsfelt<Any>>()
             // Act & Assert
             assertThat(spørsmål.erIBeredskapshjem()).isFalse()
+        }
+    }
+
+    @Nested
+    inner class OppholderSegIInstitusjon {
+        @Test
+        fun `skal gi true når søker har svart ja på at barnet oppholder seg i institusjon`() {
+            // Arrange
+            val spørsmål = mapOf<String, Søknadsfelt<Any>>("oppholderSegIInstitusjon" to lagStringSøknadsfelt("JA"))
+
+            // Act & Assert
+            assertThat(spørsmål.oppholderSegIInstitusjon()).isTrue()
+        }
+
+        @Test
+        fun `skal gi false når søker har svart nei på at barnet oppholder seg i institusjon`() {
+            // Arrange
+            val spørsmål = mapOf<String, Søknadsfelt<Any>>("oppholderSegIInstitusjon" to lagStringSøknadsfelt("NEI"))
+
+            // Act & Assert
+            assertThat(spørsmål.oppholderSegIInstitusjon()).isFalse()
+        }
+
+        @Test
+        fun `skal gi false når søknaden ikke inneholder spørsmålet om institusjon`() {
+            // Arrange
+            val spørsmål = emptyMap<String, Søknadsfelt<Any>>()
+
+            // Act & Assert
+            assertThat(spørsmål.oppholderSegIInstitusjon()).isFalse()
+        }
+    }
+
+    @Nested
+    inner class ErAsylsøker {
+        @Test
+        fun `skal gi true når søker har svart ja på at personen er asylsøker`() {
+            // Arrange
+            val spørsmål = mapOf<String, Søknadsfelt<Any>>("erAsylsøker" to lagStringSøknadsfelt("JA"))
+
+            // Act & Assert
+            assertThat(spørsmål.erAsylsøker()).isTrue()
+        }
+
+        @Test
+        fun `skal gi false når søker har svart nei på at personen er asylsøker`() {
+            // Arrange
+            val spørsmål = mapOf<String, Søknadsfelt<Any>>("erAsylsøker" to lagStringSøknadsfelt("NEI"))
+
+            // Act & Assert
+            assertThat(spørsmål.erAsylsøker()).isFalse()
+        }
+
+        @Test
+        fun `skal gi false når søknaden ikke inneholder spørsmålet om asyl`() {
+            // Arrange
+            val spørsmål = emptyMap<String, Søknadsfelt<Any>>()
+
+            // Act & Assert
+            assertThat(spørsmål.erAsylsøker()).isFalse()
+        }
+    }
+
+    @Nested
+    inner class ErAdoptertFraUtland {
+        @Test
+        fun `skal gi true når søker har svart ja på at barnet er adoptert fra utlandet`() {
+            // Arrange
+            val spørsmål = mapOf<String, Søknadsfelt<Any>>("erAdoptertFraUtland" to lagStringSøknadsfelt("JA"))
+
+            // Act & Assert
+            assertThat(spørsmål.erAdoptertFraUtland()).isTrue()
+        }
+
+        @Test
+        fun `skal gi false når søker har svart nei på at barnet er adoptert fra utlandet`() {
+            // Arrange
+            val spørsmål = mapOf<String, Søknadsfelt<Any>>("erAdoptertFraUtland" to lagStringSøknadsfelt("NEI"))
+
+            // Act & Assert
+            assertThat(spørsmål.erAdoptertFraUtland()).isFalse()
+        }
+
+        @Test
+        fun `skal gi false når søknaden ikke inneholder spørsmålet om adopsjon fra utlandet`() {
+            // Arrange
+            val spørsmål = emptyMap<String, Søknadsfelt<Any>>()
+
+            // Act & Assert
+            assertThat(spørsmål.erAdoptertFraUtland()).isFalse()
         }
     }
 
