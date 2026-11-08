@@ -28164,15 +28164,15 @@
   {
     "_createdAt": "2022-04-28T13:58:48Z",
     "_id": "9b64cac0-5f5c-4464-9854-4bb604900f40",
-    "_rev": "s5bO7mmdcSAEOIvzeF07UU",
+    "_rev": "rU16mkCQwwcAuY0ergm2qc",
     "_system": {
       "base": {
         "id": "9b64cac0-5f5c-4464-9854-4bb604900f40",
-        "rev": "s5bO7mmdcSAEOIvzeEwdQx"
+        "rev": "jlHzKKRQQjdjxVtINUaHCf"
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-10-28T14:53:48Z",
+    "_updatedAt": "2026-11-06T13:25:22Z",
     "apiNavn": "innvilgetTilleggstekstOpphorUtvidetNyfoedtBarn",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
