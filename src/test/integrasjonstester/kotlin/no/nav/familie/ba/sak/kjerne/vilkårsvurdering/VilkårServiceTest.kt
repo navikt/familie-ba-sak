@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UTVIDET_BARNETRYGD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -230,7 +231,7 @@ class VilkårServiceTest(
         }
 
         @ParameterizedTest
-        @ValueSource(strings = ["", PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT])
+        @ValueSource(strings = ["", PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT, IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT])
         fun `skal kaste Feil når preutfylt vilkår er endret og har tom eller automatisk utfylt begrunnelse`(
             begrunnelseFraFrontend: String,
         ) {

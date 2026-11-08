@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagSøknad
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -17,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import org.junit.jupiter.api.Test
 
 class PreutfyllVilkårServiceTest {
@@ -25,6 +27,7 @@ class PreutfyllVilkårServiceTest {
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService = mockk(relaxed = true)
     private val preutfyllBosattIRiketForFødselshendelserService: PreutfyllBosattIRiketForFødselshendelserService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
+    private val søknadService: SøknadService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
 
@@ -35,6 +38,7 @@ class PreutfyllVilkårServiceTest {
             preutfyllBosattIRiketService,
             preutfyllBosattIRiketForFødselshendelserService,
             persongrunnlagService,
+            søknadService,
             behandlingHentOgPersisterService,
             featureToggleService = featureToggleService,
         )
@@ -54,8 +58,8 @@ class PreutfyllVilkårServiceTest {
 
         // Assert
         verify(exactly = 0) { preutfyllLovligOppholdService.preutfyllLovligOpphold(any(), any()) }
-        verify(exactly = 0) { preutfyllBosattIRiketService.preutfyllBosattIRiket(any(), any()) }
-        verify(exactly = 0) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(any(), any()) }
+        verify(exactly = 0) { preutfyllBosattIRiketService.preutfyllBosattIRiket(any(), any(), any()) }
+        verify(exactly = 0) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(any(), any(), any()) }
     }
 
     @Test
@@ -69,8 +73,8 @@ class PreutfyllVilkårServiceTest {
 
         // Assert
         verify(exactly = 0) { preutfyllLovligOppholdService.preutfyllLovligOpphold(any(), any()) }
-        verify(exactly = 0) { preutfyllBosattIRiketService.preutfyllBosattIRiket(any(), any()) }
-        verify(exactly = 0) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(any(), any()) }
+        verify(exactly = 0) { preutfyllBosattIRiketService.preutfyllBosattIRiket(any(), any(), any()) }
+        verify(exactly = 0) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(any(), any(), any()) }
     }
 
     @Test
@@ -83,6 +87,8 @@ class PreutfyllVilkårServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns
             lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
         every { persongrunnlagService.oppdaterRegisteropplysninger(behandling.id) } returns mockk()
+        val digitalSøknad = lagSøknad()
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns digitalSøknad
 
         val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
         val alleAktører = listOf(søker.aktør, barn.aktør)
@@ -92,8 +98,8 @@ class PreutfyllVilkårServiceTest {
 
         // Assert
         verify(exactly = 1) { preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering, alleAktører) }
-        verify(exactly = 1) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, alleAktører) }
-        verify(exactly = 1) { preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, alleAktører) }
+        verify(exactly = 1) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, alleAktører, digitalSøknad) }
+        verify(exactly = 1) { preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, alleAktører, digitalSøknad) }
     }
 
     @Test
@@ -112,8 +118,8 @@ class PreutfyllVilkårServiceTest {
 
         // Assert
         verify(exactly = 0) { preutfyllLovligOppholdService.preutfyllLovligOpphold(any(), any()) }
-        verify(exactly = 0) { preutfyllBosattIRiketService.preutfyllBosattIRiket(any(), any()) }
-        verify(exactly = 0) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(any(), any()) }
+        verify(exactly = 0) { preutfyllBosattIRiketService.preutfyllBosattIRiket(any(), any(), any()) }
+        verify(exactly = 0) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(any(), any(), any()) }
     }
 
     @Test
@@ -134,6 +140,8 @@ class PreutfyllVilkårServiceTest {
             lagTestPersonopplysningGrunnlag(forrigeBehandling.id, søker, eksisterendeBarn)
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
         every { persongrunnlagService.oppdaterRegisteropplysninger(behandling.id) } returns mockk()
+        val digitalSøknad = lagSøknad()
+        every { søknadService.finnDigitalSøknad(behandling.id) } returns digitalSøknad
 
         val vilkårsvurdering = lagVilkårsvurdering(behandling = behandling)
         val nyttBarnAktør = nyttBarn.aktør
@@ -143,8 +151,8 @@ class PreutfyllVilkårServiceTest {
 
         // Assert
         verify(exactly = 1) { preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering, listOf(nyttBarnAktør)) }
-        verify(exactly = 1) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, listOf(nyttBarnAktør)) }
-        verify(exactly = 1) { preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, listOf(nyttBarnAktør)) }
+        verify(exactly = 1) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, listOf(nyttBarnAktør), digitalSøknad) }
+        verify(exactly = 1) { preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, listOf(nyttBarnAktør), digitalSøknad) }
     }
 
     @Test
@@ -172,7 +180,7 @@ class PreutfyllVilkårServiceTest {
         // Assert
         verify(exactly = 0) { persongrunnlagService.oppdaterRegisteropplysninger(any()) }
         verify(exactly = 0) { preutfyllLovligOppholdService.preutfyllLovligOpphold(any(), any()) }
-        verify(exactly = 0) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(any(), any()) }
-        verify(exactly = 0) { preutfyllBosattIRiketService.preutfyllBosattIRiket(any(), any()) }
+        verify(exactly = 0) { preutfyllBorMedSøkerService.preutfyllBorMedSøker(any(), any(), any()) }
+        verify(exactly = 0) { preutfyllBosattIRiketService.preutfyllBosattIRiket(any(), any(), any()) }
     }
 }

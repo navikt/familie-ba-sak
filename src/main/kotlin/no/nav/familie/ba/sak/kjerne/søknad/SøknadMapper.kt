@@ -24,6 +24,7 @@ interface SøknadMapper {
         private const val ER_I_BEREDSKAPSHJEM = "erIBeredskapshjem"
         private const val OPPHOLDER_SEG_I_INSTITUSJON = "oppholderSegIInstitusjon"
         private const val ER_ASYLSØKER = "erAsylsøker"
+        private const val BOR_FAST_MED_SØKER = "borFastMedSøker"
 
         fun Søknadstype.tilBehandlingUnderkategori(): BehandlingUnderkategori =
             when (this) {
@@ -41,6 +42,8 @@ interface SøknadMapper {
         fun Map<String, Søknadsfelt<Any>>.erAsylsøker(): Boolean = this[ER_ASYLSØKER]?.bokmålsverdi().tilBoolskSvar()
 
         fun Map<String, Søknadsfelt<Any>>.erAdoptertFraUtland(): Boolean = this.hentVerdiForSøknadsfelt(SøknadsFeltId.ER_ADOPTERT_FRA_UTLAND).tilBoolskSvar()
+
+        fun Map<String, Søknadsfelt<Any>>.borFastMedSøker(): Boolean = this[BOR_FAST_MED_SØKER]?.bokmålsverdi().tilBoolskSvar()
 
         fun AndreForelder?.harKryssetForDeltBosted(): Boolean = this?.skriftligAvtaleOmDeltBosted?.bokmålsverdi().tilBoolskSvar()
 

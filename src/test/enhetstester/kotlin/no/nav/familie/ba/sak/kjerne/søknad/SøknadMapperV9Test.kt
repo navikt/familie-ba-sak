@@ -40,6 +40,7 @@ class SøknadMapperV9Test {
                             søkerErAsylsøker = true,
                             barnErAsylsøker = true,
                             erAdoptertFraUtland = true,
+                            borFastMedSøker = true,
                         ),
                 )
 
@@ -60,6 +61,7 @@ class SøknadMapperV9Test {
             assertThat(søknad.barn.map { it.oppholderSegIInstitusjon }).containsOnly(true)
             assertThat(søknad.barn.map { it.erAsylsøker }).containsOnly(true)
             assertThat(søknad.barn.map { it.erAdoptertFraUtland }).containsOnly(true)
+            assertThat(søknad.barn.map { it.borFastMedSøker }).containsOnly(true)
             assertThat(søknad.søker.erAsylsøker).isTrue()
         }
 

@@ -43,6 +43,7 @@ fun lagSøknad(
     søkerErAsylsøker: Boolean = false,
     barneIdenterTilErAsylsøker: Map<String, Boolean> = emptyMap(),
     barneIdenterTilErAdoptertFraUtland: Map<String, Boolean> = emptyMap(),
+    barneIdenterTilBorFastMedSøker: Map<String, Boolean> = emptyMap(),
 ): Søknad =
     Søknad(
         søker = Søker(fnr = randomFnr(), planleggerÅBoINorge12Mnd = søkerPlanleggerÅBoINorge12Mnd, erAsylsøker = søkerErAsylsøker),
@@ -57,6 +58,7 @@ fun lagSøknad(
                     oppholderSegIInstitusjon = barneIdenterTilOppholderSegIInstitusjon[fnr] ?: false,
                     erAsylsøker = barneIdenterTilErAsylsøker[fnr] ?: false,
                     erAdoptertFraUtland = barneIdenterTilErAdoptertFraUtland[fnr] ?: false,
+                    borFastMedSøker = barneIdenterTilBorFastMedSøker[fnr] ?: true,
                 )
             },
         behandlingKategori = BehandlingKategori.NASJONAL,

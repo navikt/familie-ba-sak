@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.søknad
 
 import no.nav.familie.ba.sak.datagenerator.lagStringSøknadsfelt
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.borFastMedSøker
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erAdoptertFraUtland
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erAsylsøker
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erFosterbarn
@@ -203,6 +204,36 @@ class SøknadMapperTest {
 
             // Act & Assert
             assertThat(spørsmål.erAdoptertFraUtland()).isFalse()
+        }
+    }
+
+    @Nested
+    inner class BorFastMedSøker {
+        @Test
+        fun `skal gi true når søker har svart ja på at barnet bor fast med søker`() {
+            // Arrange
+            val spørsmål = mapOf<String, Søknadsfelt<Any>>("borFastMedSøker" to lagStringSøknadsfelt("JA"))
+
+            // Act & Assert
+            assertThat(spørsmål.borFastMedSøker()).isTrue()
+        }
+
+        @Test
+        fun `skal gi false når søker har svart nei på at barnet bor fast med søker`() {
+            // Arrange
+            val spørsmål = mapOf<String, Søknadsfelt<Any>>("borFastMedSøker" to lagStringSøknadsfelt("NEI"))
+
+            // Act & Assert
+            assertThat(spørsmål.borFastMedSøker()).isFalse()
+        }
+
+        @Test
+        fun `skal gi false når søknaden ikke inneholder spørsmålet om barnet bor fast med søker`() {
+            // Arrange
+            val spørsmål = emptyMap<String, Søknadsfelt<Any>>()
+
+            // Act & Assert
+            assertThat(spørsmål.borFastMedSøker()).isFalse()
         }
     }
 

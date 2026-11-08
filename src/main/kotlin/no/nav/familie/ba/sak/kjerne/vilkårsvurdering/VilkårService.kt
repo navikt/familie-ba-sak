@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.tidslinje.Tidslinje
@@ -97,7 +98,7 @@ class VilkårService(
             }
 
             val begrunnelseErTomEllerAutomatiskUtfylt =
-                vilkårResultatDto.begrunnelse.run { isBlank() || startsWith(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT) }
+                vilkårResultatDto.begrunnelse.run { isBlank() || startsWith(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT) || startsWith(IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT) }
 
             if (erEndringSomPåvirkerResultat && begrunnelseErTomEllerAutomatiskUtfylt) {
                 throw FunksjonellFeil(

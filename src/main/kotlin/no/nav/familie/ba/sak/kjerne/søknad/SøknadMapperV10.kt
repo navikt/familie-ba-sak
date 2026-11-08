@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.søknad
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.borFastMedSøker
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erAdoptertFraUtland
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erAsylsøker
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erFosterbarn
@@ -50,6 +51,7 @@ class SøknadMapperV10 : SøknadMapper {
                             oppholderSegIInstitusjon = it.spørsmål.oppholderSegIInstitusjon(),
                             erAsylsøker = it.spørsmål.erAsylsøker(),
                             erAdoptertFraUtland = it.spørsmål.erAdoptertFraUtland(),
+                            borFastMedSøker = it.spørsmål.borFastMedSøker(),
                         )
                     },
             behandlingUnderkategori = versjonertBarnetrygdSøknad.barnetrygdSøknad.søknadstype.tilBehandlingUnderkategori(),

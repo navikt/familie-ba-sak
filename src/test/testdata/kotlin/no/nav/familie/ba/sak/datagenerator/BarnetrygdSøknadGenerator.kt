@@ -31,6 +31,7 @@ fun lagBarnetrygdSøknadV10(
     søkerErAsylsøker: Boolean = false,
     barnErAsylsøker: Boolean = false,
     erAdoptertFraUtland: Boolean = false,
+    borFastMedSøker: Boolean = true,
 ): BarnetrygdSøknadV10 =
     BarnetrygdSøknadV10(
         kontraktVersjon = 10,
@@ -45,6 +46,7 @@ fun lagBarnetrygdSøknadV10(
                     oppholderSegIInstitusjon = oppholderSegIInstitusjon,
                     erAsylsøker = barnErAsylsøker,
                     erAdoptertFraUtland = erAdoptertFraUtland,
+                    borFastMedSøker = borFastMedSøker,
                 )
             },
         antallEøsSteg = if (erEøs) 1 else 0,
@@ -70,6 +72,7 @@ fun lagBarnetrygdSøknadV9(
     søkerErAsylsøker: Boolean = false,
     barnErAsylsøker: Boolean = false,
     erAdoptertFraUtland: Boolean = false,
+    borFastMedSøker: Boolean = true,
 ): BarnetrygdSøknadV9 =
     BarnetrygdSøknadV9(
         kontraktVersjon = 9,
@@ -84,6 +87,7 @@ fun lagBarnetrygdSøknadV9(
                     oppholderSegIInstitusjon = oppholderSegIInstitusjon,
                     erAsylsøker = barnErAsylsøker,
                     erAdoptertFraUtland = erAdoptertFraUtland,
+                    borFastMedSøker = borFastMedSøker,
                 )
             },
         antallEøsSteg = if (erEøs) 1 else 0,
@@ -137,6 +141,7 @@ fun lagBarnV10(
     oppholderSegIInstitusjon: Boolean = false,
     erAsylsøker: Boolean = false,
     erAdoptertFraUtland: Boolean = false,
+    borFastMedSøker: Boolean = true,
 ): BarnV10 =
     BarnV10(
         harEøsSteg = false,
@@ -155,6 +160,7 @@ fun lagBarnV10(
                 oppholderSegIInstitusjon = oppholderSegIInstitusjon,
                 erAsylsøker = erAsylsøker,
                 erAdoptertFraUtland = erAdoptertFraUtland,
+                borFastMedSøker = borFastMedSøker,
             ),
         eøsBarnetrygdsperioder = emptyList(),
     )
@@ -201,6 +207,7 @@ fun lagBarnV8(
     oppholderSegIInstitusjon: Boolean = false,
     erAsylsøker: Boolean = false,
     erAdoptertFraUtland: Boolean = false,
+    borFastMedSøker: Boolean = true,
 ): BarnV8 =
     BarnV8(
         harEøsSteg = false,
@@ -219,6 +226,7 @@ fun lagBarnV8(
                 oppholderSegIInstitusjon = oppholderSegIInstitusjon,
                 erAsylsøker = erAsylsøker,
                 erAdoptertFraUtland = erAdoptertFraUtland,
+                borFastMedSøker = borFastMedSøker,
             ),
         eøsBarnetrygdsperioder = emptyList(),
     )
@@ -234,6 +242,7 @@ private fun lagBarnSpørsmål(
     oppholderSegIInstitusjon: Boolean,
     erAsylsøker: Boolean,
     erAdoptertFraUtland: Boolean,
+    borFastMedSøker: Boolean,
 ): Map<String, Søknadsfelt<Any>> =
     mapOf(
         "erFosterbarn" to lagStringSøknadsfelt<Any>(erFosterbarn.tilSøknadssvar()),
@@ -241,6 +250,7 @@ private fun lagBarnSpørsmål(
         "oppholderSegIInstitusjon" to lagStringSøknadsfelt<Any>(oppholderSegIInstitusjon.tilSøknadssvar()),
         "erAsylsøker" to lagStringSøknadsfelt<Any>(erAsylsøker.tilSøknadssvar()),
         "erAdoptertFraUtland" to lagStringSøknadsfelt<Any>(erAdoptertFraUtland.tilSøknadssvar()),
+        "borFastMedSøker" to lagStringSøknadsfelt<Any>(borFastMedSøker.tilSøknadssvar()),
     )
 
 private fun lagAndreForelder(): AndreForelder =

@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.ScenarioPersonDto
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
+import no.nav.familie.ba.sak.statistikk.automatiskbehandlingavSoknadStatistikk.AutomatiskBehandlingAvSøknadStatistikkRepository
 import no.nav.familie.ba.sak.task.BehandleAutomatiskSøknadTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.task.dto.BehandleAutomatiskSøknadTaskDTO
@@ -35,6 +36,7 @@ class AutomatiskBehandlingAvSøknadHenleggelseTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val fakeIntegrasjonKlient: FakeIntegrasjonKlient,
     @Autowired private val fakeTaskRepositoryWrapper: FakeTaskRepositoryWrapper,
+    @Autowired private val automatiskBehandlingAvSøknadStatistikkRepository: AutomatiskBehandlingAvSøknadStatistikkRepository,
 ) : AbstractVerdikjedetest() {
     @BeforeEach
     fun førHverTest() {
@@ -86,7 +88,33 @@ class AutomatiskBehandlingAvSøknadHenleggelseTest(
         assertThat(behandleSakOppgave.beskrivelse).isEqualTo("Automatisk behandling av søknad fører til feilutbetaling.\nBehandling av søknad må håndteres manuelt.")
     }
 
-    private fun opprettFagsakMedSøknad(søknadInneholderVedlegg: Boolean): NyBehandling {
+    @Test
+    fun `skal sende søknaden til manuell behandling når søker har svart nei på at barnet bor fast med søker`() {
+        // Arrange
+        val nyBehandling = opprettFagsakMedSøknad(søknadInneholderVedlegg = false, borFastMedSøker = false)
+
+        // Act
+        val behandlinger = behandleAutomatiskSøknad(nyBehandling)
+
+        // Assert
+        val automatiskBehandling = behandlinger.single { it.skalBehandlesAutomatisk }
+        assertThat(automatiskBehandling.resultat).isEqualTo(Behandlingsresultat.HENLAGT_AUTOMATISK_SØKNAD)
+        assertThat(
+            automatiskBehandlingAvSøknadStatistikkRepository
+                .findAll()
+                .filter { it.behandlingId == automatiskBehandling.id }
+                .map { it.årsakTilManuellBehandling },
+        ).containsExactly("BARN_VILKÅR_BOR_MED_SØKER")
+
+        val behandleSakOppgave = hentBehandleSakOppgaver(behandlinger).single()
+        assertThat(behandleSakOppgave.behandlingId).isEqualTo(behandlinger.single { !it.skalBehandlesAutomatisk }.id)
+        assertThat(behandleSakOppgave.beskrivelse).isEqualTo("Vilkårsvurderingen er ikke oppfylt.\nBehandling av søknad må håndteres manuelt.")
+    }
+
+    private fun opprettFagsakMedSøknad(
+        søknadInneholderVedlegg: Boolean,
+        borFastMedSøker: Boolean = true,
+    ): NyBehandling {
         val scenario =
             ScenarioDto(
                 søker = ScenarioPersonDto(fødselsdato = "1996-12-12", fornavn = "Mor", etternavn = "Søker"),
@@ -107,7 +135,7 @@ class AutomatiskBehandlingAvSøknadHenleggelseTest(
             journalpostId = journalpostId,
             versjonertBarnetrygdSøknad =
                 VersjonertBarnetrygdSøknadV9(
-                    lagBarnetrygdSøknadV9(søkerFnr = scenario.søker.ident, barnFnr = barnasIdenter, inneholderVedlegg = søknadInneholderVedlegg),
+                    lagBarnetrygdSøknadV9(søkerFnr = scenario.søker.ident, barnFnr = barnasIdenter, inneholderVedlegg = søknadInneholderVedlegg, borFastMedSøker = borFastMedSøker),
                 ),
         )
 
