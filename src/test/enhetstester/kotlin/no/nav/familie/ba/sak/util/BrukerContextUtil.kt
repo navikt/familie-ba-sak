@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.util
 
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.familie.ba.sak.sikkerhet.Rolle
 import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.security.oauth2.jwt.Jwt
@@ -21,6 +23,7 @@ object BrukerContextUtil {
         preferredUsername: String = "A",
         groups: List<String> = emptyList(),
         servletRequest: HttpServletRequest = MockHttpServletRequest(),
+        roller: List<Rolle> = emptyList(),
     ) {
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(servletRequest))
 
@@ -39,7 +42,7 @@ object BrukerContextUtil {
                 .claim("sub", sub)
                 .claim("groups", groups)
                 .build()
-        SecurityContextHolder.setContext(SecurityContextImpl(JwtAuthenticationToken(jwt)))
+        SecurityContextHolder.setContext(SecurityContextImpl(JwtAuthenticationToken(jwt, roller.map { SimpleGrantedAuthority(it.authority()) })))
     }
 
     fun <T> testWithBrukerContext(

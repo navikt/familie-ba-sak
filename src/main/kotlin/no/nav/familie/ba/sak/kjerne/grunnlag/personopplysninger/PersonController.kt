@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.ManuellDødsfallDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonInfoDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonInfoMedNavnOgAdresseDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -40,6 +40,11 @@ class PersonController(
     fun hentPerson(
         @Valid @RequestBody personIdentDto: PersonIdent,
     ): ResponseEntity<Ressurs<PersonInfoDto>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "Hente person",
+        )
+
         val personIdent = personIdentDto.ident
 
         // Valider personIdent
@@ -58,6 +63,11 @@ class PersonController(
     fun hentPersonEnkel(
         @Valid @RequestBody personIdentDto: PersonIdent,
     ): ResponseEntity<Ressurs<PersonInfoDto>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "Hente person",
+        )
+
         val personIdent = personIdentDto.ident
 
         // Valider personIdent
@@ -69,24 +79,6 @@ class PersonController(
                 ?: personopplysningerService
                     .hentPersoninfoEnkel(aktør)
                     .tilPersonInfoDto(personIdent)
-        return ResponseEntity.ok(Ressurs.success(personinfo))
-    }
-
-    @PostMapping(path = ["/adresse"])
-    fun hentPersonAdresse(
-        @Valid @RequestBody personIdentDto: PersonIdent,
-    ): ResponseEntity<Ressurs<PersonInfoDto>> {
-        val personIdent = personIdentDto.ident
-
-        // For validering
-        Fødselsnummer(personIdent)
-
-        val aktør = personidentService.hentAktør(personIdent)
-        val personinfo =
-            personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
-                ?: personopplysningerService
-                    .hentPersoninfoNavnOgAdresse(aktør)
-                    .tilPersonInfoMedNavnOgAdresseDto(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }
 
@@ -111,6 +103,10 @@ class PersonController(
         @RequestBody manuellDødsfallDto: ManuellDødsfallDto,
     ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Registrere manuelt dødsfall",
+        )
 
         persongrunnlagService.registrerManuellDødsfallPåPerson(
             behandlingId = BehandlingId(behandlingId),

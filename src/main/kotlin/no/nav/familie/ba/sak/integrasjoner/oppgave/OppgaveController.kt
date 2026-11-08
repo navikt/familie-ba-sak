@@ -50,14 +50,20 @@ class OppgaveController(
     )
     fun hentOppgaver(
         @RequestBody finnOppgaveRequestDto: FinnOppgaveRequestDto,
-    ): ResponseEntity<Ressurs<FinnOppgaveResponseDto>> =
-        try {
+    ): ResponseEntity<Ressurs<FinnOppgaveResponseDto>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "Hente oppgaver",
+        )
+
+        return try {
             val oppgaver: FinnOppgaveResponseDto =
                 oppgaveService.hentOppgaver(finnOppgaveRequestDto.tilFinnOppgaveRequest())
             ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
         } catch (e: Throwable) {
             illegalState("Henting av oppgaver feilet", e)
         }
+    }
 
     @PostMapping(path = ["/{oppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fordelOppgave(
@@ -101,6 +107,11 @@ class OppgaveController(
     fun hentDataForManuellJournalføring(
         @PathVariable(name = "oppgaveId") oppgaveId: Long,
     ): ResponseEntity<Ressurs<DataForManuellJournalføring>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "Hente data for manuell journalføring",
+        )
+
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val aktør = oppgave.aktoerId?.let { personidentService.hentAktør(it) }
 
@@ -159,6 +170,11 @@ class OppgaveController(
 
     @PostMapping("/hent-frister-for-apne-utvidet-barnetrygd-behandlinger")
     fun hentFristerForÅpneUtvidetBarnetrygdBehandlinger(): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Hente frister for åpne utvidet barnetrygd-behandlinger",
+        )
+
         val behandleSakOppgaveFrister = oppgaveService.hentFristerForÅpneUtvidetBarnetrygdBehandlinger()
 
         return ResponseEntity.ok(Ressurs.success(behandleSakOppgaveFrister))

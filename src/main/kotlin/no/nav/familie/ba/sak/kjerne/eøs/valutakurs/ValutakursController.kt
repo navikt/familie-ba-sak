@@ -111,10 +111,16 @@ class ValutakursController(
     ): Boolean = valutakursDto.valutakode != null && valutakursDto.valutakursdato != null && (eksisterendeValutakurs.valutakursdato != valutakursDto.valutakursdato || eksisterendeValutakurs.valutakode != valutakursDto.valutakode)
 
     @PutMapping(path = ["behandlinger/{behandlingId}/endre-vurderingsstrategi-til/{vurderingsstrategiForValutakurser}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    private fun endreVurderingsstrategiForValutakurser(
+    fun endreVurderingsstrategiForValutakurser(
         @PathVariable behandlingId: Long,
         @PathVariable vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser,
     ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Endrer vurderingsstrategi for valutakurser",
+        )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
+
         automatiskOppdaterValutakursService.endreVurderingsstrategiForValutakurser(behandlingId = BehandlingId(behandlingId), nyStrategi = vurderingsstrategiForValutakurser)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
     }
