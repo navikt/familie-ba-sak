@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -17,7 +16,6 @@ open class BaseFagsakDto(
     open val underBehandling: Boolean,
     open val løpendeKategori: BehandlingKategori?,
     open val løpendeUnderkategori: BehandlingUnderkategori?,
-    open val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     open val fagsakType: FagsakType = FagsakType.NORMAL,
     open val institusjon: InstitusjonDto? = null,
     open val finnesStrengtFortroligPersonIFagsak: Boolean,
@@ -33,7 +31,6 @@ data class FagsakDto(
     override val underBehandling: Boolean,
     override val løpendeKategori: BehandlingKategori?,
     override val løpendeUnderkategori: BehandlingUnderkategori?,
-    override val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     val behandlinger: List<UtvidetBehandlingDto>,
     override val fagsakType: FagsakType = FagsakType.NORMAL,
     override val finnesStrengtFortroligPersonIFagsak: Boolean,
@@ -47,7 +44,6 @@ data class FagsakDto(
         underBehandling = underBehandling,
         løpendeKategori = løpendeKategori,
         løpendeUnderkategori = løpendeUnderkategori,
-        gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
         fagsakType = fagsakType,
         finnesStrengtFortroligPersonIFagsak = finnesStrengtFortroligPersonIFagsak,
         låstTidspunkt = låstTidspunkt,
@@ -64,7 +60,6 @@ fun BaseFagsakDto.tilFagsakDto(
     underBehandling = this.underBehandling,
     løpendeKategori = this.løpendeKategori,
     løpendeUnderkategori = this.løpendeUnderkategori,
-    gjeldendeUtbetalingsperioder = this.gjeldendeUtbetalingsperioder,
     behandlinger = utvidetBehandlingerDto,
     fagsakType = this.fagsakType,
     finnesStrengtFortroligPersonIFagsak = this.finnesStrengtFortroligPersonIFagsak,
@@ -80,7 +75,6 @@ data class MinimalFagsakDto(
     override val løpendeKategori: BehandlingKategori?,
     override val løpendeUnderkategori: BehandlingUnderkategori?,
     override val underBehandling: Boolean,
-    override val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     val behandlinger: List<VisningBehandlingDto>,
     val migreringsdato: LocalDate? = null,
     override val fagsakType: FagsakType,
@@ -96,7 +90,6 @@ data class MinimalFagsakDto(
         underBehandling = underBehandling,
         løpendeKategori = løpendeKategori,
         løpendeUnderkategori = løpendeUnderkategori,
-        gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
         fagsakType = fagsakType,
         institusjon = institusjon,
         finnesStrengtFortroligPersonIFagsak = finnesStrengtFortroligPersonIFagsak,
@@ -115,7 +108,6 @@ fun BaseFagsakDto.tilMinimalFagsakDto(
     underBehandling = this.underBehandling,
     løpendeKategori = this.løpendeKategori,
     løpendeUnderkategori = this.løpendeUnderkategori,
-    gjeldendeUtbetalingsperioder = this.gjeldendeUtbetalingsperioder,
     behandlinger = visningBehandlingerDto,
     migreringsdato = migreringsdato,
     fagsakType = this.fagsakType,

@@ -30,7 +30,6 @@ import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -48,7 +47,6 @@ class FagsakService(
     private val behandlingService: BehandlingService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val skyggesakService: SkyggesakService,
-    private val vedtaksperiodeService: VedtaksperiodeService,
     private val institusjonService: InstitusjonService,
     private val organisasjonService: OrganisasjonService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -235,48 +233,37 @@ class FagsakService(
 
         val sistVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
 
-        val gjeldendeUtbetalingsperioder =
-            if (sistVedtatteBehandling != null) {
-                vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistVedtatteBehandling)
-            } else {
-                emptyList()
-            }
-
-        val baseFagsakDto =
-            BaseFagsakDto(
-                opprettetTidspunkt = fagsak.opprettetTidspunkt,
-                id = fagsak.id,
-                fagsakeier = fagsak.aktør.aktivFødselsnummer(),
-                søkerFødselsnummer = hentSøkersFødselsnummer(fagsak),
-                status = fagsak.status,
-                underBehandling =
-                    if (aktivBehandling == null) {
-                        false
-                    } else {
-                        aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET)
-                    },
-                løpendeKategori = (aktivBehandling ?: sistVedtatteBehandling)?.kategori,
-                løpendeUnderkategori = (aktivBehandling ?: sistVedtatteBehandling)?.underkategori,
-                gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
-                fagsakType = fagsak.type,
-                institusjon =
-                    fagsak.institusjon?.let {
-                        InstitusjonDto(
-                            orgNummer = it.orgNummer,
-                            tssEksternId = it.tssEksternId,
-                            navn = organisasjonService.hentOrganisasjon(it.orgNummer).navn,
-                        )
-                    },
-                finnesStrengtFortroligPersonIFagsak = strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak),
-                låstTidspunkt =
-                    if (fagsak.status == FagsakStatus.LÅST) {
-                        fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id)?.opprettetTidspunkt
-                    } else {
-                        null
-                    },
-            )
-
-        return strengtFortroligService.anonymiserFagsakDto(baseFagsakDto, fagsak)
+        return BaseFagsakDto(
+            opprettetTidspunkt = fagsak.opprettetTidspunkt,
+            id = fagsak.id,
+            fagsakeier = fagsak.aktør.aktivFødselsnummer(),
+            søkerFødselsnummer = hentSøkersFødselsnummer(fagsak),
+            status = fagsak.status,
+            underBehandling =
+                if (aktivBehandling == null) {
+                    false
+                } else {
+                    aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET)
+                },
+            løpendeKategori = (aktivBehandling ?: sistVedtatteBehandling)?.kategori,
+            løpendeUnderkategori = (aktivBehandling ?: sistVedtatteBehandling)?.underkategori,
+            fagsakType = fagsak.type,
+            institusjon =
+                fagsak.institusjon?.let {
+                    InstitusjonDto(
+                        orgNummer = it.orgNummer,
+                        tssEksternId = it.tssEksternId,
+                        navn = organisasjonService.hentOrganisasjon(it.orgNummer).navn,
+                    )
+                },
+            finnesStrengtFortroligPersonIFagsak = strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak),
+            låstTidspunkt =
+                if (fagsak.status == FagsakStatus.LÅST) {
+                    fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id)?.opprettetTidspunkt
+                } else {
+                    null
+                },
+        )
     }
 
     private fun hentSøkersFødselsnummer(fagsak: Fagsak): String {

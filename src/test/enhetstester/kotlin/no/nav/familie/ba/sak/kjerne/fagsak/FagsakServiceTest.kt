@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsHendelse
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsing
 import no.nav.familie.ba.sak.kjerne.fagsaklåsing.FagsakLåsingService
@@ -32,15 +31,11 @@ import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 class FagsakServiceTest {
@@ -52,7 +47,6 @@ class FagsakServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val saksstatistikkEventPublisher = mockk<SaksstatistikkEventPublisher>()
     private val skyggesakService = mockk<SkyggesakService>()
-    private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val institusjonService = mockk<InstitusjonService>()
     private val organisasjonService = mockk<OrganisasjonService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
@@ -70,7 +64,6 @@ class FagsakServiceTest {
             behandlingService = behandlingService,
             saksstatistikkEventPublisher = saksstatistikkEventPublisher,
             skyggesakService = skyggesakService,
-            vedtaksperiodeService = vedtaksperiodeService,
             institusjonService = institusjonService,
             organisasjonService = organisasjonService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -118,26 +111,12 @@ class FagsakServiceTest {
                     aktiv = false,
                 )
 
-            val utbetalingsperiode =
-                Utbetalingsperiode(
-                    periodeFom = LocalDate.now().minusYears(1),
-                    periodeTom = LocalDate.now().plusYears(1),
-                    vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
-                    utbetalingsperiodeDetaljer = emptyList(),
-                    ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD),
-                    antallBarn = 1,
-                    utbetaltPerMnd = 3000,
-                )
-
             every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns null
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteBehandlingSomErVedtatt
-            every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns listOf(utbetalingsperiode)
             every { behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsak.id) } returns listOf(visningsbehandling1, visningsbehandling2)
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
-            every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns emptySet()
             every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
-            every { strengtFortroligService.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
             every { fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id) } returns null
 
             // Act
@@ -151,8 +130,6 @@ class FagsakServiceTest {
             assertThat(restMinimalFagsak.status).isEqualTo(fagsak.status)
             assertThat(restMinimalFagsak.løpendeKategori).isEqualTo(sisteBehandlingSomErVedtatt.kategori)
             assertThat(restMinimalFagsak.løpendeUnderkategori).isEqualTo(sisteBehandlingSomErVedtatt.underkategori)
-            assertThat(restMinimalFagsak.gjeldendeUtbetalingsperioder).hasSize(1)
-            assertThat(restMinimalFagsak.gjeldendeUtbetalingsperioder).containsExactly(utbetalingsperiode)
             assertThat(restMinimalFagsak.underBehandling).isFalse()
             assertThat(restMinimalFagsak.migreringsdato).isNull()
             assertThat(restMinimalFagsak.fagsakType).isEqualTo(FagsakType.NORMAL)
@@ -225,13 +202,10 @@ class FagsakServiceTest {
             every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivForFagsak(fagsak.id) } returns null
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteBehandlingSomErVedtatt
-            every { vedtaksperiodeService.hentUtbetalingsperioder(sisteBehandlingSomErVedtatt) } returns emptyList()
             every { behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsak.id) } returns listOf(visningsbehandling)
             every { behandlingService.hentMigreringsdatoPåFagsak(fagsak.id) } returns null
             every { fagsakLåsingService.finnAktivLåsForFagsak(fagsak.id) } returns fagsakLåsing
             every { strengtFortroligService.harFagsakPersonMedStrengtFortroligAdressebeskyttelse(fagsak) } returns false
-            every { strengtFortroligService.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
-            every { strengtFortroligService.hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak) } returns emptySet()
 
             // Act
             val restMinimalFagsak = fagsakService.lagMinimalFagsakDto(fagsak.id)
