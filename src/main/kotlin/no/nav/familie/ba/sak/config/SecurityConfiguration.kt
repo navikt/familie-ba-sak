@@ -45,7 +45,6 @@ class SecurityConfiguration(
             securityMatcher(
                 "/internal",
                 "/internal/health/**",
-                "/internal/info",
                 "/internal/metrics/**",
                 "/internal/prometheus",
                 "/redirect/**",
