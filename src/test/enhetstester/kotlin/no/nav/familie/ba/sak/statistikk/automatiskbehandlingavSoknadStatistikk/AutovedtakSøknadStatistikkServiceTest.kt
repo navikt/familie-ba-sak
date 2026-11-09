@@ -45,6 +45,8 @@ class AutovedtakSøknadStatistikkServiceTest {
                 AutovedtakSøknadFeilårsak.SØKER_HAR_LØPENDE_BARNETRYGD,
                 AutovedtakSøknadFeilårsak.SØKNAD_MANGLER_VEDLEGG,
                 AutovedtakSøknadFeilårsak.SØKER_HAR_HATT_BARNETRYGD_TIDLIGERE,
+                AutovedtakSøknadFeilårsak.SØKNAD_HAR_TEMA_EØS,
+                AutovedtakSøknadFeilårsak.SØKER_ELLER_BARN_HAR_KODE_6_ELLER_19,
             )
 
         // Act
@@ -52,7 +54,7 @@ class AutovedtakSøknadStatistikkServiceTest {
 
         // Assert
         verify(exactly = 1) { repository.saveAll(any<Iterable<AutomatiskBehandlingAvSøknadStatistikk>>()) }
-        assertThat(lagrede.captured.map { it.journalpostId }).containsExactly(123L, 123L, 123L)
+        assertThat(lagrede.captured.map { it.journalpostId }).containsExactlyElementsOf(årsaker.map { 123L })
         assertThat(lagrede.captured.map { it.behandlingId }).containsOnlyNulls()
         assertThat(lagrede.captured.map { it.årsakTilManuellBehandling }).containsExactlyElementsOf(årsaker.map { it.name })
     }
