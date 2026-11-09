@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.søknad.Søknad
-import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -38,19 +37,17 @@ import java.time.LocalDate
 
 @Service
 class PreutfyllBosattIRiketService(
-    private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
     private val featureToggleService: FeatureToggleService,
 ) {
     fun preutfyllBosattIRiket(
         vilkårsvurdering: Vilkårsvurdering,
         aktørerVilkårSkalPreutfyllesFor: List<Aktør>,
+        digitalSøknad: Søknad?,
     ) {
         val behandling = vilkårsvurdering.behandling
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
-
-        val digitalSøknad = søknadService.finnDigitalSøknad(behandling.id)
 
         vilkårsvurdering.personResultater
             .filter { it.aktør in aktørerVilkårSkalPreutfyllesFor }

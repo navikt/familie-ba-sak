@@ -257,5 +257,6 @@ class SøknadTest {
             oppholderSegIInstitusjon = oppholderSegIInstitusjon,
             erAsylsøker = erAsylsøker,
             erAdoptertFraUtland = erAdoptertFraUtland,
+            borFastMedSøker = true,
         )
 }

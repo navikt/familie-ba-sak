@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER
 import java.time.LocalDate
 
 object VilkårsvurderingUtils {
@@ -279,9 +280,14 @@ object VilkårsvurderingUtils {
                 personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
 
             val vilkårSomSkalKopieresOver =
-                vilkårSomFinnes.filtrerVilkårÅKopiere(
-                    kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
-                )
+                if (kopieringSkjerFraForrigeBehandling && vilkårFraInit.begrunnelseForManuellKontroll == SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER) {
+                    // Søker har oppgitt i søknaden at barnet ikke bor fast med søker, så vilkåret skal vurderes på nytt i stedet for å kopieres fra forrige behandling
+                    emptyList()
+                } else {
+                    vilkårSomFinnes.filtrerVilkårÅKopiere(
+                        kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
+                    )
+                }
             val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver
             personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt)
 

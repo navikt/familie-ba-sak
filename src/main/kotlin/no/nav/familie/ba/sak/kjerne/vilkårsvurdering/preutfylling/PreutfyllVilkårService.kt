@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.springframework.stereotype.Service
 
@@ -21,6 +22,7 @@ class PreutfyllVilkårService(
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
     private val preutfyllBosattIRiketForFødselshendelserService: PreutfyllBosattIRiketForFødselshendelserService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val søknadService: SøknadService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -49,10 +51,11 @@ class PreutfyllVilkårService(
             }.ifEmpty { return }
 
         persongrunnlagService.oppdaterRegisteropplysninger(behandling.id)
+        val digitalSøknad = søknadService.finnDigitalSøknad(behandling.id)
 
         preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor)
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor)
-        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor, digitalSøknad)
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, aktørerVilkårSkalPreutfyllesFor, digitalSøknad)
     }
 
     private fun finnNyeAktørerIBehandling(behandling: Behandling): List<Aktør> {
@@ -96,5 +99,6 @@ class PreutfyllVilkårService(
 
     companion object {
         const val PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT = "Fylt ut automatisk fra registerdata i PDL\n"
+        const val IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT = "Ikke fylt ut automatisk\n"
     }
 }

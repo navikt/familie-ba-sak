@@ -34,6 +34,7 @@ data class Barn(
     val oppholderSegIInstitusjon: Boolean,
     val erAsylsøker: Boolean,
     val erAdoptertFraUtland: Boolean,
+    val borFastMedSøker: Boolean,
 )
 
 data class Søker(

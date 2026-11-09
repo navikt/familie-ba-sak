@@ -19,6 +19,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -601,6 +603,49 @@ class OppdaterVilkårsvurderingTest {
         Assertions.assertTrue(nyInitInnholderOpplysningspliktVilkår)
         Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
     }
+
+    @Test
+    fun `skal ikke kopiere bor med søker fra forrige behandling når søker har oppgitt at barnet ikke bor fast med søker`() {
+        // Arrange
+        val barn = lagPerson(type = PersonType.BARN)
+
+        val initiellVilkårsvurdering = lagBasicVilkårsvurdering(behandling = lagBehandling(), personer = listOf(barn))
+        initiellVilkårsvurdering.borMedSøker(barn).begrunnelseForManuellKontroll = SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER
+
+        val forrigeVilkårsvurdering = lagBasicVilkårsvurdering(behandling = lagBehandling(), personer = listOf(barn))
+        forrigeVilkårsvurdering.borMedSøker(barn).resultat = Resultat.OPPFYLT
+
+        // Act
+        val (nyInit) = flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårsvurdering, aktivVilkårsvurdering = forrigeVilkårsvurdering)
+
+        // Assert
+        assertThat(nyInit.borMedSøker(barn).resultat).isEqualTo(Resultat.IKKE_VURDERT)
+    }
+
+    @Test
+    fun `skal beholde bor med søker vurdert i inneværende behandling selv om søker har oppgitt at barnet ikke bor fast med søker`() {
+        // Arrange
+        val barn = lagPerson(type = PersonType.BARN)
+        val behandling = lagBehandling()
+
+        val initiellVilkårsvurdering = lagBasicVilkårsvurdering(behandling = behandling, personer = listOf(barn))
+        initiellVilkårsvurdering.borMedSøker(barn).begrunnelseForManuellKontroll = SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER
+
+        val aktivVilkårsvurdering = lagBasicVilkårsvurdering(behandling = behandling, personer = listOf(barn))
+        aktivVilkårsvurdering.borMedSøker(barn).resultat = Resultat.OPPFYLT
+
+        // Act
+        val (nyInit) = flyttResultaterTilInitielt(initiellVilkårsvurdering = initiellVilkårsvurdering, aktivVilkårsvurdering = aktivVilkårsvurdering)
+
+        // Assert
+        assertThat(nyInit.borMedSøker(barn).resultat).isEqualTo(Resultat.OPPFYLT)
+    }
+
+    private fun Vilkårsvurdering.borMedSøker(barn: Person): VilkårResultat =
+        personResultater
+            .single { it.aktør == barn.aktør }
+            .vilkårResultater
+            .single { it.vilkårType == Vilkår.BOR_MED_SØKER }
 
     fun lagVilkårsvurderingMedForskjelligeTyperVilkår(
         søkerAktør: Aktør,
