@@ -33,7 +33,6 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
                 "/internal/health",
                 "/internal/health/liveness",
                 "/internal/health/readyness",
-                "/internal/info",
                 "/internal/metrics",
             ],
         )
@@ -50,6 +49,21 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
             // Assert
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        }
+
+        @Test
+        fun `skal ikke eksponere info-endepunktet`() {
+            // Act & Assert
+            val feil =
+                assertThrows<HttpStatusCodeException> {
+                    restClient
+                        .get()
+                        .uri(hentUrl("/internal/info"))
+                        .retrieve()
+                        .toEntity(String::class.java)
+                }
+
+            assertThat(feil.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
         }
 
         @Test
