@@ -52,21 +52,6 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
         }
 
         @Test
-        fun `skal ikke eksponere info-endepunktet`() {
-            // Act & Assert
-            val feil =
-                assertThrows<HttpStatusCodeException> {
-                    restClient
-                        .get()
-                        .uri(hentUrl("/internal/info"))
-                        .retrieve()
-                        .toEntity(String::class.java)
-                }
-
-            assertThat(feil.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
-        }
-
-        @Test
         fun `prometheus er tilgjengelig uten token`() {
             // Act
             val response =
@@ -84,14 +69,17 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
 
     @Nested
     inner class UtenToken {
-        @Test
-        fun `øvrige internal-endepunkter uten token returnerer 401`() {
+        @ParameterizedTest
+        @ValueSource(strings = ["/internal/autobrev", "/internal/info", "/internal/mappings", "/internal/healthcheck", "/internal/prometheus/other"])
+        fun `øvrige internal-endepunkter uten token returnerer 401`(
+            path: String,
+        ) {
             // Act & Assert
             val feil =
                 assertThrows<HttpStatusCodeException> {
                     restClient
                         .get()
-                        .uri(hentUrl("/internal/autobrev"))
+                        .uri(hentUrl(path))
                         .retrieve()
                         .toEntity(String::class.java)
                 }
