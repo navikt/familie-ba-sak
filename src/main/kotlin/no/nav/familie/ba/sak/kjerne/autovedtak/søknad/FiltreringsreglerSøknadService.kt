@@ -8,9 +8,11 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.Filtreri
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.FiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.filtreringsregler.domene.slåSammenIkkeOppfylteBegrunnelser
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerFødselshendelseService.Companion.logger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.steg.FiltrerAutomatiskBehandlingData
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -41,4 +43,8 @@ class FiltreringsreglerSøknadService(
     }
 
     fun hentBegrunnelseForStoppIFiltreringsreglene(behandlingId: Long): String = filtreringResultatRepository.finnFiltreringResultater(behandlingId).slåSammenIkkeOppfylteBegrunnelser(behandlingId)
+
+    companion object {
+        val logger = LoggerFactory.getLogger(FiltreringsreglerSøknadService::class.java)
+    }
 }
