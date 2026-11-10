@@ -78,9 +78,11 @@ management:
       show-details: always
       group:
         readyness:
-          include: db
+          include:
+            - db
         liveness:
-          include: db
+          include:
+            - db
   info:
     defaults:
       enabled: false
