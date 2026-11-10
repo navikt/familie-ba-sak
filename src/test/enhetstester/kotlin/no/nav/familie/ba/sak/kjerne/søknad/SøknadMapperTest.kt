@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erAsylsøker
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erFosterbarn
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erIBeredskapshjem
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harKryssetForDeltBosted
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harOppholdtSegUtenforNorgeSiste12Mnd
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.inneholderVedlegg
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.oppholderSegIInstitusjon
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.tilBehandlingUnderkategori
@@ -234,6 +235,36 @@ class SøknadMapperTest {
 
             // Act & Assert
             assertThat(spørsmål.borFastMedSøker()).isFalse()
+        }
+    }
+
+    @Nested
+    inner class HarOppholdtSegUtenforNorgeSiste12Mnd {
+        @Test
+        fun `skal gi true når søker har oppgitt at barnet har oppholdt seg utenfor Norge de siste 12 månedene`() {
+            // Arrange
+            val spørsmål = mapOf<String, Søknadsfelt<Any>>("boddMindreEnn12MndINorge" to lagStringSøknadsfelt("JA"))
+
+            // Act & Assert
+            assertThat(spørsmål.harOppholdtSegUtenforNorgeSiste12Mnd()).isTrue()
+        }
+
+        @Test
+        fun `skal gi false når søker har oppgitt at barnet ikke har oppholdt seg utenfor Norge de siste 12 månedene`() {
+            // Arrange
+            val spørsmål = mapOf<String, Søknadsfelt<Any>>("boddMindreEnn12MndINorge" to lagStringSøknadsfelt("NEI"))
+
+            // Act & Assert
+            assertThat(spørsmål.harOppholdtSegUtenforNorgeSiste12Mnd()).isFalse()
+        }
+
+        @Test
+        fun `skal gi false når søknaden ikke inneholder spørsmålet om barnet har oppholdt seg utenfor Norge`() {
+            // Arrange
+            val spørsmål = emptyMap<String, Søknadsfelt<Any>>()
+
+            // Act & Assert
+            assertThat(spørsmål.harOppholdtSegUtenforNorgeSiste12Mnd()).isFalse()
         }
     }
 

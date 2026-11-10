@@ -111,9 +111,57 @@ class AutomatiskBehandlingAvSøknadHenleggelseTest(
         assertThat(behandleSakOppgave.beskrivelse).isEqualTo("Vilkårsvurderingen er ikke oppfylt.\nBehandling av søknad må håndteres manuelt.")
     }
 
+    @Test
+    fun `skal sende søknaden til manuell behandling når søker har svart nei på sammenhengende opphold i Norge de siste 12 månedene`() {
+        // Arrange
+        val nyBehandling = opprettFagsakMedSøknad(søknadInneholderVedlegg = false, søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = false)
+
+        // Act
+        val behandlinger = behandleAutomatiskSøknad(nyBehandling)
+
+        // Assert
+        val automatiskBehandling = behandlinger.single { it.skalBehandlesAutomatisk }
+        assertThat(automatiskBehandling.resultat).isEqualTo(Behandlingsresultat.HENLAGT_AUTOMATISK_SØKNAD)
+        assertThat(
+            automatiskBehandlingAvSøknadStatistikkRepository
+                .findAll()
+                .filter { it.behandlingId == automatiskBehandling.id }
+                .map { it.årsakTilManuellBehandling },
+        ).containsExactly("SØKER_VILKÅR_BOSATT_I_RIKET")
+
+        val behandleSakOppgave = hentBehandleSakOppgaver(behandlinger).single()
+        assertThat(behandleSakOppgave.behandlingId).isEqualTo(behandlinger.single { !it.skalBehandlesAutomatisk }.id)
+        assertThat(behandleSakOppgave.beskrivelse).isEqualTo("Vilkårsvurderingen er ikke oppfylt.\nBehandling av søknad må håndteres manuelt.")
+    }
+
+    @Test
+    fun `skal sende søknaden til manuell behandling når søker har svart at barnet har oppholdt seg utenfor Norge de siste 12 månedene`() {
+        // Arrange
+        val nyBehandling = opprettFagsakMedSøknad(søknadInneholderVedlegg = false, barnHarOppholdtSegUtenforNorgeSiste12Mnd = true)
+
+        // Act
+        val behandlinger = behandleAutomatiskSøknad(nyBehandling)
+
+        // Assert
+        val automatiskBehandling = behandlinger.single { it.skalBehandlesAutomatisk }
+        assertThat(automatiskBehandling.resultat).isEqualTo(Behandlingsresultat.HENLAGT_AUTOMATISK_SØKNAD)
+        assertThat(
+            automatiskBehandlingAvSøknadStatistikkRepository
+                .findAll()
+                .filter { it.behandlingId == automatiskBehandling.id }
+                .map { it.årsakTilManuellBehandling },
+        ).containsExactly("BARN_VILKÅR_BOSATT_I_RIKET")
+
+        val behandleSakOppgave = hentBehandleSakOppgaver(behandlinger).single()
+        assertThat(behandleSakOppgave.behandlingId).isEqualTo(behandlinger.single { !it.skalBehandlesAutomatisk }.id)
+        assertThat(behandleSakOppgave.beskrivelse).isEqualTo("Vilkårsvurderingen er ikke oppfylt.\nBehandling av søknad må håndteres manuelt.")
+    }
+
     private fun opprettFagsakMedSøknad(
         søknadInneholderVedlegg: Boolean,
         borFastMedSøker: Boolean = true,
+        søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd: Boolean = true,
+        barnHarOppholdtSegUtenforNorgeSiste12Mnd: Boolean = false,
     ): NyBehandling {
         val scenario =
             ScenarioDto(
@@ -135,7 +183,14 @@ class AutomatiskBehandlingAvSøknadHenleggelseTest(
             journalpostId = journalpostId,
             versjonertBarnetrygdSøknad =
                 VersjonertBarnetrygdSøknadV9(
-                    lagBarnetrygdSøknadV9(søkerFnr = scenario.søker.ident, barnFnr = barnasIdenter, inneholderVedlegg = søknadInneholderVedlegg, borFastMedSøker = borFastMedSøker),
+                    lagBarnetrygdSøknadV9(
+                        søkerFnr = scenario.søker.ident,
+                        barnFnr = barnasIdenter,
+                        inneholderVedlegg = søknadInneholderVedlegg,
+                        borFastMedSøker = borFastMedSøker,
+                        søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd,
+                        barnHarOppholdtSegUtenforNorgeSiste12Mnd = barnHarOppholdtSegUtenforNorgeSiste12Mnd,
+                    ),
                 ),
         )
 

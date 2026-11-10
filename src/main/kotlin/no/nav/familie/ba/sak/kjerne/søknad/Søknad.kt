@@ -35,10 +35,13 @@ data class Barn(
     val erAsylsøker: Boolean,
     val erAdoptertFraUtland: Boolean,
     val borFastMedSøker: Boolean,
+    val harOppholdtSegUtenforNorgeSiste12Mnd: Boolean,
 )
 
 data class Søker(
     val fnr: String,
     val planleggerÅBoINorge12Mnd: Boolean,
     val erAsylsøker: Boolean,
+    // Utledes fra søkers utenlandsperioder. ba-soknad sender ikke svaret, men sender bare utenlandsperioder når søker har svart nei.
+    val harOppholdtSegSammenhengendeINorgeSiste12Mnd: Boolean,
 )
