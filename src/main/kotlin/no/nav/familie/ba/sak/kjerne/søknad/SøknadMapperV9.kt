@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erAsylsøker
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erFosterbarn
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erIBeredskapshjem
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harKryssetForDeltBosted
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harOppholdtSegSammenhengendeINorgeSiste12Mnd
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harOppholdtSegUtenforNorgeSiste12Mnd
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.inneholderVedlegg
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.oppholderSegIInstitusjon
@@ -40,8 +41,8 @@ class SøknadMapperV9 : SøknadMapper {
                         versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.spørsmål
                             .erAsylsøker(),
                     harOppholdtSegSammenhengendeINorgeSiste12Mnd =
-                        versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.utenlandsperioder
-                            .isEmpty(),
+                        versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.spørsmål
+                            .harOppholdtSegSammenhengendeINorgeSiste12Mnd(),
                 ),
             barn =
                 versjonertBarnetrygdSøknad.barnetrygdSøknad.barn

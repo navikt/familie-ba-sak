@@ -42,6 +42,5 @@ data class Søker(
     val fnr: String,
     val planleggerÅBoINorge12Mnd: Boolean,
     val erAsylsøker: Boolean,
-    // Utledes fra søkers utenlandsperioder. ba-soknad sender ikke svaret, men sender bare utenlandsperioder når søker har svart nei.
     val harOppholdtSegSammenhengendeINorgeSiste12Mnd: Boolean,
 )

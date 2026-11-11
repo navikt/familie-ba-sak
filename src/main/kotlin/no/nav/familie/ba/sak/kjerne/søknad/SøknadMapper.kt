@@ -47,6 +47,9 @@ interface SøknadMapper {
 
         fun Map<String, Søknadsfelt<Any>>.harOppholdtSegUtenforNorgeSiste12Mnd(): Boolean = this.hentVerdiForSøknadsfelt(SøknadsFeltId.BODD_MINDRE_ENN_12_MND_I_NORGE).tilBoolskSvar()
 
+        // Søknader uten svaret regnes som ja
+        fun Map<String, Søknadsfelt<Any>>.harOppholdtSegSammenhengendeINorgeSiste12Mnd(): Boolean = this.hentVerdiForSøknadsfelt(SøknadsFeltId.VÆRT_I_NORGE_I_TOLV_MÅNEDER)?.tilBoolskSvar() ?: true
+
         fun AndreForelder?.harKryssetForDeltBosted(): Boolean = this?.skriftligAvtaleOmDeltBosted?.bokmålsverdi().tilBoolskSvar()
 
         fun List<BaSøknaddokumentasjon>.inneholderVedlegg(): Boolean = this.any { it.opplastedeVedlegg.isNotEmpty() }

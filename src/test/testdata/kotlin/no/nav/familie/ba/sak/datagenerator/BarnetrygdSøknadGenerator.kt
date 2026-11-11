@@ -137,7 +137,7 @@ fun lagSøkerV10(
         pensjonsperioderNorge = emptyList(),
         andreUtbetalingsperioder = emptyList(),
         idNummer = emptyList(),
-        spørsmål = lagSøkerSpørsmål(erAsylsøker = erAsylsøker),
+        spørsmål = lagSøkerSpørsmål(erAsylsøker = erAsylsøker, harOppholdtSegSammenhengendeINorgeSiste12Mnd = harOppholdtSegSammenhengendeINorgeSiste12Mnd),
         nåværendeSamboer = null,
         tidligereSamboere = emptyList(),
     )
@@ -206,7 +206,7 @@ fun lagSøkerV8(
         pensjonsperioderNorge = emptyList(),
         andreUtbetalingsperioder = emptyList(),
         idNummer = emptyList(),
-        spørsmål = lagSøkerSpørsmål(erAsylsøker = erAsylsøker),
+        spørsmål = lagSøkerSpørsmål(erAsylsøker = erAsylsøker, harOppholdtSegSammenhengendeINorgeSiste12Mnd = harOppholdtSegSammenhengendeINorgeSiste12Mnd),
         nåværendeSamboer = null,
         tidligereSamboere = emptyList(),
     )
@@ -261,9 +261,13 @@ private fun <T> lagV4StringSøknadsfelt(verdi: T): V4Søknadsfelt<T> =
         verdi = mapOf("nb" to verdi),
     )
 
-private fun lagSøkerSpørsmål(erAsylsøker: Boolean): Map<String, Søknadsfelt<Any>> =
+private fun lagSøkerSpørsmål(
+    erAsylsøker: Boolean,
+    harOppholdtSegSammenhengendeINorgeSiste12Mnd: Boolean,
+): Map<String, Søknadsfelt<Any>> =
     mapOf(
         "erAsylsøker" to lagStringSøknadsfelt<Any>(erAsylsøker.tilSøknadssvar()),
+        "værtINorgeITolvMåneder" to lagStringSøknadsfelt<Any>(harOppholdtSegSammenhengendeINorgeSiste12Mnd.tilSøknadssvar()),
     )
 
 private fun lagBarnSpørsmål(

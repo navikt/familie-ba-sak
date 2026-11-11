@@ -206,7 +206,7 @@ class SøknadServiceTest {
         }
 
         @Test
-        fun `skal mappe at søker har oppholdt seg sammenhengende i Norge når VersjonertBarnetrygdSøknadV10 ikke har utenlandsperioder for søker`() {
+        fun `skal mappe at søker har oppholdt seg sammenhengende i Norge når søker har svart ja på spørsmålet i VersjonertBarnetrygdSøknadV10`() {
             // Arrange
             val behandling = lagBehandling()
             val journalpostId = "123456789"
