@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRegisterhistorikkDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -32,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
@@ -56,6 +58,7 @@ class PersongrunnlagServiceTest {
     private val kodeverkService = mockk<KodeverkService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val statsborgerskapService = mockk<StatsborgerskapService>()
+    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>(relaxed = true)
 
     private val persongrunnlagService =
         spyk(
@@ -63,7 +66,7 @@ class PersongrunnlagServiceTest {
                 personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
                 personopplysningGrunnlagLagreService = personopplysningGrunnlagLagreService,
                 statsborgerskapService = statsborgerskapService,
-                arbeidsfordelingService = mockk(relaxed = true),
+                arbeidsfordelingService = arbeidsfordelingService,
                 personopplysningerService = personopplysningerService,
                 personidentService = personidentService,
                 saksstatistikkEventPublisher = mockk(relaxed = true),
@@ -718,7 +721,7 @@ class PersongrunnlagServiceTest {
         }
 
         @Test
-        fun `skal oppdatere endretTidspunkt på aktivt grunnlag når det ikke er relevante endringer`() {
+        fun `skal oppdatere hentetidspunkt og fastsette enhet når bare adressebeskyttelsen er endret`() {
             // Arrange
             val søker = lagPerson(type = PersonType.SØKER)
             val barn = lagPerson(type = PersonType.BARN)
@@ -737,7 +740,12 @@ class PersongrunnlagServiceTest {
 
             every { personopplysningerService.hentPersoninfoEnkel(barn.aktør) } returns PersonInfo(barn.fødselsdato)
             every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør, any()) } returns
-                PersonInfo(søker.fødselsdato, søker.navn, søker.kjønn)
+                PersonInfo(
+                    fødselsdato = søker.fødselsdato,
+                    navn = søker.navn,
+                    kjønn = søker.kjønn,
+                    adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
+                )
             every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn.aktør, any()) } returns
                 PersonInfo(barn.fødselsdato, barn.navn, barn.kjønn)
 
@@ -754,6 +762,7 @@ class PersongrunnlagServiceTest {
             assertThat(oppdatertPersonopplysningGrunnlag).isSameAs(aktivtGrunnlag)
             assertThat(oppdatertPersonopplysningGrunnlag.endretTidspunkt).isAfter(opprinneligEndretTidspunkt)
             verify(exactly = 0) { personopplysningGrunnlagLagreService.lagreOgSlettGammelt(any()) }
+            verify(exactly = 1) { arbeidsfordelingService.fastsettBehandlendeEnhet(behandling = behandling) }
         }
 
         @Test

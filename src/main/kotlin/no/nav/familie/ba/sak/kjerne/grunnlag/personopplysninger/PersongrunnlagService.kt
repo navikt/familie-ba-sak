@@ -363,6 +363,9 @@ class PersongrunnlagService(
                 saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
             }
         } else {
+            // Adressebeskyttelse kan være endret selv om personopplysningsgrunnlaget er uendret.
+            arbeidsfordelingService.fastsettBehandlendeEnhet(behandling = behandling)
+
             // Siden vi ikke har gjort noen endringer i det aktive personopplysningsgrunnlaget, trenger vi ikke å lagre det på nytt.
             // Vi oppdaterer likevel endretTidspunkt for å reflektere at det er sjekket for oppdateringer i registeret.
             aktivtPersonopplysningGrunnlag.apply {
