@@ -238,8 +238,8 @@ class PersongrunnlagService(
         } ?: emptyList()
 
     /**
-     * Henter oppdatert registerdata og lagrer i nytt aktivt personopplysningsgrunnlag
-     * Lagrer kun dersom det er relevante endringer fra det aktive personopplysningsgrunnlaget.
+     * Henter oppdatert registerdata og fastsetter behandlende enhet.
+     * Lagrer nytt aktivt personopplysningsgrunnlag kun dersom det er relevante endringer fra det aktive personopplysningsgrunnlaget.
      */
     @Transactional
     fun hentOgLagreSøkerOgBarnINyttGrunnlag(
@@ -353,17 +353,14 @@ class PersongrunnlagService(
 
         return if (aktivtPersonopplysningGrunnlag == null || nyttPersonopplysningGrunnlag.harRelevantEndring(aktivtPersonopplysningGrunnlag)) {
             lagreOgSlettGammelt(nyttPersonopplysningGrunnlag).also {
-                /*
-                 * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
-                 * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
-                 */
+                // Det kan ha blitt introdusert personer med fortrolig adresse.
                 arbeidsfordelingService.fastsettBehandlendeEnhet(
                     behandling = behandling,
                 )
                 saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
             }
         } else {
-            // Adressebeskyttelse kan være endret selv om personopplysningsgrunnlaget er uendret.
+            // Adressebeskyttelse lagres ikke i personopplysningsgrunnlaget, så den kan være endret selv om grunnlaget er uendret.
             arbeidsfordelingService.fastsettBehandlendeEnhet(behandling = behandling)
 
             // Siden vi ikke har gjort noen endringer i det aktive personopplysningsgrunnlaget, trenger vi ikke å lagre det på nytt.

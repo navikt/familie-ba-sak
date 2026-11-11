@@ -28,6 +28,7 @@ class PersonTest {
 
         @Test
         fun `skal returnere true når alle felter er identiske`() {
+            // Act & Assert
             assertThat(person.personopplysningerErLike(personMedNyId())).isTrue()
         }
 

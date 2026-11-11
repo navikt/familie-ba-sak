@@ -16,7 +16,7 @@ class PersonopplysningGrunnlagTest {
         fun `skal returnere false når det ikke er noen endringer`() {
             // Arrange
             val personopplysningGrunnlag = lagPersonopplysningGrunnlag(id = 0) { setOf(søkerPerson) }
-            val nyttPersonopplysningGrunnlag = personopplysningGrunnlag.copy(id = 1, personer = mutableSetOf(søkerPerson))
+            val nyttPersonopplysningGrunnlag = lagPersonopplysningGrunnlag(id = 1) { setOf(søkerPerson) }
 
             // Act & Assert
             assertThat(personopplysningGrunnlag.harRelevantEndring(nyttPersonopplysningGrunnlag)).isFalse()
@@ -26,7 +26,7 @@ class PersonopplysningGrunnlagTest {
         fun `skal returnere true når en person i personopplysninggrunnlaget er endret`() {
             // Arrange
             val personopplysningGrunnlag = lagPersonopplysningGrunnlag(id = 0) { setOf(søkerPerson) }
-            val nyttPersonopplysningGrunnlag = personopplysningGrunnlag.copy(id = 1, personer = mutableSetOf(søkerPerson.copy(navn = "Endret Navn")))
+            val nyttPersonopplysningGrunnlag = lagPersonopplysningGrunnlag(id = 1) { setOf(søkerPerson.copy(navn = "Endret Navn")) }
 
             // Act & Assert
             assertThat(personopplysningGrunnlag.harRelevantEndring(nyttPersonopplysningGrunnlag)).isTrue()
@@ -36,7 +36,7 @@ class PersonopplysningGrunnlagTest {
         fun `skal returnere true når en person er lagt til i personopplysninggrunnlaget`() {
             // Arrange
             val personopplysningGrunnlag = lagPersonopplysningGrunnlag(id = 0) { setOf(søkerPerson) }
-            val nyttPersonopplysningGrunnlag = personopplysningGrunnlag.copy(id = 1, personer = mutableSetOf(søkerPerson, barnPerson))
+            val nyttPersonopplysningGrunnlag = lagPersonopplysningGrunnlag(id = 1) { setOf(søkerPerson, barnPerson) }
 
             // Act & Assert
             assertThat(personopplysningGrunnlag.harRelevantEndring(nyttPersonopplysningGrunnlag)).isTrue()
@@ -46,7 +46,7 @@ class PersonopplysningGrunnlagTest {
         fun `skal returnere true når en person er fjernet fra personopplysninggrunnlaget`() {
             // Arrange
             val personopplysningGrunnlag = lagPersonopplysningGrunnlag(id = 0) { setOf(søkerPerson, barnPerson) }
-            val nyttPersonopplysningGrunnlag = personopplysningGrunnlag.copy(id = 1, personer = mutableSetOf(søkerPerson))
+            val nyttPersonopplysningGrunnlag = lagPersonopplysningGrunnlag(id = 1) { setOf(søkerPerson) }
 
             // Act & Assert
             assertThat(personopplysningGrunnlag.harRelevantEndring(nyttPersonopplysningGrunnlag)).isTrue()

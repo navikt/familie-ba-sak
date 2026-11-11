@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -59,6 +60,7 @@ class PersongrunnlagServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val statsborgerskapService = mockk<StatsborgerskapService>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>(relaxed = true)
+    private val saksstatistikkEventPublisher = mockk<SaksstatistikkEventPublisher>(relaxed = true)
 
     private val persongrunnlagService =
         spyk(
@@ -69,7 +71,7 @@ class PersongrunnlagServiceTest {
                 arbeidsfordelingService = arbeidsfordelingService,
                 personopplysningerService = personopplysningerService,
                 personidentService = personidentService,
-                saksstatistikkEventPublisher = mockk(relaxed = true),
+                saksstatistikkEventPublisher = saksstatistikkEventPublisher,
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
                 loggService = loggService,
@@ -721,7 +723,7 @@ class PersongrunnlagServiceTest {
         }
 
         @Test
-        fun `skal oppdatere hentetidspunkt og fastsette enhet når bare adressebeskyttelsen er endret`() {
+        fun `skal oppdatere endretTidspunkt og fastsette enhet uten å lagre når bare adressebeskyttelsen er endret`() {
             // Arrange
             val søker = lagPerson(type = PersonType.SØKER)
             val barn = lagPerson(type = PersonType.BARN)
@@ -762,6 +764,7 @@ class PersongrunnlagServiceTest {
             assertThat(oppdatertPersonopplysningGrunnlag).isSameAs(aktivtGrunnlag)
             assertThat(oppdatertPersonopplysningGrunnlag.endretTidspunkt).isAfter(opprinneligEndretTidspunkt)
             verify(exactly = 0) { personopplysningGrunnlagLagreService.lagreOgSlettGammelt(any()) }
+            verify(exactly = 0) { saksstatistikkEventPublisher.publiserSaksstatistikk(any()) }
             verify(exactly = 1) { arbeidsfordelingService.fastsettBehandlendeEnhet(behandling = behandling) }
         }
 

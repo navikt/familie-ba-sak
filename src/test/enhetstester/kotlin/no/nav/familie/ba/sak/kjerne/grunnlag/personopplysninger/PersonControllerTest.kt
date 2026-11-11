@@ -7,6 +7,7 @@ import io.mockk.verify
 import io.mockk.verifyOrder
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.ManuellDødsfallDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
@@ -148,8 +149,8 @@ class PersonControllerTest {
             val behandling = lagBehandling()
 
             justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
-            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns PersonopplysningGrunnlag(id = 1, behandlingId = behandling.id)
-            every { persongrunnlagService.oppdaterRegisteropplysninger(behandling.id) } returns PersonopplysningGrunnlag(id = 2, behandlingId = behandling.id)
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns lagPersonopplysningGrunnlag(id = 1, behandlingId = behandling.id)
+            every { persongrunnlagService.oppdaterRegisteropplysninger(behandling.id) } returns lagPersonopplysningGrunnlag(id = 2, behandlingId = behandling.id)
             every { tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id) } returns behandling
             every { utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id) } returns mockk()
 
@@ -167,7 +168,7 @@ class PersonControllerTest {
         fun `skal ikke tilbakestille behandlingen når registeropplysningene er uendret`() {
             // Arrange
             val behandling = lagBehandling()
-            val personopplysningGrunnlag = PersonopplysningGrunnlag(id = 1, behandlingId = behandling.id)
+            val personopplysningGrunnlag = lagPersonopplysningGrunnlag(id = 1, behandlingId = behandling.id)
 
             justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
             every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
