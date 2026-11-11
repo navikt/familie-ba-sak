@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.datagenerator
 import no.nav.familie.kontrakter.ba.søknad.v1.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.ba.søknad.v1.SøknadAdresse
 import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
-import no.nav.familie.kontrakter.ba.søknad.v4.Utenlandsopphold
 import no.nav.familie.kontrakter.ba.søknad.v5.RegistrertBostedType
 import no.nav.familie.kontrakter.ba.søknad.v7.Dokumentasjonsbehov
 import no.nav.familie.kontrakter.ba.søknad.v7.Søknaddokumentasjon
@@ -14,7 +13,6 @@ import no.nav.familie.kontrakter.felles.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ba.søknad.v10.Barn as BarnV10
 import no.nav.familie.kontrakter.ba.søknad.v10.BarnetrygdSøknad as BarnetrygdSøknadV10
 import no.nav.familie.kontrakter.ba.søknad.v10.Søker as SøkerV10
-import no.nav.familie.kontrakter.ba.søknad.v4.Søknadsfelt as V4Søknadsfelt
 import no.nav.familie.kontrakter.ba.søknad.v8.Barn as BarnV8
 import no.nav.familie.kontrakter.ba.søknad.v8.Søker as SøkerV8
 import no.nav.familie.kontrakter.ba.søknad.v9.BarnetrygdSøknad as BarnetrygdSøknadV9
@@ -130,7 +128,7 @@ fun lagSøkerV10(
             ),
         adressebeskyttelse = false,
         sivilstand = lagStringSøknadsfelt(SIVILSTANDTYPE.UOPPGITT),
-        utenlandsperioder = if (harOppholdtSegSammenhengendeINorgeSiste12Mnd) emptyList() else listOf(lagUtenlandsperiode()),
+        utenlandsperioder = emptyList(),
         arbeidsperioderUtland = emptyList(),
         pensjonsperioderUtland = emptyList(),
         arbeidsperioderNorge = emptyList(),
@@ -160,7 +158,7 @@ fun lagBarnV10(
         registrertBostedType = lagStringSøknadsfelt(RegistrertBostedType.REGISTRERT_SOKERS_ADRESSE),
         alder = null,
         andreForelder = if (harKryssetForDeltBosted) lagAndreForelder() else null,
-        utenlandsperioder = if (harOppholdtSegUtenforNorgeSiste12Mnd) listOf(lagUtenlandsperiode()) else emptyList(),
+        utenlandsperioder = emptyList(),
         omsorgsperson = null,
         idNummer = emptyList(),
         spørsmål =
@@ -199,7 +197,7 @@ fun lagSøkerV8(
             ),
         adressebeskyttelse = false,
         sivilstand = lagStringSøknadsfelt(SIVILSTANDTYPE.UOPPGITT),
-        utenlandsperioder = if (harOppholdtSegSammenhengendeINorgeSiste12Mnd) emptyList() else listOf(lagUtenlandsperiode()),
+        utenlandsperioder = emptyList(),
         arbeidsperioderUtland = emptyList(),
         pensjonsperioderUtland = emptyList(),
         arbeidsperioderNorge = emptyList(),
@@ -229,7 +227,7 @@ fun lagBarnV8(
         registrertBostedType = lagStringSøknadsfelt(RegistrertBostedType.REGISTRERT_SOKERS_ADRESSE),
         alder = null,
         andreForelder = if (harKryssetForDeltBosted) lagAndreForelder() else null,
-        utenlandsperioder = if (harOppholdtSegUtenforNorgeSiste12Mnd) listOf(lagUtenlandsperiode()) else emptyList(),
+        utenlandsperioder = emptyList(),
         omsorgsperson = null,
         idNummer = emptyList(),
         spørsmål =
@@ -243,22 +241,6 @@ fun lagBarnV8(
                 harOppholdtSegUtenforNorgeSiste12Mnd = harOppholdtSegUtenforNorgeSiste12Mnd,
             ),
         eøsBarnetrygdsperioder = emptyList(),
-    )
-
-private fun lagUtenlandsperiode(): Søknadsfelt<Utenlandsopphold> =
-    lagStringSøknadsfelt(
-        Utenlandsopphold(
-            utenlandsoppholdÅrsak = lagV4StringSøknadsfelt("OPPHOLDT_SEG_I_UTLANDET"),
-            oppholdsland = lagV4StringSøknadsfelt("USA"),
-            oppholdslandFraDato = lagV4StringSøknadsfelt("2025-01-01"),
-            oppholdslandTilDato = lagV4StringSøknadsfelt("2025-06-01"),
-        ),
-    )
-
-private fun <T> lagV4StringSøknadsfelt(verdi: T): V4Søknadsfelt<T> =
-    V4Søknadsfelt(
-        label = mapOf("nb" to ""),
-        verdi = mapOf("nb" to verdi),
     )
 
 private fun lagSøkerSpørsmål(

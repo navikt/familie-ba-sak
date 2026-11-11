@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.søknad
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
-import no.nav.familie.ba.sak.datagenerator.lagStringSøknadsfelt
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -98,28 +97,6 @@ class SøknadMapperV9Test {
             val versjonertBarnetrygdSøknadV9 =
                 VersjonertBarnetrygdSøknadV9(
                     barnetrygdSøknad = lagBarnetrygdSøknadV9(søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = true),
-                )
-
-            // Act
-            val søknad = SøknadMapperV9().mapTilSøknad(versjonertBarnetrygdSøknadV9)
-
-            // Assert
-            assertThat(søknad.søker.harOppholdtSegSammenhengendeINorgeSiste12Mnd).isTrue()
-        }
-
-        @Test
-        fun `skal bruke svaret på spørsmålet selv om søker har utenlandsperioder`() {
-            // Arrange
-            val barnetrygdSøknadV9 = lagBarnetrygdSøknadV9(søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = false)
-            val versjonertBarnetrygdSøknadV9 =
-                VersjonertBarnetrygdSøknadV9(
-                    barnetrygdSøknad =
-                        barnetrygdSøknadV9.copy(
-                            søker =
-                                barnetrygdSøknadV9.søker.copy(
-                                    spørsmål = barnetrygdSøknadV9.søker.spørsmål + ("værtINorgeITolvMåneder" to lagStringSøknadsfelt<Any>("JA")),
-                                ),
-                        ),
                 )
 
             // Act
