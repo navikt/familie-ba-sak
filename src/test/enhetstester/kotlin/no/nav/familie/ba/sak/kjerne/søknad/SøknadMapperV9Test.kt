@@ -41,6 +41,7 @@ class SøknadMapperV9Test {
                             barnErAsylsøker = true,
                             erAdoptertFraUtland = true,
                             borFastMedSøker = true,
+                            barnHarOppholdtSegUtenforNorgeSiste12Mnd = true,
                         ),
                 )
 
@@ -62,6 +63,7 @@ class SøknadMapperV9Test {
             assertThat(søknad.barn.map { it.erAsylsøker }).containsOnly(true)
             assertThat(søknad.barn.map { it.erAdoptertFraUtland }).containsOnly(true)
             assertThat(søknad.barn.map { it.borFastMedSøker }).containsOnly(true)
+            assertThat(søknad.barn.map { it.harOppholdtSegUtenforNorgeSiste12Mnd }).containsOnly(true)
             assertThat(søknad.søker.erAsylsøker).isTrue()
         }
 
@@ -87,6 +89,40 @@ class SøknadMapperV9Test {
             assertThat(søknad.søker.erAsylsøker).isTrue()
             assertThat(søknad.barn.map { it.erAsylsøker }).containsOnly(false)
             assertThat(søknad.barn.map { it.erAdoptertFraUtland }).containsOnly(false)
+        }
+
+        @Test
+        fun `skal mappe at søker har oppholdt seg sammenhengende i Norge når søker har svart ja på spørsmålet`() {
+            // Arrange
+            val versjonertBarnetrygdSøknadV9 =
+                VersjonertBarnetrygdSøknadV9(
+                    barnetrygdSøknad = lagBarnetrygdSøknadV9(søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = true),
+                )
+
+            // Act
+            val søknad = SøknadMapperV9().mapTilSøknad(versjonertBarnetrygdSøknadV9)
+
+            // Assert
+            assertThat(søknad.søker.harOppholdtSegSammenhengendeINorgeSiste12Mnd).isTrue()
+        }
+
+        @Test
+        fun `skal mappe at søker har oppholdt seg sammenhengende i Norge når svaret mangler i søknaden`() {
+            // Arrange
+            val barnetrygdSøknadV9 = lagBarnetrygdSøknadV9(søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = false)
+            val versjonertBarnetrygdSøknadV9 =
+                VersjonertBarnetrygdSøknadV9(
+                    barnetrygdSøknad =
+                        barnetrygdSøknadV9.copy(
+                            søker = barnetrygdSøknadV9.søker.copy(spørsmål = barnetrygdSøknadV9.søker.spørsmål - "værtINorgeITolvMåneder"),
+                        ),
+                )
+
+            // Act
+            val søknad = SøknadMapperV9().mapTilSøknad(versjonertBarnetrygdSøknadV9)
+
+            // Assert
+            assertThat(søknad.søker.harOppholdtSegSammenhengendeINorgeSiste12Mnd).isTrue()
         }
 
         @Test

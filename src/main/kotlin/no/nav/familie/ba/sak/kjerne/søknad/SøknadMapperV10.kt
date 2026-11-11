@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erAsylsøker
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erFosterbarn
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erIBeredskapshjem
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harKryssetForDeltBosted
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harOppholdtSegSammenhengendeINorgeSiste12Mnd
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harOppholdtSegUtenforNorgeSiste12Mnd
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.inneholderVedlegg
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.oppholderSegIInstitusjon
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.tilBehandlingUnderkategori
@@ -38,6 +40,9 @@ class SøknadMapperV10 : SøknadMapper {
                     erAsylsøker =
                         versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.spørsmål
                             .erAsylsøker(),
+                    harOppholdtSegSammenhengendeINorgeSiste12Mnd =
+                        versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.spørsmål
+                            .harOppholdtSegSammenhengendeINorgeSiste12Mnd(),
                 ),
             barn =
                 versjonertBarnetrygdSøknad.barnetrygdSøknad.barn
@@ -52,6 +57,7 @@ class SøknadMapperV10 : SøknadMapper {
                             erAsylsøker = it.spørsmål.erAsylsøker(),
                             erAdoptertFraUtland = it.spørsmål.erAdoptertFraUtland(),
                             borFastMedSøker = it.spørsmål.borFastMedSøker(),
+                            harOppholdtSegUtenforNorgeSiste12Mnd = it.spørsmål.harOppholdtSegUtenforNorgeSiste12Mnd(),
                         )
                     },
             behandlingUnderkategori = versjonertBarnetrygdSøknad.barnetrygdSøknad.søknadstype.tilBehandlingUnderkategori(),

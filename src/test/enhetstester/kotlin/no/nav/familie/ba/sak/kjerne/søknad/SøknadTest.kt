@@ -258,5 +258,6 @@ class SøknadTest {
             erAsylsøker = erAsylsøker,
             erAdoptertFraUtland = erAdoptertFraUtland,
             borFastMedSøker = true,
+            harOppholdtSegUtenforNorgeSiste12Mnd = false,
         )
 }

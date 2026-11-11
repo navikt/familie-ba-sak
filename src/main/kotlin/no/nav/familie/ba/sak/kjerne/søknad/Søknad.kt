@@ -35,10 +35,12 @@ data class Barn(
     val erAsylsøker: Boolean,
     val erAdoptertFraUtland: Boolean,
     val borFastMedSøker: Boolean,
+    val harOppholdtSegUtenforNorgeSiste12Mnd: Boolean,
 )
 
 data class Søker(
     val fnr: String,
     val planleggerÅBoINorge12Mnd: Boolean,
     val erAsylsøker: Boolean,
+    val harOppholdtSegSammenhengendeINorgeSiste12Mnd: Boolean,
 )

@@ -26,10 +26,19 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_BARNET_HAR_OPPHOLDT_SEG_UTENFOR_NORGE
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_SØKER_IKKE_HAR_OPPHOLDT_SEG_SAMMENHENGENDE_I_NORGE
 import java.time.LocalDate
 
 object VilkårsvurderingUtils {
+    private val BEGRUNNELSER_FOR_Å_VURDERE_VILKÅR_PÅ_NYTT =
+        setOf(
+            SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER,
+            SØKER_HAR_OPPGITT_AT_SØKER_IKKE_HAR_OPPHOLDT_SEG_SAMMENHENGENDE_I_NORGE,
+            SØKER_HAR_OPPGITT_AT_BARNET_HAR_OPPHOLDT_SEG_UTENFOR_NORGE,
+        )
+
     /**
      * Funksjon som forsøker å slette en periode på et vilkår.
      * Dersom det kun finnes en periode eller perioden som skal slettes
@@ -280,8 +289,8 @@ object VilkårsvurderingUtils {
                 personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
 
             val vilkårSomSkalKopieresOver =
-                if (kopieringSkjerFraForrigeBehandling && vilkårFraInit.begrunnelseForManuellKontroll == SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER) {
-                    // Søker har oppgitt i søknaden at barnet ikke bor fast med søker, så vilkåret skal vurderes på nytt i stedet for å kopieres fra forrige behandling
+                if (kopieringSkjerFraForrigeBehandling && vilkårFraInit.begrunnelseForManuellKontroll in BEGRUNNELSER_FOR_Å_VURDERE_VILKÅR_PÅ_NYTT) {
+                    // Søker har oppgitt noe i søknaden som gjør at vilkåret skal vurderes på nytt i stedet for å kopieres fra forrige behandling
                     emptyList()
                 } else {
                     vilkårSomFinnes.filtrerVilkårÅKopiere(

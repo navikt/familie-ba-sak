@@ -32,10 +32,12 @@ fun lagBarnetrygdSøknadV10(
     barnErAsylsøker: Boolean = false,
     erAdoptertFraUtland: Boolean = false,
     borFastMedSøker: Boolean = true,
+    søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd: Boolean = true,
+    barnHarOppholdtSegUtenforNorgeSiste12Mnd: Boolean = false,
 ): BarnetrygdSøknadV10 =
     BarnetrygdSøknadV10(
         kontraktVersjon = 10,
-        søker = lagSøkerV10(søkerFnr, erAsylsøker = søkerErAsylsøker),
+        søker = lagSøkerV10(søkerFnr, erAsylsøker = søkerErAsylsøker, harOppholdtSegSammenhengendeINorgeSiste12Mnd = søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd),
         barn =
             barnFnr.map {
                 lagBarnV10(
@@ -47,6 +49,7 @@ fun lagBarnetrygdSøknadV10(
                     erAsylsøker = barnErAsylsøker,
                     erAdoptertFraUtland = erAdoptertFraUtland,
                     borFastMedSøker = borFastMedSøker,
+                    harOppholdtSegUtenforNorgeSiste12Mnd = barnHarOppholdtSegUtenforNorgeSiste12Mnd,
                 )
             },
         antallEøsSteg = if (erEøs) 1 else 0,
@@ -73,10 +76,12 @@ fun lagBarnetrygdSøknadV9(
     barnErAsylsøker: Boolean = false,
     erAdoptertFraUtland: Boolean = false,
     borFastMedSøker: Boolean = true,
+    søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd: Boolean = true,
+    barnHarOppholdtSegUtenforNorgeSiste12Mnd: Boolean = false,
 ): BarnetrygdSøknadV9 =
     BarnetrygdSøknadV9(
         kontraktVersjon = 9,
-        søker = lagSøkerV8(søkerFnr, erAsylsøker = søkerErAsylsøker),
+        søker = lagSøkerV8(søkerFnr, erAsylsøker = søkerErAsylsøker, harOppholdtSegSammenhengendeINorgeSiste12Mnd = søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd),
         barn =
             barnFnr.map {
                 lagBarnV8(
@@ -88,6 +93,7 @@ fun lagBarnetrygdSøknadV9(
                     erAsylsøker = barnErAsylsøker,
                     erAdoptertFraUtland = erAdoptertFraUtland,
                     borFastMedSøker = borFastMedSøker,
+                    harOppholdtSegUtenforNorgeSiste12Mnd = barnHarOppholdtSegUtenforNorgeSiste12Mnd,
                 )
             },
         antallEøsSteg = if (erEøs) 1 else 0,
@@ -102,6 +108,7 @@ fun lagBarnetrygdSøknadV9(
 fun lagSøkerV10(
     fnr: String,
     erAsylsøker: Boolean = false,
+    harOppholdtSegSammenhengendeINorgeSiste12Mnd: Boolean = true,
 ): SøkerV10 =
     SøkerV10(
         harEøsSteg = false,
@@ -128,7 +135,7 @@ fun lagSøkerV10(
         pensjonsperioderNorge = emptyList(),
         andreUtbetalingsperioder = emptyList(),
         idNummer = emptyList(),
-        spørsmål = lagSøkerSpørsmål(erAsylsøker = erAsylsøker),
+        spørsmål = lagSøkerSpørsmål(erAsylsøker = erAsylsøker, harOppholdtSegSammenhengendeINorgeSiste12Mnd = harOppholdtSegSammenhengendeINorgeSiste12Mnd),
         nåværendeSamboer = null,
         tidligereSamboere = emptyList(),
     )
@@ -142,6 +149,7 @@ fun lagBarnV10(
     erAsylsøker: Boolean = false,
     erAdoptertFraUtland: Boolean = false,
     borFastMedSøker: Boolean = true,
+    harOppholdtSegUtenforNorgeSiste12Mnd: Boolean = false,
 ): BarnV10 =
     BarnV10(
         harEøsSteg = false,
@@ -161,6 +169,7 @@ fun lagBarnV10(
                 erAsylsøker = erAsylsøker,
                 erAdoptertFraUtland = erAdoptertFraUtland,
                 borFastMedSøker = borFastMedSøker,
+                harOppholdtSegUtenforNorgeSiste12Mnd = harOppholdtSegUtenforNorgeSiste12Mnd,
             ),
         eøsBarnetrygdsperioder = emptyList(),
     )
@@ -168,6 +177,7 @@ fun lagBarnV10(
 fun lagSøkerV8(
     fnr: String,
     erAsylsøker: Boolean = false,
+    harOppholdtSegSammenhengendeINorgeSiste12Mnd: Boolean = true,
 ): SøkerV8 =
     SøkerV8(
         harEøsSteg = false,
@@ -194,7 +204,7 @@ fun lagSøkerV8(
         pensjonsperioderNorge = emptyList(),
         andreUtbetalingsperioder = emptyList(),
         idNummer = emptyList(),
-        spørsmål = lagSøkerSpørsmål(erAsylsøker = erAsylsøker),
+        spørsmål = lagSøkerSpørsmål(erAsylsøker = erAsylsøker, harOppholdtSegSammenhengendeINorgeSiste12Mnd = harOppholdtSegSammenhengendeINorgeSiste12Mnd),
         nåværendeSamboer = null,
         tidligereSamboere = emptyList(),
     )
@@ -208,6 +218,7 @@ fun lagBarnV8(
     erAsylsøker: Boolean = false,
     erAdoptertFraUtland: Boolean = false,
     borFastMedSøker: Boolean = true,
+    harOppholdtSegUtenforNorgeSiste12Mnd: Boolean = false,
 ): BarnV8 =
     BarnV8(
         harEøsSteg = false,
@@ -227,13 +238,18 @@ fun lagBarnV8(
                 erAsylsøker = erAsylsøker,
                 erAdoptertFraUtland = erAdoptertFraUtland,
                 borFastMedSøker = borFastMedSøker,
+                harOppholdtSegUtenforNorgeSiste12Mnd = harOppholdtSegUtenforNorgeSiste12Mnd,
             ),
         eøsBarnetrygdsperioder = emptyList(),
     )
 
-private fun lagSøkerSpørsmål(erAsylsøker: Boolean): Map<String, Søknadsfelt<Any>> =
+private fun lagSøkerSpørsmål(
+    erAsylsøker: Boolean,
+    harOppholdtSegSammenhengendeINorgeSiste12Mnd: Boolean,
+): Map<String, Søknadsfelt<Any>> =
     mapOf(
         "erAsylsøker" to lagStringSøknadsfelt<Any>(erAsylsøker.tilSøknadssvar()),
+        "værtINorgeITolvMåneder" to lagStringSøknadsfelt<Any>(harOppholdtSegSammenhengendeINorgeSiste12Mnd.tilSøknadssvar()),
     )
 
 private fun lagBarnSpørsmål(
@@ -243,6 +259,7 @@ private fun lagBarnSpørsmål(
     erAsylsøker: Boolean,
     erAdoptertFraUtland: Boolean,
     borFastMedSøker: Boolean,
+    harOppholdtSegUtenforNorgeSiste12Mnd: Boolean,
 ): Map<String, Søknadsfelt<Any>> =
     mapOf(
         "erFosterbarn" to lagStringSøknadsfelt<Any>(erFosterbarn.tilSøknadssvar()),
@@ -251,6 +268,7 @@ private fun lagBarnSpørsmål(
         "erAsylsøker" to lagStringSøknadsfelt<Any>(erAsylsøker.tilSøknadssvar()),
         "erAdoptertFraUtland" to lagStringSøknadsfelt<Any>(erAdoptertFraUtland.tilSøknadssvar()),
         "borFastMedSøker" to lagStringSøknadsfelt<Any>(borFastMedSøker.tilSøknadssvar()),
+        "boddMindreEnn12MndINorge" to lagStringSøknadsfelt<Any>(harOppholdtSegUtenforNorgeSiste12Mnd.tilSøknadssvar()),
     )
 
 private fun lagAndreForelder(): AndreForelder =

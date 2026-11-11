@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -20,6 +21,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_OPPHOLDSTILLATELSE
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_BARNET_HAR_OPPHOLDT_SEG_UTENFOR_NORGE
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_SØKER_IKKE_HAR_OPPHOLDT_SEG_SAMMENHENGENDE_I_NORGE
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE.MIDLERTIDIG
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE.PERMANENT
 import no.nav.familie.tidslinje.Periode
@@ -54,6 +58,13 @@ class PreutfyllBosattIRiketService(
             .forEach { personResultat ->
                 try {
                     val person = personResultat.aktør.tilPerson(personopplysningGrunnlag)
+                    val ikkeVurdertBosattIRiketPgaOppholdUtenforNorge = lagIkkeVurdertBosattIRiketHvisOppgittOppholdUtenforNorge(personResultat, person, digitalSøknad)
+                    if (ikkeVurdertBosattIRiketPgaOppholdUtenforNorge != null) {
+                        personResultat.vilkårResultater.removeIf { it.vilkårType == BOSATT_I_RIKET }
+                        personResultat.vilkårResultater.add(ikkeVurdertBosattIRiketPgaOppholdUtenforNorge)
+                        return@forEach
+                    }
+
                     if (person.statsborgerskap.iUkraina()) {
                         return@forEach
                     }
@@ -82,6 +93,49 @@ class PreutfyllBosattIRiketService(
                 }
             }
     }
+
+    private fun lagIkkeVurdertBosattIRiketHvisOppgittOppholdUtenforNorge(
+        personResultat: PersonResultat,
+        person: Person,
+        digitalSøknad: Søknad?,
+    ): VilkårResultat? =
+        when {
+            person.type == PersonType.SØKER && digitalSøknad?.søker?.harOppholdtSegSammenhengendeINorgeSiste12Mnd == false -> {
+                lagIkkeVurdertBosattIRiketVilkårResultat(
+                    personResultat = personResultat,
+                    begrunnelseForManuellKontroll = SØKER_HAR_OPPGITT_AT_SØKER_IKKE_HAR_OPPHOLDT_SEG_SAMMENHENGENDE_I_NORGE,
+                    svarISøknaden = "Søker har oppgitt i søknaden at søker ikke har oppholdt seg sammenhengende i Norge de siste 12 månedene.",
+                )
+            }
+
+            person.type == PersonType.BARN && digitalSøknad?.barn?.find { person.aktør.harIdent(it.fnr) }?.harOppholdtSegUtenforNorgeSiste12Mnd == true -> {
+                lagIkkeVurdertBosattIRiketVilkårResultat(
+                    personResultat = personResultat,
+                    begrunnelseForManuellKontroll = SØKER_HAR_OPPGITT_AT_BARNET_HAR_OPPHOLDT_SEG_UTENFOR_NORGE,
+                    svarISøknaden = "Søker har oppgitt i søknaden at barnet har oppholdt seg utenfor Norge i løpet av de siste 12 månedene.",
+                )
+            }
+
+            else -> {
+                null
+            }
+        }
+
+    private fun lagIkkeVurdertBosattIRiketVilkårResultat(
+        personResultat: PersonResultat,
+        begrunnelseForManuellKontroll: BegrunnelseForManuellKontrollAvVilkår,
+        svarISøknaden: String,
+    ): VilkårResultat =
+        VilkårResultat(
+            personResultat = personResultat,
+            erAutomatiskVurdert = false,
+            resultat = Resultat.IKKE_VURDERT,
+            vilkårType = BOSATT_I_RIKET,
+            begrunnelse = IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + "- " + svarISøknaden,
+            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+            erOpprinneligPreutfyltIBehandling = personResultat.vilkårsvurdering.behandling.id,
+            begrunnelseForManuellKontroll = begrunnelseForManuellKontroll,
+        )
 
     private fun genererBosattIRiketVilkårResultat(
         personResultat: PersonResultat,

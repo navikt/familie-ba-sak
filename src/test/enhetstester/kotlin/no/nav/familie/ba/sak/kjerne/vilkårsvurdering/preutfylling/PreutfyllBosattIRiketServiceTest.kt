@@ -38,6 +38,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_BARNET_HAR_OPPHOLDT_SEG_UTENFOR_NORGE
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_SØKER_IKKE_HAR_OPPHOLDT_SEG_SAMMENHENGENDE_I_NORGE
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE.MIDLERTIDIG
@@ -46,6 +48,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -366,6 +370,51 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
+    fun `skal sette søkers bosatt i riket til ikke vurdert selv om søker planlegger å bo i Norge neste 12 mnd, fordi spørsmålet bare stilles etter nei på opphold i Norge`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                barnasFødselsdatoer = listOf(LocalDate.now().minusYears(2)),
+                søkerPersonIdent = randomFnr(),
+                barnasIdenter = listOf(randomFnr()),
+            ).also {
+                it.personer.forEach {
+                    it.statsborgerskap = emptyList<GrStatsborgerskap>().toMutableList()
+                    it.bostedsadresser =
+                        mutableListOf(
+                            lagGrVegadresseBostedsadresse(
+                                periode = DatoIntervallEntitet(LocalDate.now().minusMonths(8), null),
+                                matrikkelId = 12345L,
+                            ),
+                        )
+                }
+            }
+
+        val vilkårsvurdering =
+            lagVilkårsvurdering(persongrunnlag, behandling).also {
+                it.personResultater = setOf(lagPersonResultat(vilkårsvurdering = it, aktør = persongrunnlag.søker.aktør))
+            }
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        val digitalSøknad = lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true, søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = false)
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad)
+
+        // Assert
+        val vilkårResultat =
+            vilkårsvurdering.personResultater
+                .single { it.erSøkersResultater() }
+                .vilkårResultater
+                .single { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(vilkårResultat.resultat).isEqualTo(Resultat.IKKE_VURDERT)
+        assertThat(vilkårResultat.begrunnelseForManuellKontroll).isEqualTo(SØKER_HAR_OPPGITT_AT_SØKER_IKKE_HAR_OPPHOLDT_SEG_SAMMENHENGENDE_I_NORGE)
+    }
+
+    @Test
     fun `skal gi oppfylt i siste periode hvis den er under 12 mnd og søker planlegger å bo i Norge neste 12`() {
         // Arrange
         val behandling = lagBehandling()
@@ -411,7 +460,7 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
-    fun `skal gi oppfylt hvis søker planlegger å bo i Norge neste 12 månedene`() {
+    fun `skal sette barnets bosatt i riket til ikke vurdert selv om barnet planlegger å bo i Norge neste 12 mnd, fordi spørsmålet bare stilles når barnet har oppholdt seg utenfor Norge`() {
         // Arrange
         val behandling = lagBehandling()
         val barnAktør = lagAktør()
@@ -456,7 +505,12 @@ class PreutfyllBosattIRiketServiceTest {
             }
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
-        val digitalSøknad = lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnAktør.aktivFødselsnummer() to true))
+        val digitalSøknad =
+            lagSøknad(
+                søkerPlanleggerÅBoINorge12Mnd = false,
+                barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnAktør.aktivFødselsnummer() to true),
+                barneIdenterTilHarOppholdtSegUtenforNorgeSiste12Mnd = mapOf(barnAktør.aktivFødselsnummer() to true),
+            )
 
         // Act
         preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad)
@@ -464,9 +518,75 @@ class PreutfyllBosattIRiketServiceTest {
         // Assert
         val vilkårResultat =
             vilkårsvurdering.personResultater
-                .find { it.aktør == barnAktør }
-                ?.vilkårResultater
-                ?.first { it.vilkårType == Vilkår.BOSATT_I_RIKET }!!
+                .single { it.aktør == barnAktør }
+                .vilkårResultater
+                .single { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(vilkårResultat.resultat).isEqualTo(Resultat.IKKE_VURDERT)
+        assertThat(vilkårResultat.begrunnelseForManuellKontroll).isEqualTo(SØKER_HAR_OPPGITT_AT_BARNET_HAR_OPPHOLDT_SEG_UTENFOR_NORGE)
+    }
+
+    @Test
+    fun `skal gi barnet oppfylt bosatt i riket når søker har oppgitt at barnet planlegger å bo i Norge neste 12 mnd uten å ha oppgitt opphold utenfor Norge`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val barnAktør = lagAktør()
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                barnasFødselsdatoer = listOf(LocalDate.now().minusYears(2)),
+                søkerPersonIdent = randomFnr(),
+                barnasIdenter = listOf(barnAktør.aktivFødselsnummer()),
+                barnAktør = listOf(barnAktør),
+            ).also {
+                it.personer.forEach {
+                    it.statsborgerskap = emptyList<GrStatsborgerskap>().toMutableList()
+                    it.bostedsadresser =
+                        mutableListOf(
+                            lagGrVegadresseBostedsadresse(
+                                periode = DatoIntervallEntitet(LocalDate.now().minusMonths(2), null),
+                                matrikkelId = 12345L,
+                            ),
+                        )
+                }
+            }
+
+        val vilkårsvurdering =
+            lagVilkårsvurdering(persongrunnlag, behandling).also {
+                it.personResultater =
+                    setOf(
+                        lagPersonResultat(
+                            vilkårsvurdering = it,
+                            person = lagPerson(personIdent = PersonIdent(barnAktør.aktivFødselsnummer()), type = PersonType.BARN),
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.now().minusMonths(2),
+                            periodeTom = null,
+                            lagFullstendigVilkårResultat = true,
+                            personType = PersonType.BARN,
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            erDeltBosted = false,
+                            erDeltBostedSkalIkkeDeles = false,
+                            erEksplisittAvslagPåSøknad = false,
+                        ),
+                    )
+            }
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        val digitalSøknad =
+            lagSøknad(
+                søkerPlanleggerÅBoINorge12Mnd = false,
+                barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnAktør.aktivFødselsnummer() to true),
+                barneIdenterTilHarOppholdtSegUtenforNorgeSiste12Mnd = mapOf(barnAktør.aktivFødselsnummer() to false),
+            )
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad)
+
+        // Assert
+        val vilkårResultat =
+            vilkårsvurdering.personResultater
+                .single { it.aktør == barnAktør }
+                .vilkårResultater
+                .single { it.vilkårType == Vilkår.BOSATT_I_RIKET }
         assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
         assertThat(vilkårResultat.begrunnelseForManuellKontroll).isEqualTo(INFORMASJON_FRA_SØKNAD)
     }
@@ -602,6 +722,245 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
 
         assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.begrunnelseForManuellKontroll).isNull()
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["NOR", "USA"])
+    fun `skal sette søkers bosatt i riket til ikke vurdert når søker har svart nei på sammenhengende opphold i Norge selv om registerdata gir oppfylt`(
+        statsborgerskap: String,
+    ) {
+        // Arrange
+        val behandling = lagBehandling()
+        val søkerAktør = randomAktør()
+        val barnAktør = randomAktør()
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                barnasIdenter = listOf(barnAktør.aktivFødselsnummer()),
+                søkerAktør = søkerAktør,
+                barnAktør = listOf(barnAktør),
+            ).also { grunnlag ->
+                grunnlag.personer.forEach { person ->
+                    person.statsborgerskap = mutableListOf(GrStatsborgerskap(landkode = statsborgerskap, person = person))
+                    person.bostedsadresser =
+                        mutableListOf(
+                            lagGrVegadresseBostedsadresse(
+                                periode = DatoIntervallEntitet(fom = person.fødselsdato, tom = null),
+                                matrikkelId = 12345L,
+                            ),
+                        )
+                }
+            }
+        val vilkårsvurdering =
+            lagVilkårsvurdering(persongrunnlag, behandling).also {
+                it.personResultater =
+                    setOf(
+                        lagPersonResultat(vilkårsvurdering = it, aktør = søkerAktør),
+                        lagPersonResultat(vilkårsvurdering = it, aktør = barnAktør),
+                    )
+            }
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        val digitalSøknad =
+            lagSøknad(
+                barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnAktør.aktivFødselsnummer() to true),
+                søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = false,
+            )
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, listOf(søkerAktør, barnAktør), digitalSøknad)
+
+        // Assert
+        val bosattIRiketForSøker =
+            vilkårsvurdering.personResultater
+                .single { it.aktør == søkerAktør }
+                .vilkårResultater
+                .single { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(bosattIRiketForSøker.resultat).isEqualTo(Resultat.IKKE_VURDERT)
+        assertThat(bosattIRiketForSøker.periodeFom).isNull()
+        assertThat(bosattIRiketForSøker.periodeTom).isNull()
+        assertThat(bosattIRiketForSøker.erAutomatiskVurdert).isFalse()
+        assertThat(bosattIRiketForSøker.begrunnelse)
+            .isEqualTo("Ikke fylt ut automatisk\n- Søker har oppgitt i søknaden at søker ikke har oppholdt seg sammenhengende i Norge de siste 12 månedene.")
+        assertThat(bosattIRiketForSøker.begrunnelseForManuellKontroll).isEqualTo(SØKER_HAR_OPPGITT_AT_SØKER_IKKE_HAR_OPPHOLDT_SEG_SAMMENHENGENDE_I_NORGE)
+        assertThat(bosattIRiketForSøker.erOpprinneligPreutfyltIBehandling).isEqualTo(behandling.id)
+
+        val bosattIRiketForBarn =
+            vilkårsvurdering.personResultater
+                .single { it.aktør == barnAktør }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(bosattIRiketForBarn).isNotEmpty().allSatisfy { assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT) }
+    }
+
+    @Test
+    fun `skal sette bosatt i riket til ikke vurdert kun for barnet søker har oppgitt har oppholdt seg utenfor Norge selv om registerdata gir oppfylt`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val søkerAktør = randomAktør()
+        val barnSomHarOppholdtSegUtenforNorge = randomAktør()
+        val barnSomHarOppholdtSegINorge = randomAktør()
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                barnasIdenter = listOf(barnSomHarOppholdtSegUtenforNorge.aktivFødselsnummer(), barnSomHarOppholdtSegINorge.aktivFødselsnummer()),
+                søkerAktør = søkerAktør,
+                barnAktør = listOf(barnSomHarOppholdtSegUtenforNorge, barnSomHarOppholdtSegINorge),
+            ).also { grunnlag ->
+                grunnlag.personer.forEach { person ->
+                    person.bostedsadresser =
+                        mutableListOf(
+                            lagGrVegadresseBostedsadresse(
+                                periode = DatoIntervallEntitet(fom = person.fødselsdato, tom = null),
+                                matrikkelId = 12345L,
+                            ),
+                        )
+                }
+            }
+        val vilkårsvurdering =
+            lagVilkårsvurdering(persongrunnlag, behandling).also {
+                it.personResultater =
+                    setOf(
+                        lagPersonResultat(vilkårsvurdering = it, aktør = søkerAktør),
+                        lagPersonResultat(vilkårsvurdering = it, aktør = barnSomHarOppholdtSegUtenforNorge),
+                        lagPersonResultat(vilkårsvurdering = it, aktør = barnSomHarOppholdtSegINorge),
+                    )
+            }
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        val digitalSøknad =
+            lagSøknad(
+                barneIdenterTilPlanleggerBoINorge12Mnd =
+                    mapOf(
+                        barnSomHarOppholdtSegUtenforNorge.aktivFødselsnummer() to false,
+                        barnSomHarOppholdtSegINorge.aktivFødselsnummer() to false,
+                    ),
+                barneIdenterTilHarOppholdtSegUtenforNorgeSiste12Mnd =
+                    mapOf(
+                        barnSomHarOppholdtSegUtenforNorge.aktivFødselsnummer() to true,
+                        barnSomHarOppholdtSegINorge.aktivFødselsnummer() to false,
+                    ),
+            )
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad)
+
+        // Assert
+        val bosattIRiketForBarnSomHarOppholdtSegUtenforNorge =
+            vilkårsvurdering.personResultater
+                .single { it.aktør == barnSomHarOppholdtSegUtenforNorge }
+                .vilkårResultater
+                .single { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(bosattIRiketForBarnSomHarOppholdtSegUtenforNorge.resultat).isEqualTo(Resultat.IKKE_VURDERT)
+        assertThat(bosattIRiketForBarnSomHarOppholdtSegUtenforNorge.periodeFom).isNull()
+        assertThat(bosattIRiketForBarnSomHarOppholdtSegUtenforNorge.erAutomatiskVurdert).isFalse()
+        assertThat(bosattIRiketForBarnSomHarOppholdtSegUtenforNorge.begrunnelse)
+            .isEqualTo("Ikke fylt ut automatisk\n- Søker har oppgitt i søknaden at barnet har oppholdt seg utenfor Norge i løpet av de siste 12 månedene.")
+        assertThat(bosattIRiketForBarnSomHarOppholdtSegUtenforNorge.begrunnelseForManuellKontroll).isEqualTo(SØKER_HAR_OPPGITT_AT_BARNET_HAR_OPPHOLDT_SEG_UTENFOR_NORGE)
+        assertThat(bosattIRiketForBarnSomHarOppholdtSegUtenforNorge.erOpprinneligPreutfyltIBehandling).isEqualTo(behandling.id)
+
+        listOf(søkerAktør, barnSomHarOppholdtSegINorge).forEach { aktør ->
+            val bosattIRiket =
+                vilkårsvurdering.personResultater
+                    .single { it.aktør == aktør }
+                    .vilkårResultater
+                    .filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+            assertThat(bosattIRiket).isNotEmpty().allSatisfy { assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT) }
+        }
+    }
+
+    @Test
+    fun `skal sette barnets bosatt i riket til ikke vurdert når søknaden har barnets tidligere ident`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val barnAktør = randomAktør()
+        val tidligereIdentBarn = randomFnr()
+        barnAktør.personidenter.add(Personident(fødselsnummer = tidligereIdentBarn, aktør = barnAktør, aktiv = false))
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = randomFnr(),
+                barnasIdenter = listOf(barnAktør.aktivFødselsnummer()),
+                barnAktør = listOf(barnAktør),
+            ).also { grunnlag ->
+                grunnlag.barna.single().bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresseBostedsadresse(
+                            periode = DatoIntervallEntitet(fom = grunnlag.barna.single().fødselsdato, tom = null),
+                            matrikkelId = 12345L,
+                        ),
+                    )
+            }
+        val vilkårsvurdering =
+            lagVilkårsvurdering(persongrunnlag, behandling).also {
+                it.personResultater = setOf(lagPersonResultat(vilkårsvurdering = it, aktør = barnAktør))
+            }
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        val digitalSøknad =
+            lagSøknad(
+                barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(tidligereIdentBarn to false),
+                barneIdenterTilHarOppholdtSegUtenforNorgeSiste12Mnd = mapOf(tidligereIdentBarn to true),
+            )
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, listOf(barnAktør), digitalSøknad)
+
+        // Assert
+        val bosattIRiketForBarn =
+            vilkårsvurdering.personResultater
+                .single { it.aktør == barnAktør }
+                .vilkårResultater
+                .single { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(bosattIRiketForBarn.resultat).isEqualTo(Resultat.IKKE_VURDERT)
+        assertThat(bosattIRiketForBarn.begrunnelseForManuellKontroll).isEqualTo(SØKER_HAR_OPPGITT_AT_BARNET_HAR_OPPHOLDT_SEG_UTENFOR_NORGE)
+    }
+
+    @Test
+    fun `skal preutfylle søkers bosatt i riket fra registerdata når søker har svart ja på sammenhengende opphold i Norge`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val søkerAktør = randomAktør()
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                barnasIdenter = listOf(randomFnr()),
+                søkerAktør = søkerAktør,
+            ).also { grunnlag ->
+                grunnlag.søker.bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresseBostedsadresse(
+                            periode = DatoIntervallEntitet(fom = grunnlag.søker.fødselsdato, tom = null),
+                            matrikkelId = 12345L,
+                        ),
+                    )
+            }
+        val vilkårsvurdering =
+            lagVilkårsvurdering(persongrunnlag, behandling).also {
+                it.personResultater = setOf(lagPersonResultat(vilkårsvurdering = it, aktør = søkerAktør))
+            }
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(
+            vilkårsvurdering,
+            listOf(søkerAktør),
+            lagSøknad(søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = true),
+        )
+
+        // Assert
+        val bosattIRiketForSøker =
+            vilkårsvurdering.personResultater
+                .single { it.aktør == søkerAktør }
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        assertThat(bosattIRiketForSøker).isNotEmpty().allSatisfy {
+            assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
             assertThat(it.begrunnelseForManuellKontroll).isNull()
         }
     }
@@ -2198,6 +2557,29 @@ class PreutfyllBosattIRiketServiceTest {
             // Assert
             assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
             assertThat(vilkårResultat.begrunnelseForManuellKontroll).isEqualTo(BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_OPPHOLDSTILLATELSE)
+        }
+
+        @Test
+        fun `skal sette søkers bosatt i riket til ikke vurdert selv med oppholdstillatelse når søker har svart nei på opphold i Norge og planlegger å bo i Norge i 12 mnd`() {
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurderingForSøkerMedOpphold(
+                    bosattFom = iDag.minusMonths(3),
+                    opphold = listOf(PERMANENT to DatoIntervallEntitet(fom = iDag.minusMonths(3))),
+                )
+            val digitalSøknad = lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true, søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = false)
+
+            // Act
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad)
+            val vilkårResultat =
+                vilkårsvurdering.personResultater
+                    .single()
+                    .vilkårResultater
+                    .single { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+
+            // Assert
+            assertThat(vilkårResultat.resultat).isEqualTo(Resultat.IKKE_VURDERT)
+            assertThat(vilkårResultat.begrunnelseForManuellKontroll).isEqualTo(SØKER_HAR_OPPGITT_AT_SØKER_IKKE_HAR_OPPHOLDT_SEG_SAMMENHENGENDE_I_NORGE)
         }
 
         @Test
