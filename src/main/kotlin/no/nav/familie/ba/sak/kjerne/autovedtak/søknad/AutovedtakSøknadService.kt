@@ -94,6 +94,7 @@ class AutovedtakSøknadService(
 
         val behandlingEtterBehandlingsresultat = stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
         autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandlingEtterBehandlingsresultat)
+        autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandlingEtterBehandlingsresultat)
         autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandlingEtterBehandlingsresultat)
         autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(behandlingEtterBehandlingsresultat)
         autovedtakSøknadValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandlingEtterBehandlingsresultat)

@@ -3,15 +3,20 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.søknad
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.OVERLAPP_ANDELER_FOR_BARN
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.UTBETALING_OVER_100_PROSENT_BARN
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.UTBETALING_OVER_100_PROSENT_SØKER
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.tilPeriode
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.tidslinje.harOverlappMed
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombiner
 import org.springframework.stereotype.Service
 
 @Service
@@ -82,6 +87,39 @@ class AutovedtakSøknadValideringService(
     fun validerAtSimuleringGirUtbetalingUtenFeilutbetaling(simulering: List<ØkonomiSimuleringMottaker>) {
         AutovedtakSøknadValidering.validerAtSimuleringGirUtbetaling(simulering)
         AutovedtakSøknadValidering.validerAtDetIkkeErFeilutbetaling(simulering)
+    }
+
+    fun validerAtBehandlingIkkeHarOverlappendeAndeler(behandling: Behandling) {
+        val personerFremstiltKravFor = søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = null).toSet()
+        val andelerPerBarnSøktFor =
+            beregningService
+                .hentAndelerTilkjentYtelseForBehandling(behandling.id)
+                .filter { it.aktør in personerFremstiltKravFor && !it.erSøkersAndel() }
+                .groupBy { it.aktør }
+
+        val harOverlapp =
+            andelerPerBarnSøktFor.any { (barn, nyeAndeler) ->
+                val harTidligereAndelerTidslinje =
+                    beregningService
+                        .hentAndelerFraIverksatteBehandlingerForAktør(barn)
+                        .filter { it.behandlingId != behandling.id && !it.erSøkersAndel() }
+                        .map { it.tilPeriode().tilTidslinje() }
+                        .kombiner { true }
+
+                val harNyeAndelerTidslinje =
+                    nyeAndeler
+                        .map { it.tilPeriode().tilTidslinje() }
+                        .kombiner { true }
+
+                harNyeAndelerTidslinje.harOverlappMed(harTidligereAndelerTidslinje)
+            }
+
+        if (harOverlapp) {
+            throw AutovedtakSøknadMåBehandlesManueltFeil(
+                beskrivelse = "Automatisk behandling av søknad gir andeler som overlapper med andeler i en tidligere iverksatt behandling for samme barn.\n$MÅ_HÅNDTERES_MANUELT",
+                årsak = OVERLAPP_ANDELER_FOR_BARN,
+            )
+        }
     }
 
     companion object {
