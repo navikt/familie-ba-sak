@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.sikkerhet
 
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.TilgangDTO
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -18,11 +19,17 @@ class TilgangController(
     private val personopplysningerService: PersonopplysningerService,
     private val personidentService: PersonidentService,
     private val personTilgangService: PersonTilgangService,
+    private val tilgangService: TilgangService,
 ) {
     @PostMapping(path = ["tilgang"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentTilgangOgDiskresjonskode(
         @RequestBody tilgangRequestDTO: TilgangRequestDTO,
     ): ResponseEntity<Ressurs<TilgangDTO>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "Sjekke tilgang til person",
+        )
+
         val aktør = personidentService.hentAktør(tilgangRequestDTO.brukerIdent)
 
         val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør)

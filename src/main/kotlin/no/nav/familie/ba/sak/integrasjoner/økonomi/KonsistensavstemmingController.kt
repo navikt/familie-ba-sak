@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import jakarta.transaction.Transactional
+import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStartTask
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -24,10 +26,16 @@ import java.util.UUID
 class KonsistensavstemmingController(
     private val taskService: TaskService,
     private val batchRepository: BatchRepository,
+    private val tilgangService: TilgangService,
 ) {
     @PostMapping(path = ["/dryrun"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Transactional
     fun kjørKonsistensavstemmingUtenSendingTilØkonomi(): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Testkjøre konsistensavstemming uten sending til økonomi",
+        )
+
         val (transaksjonsId, task) = opprettKonsistensavstemMotOppdragStartTask(false, LocalDateTime.now())
 
         return ResponseEntity.ok(Ressurs.success("Testkjører konsistensavstemming uten å sende til økonomi. transaksjonsId=$transaksjonsId callId=${task.callId}"))
@@ -38,6 +46,11 @@ class KonsistensavstemmingController(
     fun kjørKonsistensavstemming(
         @RequestBody request: StartKonsistensavstemming,
     ): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Kjøre konsistensavstemming",
+        )
+
         val (transaksjonsId, task) = opprettKonsistensavstemMotOppdragStartTask(true, request.triggerTid)
 
         return ResponseEntity.ok(Ressurs.success("Kjører konsistensavstemming. transaksjonsId=$transaksjonsId callId=${task.callId}"))

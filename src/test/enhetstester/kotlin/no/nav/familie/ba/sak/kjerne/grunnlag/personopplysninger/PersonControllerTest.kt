@@ -1,14 +1,23 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.verify
+import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagPersonInfo
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.ekstern.restDomene.ManuellDødsfallDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FalskIdentitetPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -16,9 +25,12 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
+import java.time.LocalDate
 
 class PersonControllerTest {
     private val personopplysningerService = mockk<PersonopplysningerService>()
@@ -36,6 +48,11 @@ class PersonControllerTest {
             utvidetBehandlingService = utvidetBehandlingService,
             tilgangService = tilgangService,
         )
+
+    @BeforeEach
+    fun setUp() {
+        justRun { tilgangService.verifiserHarTilgangTilHandling(any(), any()) }
+    }
 
     @Nested
     inner class HentPerson {
@@ -127,6 +144,109 @@ class PersonControllerTest {
 
             val data: PersonInfoDto = respons.body!!.data!!
             assertThat(data).isEqualTo(personInfoDto)
+        }
+    }
+
+    @Nested
+    inner class Tilgangskontroll {
+        private val person = lagPerson()
+        private val personIdent = PersonIdent(person.aktør.aktivFødselsnummer())
+
+        @BeforeEach
+        fun setUp() {
+            every { personidentService.hentAktør(personIdent.ident) } returns person.aktør
+            every { personTilgangService.hentMaskertPersonInfoVedManglendeTilgang(person.aktør) } returns null
+            every { personopplysningerService.hentPdlPersoninfoMedRelasjonerOgRegisterinformasjon(person.aktør) } returns
+                PdlPersonInfo.Person(personInfo = lagPersonInfo(fødselsdato = person.fødselsdato, navn = person.navn, kjønn = person.kjønn))
+            every { personopplysningerService.hentPersoninfoEnkel(person.aktør) } returns
+                lagPersonInfo(fødselsdato = person.fødselsdato, navn = person.navn, kjønn = person.kjønn)
+        }
+
+        @Test
+        fun `skal kreve veilederrolle ved henting av person`() {
+            // Act
+            personController.hentPerson(personIdent)
+
+            // Assert
+            verify(exactly = 1) { tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.VEILEDER, handling = "Hente person") }
+        }
+
+        @Test
+        fun `skal kreve veilederrolle ved enkel henting av person`() {
+            // Act
+            personController.hentPersonEnkel(personIdent)
+
+            // Assert
+            verify(exactly = 1) { tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.VEILEDER, handling = "Hente person") }
+        }
+
+        @Test
+        fun `skal ikke slå opp person når kaller mangler veilederrolle`() {
+            // Arrange
+            every {
+                tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.VEILEDER, handling = "Hente person")
+            } throws RolleTilgangskontrollFeil("Krever VEILEDER")
+
+            // Act & Assert
+            assertThrows<RolleTilgangskontrollFeil> { personController.hentPerson(personIdent) }
+            assertThrows<RolleTilgangskontrollFeil> { personController.hentPersonEnkel(personIdent) }
+
+            verify(exactly = 0) { personidentService.hentAktør(any()) }
+        }
+    }
+
+    @Nested
+    inner class RegistrerManuellDødsfallPåPerson {
+        private val behandlingId = 1L
+        private val manuellDødsfallDto =
+            ManuellDødsfallDto(
+                dødsfallDato = LocalDate.of(2026, 1, 1),
+                personIdent = randomFnr(),
+                begrunnelse = "Begrunnelse",
+            )
+
+        @BeforeEach
+        fun setUp() {
+            justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
+            justRun { tilgangService.verifiserHarTilgangTilHandling(any(), any()) }
+            justRun { persongrunnlagService.registrerManuellDødsfallPåPerson(any(), any(), any(), any()) }
+            every { utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId) } returns mockk()
+        }
+
+        @Test
+        fun `skal kreve saksbehandlerrolle og tilgang til behandlingen`() {
+            // Act
+            personController.registrerManuellDødsfallPåPerson(behandlingId, manuellDødsfallDto)
+
+            // Assert
+            verify(exactly = 1) { tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS) }
+            verify(exactly = 1) {
+                tilgangService.verifiserHarTilgangTilHandling(
+                    minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                    handling = "Registrere manuelt dødsfall",
+                )
+            }
+            verify(exactly = 1) { persongrunnlagService.registrerManuellDødsfallPåPerson(BehandlingId(behandlingId), any(), any(), any()) }
+        }
+
+        @Test
+        fun `skal ikke registrere dødsfall når kaller ikke er saksbehandler`() {
+            // Arrange
+            every {
+                tilgangService.verifiserHarTilgangTilHandling(
+                    minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                    handling = "Registrere manuelt dødsfall",
+                )
+            } throws RolleTilgangskontrollFeil("Krever SAKSBEHANDLER")
+
+            // Act & Assert
+            val feilmelding =
+                assertThrows<RolleTilgangskontrollFeil> {
+                    personController.registrerManuellDødsfallPåPerson(behandlingId, manuellDødsfallDto)
+                }.message
+
+            assertThat(feilmelding).isEqualTo("Krever SAKSBEHANDLER")
+            verify(exactly = 0) { persongrunnlagService.registrerManuellDødsfallPåPerson(any(), any(), any(), any()) }
         }
     }
 }

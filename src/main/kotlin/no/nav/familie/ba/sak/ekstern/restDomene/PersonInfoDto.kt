@@ -120,31 +120,3 @@ fun FalskIdentitetPersonInfo.tilPersonInfoDto(personIdent: String): PersonInfoDt
         harFalskIdentitet = true,
     )
 }
-
-fun PersonInfo.tilPersonInfoMedNavnOgAdresseDto(personIdent: String): PersonInfoDto {
-    val bostedsadresse = this.bostedsadresser.singleOrNull() // det skal kun være en bostedsadresse i PersonInfo uten historikk
-    val postnummer = bostedsadresse?.vegadresse?.postnummer ?: bostedsadresse?.matrikkeladresse?.postnummer
-    return PersonInfoDto(
-        personIdent = personIdent,
-        fødselsdato = this.fødselsdato,
-        navn = this.navn,
-        bostedsadresse =
-            when (postnummer) {
-                null -> {
-                    null
-                }
-
-                else -> {
-                    BostedsadresseDto(
-                        adresse =
-                            bostedsadresse
-                                ?.vegadresse
-                                ?.adressenavn
-                                ?.plus(" ${bostedsadresse.vegadresse?.husnummer ?: ""}")
-                                ?.trim(),
-                        postnummer = postnummer,
-                    )
-                }
-            },
-    )
-}

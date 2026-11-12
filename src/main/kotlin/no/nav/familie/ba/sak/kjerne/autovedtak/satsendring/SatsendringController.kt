@@ -35,6 +35,11 @@ class SatsendringController(
     fun utførSatsendringITaskPåFagsak(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Trigge satsendring for fagsak",
+        )
+
         startSatsendring.opprettSatsendringForFagsak(fagsakId)
         return ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsak $fagsakId"))
     }
@@ -43,6 +48,11 @@ class SatsendringController(
     fun utførSatsendringITaskPåFagsaker(
         @RequestBody fagsaker: Set<Long>,
     ): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Trigge satsendring for fagsaker",
+        )
+
         fagsaker.forEach { startSatsendring.opprettSatsendringForFagsak(it) }
         return ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsakene $fagsaker"))
     }
@@ -65,12 +75,24 @@ class SatsendringController(
     @GetMapping(path = ["/{fagsakId}/kan-kjore-satsendring"])
     fun kanKjøreSatsendringPåFagsak(
         @PathVariable fagsakId: Long,
-    ): ResponseEntity<Ressurs<Boolean>> = ResponseEntity.ok(Ressurs.success(startSatsendring.kanGjennomføreSatsendringManuelt(fagsakId)))
+    ): ResponseEntity<Ressurs<Boolean>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Sjekke om satsendring kan kjøres på fagsak",
+        )
+
+        return ResponseEntity.ok(Ressurs.success(startSatsendring.kanGjennomføreSatsendringManuelt(fagsakId)))
+    }
 
     @PostMapping(path = ["/kjorsatsendringForListeMedIdenter"])
     fun utførSatsendringPåListeIdenter(
         @RequestBody listeMedIdenter: Set<String>,
     ): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Trigge satsendring for liste med identer",
+        )
+
         listeMedIdenter.forEach {
             startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(it)
         }
@@ -79,6 +101,11 @@ class SatsendringController(
 
     @PostMapping(path = ["/saker-uten-sats"])
     fun finnSakerUtenSisteSats(): ResponseEntity<Pair<String, String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Finne løpende fagsaker uten siste sats",
+        )
+
         val callId = UUID.randomUUID().toString()
         val scope = CoroutineScope(SupervisorJob())
         scope.launch {
