@@ -14,12 +14,9 @@ object SikkerhetContext {
         hentSaksbehandler() == SYSTEM_FORKORTELSE &&
             SecurityContextHolder.getContext().authentication !is AnonymousAuthenticationToken
 
-    fun erMaskinTilMaskinToken(): Boolean {
-        val oid = hentClaimFraToken<String>("oid")
-        val sub = hentClaimFraToken<String>("sub")
-        val roles = hentClaimFraToken<List<String>>("roles").orEmpty()
-        return oid != null && oid == sub && roles.contains("access_as_application")
-    }
+    fun erMaskinTilMaskinToken(): Boolean = hentJwt()?.let { erMaskinTilMaskinToken(it) } ?: false
+
+    fun erMaskinTilMaskinToken(jwt: Jwt): Boolean = jwt.getClaimAsString("idtyp") == "app"
 
     fun harInnloggetBrukerForvalterRolle(): Boolean = harRolle(Rolle.FORVALTER)
 

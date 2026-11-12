@@ -50,6 +50,13 @@ class SøknadServiceTest {
                             erFosterbarn = true,
                             erIBeredskapshjem = true,
                             harKryssetForDeltBosted = true,
+                            oppholderSegIInstitusjon = true,
+                            søkerErAsylsøker = true,
+                            barnErAsylsøker = true,
+                            erAdoptertFraUtland = true,
+                            borFastMedSøker = true,
+                            barnHarOppholdtSegUtenforNorgeSiste12Mnd = true,
+                            søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = false,
                         ),
                 )
 
@@ -72,6 +79,13 @@ class SøknadServiceTest {
             assertThat(søknad?.barn?.map { it.erFosterbarn }).containsOnly(true)
             assertThat(søknad?.barn?.map { it.erIBeredskapshjem }).containsOnly(true)
             assertThat(søknad?.barn?.map { it.harKryssetForDeltBosted }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.oppholderSegIInstitusjon }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.erAsylsøker }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.erAdoptertFraUtland }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.borFastMedSøker }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.harOppholdtSegUtenforNorgeSiste12Mnd }).containsOnly(true)
+            assertThat(søknad?.søker?.erAsylsøker).isTrue()
+            assertThat(søknad?.søker?.harOppholdtSegSammenhengendeINorgeSiste12Mnd).isFalse()
         }
 
         @Test
@@ -93,6 +107,13 @@ class SøknadServiceTest {
                             erFosterbarn = true,
                             erIBeredskapshjem = true,
                             harKryssetForDeltBosted = true,
+                            oppholderSegIInstitusjon = true,
+                            søkerErAsylsøker = true,
+                            barnErAsylsøker = true,
+                            erAdoptertFraUtland = true,
+                            borFastMedSøker = true,
+                            barnHarOppholdtSegUtenforNorgeSiste12Mnd = true,
+                            søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = false,
                         ),
                 )
 
@@ -115,6 +136,43 @@ class SøknadServiceTest {
             assertThat(søknad?.barn?.map { it.erFosterbarn }).containsOnly(true)
             assertThat(søknad?.barn?.map { it.erIBeredskapshjem }).containsOnly(true)
             assertThat(søknad?.barn?.map { it.harKryssetForDeltBosted }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.oppholderSegIInstitusjon }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.erAsylsøker }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.erAdoptertFraUtland }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.borFastMedSøker }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.harOppholdtSegUtenforNorgeSiste12Mnd }).containsOnly(true)
+            assertThat(søknad?.søker?.erAsylsøker).isTrue()
+            assertThat(søknad?.søker?.harOppholdtSegSammenhengendeINorgeSiste12Mnd).isFalse()
+        }
+
+        @Test
+        fun `skal mappe hvert svar om institusjon, asyl og adopsjon fra VersjonertBarnetrygdSøknadV10 til riktig felt`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val journalpostId = "123456789"
+            val versjonertBarnetrygdSøknadV10 =
+                VersjonertBarnetrygdSøknadV10(
+                    barnetrygdSøknad =
+                        lagBarnetrygdSøknadV10(
+                            oppholderSegIInstitusjon = false,
+                            søkerErAsylsøker = false,
+                            barnErAsylsøker = true,
+                            erAdoptertFraUtland = true,
+                        ),
+                )
+
+            every { behandlingSøknadsinfoService.finnDigitalSøknad(behandling.id)?.journalpostId } returns journalpostId
+            every { integrasjonKlient.hentVersjonertBarnetrygdSøknad(journalpostId) } returns versjonertBarnetrygdSøknadV10
+            every { søknadMapperLookup.hentSøknadMapperForVersjon(versjonertBarnetrygdSøknadV10.barnetrygdSøknad.kontraktVersjon) } returns SøknadMapperV10()
+
+            // Act
+            val søknad = søknadService.finnDigitalSøknad(behandlingId = behandling.id)
+
+            // Assert
+            assertThat(søknad?.barn?.map { it.oppholderSegIInstitusjon }).containsOnly(false)
+            assertThat(søknad?.søker?.erAsylsøker).isFalse()
+            assertThat(søknad?.barn?.map { it.erAsylsøker }).containsOnly(true)
+            assertThat(søknad?.barn?.map { it.erAdoptertFraUtland }).containsOnly(true)
         }
 
         @Test
@@ -140,6 +198,32 @@ class SøknadServiceTest {
             assertThat(søknad?.barn?.map { it.erFosterbarn }).containsOnly(false)
             assertThat(søknad?.barn?.map { it.erIBeredskapshjem }).containsOnly(false)
             assertThat(søknad?.barn?.map { it.harKryssetForDeltBosted }).containsOnly(false)
+            assertThat(søknad?.barn?.map { it.oppholderSegIInstitusjon }).containsOnly(false)
+            assertThat(søknad?.barn?.map { it.erAsylsøker }).containsOnly(false)
+            assertThat(søknad?.barn?.map { it.erAdoptertFraUtland }).containsOnly(false)
+            assertThat(søknad?.barn?.map { it.harOppholdtSegUtenforNorgeSiste12Mnd }).containsOnly(false)
+            assertThat(søknad?.søker?.erAsylsøker).isFalse()
+        }
+
+        @Test
+        fun `skal mappe at søker har oppholdt seg sammenhengende i Norge når søker har svart ja på spørsmålet i VersjonertBarnetrygdSøknadV10`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val journalpostId = "123456789"
+            val versjonertBarnetrygdSøknadV10 =
+                VersjonertBarnetrygdSøknadV10(
+                    barnetrygdSøknad = lagBarnetrygdSøknadV10(søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd = true),
+                )
+
+            every { behandlingSøknadsinfoService.finnDigitalSøknad(behandling.id)?.journalpostId } returns journalpostId
+            every { integrasjonKlient.hentVersjonertBarnetrygdSøknad(journalpostId) } returns versjonertBarnetrygdSøknadV10
+            every { søknadMapperLookup.hentSøknadMapperForVersjon(versjonertBarnetrygdSøknadV10.barnetrygdSøknad.kontraktVersjon) } returns SøknadMapperV10()
+
+            // Act
+            val søknad = søknadService.finnDigitalSøknad(behandlingId = behandling.id)
+
+            // Assert
+            assertThat(søknad?.søker?.harOppholdtSegSammenhengendeINorgeSiste12Mnd).isTrue()
         }
 
         @Test

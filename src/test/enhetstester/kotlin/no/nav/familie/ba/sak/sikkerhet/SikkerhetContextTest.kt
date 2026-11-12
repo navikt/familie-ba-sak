@@ -79,53 +79,27 @@ class SikkerhetContextTest {
     @Nested
     inner class ErMaskinTilMaskinTokenTest {
         @Test
-        fun `returnerer true når oid er lik sub og roles inneholder access_as_application`() {
+        fun `returnerer true når idtyp er app`() {
             // Arrange
-            val appId = "appId"
-            settSikkerhetscontext(
-                lagJwt(
-                    mapOf(
-                        "oid" to appId,
-                        "sub" to appId,
-                        "roles" to listOf("access_as_application"),
-                    ),
-                ),
-            )
+            settSikkerhetscontext(lagJwt(mapOf("idtyp" to "app")))
 
             // Act & Assert
             assertThat(erMaskinTilMaskinToken()).isTrue()
         }
 
         @Test
-        fun `returnerer false når oid er ulik sub`() {
+        fun `returnerer false når idtyp mangler`() {
             // Arrange
-            settSikkerhetscontext(
-                lagJwt(
-                    mapOf(
-                        "oid" to "oid",
-                        "sub" to "sub",
-                        "roles" to listOf("access_as_application"),
-                    ),
-                ),
-            )
+            settSikkerhetscontext(lagJwt(mapOf("NAVident" to "Z123456")))
 
             // Act & Assert
             assertThat(erMaskinTilMaskinToken()).isFalse()
         }
 
         @Test
-        fun `returnerer false når oid er lik sub men rollen mangler`() {
+        fun `returnerer false når idtyp ikke er app`() {
             // Arrange
-            val appId = "appId"
-            settSikkerhetscontext(
-                lagJwt(
-                    mapOf(
-                        "oid" to appId,
-                        "sub" to appId,
-                        "roles" to emptyList<String>(),
-                    ),
-                ),
-            )
+            settSikkerhetscontext(lagJwt(mapOf("idtyp" to "user")))
 
             // Act & Assert
             assertThat(erMaskinTilMaskinToken()).isFalse()

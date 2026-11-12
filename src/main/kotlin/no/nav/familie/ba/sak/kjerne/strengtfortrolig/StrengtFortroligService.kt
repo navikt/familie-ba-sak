@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.strengtfortrolig
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.BaseFagsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -13,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelserDto
 import no.nav.familie.ba.sak.sikkerhet.PersonTilgang
 import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
@@ -167,41 +167,14 @@ class StrengtFortroligService(
         }
     }
 
-    fun anonymiserFagsakDto(
-        baseFagsakDto: BaseFagsakDto,
+    fun anonymiserUtbetalingsperioder(
+        utbetalingsperioder: List<Utbetalingsperiode>,
         fagsak: Fagsak,
-    ): BaseFagsakDto {
+    ): List<Utbetalingsperiode> {
         val skjermedeIdenter =
-            hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak).takeIf { it.isNotEmpty() } ?: return baseFagsakDto
+            hentSkjermedeBarnUtenLøpendeAndelerSaksbehandlerIkkeHarTilgangTil(fagsak).takeIf { it.isNotEmpty() } ?: return utbetalingsperioder
 
-        val anonymiserteNavnForIdent = byggAnonymiserteNavn(skjermedeIdenter)
-
-        val anonymiserteUtbetalingsperioder =
-            baseFagsakDto.gjeldendeUtbetalingsperioder.map { periode ->
-                periode.copy(
-                    utbetalingsperiodeDetaljer =
-                        periode.utbetalingsperiodeDetaljer.map { detalj ->
-                            detalj.person.personIdent.anonymiserHvisSkjermet(anonymiserteNavnForIdent)?.let {
-                                detalj.copy(person = detalj.person.anonymiser(it))
-                            } ?: detalj
-                        },
-                )
-            }
-
-        return BaseFagsakDto(
-            opprettetTidspunkt = baseFagsakDto.opprettetTidspunkt,
-            id = baseFagsakDto.id,
-            fagsakeier = baseFagsakDto.fagsakeier,
-            søkerFødselsnummer = baseFagsakDto.søkerFødselsnummer,
-            status = baseFagsakDto.status,
-            underBehandling = baseFagsakDto.underBehandling,
-            løpendeKategori = baseFagsakDto.løpendeKategori,
-            løpendeUnderkategori = baseFagsakDto.løpendeUnderkategori,
-            gjeldendeUtbetalingsperioder = anonymiserteUtbetalingsperioder,
-            fagsakType = baseFagsakDto.fagsakType,
-            institusjon = baseFagsakDto.institusjon,
-            finnesStrengtFortroligPersonIFagsak = baseFagsakDto.finnesStrengtFortroligPersonIFagsak,
-        )
+        return utbetalingsperioder.anonymiser(byggAnonymiserteNavn(skjermedeIdenter))
     }
 
     /**
@@ -304,6 +277,18 @@ class StrengtFortroligService(
             harFalskIdentitet = false,
             skjermesForBruker = true,
         )
+
+    private fun List<Utbetalingsperiode>.anonymiser(anonymiserteNavnForIdent: Map<String, String>) =
+        map { periode ->
+            periode.copy(
+                utbetalingsperiodeDetaljer =
+                    periode.utbetalingsperiodeDetaljer.map { detalj ->
+                        detalj.person.personIdent.anonymiserHvisSkjermet(anonymiserteNavnForIdent)?.let {
+                            detalj.copy(person = detalj.person.anonymiser(it))
+                        } ?: detalj
+                    },
+            )
+        }
 
     private fun String.anonymiserHvisSkjermet(identerSomSkalAnonymiseres: Map<String, String>) = identerSomSkalAnonymiseres[this]
 

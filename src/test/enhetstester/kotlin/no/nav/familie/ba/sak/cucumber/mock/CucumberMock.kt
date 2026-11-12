@@ -249,7 +249,6 @@ class CucumberMock(
     val strengtFortroligService =
         mockk<StrengtFortroligService>().also {
             every { it.anonymiserSkjermetBarnIVedtaksperioder(any(), any()) } answers { firstArg() }
-            every { it.anonymiserFagsakDto(any(), any()) } answers { firstArg() }
         }
 
     val vedtaksperiodeService =
@@ -569,7 +568,6 @@ class CucumberMock(
 
     val preutfyllBosattIRiketService =
         PreutfyllBosattIRiketService(
-            søknadService = mockk(),
             persongrunnlagService = persongrunnlagService,
             featureToggleService = featureToggleService,
         )
@@ -597,6 +595,7 @@ class CucumberMock(
             preutfyllBorMedSøkerService = preutfyllBorMedSøkerService,
             preutfyllBosattIRiketForFødselshendelserService = preutfyllBosattIRiketForFødselshendelserService,
             persongrunnlagService = persongrunnlagService,
+            søknadService = mockk(),
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             featureToggleService = featureToggleService,
         )

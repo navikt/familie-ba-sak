@@ -124,12 +124,129 @@ class SøknadTest {
         }
     }
 
+    @Nested
+    inner class HarKryssetForInstitusjonForMinstEttBarn {
+        @Test
+        fun `skal gi true når kun det siste barnet oppholder seg i institusjon`() {
+            // Arrange
+            val søknad =
+                lagSøknadMedBarn(
+                    lagBarn(oppholderSegIInstitusjon = false),
+                    lagBarn(oppholderSegIInstitusjon = true),
+                )
+
+            // Act & Assert
+            assertThat(søknad.harKryssetForInstitusjonForMinstEttBarn()).isTrue()
+        }
+
+        @Test
+        fun `skal gi false når ingen av barna oppholder seg i institusjon`() {
+            // Arrange
+            val søknad =
+                lagSøknadMedBarn(
+                    lagBarn(oppholderSegIInstitusjon = false),
+                    lagBarn(oppholderSegIInstitusjon = false),
+                )
+
+            // Act & Assert
+            assertThat(søknad.harKryssetForInstitusjonForMinstEttBarn()).isFalse()
+        }
+
+        @Test
+        fun `skal gi false når søknaden ikke har barn`() {
+            // Arrange
+            val søknad = lagSøknadMedBarn()
+
+            // Act & Assert
+            assertThat(søknad.harKryssetForInstitusjonForMinstEttBarn()).isFalse()
+        }
+    }
+
+    @Nested
+    inner class HarKryssetForAsylsøkerForSøkerEllerMinstEttBarn {
+        @Test
+        fun `skal gi true når søker er asylsøker`() {
+            // Arrange
+            val søknad = lagSøknad(søkerErAsylsøker = true)
+
+            // Act & Assert
+            assertThat(søknad.harKryssetForAsylsøkerForSøkerEllerMinstEttBarn()).isTrue()
+        }
+
+        @Test
+        fun `skal gi true når kun det siste barnet er asylsøker`() {
+            // Arrange
+            val søknad =
+                lagSøknadMedBarn(
+                    lagBarn(erAsylsøker = false),
+                    lagBarn(erAsylsøker = true),
+                )
+
+            // Act & Assert
+            assertThat(søknad.harKryssetForAsylsøkerForSøkerEllerMinstEttBarn()).isTrue()
+        }
+
+        @Test
+        fun `skal gi false når verken søker eller barna er asylsøkere`() {
+            // Arrange
+            val søknad =
+                lagSøknadMedBarn(
+                    lagBarn(erAsylsøker = false),
+                    lagBarn(erAsylsøker = false),
+                )
+
+            // Act & Assert
+            assertThat(søknad.harKryssetForAsylsøkerForSøkerEllerMinstEttBarn()).isFalse()
+        }
+    }
+
+    @Nested
+    inner class HarKryssetForAdoptertFraUtlandetForMinstEttBarn {
+        @Test
+        fun `skal gi true når kun det siste barnet er adoptert fra utlandet`() {
+            // Arrange
+            val søknad =
+                lagSøknadMedBarn(
+                    lagBarn(erAdoptertFraUtland = false),
+                    lagBarn(erAdoptertFraUtland = true),
+                )
+
+            // Act & Assert
+            assertThat(søknad.harKryssetForAdoptertFraUtlandetForMinstEttBarn()).isTrue()
+        }
+
+        @Test
+        fun `skal gi false når ingen av barna er adoptert fra utlandet`() {
+            // Arrange
+            val søknad =
+                lagSøknadMedBarn(
+                    lagBarn(erAdoptertFraUtland = false),
+                    lagBarn(erAdoptertFraUtland = false),
+                )
+
+            // Act & Assert
+            assertThat(søknad.harKryssetForAdoptertFraUtlandetForMinstEttBarn()).isFalse()
+        }
+
+        @Test
+        fun `skal gi false når søknaden ikke har barn`() {
+            // Arrange
+            val søknad = lagSøknadMedBarn()
+
+            // Act & Assert
+            assertThat(søknad.harKryssetForAdoptertFraUtlandetForMinstEttBarn()).isFalse()
+        }
+    }
+
     private fun lagSøknadMedBarn(vararg barn: Barn): Søknad = lagSøknad().copy(barn = barn.toList())
 
     private fun lagBarn(
         erFosterbarn: Boolean = false,
         erIBeredskapshjem: Boolean = false,
         harKryssetForDeltBosted: Boolean = false,
+        oppholderSegIInstitusjon: Boolean = false,
+        erAsylsøker: Boolean = false,
+        erAdoptertFraUtland: Boolean = false,
     ): Barn =
         Barn(
             fnr = randomFnr(),
@@ -137,5 +254,10 @@ class SøknadTest {
             erFosterbarn = erFosterbarn,
             erIBeredskapshjem = erIBeredskapshjem,
             harKryssetForDeltBosted = harKryssetForDeltBosted,
+            oppholderSegIInstitusjon = oppholderSegIInstitusjon,
+            erAsylsøker = erAsylsøker,
+            erAdoptertFraUtland = erAdoptertFraUtland,
+            borFastMedSøker = true,
+            harOppholdtSegUtenforNorgeSiste12Mnd = false,
         )
 }

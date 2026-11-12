@@ -344,6 +344,54 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
         }
 
         @Test
+        fun `skal avvise når søker har krysset for at barn er i institusjon i søknaden`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerHarKryssetForInstitusjonISøknaden = true)
+
+            // Act
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_INSTITUSJON_I_SØKNADEN)
+        }
+
+        @Test
+        fun `skal avvise når søker har krysset for at søker eller barn er asylsøker i søknaden`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerHarKryssetForAsylsøkerISøknaden = true)
+
+            // Act
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN)
+        }
+
+        @Test
+        fun `skal avvise når søker har krysset for at barn er adoptert fra utlandet i søknaden`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søkerHarKryssetForAdoptertFraUtlandetISøknaden = true)
+
+            // Act
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_ADOPTERT_FRA_UTLANDET_I_SØKNADEN)
+        }
+
+        @Test
         fun `skal avvise når søknaden inneholder vedlegg`() {
             // Arrange
             val fakta = lagFiltreringsreglerFaktaSøknad(søknadenInneholderVedlegg = true)

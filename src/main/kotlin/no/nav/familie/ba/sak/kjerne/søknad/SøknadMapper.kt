@@ -4,7 +4,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
 import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
 import no.nav.familie.kontrakter.ba.søknad.v8.AndreForelder
+import no.nav.familie.kontrakter.ba.søknad.v9.SøknadsFeltId
 import no.nav.familie.kontrakter.ba.søknad.v9.bokmålsverdi
+import no.nav.familie.kontrakter.ba.søknad.v9.hentVerdiForSøknadsfelt
 import no.nav.familie.kontrakter.ba.søknad.v9.tilBoolskSvar
 import no.nav.familie.kontrakter.felles.søknad.BaSøknaddokumentasjon
 import no.nav.familie.kontrakter.felles.søknad.MissingVersionException
@@ -17,9 +19,12 @@ interface SøknadMapper {
     fun mapTilSøknad(versjonertBarnetrygdSøknad: VersjonertBarnetrygdSøknad): Søknad
 
     companion object {
-        // SøknadsFeltId i kontrakten har ingen verdi for fosterbarn, så feltet slås opp på nøkkelen sin
+        // SøknadsFeltId i kontrakten har ingen verdi for disse feltene, så de slås opp på nøkkelen sin
         private const val ER_FOSTERBARN = "erFosterbarn"
         private const val ER_I_BEREDSKAPSHJEM = "erIBeredskapshjem"
+        private const val OPPHOLDER_SEG_I_INSTITUSJON = "oppholderSegIInstitusjon"
+        private const val ER_ASYLSØKER = "erAsylsøker"
+        private const val BOR_FAST_MED_SØKER = "borFastMedSøker"
 
         fun Søknadstype.tilBehandlingUnderkategori(): BehandlingUnderkategori =
             when (this) {
@@ -31,6 +36,19 @@ interface SøknadMapper {
         fun Map<String, Søknadsfelt<Any>>.erFosterbarn(): Boolean = this[ER_FOSTERBARN]?.bokmålsverdi().tilBoolskSvar()
 
         fun Map<String, Søknadsfelt<Any>>.erIBeredskapshjem(): Boolean = this[ER_I_BEREDSKAPSHJEM]?.bokmålsverdi().tilBoolskSvar()
+
+        fun Map<String, Søknadsfelt<Any>>.oppholderSegIInstitusjon(): Boolean = this[OPPHOLDER_SEG_I_INSTITUSJON]?.bokmålsverdi().tilBoolskSvar()
+
+        fun Map<String, Søknadsfelt<Any>>.erAsylsøker(): Boolean = this[ER_ASYLSØKER]?.bokmålsverdi().tilBoolskSvar()
+
+        fun Map<String, Søknadsfelt<Any>>.erAdoptertFraUtland(): Boolean = this.hentVerdiForSøknadsfelt(SøknadsFeltId.ER_ADOPTERT_FRA_UTLAND).tilBoolskSvar()
+
+        fun Map<String, Søknadsfelt<Any>>.borFastMedSøker(): Boolean = this[BOR_FAST_MED_SØKER]?.bokmålsverdi().tilBoolskSvar()
+
+        fun Map<String, Søknadsfelt<Any>>.harOppholdtSegUtenforNorgeSiste12Mnd(): Boolean = this.hentVerdiForSøknadsfelt(SøknadsFeltId.BODD_MINDRE_ENN_12_MND_I_NORGE).tilBoolskSvar()
+
+        // Søknader uten svaret regnes som ja
+        fun Map<String, Søknadsfelt<Any>>.harOppholdtSegSammenhengendeINorgeSiste12Mnd(): Boolean = this.hentVerdiForSøknadsfelt(SøknadsFeltId.VÆRT_I_NORGE_I_TOLV_MÅNEDER)?.tilBoolskSvar() ?: true
 
         fun AndreForelder?.harKryssetForDeltBosted(): Boolean = this?.skriftligAvtaleOmDeltBosted?.bokmålsverdi().tilBoolskSvar()
 

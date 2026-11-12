@@ -30,26 +30,44 @@ class JournalføringController(
     @GetMapping(path = ["/{journalpostId}/hent"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentJournalpost(
         @PathVariable journalpostId: String,
-    ): ResponseEntity<Ressurs<Journalpost>> = ResponseEntity.ok(Ressurs.success(innkommendeJournalføringService.hentJournalpost(journalpostId)))
+    ): ResponseEntity<Ressurs<Journalpost>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "Hente journalpost",
+        )
+
+        return ResponseEntity.ok(Ressurs.success(innkommendeJournalføringService.hentJournalpost(journalpostId)))
+    }
 
     @PostMapping(path = ["/for-bruker"])
     fun hentJournalposterForBruker(
         @RequestBody personIdentBody: PersonIdent,
-    ): ResponseEntity<Ressurs<List<TilgangsstyrtJournalpost>>> =
-        ResponseEntity.ok(
+    ): ResponseEntity<Ressurs<List<TilgangsstyrtJournalpost>>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "Hente journalposter for bruker",
+        )
+
+        return ResponseEntity.ok(
             Ressurs.success(
                 innkommendeJournalføringService.hentJournalposterForBruker(
                     personIdentBody.ident,
                 ),
             ),
         )
+    }
 
     @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
     fun hentDokument(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String,
-    ): ResponseEntity<Ressurs<ByteArray>> =
-        ResponseEntity.ok(
+    ): ResponseEntity<Ressurs<ByteArray>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "Hente dokument",
+        )
+
+        return ResponseEntity.ok(
             Ressurs.success(
                 innkommendeJournalføringService.hentDokument(
                     journalpostId,
@@ -57,6 +75,7 @@ class JournalføringController(
                 ),
             ),
         )
+    }
 
     @GetMapping(
         path = ["/{journalpostId}/dokument/{dokumentInfoId}"],
@@ -65,7 +84,14 @@ class JournalføringController(
     fun hentDokumentBytearray(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String,
-    ): ResponseEntity<ByteArray> = ResponseEntity.ok(innkommendeJournalføringService.hentDokument(journalpostId, dokumentInfoId))
+    ): ResponseEntity<ByteArray> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "Hente dokument",
+        )
+
+        return ResponseEntity.ok(innkommendeJournalføringService.hentDokument(journalpostId, dokumentInfoId))
+    }
 
     @PostMapping(path = ["/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun journalførV2(

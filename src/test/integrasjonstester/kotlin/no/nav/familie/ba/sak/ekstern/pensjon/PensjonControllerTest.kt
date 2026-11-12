@@ -70,5 +70,5 @@ class PensjonControllerTest : WebSpringAuthTestRunner() {
         assertThat(error.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
     }
 
-    private fun hentTokenForPsys() = token(mapOf("azp_name" to "dev-gcp:pensjonopptjening:omsorgsopptjening-start-innlesning"))
+    private fun hentTokenForPsys() = hentMaskinTilMaskinToken("dev-gcp:pensjonopptjening:omsorgsopptjening-start-innlesning")
 }

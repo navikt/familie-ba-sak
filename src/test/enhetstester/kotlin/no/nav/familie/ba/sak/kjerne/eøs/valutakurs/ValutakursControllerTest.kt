@@ -5,14 +5,19 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.datagenerator.lagAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.UtfyltStatus
 import no.nav.familie.ba.sak.ekstern.restDomene.ValutakursDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -142,5 +147,58 @@ class ValutakursControllerTest {
         // Assert
         verify(exactly = 1) { ecbService.hentValutakurs("ISK", valutakursDato) }
         verify(exactly = 1) { valutakursService.oppdaterValutakurs(any(), any()) }
+    }
+
+    @Test
+    fun `skal kreve saksbehandlerrolle og at behandlingen kan redigeres for å endre vurderingsstrategi`() {
+        // Arrange
+        every { automatiskOppdaterValutakursService.endreVurderingsstrategiForValutakurser(any(), any()) } returns mockk()
+        every { utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = 1) } returns mockk()
+
+        // Act
+        valutakursController.endreVurderingsstrategiForValutakurser(1, VurderingsstrategiForValutakurser.MANUELL)
+
+        // Assert
+        verify(exactly = 1) {
+            tilgangService.verifiserHarTilgangTilHandling(
+                minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                handling = "Endrer vurderingsstrategi for valutakurser",
+            )
+        }
+        verify(exactly = 1) { tilgangService.validerKanRedigereBehandling(1) }
+        verify(exactly = 1) { automatiskOppdaterValutakursService.endreVurderingsstrategiForValutakurser(BehandlingId(1), VurderingsstrategiForValutakurser.MANUELL) }
+    }
+
+    @Test
+    fun `skal ikke endre vurderingsstrategi når kaller ikke er saksbehandler`() {
+        // Arrange
+        every {
+            tilgangService.verifiserHarTilgangTilHandling(
+                minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                handling = "Endrer vurderingsstrategi for valutakurser",
+            )
+        } throws RolleTilgangskontrollFeil("Krever SAKSBEHANDLER")
+
+        // Act & Assert
+        val feilmelding =
+            assertThrows<RolleTilgangskontrollFeil> {
+                valutakursController.endreVurderingsstrategiForValutakurser(1, VurderingsstrategiForValutakurser.MANUELL)
+            }.message
+
+        assertThat(feilmelding).isEqualTo("Krever SAKSBEHANDLER")
+        verify(exactly = 0) { automatiskOppdaterValutakursService.endreVurderingsstrategiForValutakurser(any(), any()) }
+    }
+
+    @Test
+    fun `skal ikke endre vurderingsstrategi når behandlingen ikke kan redigeres`() {
+        // Arrange
+        every { tilgangService.validerKanRedigereBehandling(1) } throws FunksjonellFeil("Behandlingen er låst for videre redigering")
+
+        // Act & Assert
+        assertThrows<FunksjonellFeil> {
+            valutakursController.endreVurderingsstrategiForValutakurser(1, VurderingsstrategiForValutakurser.MANUELL)
+        }
+
+        verify(exactly = 0) { automatiskOppdaterValutakursService.endreVurderingsstrategiForValutakurser(any(), any()) }
     }
 }

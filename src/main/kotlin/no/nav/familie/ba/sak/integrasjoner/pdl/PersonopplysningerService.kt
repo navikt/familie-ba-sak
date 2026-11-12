@@ -140,16 +140,6 @@ class PersonopplysningerService(
         }
     }
 
-    fun hentPdlPersoninfoNavnOgAdresse(aktør: Aktør): PdlPersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.NAVN_OG_ADRESSE)
-
-    fun hentPersoninfoNavnOgAdresse(aktør: Aktør): PersonInfo {
-        val pdlPersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.NAVN_OG_ADRESSE)
-        when (pdlPersonInfo) {
-            is PdlPersonInfo.Person -> return pdlPersonInfo.personInfo
-            else -> throw FunksjonellFeil(PERSON_HAR_FALSK_IDENTITET)
-        }
-    }
-
     private fun hentPersoninfoMedQuery(
         aktør: Aktør,
         personInfoQuery: PersonInfoQuery,

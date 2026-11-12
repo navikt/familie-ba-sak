@@ -2,10 +2,16 @@ package no.nav.familie.ba.sak.kjerne.søknad
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.borFastMedSøker
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erAdoptertFraUtland
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erAsylsøker
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erFosterbarn
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erIBeredskapshjem
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harKryssetForDeltBosted
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harOppholdtSegSammenhengendeINorgeSiste12Mnd
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harOppholdtSegUtenforNorgeSiste12Mnd
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.inneholderVedlegg
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.oppholderSegIInstitusjon
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.tilBehandlingUnderkategori
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
@@ -31,6 +37,12 @@ class SøknadMapperV9 : SøknadMapper {
                         versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.spørsmål
                             .hentVerdiForSøknadsfelt(SøknadsFeltId.PLANLEGGER_Å_BO_I_NORGE_12_MND_SØKER)
                             .tilBoolskSvar(),
+                    erAsylsøker =
+                        versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.spørsmål
+                            .erAsylsøker(),
+                    harOppholdtSegSammenhengendeINorgeSiste12Mnd =
+                        versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.spørsmål
+                            .harOppholdtSegSammenhengendeINorgeSiste12Mnd(),
                 ),
             barn =
                 versjonertBarnetrygdSøknad.barnetrygdSøknad.barn
@@ -41,6 +53,11 @@ class SøknadMapperV9 : SøknadMapper {
                             erFosterbarn = it.spørsmål.erFosterbarn(),
                             erIBeredskapshjem = it.spørsmål.erIBeredskapshjem(),
                             harKryssetForDeltBosted = it.andreForelder.harKryssetForDeltBosted(),
+                            oppholderSegIInstitusjon = it.spørsmål.oppholderSegIInstitusjon(),
+                            erAsylsøker = it.spørsmål.erAsylsøker(),
+                            erAdoptertFraUtland = it.spørsmål.erAdoptertFraUtland(),
+                            borFastMedSøker = it.spørsmål.borFastMedSøker(),
+                            harOppholdtSegUtenforNorgeSiste12Mnd = it.spørsmål.harOppholdtSegUtenforNorgeSiste12Mnd(),
                         )
                     },
             behandlingUnderkategori = versjonertBarnetrygdSøknad.barnetrygdSøknad.søknadstype.tilBehandlingUnderkategori(),

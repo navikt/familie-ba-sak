@@ -1,17 +1,21 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.erSammeAdresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.søknad.Søknad
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_DELT_BOSTED
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
@@ -32,6 +36,7 @@ class PreutfyllBorMedSøkerService(
     fun preutfyllBorMedSøker(
         vilkårsvurdering: Vilkårsvurdering,
         aktørerVilkårSkalPreutfyllesFor: List<Aktør>,
+        digitalSøknad: Søknad?,
     ) {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
         val bostedsadresserSøker = Adresser.opprettFra(personopplysningGrunnlag.søker)
@@ -41,16 +46,20 @@ class PreutfyllBorMedSøkerService(
             .filter { it.aktør in aktørerVilkårSkalPreutfyllesFor }
             .forEach { personResultat ->
                 try {
-                    val barn = personResultat.aktør.tilPerson(personopplysningGrunnlag)
-                    val adresserForBarn = Adresser.opprettFra(barn)
-
                     val nyeBorMedSøkerVilkårResultat =
-                        genererBorMedSøkerVilkårResultat(
-                            personResultat = personResultat,
-                            bostedsadresserBarn = adresserForBarn,
-                            bostedsadresserSøker = bostedsadresserSøker,
-                            barnFødselsdato = barn.fødselsdato,
-                        )
+                        if (erOppgittISøknadAtBarnetIkkeBorFastMedSøker(digitalSøknad, personResultat)) {
+                            setOf(lagIkkeVurdertBorMedSøkerVilkårResultat(personResultat))
+                        } else {
+                            val barn = personResultat.aktør.tilPerson(personopplysningGrunnlag)
+                            val adresserForBarn = Adresser.opprettFra(barn)
+
+                            genererBorMedSøkerVilkårResultat(
+                                personResultat = personResultat,
+                                bostedsadresserBarn = adresserForBarn,
+                                bostedsadresserSøker = bostedsadresserSøker,
+                                barnFødselsdato = barn.fødselsdato,
+                            )
+                        }
 
                     if (nyeBorMedSøkerVilkårResultat.isNotEmpty()) {
                         personResultat.vilkårResultater.removeIf { it.vilkårType == BOR_MED_SØKER }
@@ -64,6 +73,23 @@ class PreutfyllBorMedSøkerService(
                 }
             }
     }
+
+    private fun erOppgittISøknadAtBarnetIkkeBorFastMedSøker(
+        digitalSøknad: Søknad?,
+        personResultat: PersonResultat,
+    ): Boolean = digitalSøknad?.barn?.find { personResultat.aktør.harIdent(it.fnr) }?.borFastMedSøker == false
+
+    private fun lagIkkeVurdertBorMedSøkerVilkårResultat(personResultat: PersonResultat): VilkårResultat =
+        VilkårResultat(
+            personResultat = personResultat,
+            erAutomatiskVurdert = false,
+            resultat = Resultat.IKKE_VURDERT,
+            vilkårType = BOR_MED_SØKER,
+            begrunnelse = IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + "- Søker har oppgitt i søknaden at barnet ikke bor fast med søker.",
+            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+            erOpprinneligPreutfyltIBehandling = personResultat.vilkårsvurdering.behandling.id,
+            begrunnelseForManuellKontroll = SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER,
+        )
 
     private fun genererBorMedSøkerVilkårResultat(
         personResultat: PersonResultat,

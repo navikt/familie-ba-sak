@@ -109,6 +109,8 @@ spec:
           cluster: prod-gcp
         - application: familie-integrasjoner
           cluster: prod-fss
+        - application: familie-integrasjoner
+          cluster: prod-gcp
         - application: populasjonstilgangskontroll
           namespace: tilgangsmaskin
           cluster: prod-gcp

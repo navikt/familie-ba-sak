@@ -38,7 +38,9 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
             IntegrasjonKlient(
                 URI.create(wireMockServer.baseUrl() + "/api"),
                 restClient,
-                mockk(),
+                URI.create(wireMockServer.baseUrl() + "/api"),
+                restClient,
+                mockk(relaxed = true),
                 1,
             )
     }

@@ -66,13 +66,23 @@ const val DEFAULT_JOURNALFØRENDE_ENHET = "9999"
 
 @Component
 class IntegrasjonKlient(
-    @param:Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
-    @param:Qualifier("integrasjonerRestClient") private val restClient: RestClient,
+    @param:Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonFssUri: URI,
+    @param:Qualifier("integrasjonerRestClient") private val restClientFss: RestClient,
+    @param:Value("\${FAMILIE_INTEGRASJONER_GCP_API_URL}") private val integrasjonGcpUri: URI,
+    @param:Qualifier("integrasjonerGcpRestClient") private val restClientGcp: RestClient,
     private val featureToggleService: FeatureToggleService,
     @param:Value(RETRY_BACKOFF_5000MS) private val retryBackoffDelay: Long,
 ) {
+    private fun hentIntegrasjonKlient(): Pair<URI, RestClient> =
+        if (featureToggleService.isEnabled(FeatureToggle.BRUK_FAMILIE_INTEGRASJONER_I_GCP, defaultValue = false)) {
+            integrasjonGcpUri to restClientGcp
+        } else {
+            integrasjonFssUri to restClientFss
+        }
+
     @Cacheable("alle-eøs-land", cacheManager = "dailyCache")
     fun hentAlleEØSLand(): KodeverkDto {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/eea")
 
         return kallEksternTjenesteRessurs(
@@ -94,6 +104,7 @@ class IntegrasjonKlient(
             throw Feil("Støtter bare landkoder med tre bokstaver")
         }
 
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/$landkode")
 
         return kallEksternTjenesteRessurs(
@@ -111,6 +122,7 @@ class IntegrasjonKlient(
 
     @Cacheable("poststeder", cacheManager = "dailyCache")
     fun hentPoststeder(): KodeverkDto {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/kodeverk/poststed")
 
         return kallEksternTjenesteRessurs(
@@ -133,6 +145,7 @@ class IntegrasjonKlient(
         ident: String,
         behandlingstype: Behandlingstype? = null,
     ): List<Arbeidsfordelingsenhet> {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri =
             UriComponentsBuilder
                 .fromUri(integrasjonUri)
@@ -165,6 +178,7 @@ class IntegrasjonKlient(
 
     @Cacheable("saksbehandler", cacheManager = "shortCache")
     fun hentSaksbehandler(id: String): Saksbehandler {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri =
             UriComponentsBuilder
                 .fromUri(integrasjonUri)
@@ -189,6 +203,7 @@ class IntegrasjonKlient(
 
     @Cacheable("saksbehandler", cacheManager = "shortCache")
     fun hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent: NavIdent): List<BarnetrygdEnhet> {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri =
             UriComponentsBuilder
                 .fromUri(integrasjonUri)
@@ -220,6 +235,7 @@ class IntegrasjonKlient(
         ident: String,
         ansettelsesperiodeFom: LocalDate,
     ): List<Arbeidsforhold> {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri =
             UriComponentsBuilder
                 .fromUri(integrasjonUri)
@@ -244,6 +260,7 @@ class IntegrasjonKlient(
     }
 
     fun distribuerBrev(distribuerDokumentDTO: DistribuerDokumentDTO): String {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/dist/v1")
 
         val resultat: String =
@@ -289,6 +306,7 @@ class IntegrasjonKlient(
         )
 
     fun ferdigstillOppgave(oppgaveId: Long) {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId/ferdigstill")
 
         kallEksternTjenesteUtenRespons<OppgaveResponse>(
@@ -308,6 +326,7 @@ class IntegrasjonKlient(
     fun oppdaterOppgave(
         oppdatertOppgave: Oppgave,
     ) {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/oppgave/${oppdatertOppgave.id}/oppdater")
 
         kallEksternTjenesteUtenRespons<OppgaveResponse>(
@@ -326,6 +345,7 @@ class IntegrasjonKlient(
 
     @Cacheable("enhet", cacheManager = "dailyCache")
     fun hentEnhet(enhetId: String): NavKontorEnhet {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/arbeidsfordeling/nav-kontor/$enhetId")
 
         return kallEksternTjenesteRessurs(
@@ -342,6 +362,7 @@ class IntegrasjonKlient(
     }
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/oppgave/opprett")
 
         return kallEksternTjenesteRessurs(
@@ -360,6 +381,7 @@ class IntegrasjonKlient(
     }
 
     fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/oppgave/${patchOppgave.id}/oppdater")
 
         return kallEksternTjenesteRessurs(
@@ -381,6 +403,7 @@ class IntegrasjonKlient(
         oppgaveId: Long,
         saksbehandler: String?,
     ): OppgaveResponse {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/fordel")
         val uri =
             if (saksbehandler == null) {
@@ -411,6 +434,7 @@ class IntegrasjonKlient(
         oppgaveId: Long,
         nyEnhet: String,
     ): OppgaveResponse {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/enhet/$nyEnhet")
         val uri =
             UriComponentsBuilder
@@ -439,6 +463,7 @@ class IntegrasjonKlient(
         nyEnhet: String,
         nyMappe: Long?,
     ): OppgaveResponse {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/enhet/$nyEnhet")
         val uri =
             UriComponentsBuilder
@@ -464,6 +489,7 @@ class IntegrasjonKlient(
     }
 
     fun finnOppgaveMedId(oppgaveId: Long): Oppgave {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId")
 
         return kallEksternTjenesteRessurs(
@@ -480,6 +506,7 @@ class IntegrasjonKlient(
     }
 
     fun hentJournalpost(journalpostId: String): Journalpost {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/journalpost/tilgangsstyrt/baks?journalpostId=$journalpostId")
 
         return kallEksternTjenesteRessurs(
@@ -498,6 +525,7 @@ class IntegrasjonKlient(
     }
 
     fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/journalpost")
 
         return kallEksternTjenesteRessurs(
@@ -517,6 +545,7 @@ class IntegrasjonKlient(
     }
 
     fun hentTilgangsstyrteJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<TilgangsstyrtJournalpost> {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/journalpost/tilgangsstyrt/baks")
 
         return kallEksternTjenesteRessurs(
@@ -536,6 +565,7 @@ class IntegrasjonKlient(
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/oppgave/v4")
 
         return kallEksternTjenesteRessurs(
@@ -557,6 +587,7 @@ class IntegrasjonKlient(
         journalpostId: String,
         journalførendeEnhet: String,
     ) {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri =
             URI.create("$integrasjonUri/arkiv/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet")
 
@@ -575,6 +606,7 @@ class IntegrasjonKlient(
     }
 
     fun avsluttSak(request: AvsluttSakRequest) {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/arkiv/avsluttSak")
 
         try {
@@ -600,6 +632,7 @@ class IntegrasjonKlient(
     }
 
     fun gjenåpneSakIDokarkiv(request: GjenåpneSakRequest) {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/arkiv/gjenaapneSak")
 
         try {
@@ -628,6 +661,7 @@ class IntegrasjonKlient(
         request: OppdaterJournalpostRequest,
         journalpostId: String,
     ): OppdaterJournalpostResponse {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId")
 
         return kallEksternTjenesteRessurs(
@@ -648,6 +682,7 @@ class IntegrasjonKlient(
         dokumentInfoId: String,
         request: BulkOppdaterLogiskVedleggRequest,
     ) {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentInfoId/logiskVedlegg")
 
         kallEksternTjenesteRessurs<String>(
@@ -668,6 +703,7 @@ class IntegrasjonKlient(
         dokumentInfoId: String,
         journalpostId: String,
     ): ByteArray {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/journalpost/hentdokument/tilgangsstyrt/baks/$journalpostId/$dokumentInfoId")
 
         return kallEksternTjenesteRessurs(
@@ -686,6 +722,7 @@ class IntegrasjonKlient(
     fun journalførDokument(
         arkiverDokumentRequest: ArkiverDokumentRequest,
     ): ArkiverDokumentResponse {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/arkiv/v4")
 
         return kallEksternTjenesteRessurs(
@@ -706,6 +743,7 @@ class IntegrasjonKlient(
         aktør: Aktør,
         fagsakId: Long,
     ) {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/skyggesak/v1")
 
         kallEksternTjenesteUtenRespons<Unit>(
@@ -724,6 +762,7 @@ class IntegrasjonKlient(
 
     @Cacheable("landkoder-ISO_3166-1_alfa-2", cacheManager = "dailyCache")
     fun hentLandkoderISO2(): Map<String, String> {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/kodeverk/landkoderISO2")
 
         return kallEksternTjenesteRessurs(
@@ -740,6 +779,7 @@ class IntegrasjonKlient(
     }
 
     fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/organisasjon/$organisasjonsnummer")
         return kallEksternTjenesteRessurs(
             tjeneste = "organisasjon",
@@ -755,6 +795,7 @@ class IntegrasjonKlient(
     }
 
     fun hentDistribusjonskanal(request: DokdistkanalRequest): Distribusjonskanal {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/dokdistkanal/BAR")
         return kallEksternTjenesteRessurs(
             tjeneste = "dokdistkanal",
@@ -771,6 +812,7 @@ class IntegrasjonKlient(
     }
 
     fun settNyAktivBrukerIModiaContext(nyAktivBruker: NyAktivBrukerIModiaContextDto): ModiaContext {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/modia-context-holder/sett-aktiv-bruker")
         return kallEksternTjenesteRessurs(
             tjeneste = "modia.context.holder.sett",
@@ -788,6 +830,7 @@ class IntegrasjonKlient(
     }
 
     fun hentModiaContext(): ModiaContext {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/modia-context-holder")
         return kallEksternTjenesteRessurs(
             tjeneste = "modia.context.holder.hent",
@@ -803,6 +846,7 @@ class IntegrasjonKlient(
     }
 
     fun hentVersjonertBarnetrygdSøknad(journalpostId: String): VersjonertBarnetrygdSøknad {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val uri = URI.create("$integrasjonUri/baks/versjonertsoknad/ba/$journalpostId")
         return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
@@ -818,6 +862,7 @@ class IntegrasjonKlient(
     }
 
     fun hentAInntektUrl(personIdent: PersonIdent): String {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val url = URI.create("$integrasjonUri/arbeid-og-inntekt/hent-url")
 
         return kallEksternTjenesteRessurs(
@@ -835,6 +880,7 @@ class IntegrasjonKlient(
     }
 
     fun sjekkErEgenAnsattBulk(personIdenter: List<String>): Map<String, Boolean> {
+        val (integrasjonUri, restClient) = hentIntegrasjonKlient()
         val url = URI.create("$integrasjonUri/egenansatt/bulk")
 
         val egenAnsattResponse =

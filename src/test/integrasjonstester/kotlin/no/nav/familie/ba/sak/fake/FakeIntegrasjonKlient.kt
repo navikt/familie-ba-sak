@@ -57,7 +57,15 @@ import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
 
-class FakeIntegrasjonKlient : IntegrasjonKlient(URI("integrasjoner-url"), mockk<RestClient>(relaxed = true), mockk(), 1) {
+class FakeIntegrasjonKlient :
+    IntegrasjonKlient(
+        integrasjonFssUri = URI("integrasjoner-url"),
+        restClientFss = mockk<RestClient>(relaxed = true),
+        integrasjonGcpUri = URI("integrasjoner-gcp-url"),
+        restClientGcp = mockk<RestClient>(relaxed = true),
+        featureToggleService = mockk(relaxed = true),
+        retryBackoffDelay = 1,
+    ) {
     private val egenansatt = mutableSetOf<String>()
     private val behandlendeEnhetForIdent = mutableMapOf<String, List<Arbeidsfordelingsenhet>>()
     private val versjonerteBarnetrygdSøknader = mutableMapOf<String, VersjonertBarnetrygdSøknad>()

@@ -39,9 +39,22 @@ fun lagSøknad(
     barneIdenterTilErFosterbarn: Map<String, Boolean> = emptyMap(),
     barneIdenterTilErIBeredskapshjem: Map<String, Boolean> = emptyMap(),
     barneIdenterTilHarKryssetForDeltBosted: Map<String, Boolean> = emptyMap(),
+    barneIdenterTilOppholderSegIInstitusjon: Map<String, Boolean> = emptyMap(),
+    søkerErAsylsøker: Boolean = false,
+    barneIdenterTilErAsylsøker: Map<String, Boolean> = emptyMap(),
+    barneIdenterTilErAdoptertFraUtland: Map<String, Boolean> = emptyMap(),
+    barneIdenterTilBorFastMedSøker: Map<String, Boolean> = emptyMap(),
+    søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd: Boolean = true,
+    barneIdenterTilHarOppholdtSegUtenforNorgeSiste12Mnd: Map<String, Boolean> = emptyMap(),
 ): Søknad =
     Søknad(
-        søker = Søker(fnr = randomFnr(), planleggerÅBoINorge12Mnd = søkerPlanleggerÅBoINorge12Mnd),
+        søker =
+            Søker(
+                fnr = randomFnr(),
+                planleggerÅBoINorge12Mnd = søkerPlanleggerÅBoINorge12Mnd,
+                erAsylsøker = søkerErAsylsøker,
+                harOppholdtSegSammenhengendeINorgeSiste12Mnd = søkerHarOppholdtSegSammenhengendeINorgeSiste12Mnd,
+            ),
         barn =
             barneIdenterTilPlanleggerBoINorge12Mnd.map { (fnr, planleggerÅBoINorge12Mnd) ->
                 Barn(
@@ -50,6 +63,11 @@ fun lagSøknad(
                     erFosterbarn = barneIdenterTilErFosterbarn[fnr] ?: false,
                     erIBeredskapshjem = barneIdenterTilErIBeredskapshjem[fnr] ?: false,
                     harKryssetForDeltBosted = barneIdenterTilHarKryssetForDeltBosted[fnr] ?: false,
+                    oppholderSegIInstitusjon = barneIdenterTilOppholderSegIInstitusjon[fnr] ?: false,
+                    erAsylsøker = barneIdenterTilErAsylsøker[fnr] ?: false,
+                    erAdoptertFraUtland = barneIdenterTilErAdoptertFraUtland[fnr] ?: false,
+                    borFastMedSøker = barneIdenterTilBorFastMedSøker[fnr] ?: true,
+                    harOppholdtSegUtenforNorgeSiste12Mnd = barneIdenterTilHarOppholdtSegUtenforNorgeSiste12Mnd[fnr] ?: false,
                 )
             },
         behandlingKategori = BehandlingKategori.NASJONAL,

@@ -84,8 +84,6 @@ class FakePersonopplysningerService(
 
     override fun hentPdlPersonInfoEnkel(aktør: Aktør): PdlPersonInfo = PdlPersonInfo.Person(this.hentPersoninfoEnkel(aktør))
 
-    override fun hentPersoninfoNavnOgAdresse(aktør: Aktør): PersonInfo = hentPersoninfoEnkel(aktør)
-
     override fun hentAdressebeskyttelseSomSystembruker(aktør: Aktør): ADRESSEBESKYTTELSEGRADERING =
         if (aktør.aktivFødselsnummer() == BARN_DET_IKKE_GIS_TILGANG_TIL_FNR) {
             ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG

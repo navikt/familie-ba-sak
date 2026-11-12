@@ -10,19 +10,23 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagGrVegadresse
 import no.nav.familie.ba.sak.datagenerator.lagGrVegadresseDeltBosted
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagSøknad
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
 import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class PreutfyllBorMedSøkerServiceTest {
     private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
@@ -75,7 +79,7 @@ class PreutfyllBorMedSøkerServiceTest {
             )
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -140,7 +144,7 @@ class PreutfyllBorMedSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagForskjelligAdresseForSøkerOgBarn
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -219,7 +223,7 @@ class PreutfyllBorMedSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagBarnHarBoddKun2MånederPåSammeAdresseSomSøker
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -291,7 +295,7 @@ class PreutfyllBorMedSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagSøkerOgBarnFLyttetMellomDiverseAdresser
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -352,7 +356,7 @@ class PreutfyllBorMedSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagAlleHarSammeAdresse
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -410,7 +414,7 @@ class PreutfyllBorMedSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagBarnHarBoddKortereEnnSøkerPåSammeAdresse
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -467,7 +471,7 @@ class PreutfyllBorMedSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagBarnHarBoddLengerEnnSøkerPåSammeAdresse
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -548,7 +552,7 @@ class PreutfyllBorMedSøkerServiceTest {
                 overstyrendeVilkårResultater = emptyMap(),
             )
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val personResultat =
@@ -653,7 +657,7 @@ class PreutfyllBorMedSøkerServiceTest {
                 overstyrendeVilkårResultater = emptyMap(),
             )
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val personResultat =
@@ -731,7 +735,7 @@ class PreutfyllBorMedSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagMedSammeAdresseFraFødsel
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -794,7 +798,7 @@ class PreutfyllBorMedSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagMedSammeAdresseI3Måneder
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -878,7 +882,7 @@ class PreutfyllBorMedSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagMedSammeDeltBostedAdresseFraFødsel
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -940,6 +944,7 @@ class PreutfyllBorMedSøkerServiceTest {
         preutfyllBorMedSøkerService.preutfyllBorMedSøker(
             vilkårsvurdering,
             listOf(aktørBarn1),
+            digitalSøknad = null,
         )
 
         // Assert
@@ -1007,7 +1012,7 @@ class PreutfyllBorMedSøkerServiceTest {
             )
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val barnIGrunnlagBorMedSøker =
@@ -1089,7 +1094,7 @@ class PreutfyllBorMedSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -1158,7 +1163,7 @@ class PreutfyllBorMedSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -1236,7 +1241,7 @@ class PreutfyllBorMedSøkerServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlag
 
         // Act
-        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør })
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val borFastHosSøkerVilkår =
@@ -1246,5 +1251,119 @@ class PreutfyllBorMedSøkerServiceTest {
                 .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
 
         assertThat(borFastHosSøkerVilkår).allMatch { it.resultat == Resultat.IKKE_OPPFYLT }
+    }
+
+    @Test
+    fun `skal sette bor med søker til ikke vurdert for barnet søker har svart nei på i søknaden selv om barnet har samme adresse som søker`() {
+        // Arrange
+        val aktørSøker = randomAktør()
+        val aktørBarnSomIkkeBorFastMedSøker = randomAktør()
+        val aktørBarnSomBorFastMedSøker = randomAktør()
+
+        val behandling = lagBehandling()
+
+        val persongrunnlagMedSammeAdresseForAllePersoner =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = aktørSøker.aktivFødselsnummer(),
+                barnasIdenter = listOf(aktørBarnSomIkkeBorFastMedSøker.aktivFødselsnummer(), aktørBarnSomBorFastMedSøker.aktivFødselsnummer()),
+                søkerAktør = aktørSøker,
+                barnAktør = listOf(aktørBarnSomIkkeBorFastMedSøker, aktørBarnSomBorFastMedSøker),
+            ).also { persongrunnlag ->
+                persongrunnlag.personer.forEach { person ->
+                    person.bostedsadresser =
+                        mutableListOf(
+                            lagGrVegadresse(matrikkelId = 12345L).also {
+                                it.periode =
+                                    DatoIntervallEntitet(
+                                        fom = LocalDate.now().minusYears(10),
+                                        tom = null,
+                                    )
+                                it.person = person
+                            },
+                        )
+                }
+            }
+        every { persongrunnlagService.hentAktivThrows(behandlingId = behandling.id) } returns persongrunnlagMedSammeAdresseForAllePersoner
+        val digitalSøknad =
+            lagSøknad(
+                barneIdenterTilPlanleggerBoINorge12Mnd =
+                    mapOf(
+                        aktørBarnSomIkkeBorFastMedSøker.aktivFødselsnummer() to true,
+                        aktørBarnSomBorFastMedSøker.aktivFødselsnummer() to true,
+                    ),
+                barneIdenterTilBorFastMedSøker =
+                    mapOf(
+                        aktørBarnSomIkkeBorFastMedSøker.aktivFødselsnummer() to false,
+                        aktørBarnSomBorFastMedSøker.aktivFødselsnummer() to true,
+                    ),
+            )
+
+        val vilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                behandling = behandling,
+                søker = persongrunnlagMedSammeAdresseForAllePersoner.søker,
+                barna = persongrunnlagMedSammeAdresseForAllePersoner.barna,
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+
+        // Act
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad)
+
+        // Assert
+        val borMedSøkerForBarnSomIkkeBorFastMedSøker =
+            vilkårsvurdering.personResultater
+                .single { it.aktør == aktørBarnSomIkkeBorFastMedSøker }
+                .vilkårResultater
+                .single { it.vilkårType == Vilkår.BOR_MED_SØKER }
+        assertThat(borMedSøkerForBarnSomIkkeBorFastMedSøker.resultat).isEqualTo(Resultat.IKKE_VURDERT)
+        assertThat(borMedSøkerForBarnSomIkkeBorFastMedSøker.begrunnelse).isEqualTo("Ikke fylt ut automatisk\n- Søker har oppgitt i søknaden at barnet ikke bor fast med søker.")
+        assertThat(borMedSøkerForBarnSomIkkeBorFastMedSøker.begrunnelseForManuellKontroll).isEqualTo(BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER)
+        assertThat(borMedSøkerForBarnSomIkkeBorFastMedSøker.erOpprinneligPreutfyltIBehandling).isEqualTo(behandling.id)
+
+        val borMedSøkerForBarnSomBorFastMedSøker =
+            vilkårsvurdering.personResultater
+                .single { it.aktør == aktørBarnSomBorFastMedSøker }
+                .vilkårResultater
+                .single { it.vilkårType == Vilkår.BOR_MED_SØKER }
+        assertThat(borMedSøkerForBarnSomBorFastMedSøker.resultat).isEqualTo(Resultat.OPPFYLT)
+        assertThat(borMedSøkerForBarnSomBorFastMedSøker.erAutomatiskVurdert).isTrue()
+    }
+
+    @Test
+    fun `skal sette bor med søker til ikke vurdert når søker har svart nei i søknaden for barnets tidligere ident`() {
+        // Arrange
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN)
+        val tidligereIdentBarn = randomFnr()
+        barn.aktør.personidenter.add(Personident(fødselsnummer = tidligereIdentBarn, aktør = barn.aktør, aktiv = false, gjelderTil = LocalDateTime.now().minusMonths(1)))
+
+        val behandling = lagBehandling()
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
+        val digitalSøknad =
+            lagSøknad(
+                barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(tidligereIdentBarn to true),
+                barneIdenterTilBorFastMedSøker = mapOf(tidligereIdentBarn to false),
+            )
+
+        val vilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                behandling = behandling,
+                søker = søker,
+                barna = listOf(barn),
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+
+        // Act
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad)
+
+        // Assert
+        val borFastHosSøkerVilkår =
+            vilkårsvurdering.personResultater
+                .first { it.aktør == barn.aktør }
+                .vilkårResultater
+                .single { it.vilkårType == Vilkår.BOR_MED_SØKER }
+        assertThat(borFastHosSøkerVilkår.resultat).isEqualTo(Resultat.IKKE_VURDERT)
     }
 }
