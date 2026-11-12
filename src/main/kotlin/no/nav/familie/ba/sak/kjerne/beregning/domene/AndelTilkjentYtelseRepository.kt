@@ -41,6 +41,25 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
     @Query(value = "SELECT aty from AndelTilkjentYtelse aty WHERE aty.aktør = :aktør")
     fun finnAndelerTilkjentYtelseForAktør(aktør: Aktør): List<AndelTilkjentYtelse>
 
+    @Query(
+        """
+        SELECT aty FROM AndelTilkjentYtelse aty
+            JOIN aty.tilkjentYtelse ty
+            JOIN ty.behandling b
+        WHERE aty.aktør = :aktør
+            AND (ty.utbetalingsoppdrag IS NOT NULL OR b.status = 'AVSLUTTET')
+            AND b.resultat NOT IN (
+                'HENLAGT_FEILAKTIG_OPPRETTET',
+                'HENLAGT_SØKNAD_TRUKKET',
+                'HENLAGT_AUTOMATISK_FØDSELSHENDELSE',
+                'HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG',
+                'HENLAGT_AUTOMATISK_SØKNAD',
+                'HENLAGT_TEKNISK_VEDLIKEHOLD'
+            )
+        """,
+    )
+    fun finnAndelerFraIverksatteBehandlingerForAktør(aktør: Aktør): List<AndelTilkjentYtelse>
+
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId IN :behandlingIder AND aty.stønadTom >= :avstemmingstidspunkt")
     fun finnLøpendeAndelerTilkjentYtelseForBehandlinger(
         behandlingIder: List<Long>,
