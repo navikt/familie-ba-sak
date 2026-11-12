@@ -76,13 +76,15 @@ management:
       access: none
     health:
       show-details: always
+      probes.enabled: true
       group:
-        readyness:
+        readiness:
           include:
+            - readinessState
             - db
         liveness:
           include:
-            - db
+            - livenessState
   info:
     defaults:
       enabled: false
@@ -100,7 +102,6 @@ management:
     metrics:
       export:
         enabled: true
-
 
 prosessering:
   continuousRunning.enabled: true

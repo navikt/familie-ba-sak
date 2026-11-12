@@ -32,7 +32,7 @@ class SecurityConfigurationTest : WebSpringAuthTestRunner() {
                 "/internal",
                 "/internal/health",
                 "/internal/health/liveness",
-                "/internal/health/readyness",
+                "/internal/health/readiness",
                 "/internal/metrics",
             ],
         )
