@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Profile("!prod")
 @RestController
-@RequestMapping(value = ["/internal"])
+@RequestMapping(value = ["/testverktoy"])
 class TestVerktøyController(
     private val scheduler: AutobrevScheduler,
     private val personidentService: PersonidentService,

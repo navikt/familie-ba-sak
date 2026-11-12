@@ -72,15 +72,24 @@ familie:
 
 management:
   endpoint:
+    info:
+      access: none
     health:
       show-details: always
+      probes.enabled: true
       group:
-        readyness:
-          include: db
+        readiness:
+          include:
+            - readinessState
+            - db
         liveness:
-          include: db
+          include:
+            - livenessState
+  info:
+    defaults:
+      enabled: false
   endpoints.web:
-    exposure.include: info, health, metrics, prometheus
+    exposure.include: health, metrics, prometheus
     base-path: "/internal"
   health:
     livenessstate:
@@ -93,7 +102,6 @@ management:
     metrics:
       export:
         enabled: true
-
 
 prosessering:
   continuousRunning.enabled: true
