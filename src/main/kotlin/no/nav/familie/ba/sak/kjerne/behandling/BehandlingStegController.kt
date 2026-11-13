@@ -13,10 +13,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggels
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
-import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -44,6 +43,7 @@ class BehandlingStegController(
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
     private val totrinnskontrollService: TotrinnskontrollService,
+    private val behandlingsresultatStegValideringService: BehandlingsresultatStegValideringService,
 ) {
     @PostMapping(
         path = ["registrer-søknad"],
@@ -89,13 +89,7 @@ class BehandlingStegController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val behandlingSteg: BehandlingsresultatSteg =
-            stegService.hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
-
-        behandlingSteg.preValiderSteg(
-            behandling = behandling,
-            stegService = stegService,
-        )
+        behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
 
         return ResponseEntity.ok(
             Ressurs.success(
