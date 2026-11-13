@@ -53,7 +53,7 @@ private fun skalSlåsSammen(
     val aktørTilHarUtdypendeVilkårSomGirTilleggDennePerioden = hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(bosattIRiketVilkårDennePerioden)
 
     val erAndreEndringerIVilkårResultat =
-        bosattIRiketVilkårDennePerioden.erLikUtenomFinnmarksOgSvalbardTillegg(bosattIRiketVilkårForrigePeriode)
+        bosattIRiketVilkårDennePerioden.erUlikUtenomFinnmarksOgSvalbardTillegg(bosattIRiketVilkårForrigePeriode)
 
     val erTilleggInnvilgetForBarnOgSøker = aktørTilHarUtdypendeVilkårSomGirTilleggDennePerioden.all { it.value }
 
@@ -81,28 +81,28 @@ private fun hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(vilkårResulta
     return aktørTilHarUtdypendeVilkårSomGirTilleggIPeriode
 }
 
-private fun List<VilkårResultat>.erLikUtenomFinnmarksOgSvalbardTillegg(
+fun List<VilkårResultat>.erUlikUtenomFinnmarksOgSvalbardTillegg(
     bosattIRiketVilkårForrigePeriode: List<VilkårResultat>,
 ): Boolean {
     val vilkårResultatForrigePeriode =
         bosattIRiketVilkårForrigePeriode.map { vilkårResultat ->
-            vilkårResultat.copy(
+            VilkårResultatForVedtaksperiode(vilkårResultat).copy(
                 utdypendeVilkårsvurderinger =
                     vilkårResultat.utdypendeVilkårsvurderinger
-                        .filterNot { it -> it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
-                periodeFom = null,
-                periodeTom = null,
+                        .filterNot { it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
+                fom = null,
+                tom = null,
             )
         }
 
     val vilkårResultatDennePerioden =
         this.map { vilkårResultat ->
-            vilkårResultat.copy(
+            VilkårResultatForVedtaksperiode(vilkårResultat).copy(
                 utdypendeVilkårsvurderinger =
                     vilkårResultat.utdypendeVilkårsvurderinger
-                        .filterNot { it -> it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
-                periodeFom = null,
-                periodeTom = null,
+                        .filterNot { it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
+                fom = null,
+                tom = null,
             )
         }
 
