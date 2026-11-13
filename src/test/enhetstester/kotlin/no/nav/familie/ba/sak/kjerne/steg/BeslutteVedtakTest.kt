@@ -6,6 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.runs
+import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -45,6 +46,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -123,6 +125,16 @@ class BeslutteVedtakTest {
         every { tilbakekrevingService.hentTilbakekrevingsvalg(any()) } returns null
         every { simuleringService.hentFeilutbetaling(any<Long>()) } returns BigDecimal.ZERO
         every { tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(any()) } returns null
+    }
+
+    @AfterEach
+    fun tearDown() {
+        unmockkObject(
+            FerdigstillOppgaver.Companion,
+            OpprettOppgaveTask.Companion,
+            JournalførVedtaksbrevTask.Companion,
+            JournalførTilbakekrevingsvedtakMotregningBrevTask.Companion,
+        )
     }
 
     @Nested
