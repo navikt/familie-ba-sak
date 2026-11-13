@@ -157,8 +157,9 @@ Egenskap: Behandlig med svalbardtillegg
       | 1       | LOVLIG_OPPHOLD                |                              | 31.03.1990 |            | OPPFYLT  |
       | 1       | BOSATT_I_RIKET                |                              | 08.11.2018 | 06.08.2025 | OPPFYLT  |
       | 1       | BOSATT_I_RIKET                | BOSATT_PÅ_SVALBARD | 31.08.2025 |            | OPPFYLT  |
-      | 2       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                              | 08.11.2018 |            | OPPFYLT  |
-      | 2       | BOR_MED_SØKER                 | BOSATT_PÅ_SVALBARD | 08.11.2018 | 01.08.2025 | OPPFYLT  |
+      | 2       | LOVLIG_OPPHOLD,BOR_MED_SØKER  |                              | 08.11.2018 |            | OPPFYLT  |
+      | 2       | BOSATT_I_RIKET                | BOSATT_PÅ_SVALBARD | 08.11.2018 | 01.08.2025 | OPPFYLT  |
+      | 2       | BOSATT_I_RIKET                |                    | 02.08.2025 |            | OPPFYLT  |
       | 2       | GIFT_PARTNERSKAP              |                              | 08.11.2018 |            | OPPFYLT  |
       | 2       | UNDER_18_ÅR                   |                              | 08.11.2018 | 07.11.2036 | OPPFYLT  |
 
