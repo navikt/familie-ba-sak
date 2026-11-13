@@ -81,11 +81,13 @@ private fun hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(vilkårResulta
     return aktørTilHarUtdypendeVilkårSomGirTilleggIPeriode
 }
 
-fun List<VilkårResultat>.erUlikUtenomFinnmarksOgSvalbardTillegg(
-    bosattIRiketVilkårForrigePeriode: List<VilkårResultat>,
-): Boolean {
-    val vilkårResultatForrigePeriode =
-        bosattIRiketVilkårForrigePeriode.map { vilkårResultat ->
+internal fun List<VilkårResultat>.erUlikUtenomFinnmarksOgSvalbardTillegg(
+    vilkårResultaterForrigePeriode: List<VilkårResultat>,
+): Boolean = this.utenTilleggsmarkeringOgDatoer() != vilkårResultaterForrigePeriode.utenTilleggsmarkeringOgDatoer()
+
+private fun List<VilkårResultat>.utenTilleggsmarkeringOgDatoer(): Set<VilkårResultatForVedtaksperiode> =
+    this
+        .map { vilkårResultat ->
             VilkårResultatForVedtaksperiode(vilkårResultat).copy(
                 utdypendeVilkårsvurderinger =
                     vilkårResultat.utdypendeVilkårsvurderinger
@@ -93,18 +95,4 @@ fun List<VilkårResultat>.erUlikUtenomFinnmarksOgSvalbardTillegg(
                 fom = null,
                 tom = null,
             )
-        }
-
-    val vilkårResultatDennePerioden =
-        this.map { vilkårResultat ->
-            VilkårResultatForVedtaksperiode(vilkårResultat).copy(
-                utdypendeVilkårsvurderinger =
-                    vilkårResultat.utdypendeVilkårsvurderinger
-                        .filterNot { it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
-                fom = null,
-                tom = null,
-            )
-        }
-
-    return vilkårResultatDennePerioden != vilkårResultatForrigePeriode
-}
+        }.toSet()

@@ -114,7 +114,7 @@ Egenskap: Behandlig med finnmarkstillegg
       | 01.11.2036 |            | OPPHØR             |           |
 
 
-  Scenario: Skal splitte vedtaksperioder når søker flytter ut av finnmark men ikke barn
+  Scenario: Skal ikke splitte vedtaksperioder når søker flytter ut av finnmark men ikke barn, uten endring i andeler
     Og dagens dato er 05.09.2025
     Og med personer fremstilt krav for
       | BehandlingId | AktørId |
@@ -145,7 +145,7 @@ Egenskap: Behandlig med finnmarkstillegg
       | 01.06.2025 | 31.10.2036 | UTBETALING         |           |
       | 01.11.2036 |            | OPPHØR             |           |
 
-  Scenario: Skal ikke splitte vedtaksperioder når søker flytter ut av Finnmark i samme måned som barn flytter inn
+  Scenario: Skal ikke splitte vedtaksperioder når søker flytter til Finnmark i samme måned som barn flytter ut
     Og dagens dato er 05.09.2025
     Og med personer fremstilt krav for
       | BehandlingId | AktørId |

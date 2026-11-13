@@ -87,6 +87,57 @@ class SlåSammenFinnmarkstilleggEllerSvalbardUtilTest {
             // Assert
             assertThat(sammenslåttePerioder).containsExactlyElementsOf(perioder)
         }
+
+        @ParameterizedTest
+        @EnumSource(UtdypendeVilkårsvurdering::class, names = ["BOSATT_I_FINNMARK_NORD_TROMS", "BOSATT_PÅ_SVALBARD"])
+        fun `skal slå sammen perioder når bare søker får tilleggsmarkering og vilkårresultatene har ulik id`(
+            utdypendeVilkår: UtdypendeVilkårsvurdering,
+        ) {
+            // Arrange
+            val fom = LocalDate.of(2025, 10, 1)
+            val splitt = LocalDate.of(2025, 11, 1)
+            val tom = LocalDate.of(2025, 12, 31)
+            val vilkårsvurdering = lagVilkårsvurdering()
+            val søker = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+            val barn = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+            val bosattIRiketSøker =
+                lagVilkårResultat(
+                    id = 1,
+                    personResultat = søker,
+                    periodeFom = fom,
+                    periodeTom = splitt.minusDays(1),
+                )
+            val bosattIRiketSøkerEtter =
+                bosattIRiketSøker.copy(
+                    id = 2,
+                    periodeFom = splitt,
+                    periodeTom = tom,
+                    utdypendeVilkårsvurderinger = listOf(utdypendeVilkår),
+                )
+            val bosattIRiketBarn =
+                lagVilkårResultat(
+                    id = 3,
+                    personResultat = barn,
+                    periodeFom = fom,
+                    periodeTom = tom,
+                )
+            val perioder =
+                listOf(
+                    Periode(listOf(bosattIRiketSøker, bosattIRiketBarn), fom, splitt.minusDays(1)),
+                    Periode(listOf(bosattIRiketSøkerEtter, bosattIRiketBarn), splitt, tom),
+                )
+
+            // Act
+            val sammenslåttePerioder =
+                perioder
+                    .tilTidslinje()
+                    .slåSammenSplitterPåUtdypendeVilkår()
+                    .tilPerioder()
+                    .map { it.byttUtNullListeMedTomListe() }
+
+            // Assert
+            assertThat(sammenslåttePerioder).containsExactly(Periode(listOf(bosattIRiketSøker, bosattIRiketBarn), fom, tom))
+        }
     }
 
     @Nested
@@ -122,6 +173,18 @@ class SlåSammenFinnmarkstilleggEllerSvalbardUtilTest {
 
             // Act
             val erUlik = listOf(endretVilkårResultat).erUlikUtenomFinnmarksOgSvalbardTillegg(listOf(vilkårResultat))
+
+            // Assert
+            assertThat(erUlik).isFalse()
+        }
+
+        @Test
+        fun `skal returnere false når vilkårresultatene er like, men kommer i ulik rekkefølge`() {
+            // Arrange
+            val lovligOpphold = vilkårResultat.copy(id = 2, vilkårType = Vilkår.LOVLIG_OPPHOLD)
+
+            // Act
+            val erUlik = listOf(lovligOpphold, vilkårResultat).erUlikUtenomFinnmarksOgSvalbardTillegg(listOf(vilkårResultat, lovligOpphold))
 
             // Assert
             assertThat(erUlik).isFalse()
