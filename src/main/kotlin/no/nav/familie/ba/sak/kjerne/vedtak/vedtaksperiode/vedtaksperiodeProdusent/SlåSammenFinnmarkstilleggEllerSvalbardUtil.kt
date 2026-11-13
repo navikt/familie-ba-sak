@@ -53,7 +53,7 @@ private fun skalSlåsSammen(
     val aktørTilHarUtdypendeVilkårSomGirTilleggDennePerioden = hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(bosattIRiketVilkårDennePerioden)
 
     val erAndreEndringerIVilkårResultat =
-        bosattIRiketVilkårDennePerioden.erLikUtenomFinnmarksOgSvalbardTillegg(bosattIRiketVilkårForrigePeriode)
+        vilkårResultaterDennePerioden.erUlikUtenomFinnmarksOgSvalbardTillegg(vilkårResultaterForrigePeriode)
 
     val erTilleggInnvilgetForBarnOgSøker = aktørTilHarUtdypendeVilkårSomGirTilleggDennePerioden.all { it.value }
 
@@ -81,30 +81,18 @@ private fun hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(vilkårResulta
     return aktørTilHarUtdypendeVilkårSomGirTilleggIPeriode
 }
 
-private fun List<VilkårResultat>.erLikUtenomFinnmarksOgSvalbardTillegg(
-    bosattIRiketVilkårForrigePeriode: List<VilkårResultat>,
-): Boolean {
-    val vilkårResultatForrigePeriode =
-        bosattIRiketVilkårForrigePeriode.map { vilkårResultat ->
-            vilkårResultat.copy(
+internal fun List<VilkårResultat>.erUlikUtenomFinnmarksOgSvalbardTillegg(
+    vilkårResultaterForrigePeriode: List<VilkårResultat>,
+): Boolean = this.utenTilleggsmarkeringOgDatoer() != vilkårResultaterForrigePeriode.utenTilleggsmarkeringOgDatoer()
+
+private fun List<VilkårResultat>.utenTilleggsmarkeringOgDatoer(): Set<VilkårResultatForVedtaksperiode> =
+    this
+        .map { vilkårResultat ->
+            VilkårResultatForVedtaksperiode(vilkårResultat).copy(
                 utdypendeVilkårsvurderinger =
                     vilkårResultat.utdypendeVilkårsvurderinger
-                        .filterNot { it -> it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
-                periodeFom = null,
-                periodeTom = null,
+                        .filterNot { it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
+                fom = null,
+                tom = null,
             )
-        }
-
-    val vilkårResultatDennePerioden =
-        this.map { vilkårResultat ->
-            vilkårResultat.copy(
-                utdypendeVilkårsvurderinger =
-                    vilkårResultat.utdypendeVilkårsvurderinger
-                        .filterNot { it -> it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
-                periodeFom = null,
-                periodeTom = null,
-            )
-        }
-
-    return vilkårResultatDennePerioden != vilkårResultatForrigePeriode
-}
+        }.toSet()
