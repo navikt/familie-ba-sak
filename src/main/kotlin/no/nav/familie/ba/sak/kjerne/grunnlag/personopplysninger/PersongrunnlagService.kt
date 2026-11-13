@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class PersongrunnlagService(
@@ -237,7 +238,8 @@ class PersongrunnlagService(
         } ?: emptyList()
 
     /**
-     * Henter oppdatert registerdata og lagrer i nytt aktivt personopplysningsgrunnlag
+     * Henter oppdatert registerdata og fastsetter behandlende enhet.
+     * Lagrer nytt aktivt personopplysningsgrunnlag kun dersom det er relevante endringer fra det aktive personopplysningsgrunnlaget.
      */
     @Transactional
     fun hentOgLagreSøkerOgBarnINyttGrunnlag(
@@ -347,15 +349,25 @@ class PersongrunnlagService(
             }
         }
 
-        return lagreOgSlettGammelt(nyttPersonopplysningGrunnlag).also {
-            /*
-             * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
-             * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
-             */
-            arbeidsfordelingService.fastsettBehandlendeEnhet(
-                behandling = behandling,
-            )
-            saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
+        val aktivtPersonopplysningGrunnlag = hentAktiv(behandling.id)
+
+        return if (aktivtPersonopplysningGrunnlag == null || nyttPersonopplysningGrunnlag.harRelevantEndring(aktivtPersonopplysningGrunnlag)) {
+            lagreOgSlettGammelt(nyttPersonopplysningGrunnlag).also {
+                // Det kan ha blitt introdusert personer med fortrolig adresse.
+                arbeidsfordelingService.fastsettBehandlendeEnhet(
+                    behandling = behandling,
+                )
+                saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
+            }
+        } else {
+            // Adressebeskyttelse lagres ikke i personopplysningsgrunnlaget, så den kan være endret selv om grunnlaget er uendret.
+            arbeidsfordelingService.fastsettBehandlendeEnhet(behandling = behandling)
+
+            // Siden vi ikke har gjort noen endringer i det aktive personopplysningsgrunnlaget, trenger vi ikke å lagre det på nytt.
+            // Vi oppdaterer likevel endretTidspunkt for å reflektere at det er sjekket for oppdateringer i registeret.
+            aktivtPersonopplysningGrunnlag.apply {
+                endretTidspunkt = LocalDateTime.now()
+            }
         }
     }
 

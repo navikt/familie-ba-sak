@@ -91,7 +91,7 @@ data class GrOpphold(
                 DatoIntervallEntitet(
                     fom = opphold.oppholdFra,
                     tom = opphold.oppholdTil,
-                ),
+                ).takeIf { it.fom != null || it.tom != null },
             type = opphold.type,
             person = person,
         )
