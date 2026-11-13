@@ -857,6 +857,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonEnsligMindrearigBoddeIkkeIFinnmarkEllerTilleggsone"
     },
+    REDUKSJON_IKKE_MEDLEM_UTENLANDSOPPHOLD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonIkkeMedlemUtenlandsopphold"
+    },
+    REDUKSJON_VURDERING_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingIkkeMedlem"
+    },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagBosattIRiket"

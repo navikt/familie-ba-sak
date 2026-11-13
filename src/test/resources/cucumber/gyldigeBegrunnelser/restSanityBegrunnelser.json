@@ -42466,6 +42466,139 @@
     "visningsnavn": "45. Ikke bosatt i Norge"
   },
   {
+    "_createdAt": "2026-11-13T10:12:50Z",
+    "_id": "begrunnelse-43222db7-cd82-4b1a-b110-b8599b0eecc8",
+    "_rev": "n9Tpbv7HLrrvtcezKOKaPY",
+    "_type": "begrunnelse",
+    "_updatedAt": "2026-11-13T10:17:08Z",
+    "apiNavn": "reduksjonIkkeMedlemUtenlandsopphold",
+    "bokmaal": [
+      {
+        "_key": "5d9900bfde42",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "5bee7e1362a8",
+            "_type": "span",
+            "marks": [],
+            "text": "Barnetrygden endres for barn født "
+          },
+          {
+            "_key": "d7c2efc16037",
+            "_type": "flettefelt",
+            "flettefelt": "barnasFodselsdatoer"
+          },
+          {
+            "_key": "051d3d9e6540",
+            "_type": "span",
+            "marks": [],
+            "text": " fordi "
+          },
+          {
+            "_key": "f13d23d0f01c",
+            "_ref": "49509c87-0882-429c-9604-f4fbfc5876ca",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "4cec58e0d098",
+            "_type": "span",
+            "marks": [],
+            "text": " ikke er medlem i folketrygden under oppholdet i utlandet "
+          },
+          {
+            "_key": "18b1d52d14a6",
+            "_ref": "06fffef6-ae9a-47e4-8399-b034d86d0c0d",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "3d7ec7d24338",
+            "_type": "span",
+            "marks": [],
+            "text": "."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "bosattIRiketTriggere": [
+      "MEDLEMSKAP"
+    ],
+    "brevPeriodeType": "UTBETALING",
+    "hjemler": [
+      "4",
+      "5"
+    ],
+    "hjemlerFolketrygdloven": [
+      "2-5",
+      "2-8"
+    ],
+    "mappe": [
+      "REDUKSJON"
+    ],
+    "navnISystem": "Ikke medlem utenlandsopphold",
+    "nynorsk": [
+      {
+        "_key": "b76015413878",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "fe4f948201ba",
+            "_type": "span",
+            "marks": [],
+            "text": "Barnetrygda er endra for barn fødd "
+          },
+          {
+            "_key": "9c67e2289ba8",
+            "_type": "flettefelt",
+            "flettefelt": "barnasFodselsdatoer"
+          },
+          {
+            "_key": "9602f6698c8f",
+            "_type": "span",
+            "marks": [],
+            "text": " fordi "
+          },
+          {
+            "_key": "a0615ae16c63",
+            "_ref": "49509c87-0882-429c-9604-f4fbfc5876ca",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "1aef1312d350",
+            "_type": "span",
+            "marks": [],
+            "text": " ikkje er medlem i folketrygda under opphaldet i utlandet "
+          },
+          {
+            "_key": "0e921ac6fa15",
+            "_ref": "06fffef6-ae9a-47e4-8399-b034d86d0c0d",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "d6f9df227665",
+            "_type": "span",
+            "marks": [],
+            "text": "."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "periodeResultatForPerson": "REDUKSJON",
+    "regelverk": "NASJONAL",
+    "rolle": [
+      "SOKER",
+      "BARN"
+    ],
+    "valgbarhet": "STANDARD",
+    "vilkaar": [
+      "BOSATT_I_RIKET"
+    ],
+    "visningsnavn": "84. Ikke medlem utenlandsopphold"
+  },
+  {
     "_createdAt": "2021-11-05T10:26:53Z",
     "_id": "858d12b2-2321-45a3-812c-b79e156c6987",
     "_rev": "DPaEaBpcMe5fkxWlMRtGfn",
@@ -45199,6 +45332,139 @@
       "BOR_MED_SOKER"
     ],
     "visningsnavn": "44. Vurdering foreldrene bor sammen"
+  },
+  {
+    "_createdAt": "2026-11-13T10:20:55Z",
+    "_id": "begrunnelse-362f9fec-bac1-460c-a3b7-7a009a9aef5b",
+    "_rev": "n9Tpbv7HLrrvtcezKOMKcz",
+    "_type": "begrunnelse",
+    "_updatedAt": "2026-11-13T10:22:42Z",
+    "apiNavn": "reduksjonVurderingIkkeMedlem",
+    "bokmaal": [
+      {
+        "_key": "3c7e9a8f2602",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "dfc0bfab7c9f",
+            "_type": "span",
+            "marks": [],
+            "text": "Barnetrygden endres for barn født "
+          },
+          {
+            "_key": "15e2b403cc44",
+            "_type": "flettefelt",
+            "flettefelt": "barnasFodselsdatoer"
+          },
+          {
+            "_key": "85ca9ebe326c",
+            "_type": "span",
+            "marks": [],
+            "text": " fordi vi har kommet fram til at "
+          },
+          {
+            "_key": "526c66ca6465",
+            "_ref": "49509c87-0882-429c-9604-f4fbfc5876ca",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "00112228886b",
+            "_type": "span",
+            "marks": [],
+            "text": " ikke fyller vilkårene for å være medlem i folketrygden under oppholdet i utlandet "
+          },
+          {
+            "_key": "582f2c2b03e4",
+            "_ref": "06fffef6-ae9a-47e4-8399-b034d86d0c0d",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "4e0501c803fc",
+            "_type": "span",
+            "marks": [],
+            "text": "."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "bosattIRiketTriggere": [
+      "MEDLEMSKAP"
+    ],
+    "brevPeriodeType": "UTBETALING",
+    "hjemler": [
+      "4",
+      "5"
+    ],
+    "hjemlerFolketrygdloven": [
+      "2-5",
+      "2-8"
+    ],
+    "mappe": [
+      "REDUKSJON"
+    ],
+    "navnISystem": "Vurdering ikke medlem",
+    "nynorsk": [
+      {
+        "_key": "fabfeea031e6",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "ab53e397e1cb",
+            "_type": "span",
+            "marks": [],
+            "text": "Barnetrygda er endra for barn fødd "
+          },
+          {
+            "_key": "87f10f8f6059",
+            "_type": "flettefelt",
+            "flettefelt": "barnasFodselsdatoer"
+          },
+          {
+            "_key": "441b8fcd8311",
+            "_type": "span",
+            "marks": [],
+            "text": " fordi vi har kome fram til at "
+          },
+          {
+            "_key": "a9f0daadfb63",
+            "_ref": "49509c87-0882-429c-9604-f4fbfc5876ca",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "f323a7c77e5f",
+            "_type": "span",
+            "marks": [],
+            "text": " ikkje fyller vilkåra for å vere medlem i folketrygda under opphaldet i utlandet "
+          },
+          {
+            "_key": "6180978e2c4f",
+            "_ref": "06fffef6-ae9a-47e4-8399-b034d86d0c0d",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "210f46135272",
+            "_type": "span",
+            "marks": [],
+            "text": "."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "periodeResultatForPerson": "REDUKSJON",
+    "regelverk": "NASJONAL",
+    "rolle": [
+      "SOKER",
+      "BARN"
+    ],
+    "valgbarhet": "STANDARD",
+    "vilkaar": [
+      "BOSATT_I_RIKET"
+    ],
+    "visningsnavn": "85. Vurdering ikke medlem"
   },
   {
     "_createdAt": "2021-10-22T11:37:27Z",
