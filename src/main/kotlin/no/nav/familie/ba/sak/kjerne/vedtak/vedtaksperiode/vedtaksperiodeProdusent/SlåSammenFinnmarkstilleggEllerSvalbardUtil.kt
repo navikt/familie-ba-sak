@@ -53,7 +53,7 @@ private fun skalSlåsSammen(
     val aktørTilHarUtdypendeVilkårSomGirTilleggDennePerioden = hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(bosattIRiketVilkårDennePerioden)
 
     val erAndreEndringerIVilkårResultat =
-        bosattIRiketVilkårDennePerioden.erUlikUtenomFinnmarksOgSvalbardTillegg(bosattIRiketVilkårForrigePeriode)
+        vilkårResultaterDennePerioden.erUlikUtenomFinnmarksOgSvalbardTillegg(vilkårResultaterForrigePeriode)
 
     val erTilleggInnvilgetForBarnOgSøker = aktørTilHarUtdypendeVilkårSomGirTilleggDennePerioden.all { it.value }
 
