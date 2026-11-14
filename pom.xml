@@ -554,6 +554,13 @@
                     <failIfNoTests>true</failIfNoTests>
                     <threadCount>1</threadCount>
                     <runOrder>random</runOrder>
+                    <!-- Surefire 3.6+ stokker også testmetoder og @Nested-klasser ved runOrder=random. Behold JUnits standardrekkefølge for disse; toppnivåklassene stokkes fortsatt av Surefire. -->
+                    <properties>
+                        <configurationParameters>
+                            junit.jupiter.testmethod.order.default = org.junit.jupiter.api.MethodOrderer$Default
+                            junit.jupiter.testclass.order.default = org.junit.jupiter.api.ClassOrderer$Default
+                        </configurationParameters>
+                    </properties>
                     <systemPropertyVariables>
                         <org.apache.avro.SERIALIZABLE_PACKAGES>${avro.serializable.packages}</org.apache.avro.SERIALIZABLE_PACKAGES>
                     </systemPropertyVariables>
