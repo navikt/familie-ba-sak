@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
+import no.nav.familie.ba.sak.cucumber.domeneparser.tilRader
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.SøkersRettTilUtvidet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -22,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetan
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataUtenKompetanse
 import java.time.LocalDate
 
-typealias Tabellrad = Map<String, String>
+typealias Tabellrad = Map<String, String?>
 
 enum class Begrunnelsetype {
     EØS,
@@ -30,7 +31,7 @@ enum class Begrunnelsetype {
 }
 
 fun parseBegrunnelser(dataTable: DataTable): List<BegrunnelseMedData> =
-    dataTable.asMaps().map { rad: Tabellrad ->
+    dataTable.tilRader().map { rad: Tabellrad ->
 
         val type =
             parseValgfriEnum<Begrunnelsetype>(

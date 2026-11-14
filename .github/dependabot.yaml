@@ -27,6 +27,9 @@ updates:
           - "org.springframework*"
           - "no.nav.security*"
           - "org.springdoc*"
+      cucumber:
+        patterns:
+          - "io.cucumber*"
       prod-avhengigheter:
         dependency-type: "production"
         exclude-patterns:
