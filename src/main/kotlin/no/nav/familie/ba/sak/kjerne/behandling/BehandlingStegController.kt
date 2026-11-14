@@ -2,12 +2,14 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.ekstern.restDomene.TilbakekrevingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
+import no.nav.familie.ba.sak.ekstern.restDomene.hentIdenterTilValgteBarn
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -57,10 +59,17 @@ class BehandlingStegController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "registrere søknad",
         )
+        tilgangService.validerTilgangTilPersoner(
+            personIdenter = registrerSøknadDto.søknad.hentIdenterTilValgteBarn(),
+            event = AuditLoggerEvent.UPDATE,
+        )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
         stegService.håndterSøknad(behandling = behandling, registrerSøknadDto = registrerSøknadDto)
+
+        // Basert på hvilke personer som ble hentet inn på behandlingen kan saksbehandler ha mistet tilgangen til behandlingen
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id, event = AuditLoggerEvent.UPDATE)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id)))
     }
 

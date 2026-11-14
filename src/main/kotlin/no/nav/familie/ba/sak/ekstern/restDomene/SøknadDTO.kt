@@ -10,7 +10,12 @@ import java.time.LocalDate
 data class RegistrerSøknadDto(
     val søknad: SøknadDTO,
     val bekreftEndringerViaFrontend: Boolean,
-)
+) {
+    // Bruker init til å validere personidentene
+    init {
+        søknad.hentIdenterTilValgteBarn().forEach { Fødselsnummer(it) }
+    }
+}
 
 data class SøknadDTO(
     val underkategori: BehandlingUnderkategoriDTO,
@@ -21,6 +26,11 @@ data class SøknadDTO(
 )
 
 fun SøknadDTO.writeValueAsString(): String = jsonMapper.writeValueAsString(this)
+
+fun SøknadDTO.hentIdenterTilValgteBarn(): List<String> =
+    barnaMedOpplysninger
+        .filter { it.inkludertISøknaden && it.erFolkeregistrert }
+        .map { it.ident }
 
 data class SøkerMedOpplysninger(
     val ident: String,
