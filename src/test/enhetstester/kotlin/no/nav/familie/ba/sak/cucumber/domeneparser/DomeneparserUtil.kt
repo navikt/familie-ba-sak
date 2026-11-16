@@ -35,5 +35,5 @@ enum class Domenebegrep(
 }
 
 object DomeneparserUtil {
-    fun DataTable.groupByBehandlingId(): Map<Long, List<Map<String, String>>> = this.asMaps().groupBy { rad -> parseLong(Domenebegrep.BEHANDLING_ID, rad) }
+    fun DataTable.groupByBehandlingId(): Map<Long, List<Map<String, String?>>> = this.tilRader().groupBy { rad -> parseLong(Domenebegrep.BEHANDLING_ID, rad) }
 }

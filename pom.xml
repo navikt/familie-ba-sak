@@ -31,13 +31,13 @@
         <familie.kontrakter.stønadsstatistikk>2.0_20261109090840_bb41ccf</familie.kontrakter.stønadsstatistikk>
         <felles-kontrakter.version>4.0_20261108214032_20eed0c</felles-kontrakter.version>
         <utbetalingsgenerator.version>1.0_20260923084625_49defa2</utbetalingsgenerator.version>
-        <cucumber.version>7.34.8</cucumber.version>
+        <cucumber.version>8.0.4</cucumber.version>
         <mockk.version>1.14.11</mockk.version>
         <token-validation-spring.version>6.0.8</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>3.2.0</springdoc.version>
         <kotlinx.version>1.11.0</kotlinx.version>
-        <kotlinx-kover.version>0.9.9</kotlinx-kover.version>
+        <kotlinx-kover.version>0.9.11</kotlinx-kover.version>
         <mock-oauth2-server.version>6.1.4</mock-oauth2-server.version>
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
@@ -411,7 +411,7 @@
         <dependency>
             <groupId>org.wiremock.integrations</groupId>
             <artifactId>wiremock-spring-boot-standalone</artifactId>
-            <version>4.2.3</version>
+            <version>4.4.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -544,7 +544,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.6</version>
+                <version>3.6.1</version>
                 <configuration>
                     <!-- Trenger argline for å få injected javaagent for kover -->
                     <argLine>@{argLine} -XX:MinRAMPercentage=25 -XX:MaxRAMPercentage=75</argLine>
@@ -554,6 +554,13 @@
                     <failIfNoTests>true</failIfNoTests>
                     <threadCount>1</threadCount>
                     <runOrder>random</runOrder>
+                    <!-- Surefire 3.6+ stokker også testmetoder og @Nested-klasser ved runOrder=random. Behold JUnits standardrekkefølge for disse; toppnivåklassene stokkes fortsatt av Surefire. -->
+                    <properties>
+                        <configurationParameters>
+                            junit.jupiter.testmethod.order.default = org.junit.jupiter.api.MethodOrderer$Default
+                            junit.jupiter.testclass.order.default = org.junit.jupiter.api.ClassOrderer$Default
+                        </configurationParameters>
+                    </properties>
                     <systemPropertyVariables>
                         <org.apache.avro.SERIALIZABLE_PACKAGES>${avro.serializable.packages}</org.apache.avro.SERIALIZABLE_PACKAGES>
                     </systemPropertyVariables>
@@ -562,7 +569,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.6.2</version>
+                <version>3.7.0</version>
                 <executions>
                     <execution>
                         <id>add-generated-sources</id>
@@ -594,7 +601,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.6.3</version>
+                <version>3.7.0</version>
                 <executions>
                     <execution>
                         <id>enforce-banned-dependencies</id>
