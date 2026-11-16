@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.ekstern.restDomene.hentIdenterTilValgteBarn
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.KodeverkService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -209,11 +210,11 @@ class PersongrunnlagService(
         behandling: Behandling,
         forrigeBehandlingSomErVedtatt: Behandling? = null,
     ) {
-        val søkerAktør = personidentService.hentOgLagreAktør(søknadDTO.søkerMedOpplysninger.ident, true)
+        val søkerAktør = behandling.fagsak.skjermetBarnSøker?.aktør ?: behandling.fagsak.aktør
         val valgteBarnsAktør =
-            søknadDTO.barnaMedOpplysninger
-                .filter { it.inkludertISøknaden && it.erFolkeregistrert }
-                .map { barn -> personidentService.hentOgLagreAktør(barn.ident, true) }
+            søknadDTO
+                .hentIdenterTilValgteBarn()
+                .map { barnIdent -> personidentService.hentOgLagreAktør(barnIdent, true) }
 
         val barnMedTilkjentYtelseIForrigeBehandling =
             if (skalTaMedBarnFraForrigeBehandling(behandling) && forrigeBehandlingSomErVedtatt != null) {

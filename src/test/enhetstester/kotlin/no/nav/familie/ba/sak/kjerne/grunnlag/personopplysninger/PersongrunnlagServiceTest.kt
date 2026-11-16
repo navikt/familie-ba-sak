@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBostedsadresse
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
@@ -30,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -91,7 +93,7 @@ class PersongrunnlagServiceTest {
         val søkerFnr = søker.aktør.aktivFødselsnummer()
 
         val forrigeBehandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
-        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = lagBehandling(fagsak = defaultFagsak(aktør = søker.aktør), behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 
         val forrigeBehandlingPersongrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -105,7 +107,6 @@ class PersongrunnlagServiceTest {
                 barnasIdenter = listOf(barnFnr),
             )
 
-        every { personidentService.hentOgLagreAktør(søkerFnr, true) } returns søker.aktør
         every { personidentService.hentOgLagreAktør(barnFnr, true) } returns barn.aktør
 
         every { persongrunnlagService.hentAktiv(forrigeBehandling.id) } returns forrigeBehandlingPersongrunnlag
@@ -140,6 +141,89 @@ class PersongrunnlagServiceTest {
                 behandling = behandling,
                 målform = søknadDTO.søkerMedOpplysninger.målform,
             )
+        }
+    }
+
+    @Nested
+    inner class RegistrerBarnFraSøknad {
+        @Test
+        fun `skal bruke søker fra fagsaken og ikke søkeren som er oppgitt i søknaden`() {
+            // Arrange
+            val søker = lagPerson()
+            val annenPerson = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val barnFnr = barn.aktør.aktivFødselsnummer()
+            val behandling = lagBehandling(fagsak = lagFagsak(aktør = søker.aktør))
+            val søknadDTO =
+                lagSøknadDTO(
+                    søkerIdent = annenPerson.aktør.aktivFødselsnummer(),
+                    barnasIdenter = listOf(barnFnr),
+                )
+
+            every { personidentService.hentOgLagreAktør(barnFnr, true) } returns barn.aktør
+            every {
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(any(), any(), any(), any(), any())
+            } returns PersonopplysningGrunnlag(behandlingId = behandling.id)
+
+            // Act
+            persongrunnlagService.registrerBarnFraSøknad(
+                søknadDTO = søknadDTO,
+                behandling = behandling,
+            )
+
+            // Assert
+            verify(exactly = 1) {
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(barn.aktør),
+                    barnFraForrigeBehandling = emptyList(),
+                    behandling = behandling,
+                    målform = søknadDTO.søkerMedOpplysninger.målform,
+                )
+            }
+            verify(exactly = 0) { personidentService.hentOgLagreAktør(annenPerson.aktør.aktivFødselsnummer(), any()) }
+        }
+
+        @Test
+        fun `skal bruke søkeren som er lagret på fagsaken når fagsaken gjelder skjermet barn`() {
+            // Arrange
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val barnFnr = barn.aktør.aktivFødselsnummer()
+            val fagsak =
+                lagFagsak(
+                    aktør = barn.aktør,
+                    type = FagsakType.SKJERMET_BARN,
+                    skjermetBarnSøker = SkjermetBarnSøker(aktør = søker.aktør),
+                )
+            val behandling = lagBehandling(fagsak = fagsak)
+            val søknadDTO =
+                lagSøknadDTO(
+                    søkerIdent = søker.aktør.aktivFødselsnummer(),
+                    barnasIdenter = listOf(barnFnr),
+                )
+
+            every { personidentService.hentOgLagreAktør(barnFnr, true) } returns barn.aktør
+            every {
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(any(), any(), any(), any(), any())
+            } returns PersonopplysningGrunnlag(behandlingId = behandling.id)
+
+            // Act
+            persongrunnlagService.registrerBarnFraSøknad(
+                søknadDTO = søknadDTO,
+                behandling = behandling,
+            )
+
+            // Assert
+            verify(exactly = 1) {
+                persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+                    aktør = søker.aktør,
+                    barnFraInneværendeBehandling = listOf(barn.aktør),
+                    barnFraForrigeBehandling = emptyList(),
+                    behandling = behandling,
+                    målform = søknadDTO.søkerMedOpplysninger.målform,
+                )
+            }
         }
     }
 

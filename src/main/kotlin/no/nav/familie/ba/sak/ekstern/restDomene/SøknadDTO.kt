@@ -22,6 +22,11 @@ data class SøknadDTO(
 
 fun SøknadDTO.writeValueAsString(): String = jsonMapper.writeValueAsString(this)
 
+fun SøknadDTO.hentIdenterTilValgteBarn(): List<String> =
+    barnaMedOpplysninger
+        .filter { it.inkludertISøknaden && it.erFolkeregistrert }
+        .map { it.ident }
+
 data class SøkerMedOpplysninger(
     val ident: String,
     val målform: Målform = Målform.NB,
