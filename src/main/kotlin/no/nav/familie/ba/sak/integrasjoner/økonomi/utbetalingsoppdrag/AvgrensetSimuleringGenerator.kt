@@ -18,7 +18,7 @@ class AvgrensetSimuleringGenerator(
     private val clockProvider: ClockProvider,
 ) {
     /*
-    Genererer utbetalingsoppdrag for simulering fra tidligste endring eller 6 måneder tilbake i tid, avhenig av hva som kommer først.
+    Genererer utbetalingsoppdrag for simulering fra tidligste endring eller 6 måneder tilbake i tid, avhengig av hva som kommer først.
     For å få til dette, avkorter vi andeler for inneværende og forrige behandling til denne datoen og sørger for at vi opphører alle kjeder fra første utbetaling før kjedene bygges opp på nytt.
     Dette vil resultere i en simulering som inneholder totalbeløpet per måned fra og med endringstidspunkt eller 6 måneder tilbake.
      */
