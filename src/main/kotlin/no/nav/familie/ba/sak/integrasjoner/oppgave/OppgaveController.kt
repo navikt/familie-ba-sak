@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.oppgave
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.FerdigstillOppgaveKnyttJournalpostDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilPersonInfoDto
@@ -114,6 +115,13 @@ class OppgaveController(
 
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val aktør = oppgave.aktoerId?.let { personidentService.hentAktør(it) }
+
+        if (aktør != null) {
+            tilgangService.validerTilgangTilPersoner(
+                personIdenter = listOf(aktør.aktivFødselsnummer()),
+                event = AuditLoggerEvent.ACCESS,
+            )
+        }
 
         val journalpost = if (oppgave.journalpostId != null) integrasjonKlient.hentJournalpost(oppgave.journalpostId!!) else throw Feil("Oppgave har ingen journalpost knyttet til seg")
 

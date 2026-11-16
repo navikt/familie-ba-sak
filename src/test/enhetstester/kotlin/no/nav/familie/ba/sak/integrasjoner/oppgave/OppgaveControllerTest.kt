@@ -6,7 +6,9 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.datagenerator.lagPersonInfo
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
@@ -58,6 +60,7 @@ class OppgaveControllerTest {
     fun init() {
         clearMocks(oppgaveService, personopplysningerService, personidentService, integrasjonKlient, fagsakService, innkommendeJournalføringService, tilgangService)
         every { tilgangService.verifiserHarTilgangTilHandling(any(), any()) } just runs
+        every { tilgangService.validerTilgangTilPersoner(any(), any(), any()) } just runs
     }
 
     @Test
@@ -192,6 +195,56 @@ class OppgaveControllerTest {
         assertThrows<RolleTilgangskontrollFeil> { oppgaveController.hentDataForManuellJournalføring(2L) }
 
         verify(exactly = 0) { oppgaveService.hentOppgave(any()) }
+        verify(exactly = 0) { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(any(), any()) }
+    }
+
+    @Test
+    fun `skal sjekke tilgang til personen på oppgaven før data for manuell journalføring hentes`() {
+        // Arrange
+        val aktør = randomAktør()
+        val oppgave = lagTestOppgaveDTO(oppgaveId = 1L).copy(aktoerId = aktør.aktørId)
+        every { oppgaveService.hentOppgave(1L) } returns oppgave
+        every { personidentService.hentAktør(aktør.aktørId) } returns aktør
+        every { integrasjonKlient.hentJournalpost(oppgave.journalpostId!!) } returns
+            lagTestJournalpost(personIdent = aktør.aktivFødselsnummer(), journalpostId = oppgave.journalpostId!!, avsenderMottakerIdType = null, kanal = "NAV_NO")
+        every { fagsakService.hentMinimalFagsakForPerson(aktør) } returns Ressurs.success(mockk<MinimalFagsakDto>())
+        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør) } returns lagPersonInfo()
+
+        // Act
+        oppgaveController.hentDataForManuellJournalføring(1L)
+
+        // Assert
+        verifyOrder {
+            tilgangService.validerTilgangTilPersoner(
+                personIdenter = listOf(aktør.aktivFødselsnummer()),
+                event = AuditLoggerEvent.ACCESS,
+            )
+            integrasjonKlient.hentJournalpost(oppgave.journalpostId!!)
+            fagsakService.hentMinimalFagsakForPerson(aktør)
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+        }
+    }
+
+    @Test
+    fun `skal ikke hente data for manuell journalføring når saksbehandler mangler tilgang til personen på oppgaven`() {
+        // Arrange
+        val aktør = randomAktør()
+        val oppgave = lagTestOppgaveDTO(oppgaveId = 1L).copy(aktoerId = aktør.aktørId)
+        every { oppgaveService.hentOppgave(1L) } returns oppgave
+        every { personidentService.hentAktør(aktør.aktørId) } returns aktør
+        every {
+            tilgangService.validerTilgangTilPersoner(
+                personIdenter = listOf(aktør.aktivFødselsnummer()),
+                event = AuditLoggerEvent.ACCESS,
+            )
+        } throws RolleTilgangskontrollFeil("Mangler tilgang til personen")
+
+        // Act & Assert
+        val feilmelding = assertThrows<RolleTilgangskontrollFeil> { oppgaveController.hentDataForManuellJournalføring(1L) }.message
+
+        assertThat(feilmelding).isEqualTo("Mangler tilgang til personen")
+        verify(exactly = 0) { integrasjonKlient.hentJournalpost(any()) }
+        verify(exactly = 0) { fagsakService.hentMinimalFagsakForPerson(any(), any()) }
         verify(exactly = 0) { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(any(), any()) }
     }
 
