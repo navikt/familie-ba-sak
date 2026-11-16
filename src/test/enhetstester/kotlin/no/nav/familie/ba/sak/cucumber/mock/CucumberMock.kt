@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategi
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestKlient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonKlient
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.AvgrensetSimuleringGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
@@ -469,6 +470,16 @@ class CucumberMock(
             strengtFortroligService = strengtFortroligService,
         )
 
+    private val behandlingsinformasjonUtleder =
+        BehandlingsinformasjonUtleder(
+            EndretMigreringsdatoUtleder(
+                behandlingHentOgPersisterService,
+                behandlingMigreringsinfoRepository,
+                tilkjentYtelseRepository,
+            ),
+            clockProvider,
+        )
+
     val utbetalingsoppdragGenerator =
         UtbetalingsoppdragGenerator(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -478,17 +489,15 @@ class CucumberMock(
                 KlassifiseringKorrigerer(
                     tilkjentYtelseRepository,
                 ),
-            behandlingsinformasjonUtleder =
-                BehandlingsinformasjonUtleder(
-                    EndretMigreringsdatoUtleder(
-                        behandlingHentOgPersisterService,
-                        behandlingMigreringsinfoRepository,
-                        tilkjentYtelseRepository,
-                    ),
-                    clockProvider,
-                ),
+            behandlingsinformasjonUtleder = behandlingsinformasjonUtleder,
             utbetalingsgenerator = Utbetalingsgenerator(),
             featureToggleService = featureToggleService,
+            avgrensetSimuleringGenerator =
+                AvgrensetSimuleringGenerator(
+                    utbetalingsgenerator = Utbetalingsgenerator(),
+                    behandlingsinformasjonUtleder = behandlingsinformasjonUtleder,
+                    clockProvider = clockProvider,
+                ),
         )
 
     val oppdaterTilkjentYtelseService =
