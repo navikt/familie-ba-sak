@@ -8,6 +8,7 @@ Egenskap: Avgrenset simulering av alle kjeder med minst seks måneders historikk
       | BehandlingId | FeatureToggleId                             | Er togglet på |
       | 1            | familie-ba-sak.simuler-kun-endrede-perioder | Ja            |
       | 2            | familie-ba-sak.simuler-kun-endrede-perioder | Ja            |
+      | 3            | familie-ba-sak.simuler-kun-endrede-perioder | Ja            |
 
   Scenariomal: Endring <endringsmåned> på søker simulerer også uendret barn fra seks måneder før <inneværende måned>
     Gitt følgende tilkjente ytelser
@@ -240,3 +241,101 @@ Egenskap: Avgrenset simulering av alle kjeder med minst seks måneders historikk
       | 1            | 01.2024  | 12.2026  |             | 1000  | ORDINÆR_BARNETRYGD | NY           | Nei        | 0          |                    | 1               |
       | 1            | 01.2024  | 12.2026  |             | 2000  | UTVIDET_BARNETRYGD | NY           | Nei        | 1          |                    | 1               |
       | 2            | 11.2025  | 12.2026  |             | 2500  | UTVIDET_BARNETRYGD | ENDR         | Nei        | 2          | 1                  | 2               |
+
+  Scenario: Reaktivering etter tom behandling kobler seg på siste historiske periode i hver kjede uten nytt opphør
+    Gitt følgende tilkjente ytelser
+      | BehandlingId | Uten andeler | Fra dato | Til dato | Beløp | Ident | Ytelse             |
+      | 1            |              | 01.2024  | 05.2025  | 900   | 1     | ORDINÆR_BARNETRYGD |
+      | 1            |              | 06.2025  | 12.2026  | 1000  | 1     | ORDINÆR_BARNETRYGD |
+      | 1            |              | 03.2024  | 11.2026  | 2000  | 2     | UTVIDET_BARNETRYGD |
+      | 2            | Ja           |          |          |       |       |                    |
+      | 3            |              | 09.2025  | 12.2026  | 1100  | 1     | ORDINÆR_BARNETRYGD |
+      | 3            |              | 11.2025  | 11.2026  | 2100  | 2     | UTVIDET_BARNETRYGD |
+
+    Og inneværende måned er 12.2025
+
+    Når beregner utbetalingsoppdrag
+
+    Så forvent følgende simulering
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Ytelse             | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 01.2024  | 05.2025  |             | 900   | ORDINÆR_BARNETRYGD | NY           | Nei        | 0          |                    | 1               |
+      | 1            | 06.2025  | 12.2026  |             | 1000  | ORDINÆR_BARNETRYGD | NY           | Nei        | 1          | 0                  | 1               |
+      | 1            | 03.2024  | 11.2026  |             | 2000  | UTVIDET_BARNETRYGD | NY           | Nei        | 2          |                    | 1               |
+      | 2            | 06.2025  | 12.2026  | 01.2024     | 1000  | ORDINÆR_BARNETRYGD | ENDR         | Ja         | 1          | 0                  | 2               |
+      | 2            | 03.2024  | 11.2026  | 03.2024     | 2000  | UTVIDET_BARNETRYGD | ENDR         | Ja         | 2          |                    | 2               |
+      | 3            | 09.2025  | 12.2026  |             | 1100  | ORDINÆR_BARNETRYGD | ENDR         | Nei        | 3          | 1                  | 3               |
+      | 3            | 11.2025  | 11.2026  |             | 2100  | UTVIDET_BARNETRYGD | ENDR         | Nei        | 4          | 2                  | 3               |
+
+    Så forvent følgende utbetalingsoppdrag
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Ytelse             | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 01.2024  | 05.2025  |             | 900   | ORDINÆR_BARNETRYGD | NY           | Nei        | 0          |                    | 1               |
+      | 1            | 06.2025  | 12.2026  |             | 1000  | ORDINÆR_BARNETRYGD | NY           | Nei        | 1          | 0                  | 1               |
+      | 1            | 03.2024  | 11.2026  |             | 2000  | UTVIDET_BARNETRYGD | NY           | Nei        | 2          |                    | 1               |
+      | 2            | 06.2025  | 12.2026  | 01.2024     | 1000  | ORDINÆR_BARNETRYGD | ENDR         | Ja         | 1          | 0                  | 2               |
+      | 2            | 03.2024  | 11.2026  | 03.2024     | 2000  | UTVIDET_BARNETRYGD | ENDR         | Ja         | 2          |                    | 2               |
+      | 3            | 09.2025  | 12.2026  |             | 1100  | ORDINÆR_BARNETRYGD | ENDR         | Nei        | 3          | 1                  | 3               |
+      | 3            | 11.2025  | 11.2026  |             | 2100  | UTVIDET_BARNETRYGD | ENDR         | Nei        | 4          | 2                  | 3               |
+
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
+      | 1            | 1  | 1          | 0                  | 1               |
+      | 1            | 2  | 2          |                    | 1               |
+      | 3            | 3  | 3          | 1                  | 3               |
+      | 3            | 4  | 4          | 2                  | 3               |
+
+  Scenario: Opphør etter avkorting bruker opprinnelige referansedatoer og periodekoblinger for begge kjeder
+    Gitt følgende tilkjente ytelser
+      | BehandlingId | Fra dato | Til dato | Beløp | Ident | Ytelse             |
+      | 1            | 01.2024  | 03.2024  | 900   | 1     | ORDINÆR_BARNETRYGD |
+      | 1            | 04.2024  | 12.2026  | 1000  | 1     | ORDINÆR_BARNETRYGD |
+      | 1            | 02.2024  | 05.2024  | 1800  | 2     | UTVIDET_BARNETRYGD |
+      | 1            | 06.2024  | 11.2026  | 2000  | 2     | UTVIDET_BARNETRYGD |
+      | 2            | 01.2024  | 03.2024  | 900   | 1     | ORDINÆR_BARNETRYGD |
+      | 2            | 04.2024  | 09.2025  | 1000  | 1     | ORDINÆR_BARNETRYGD |
+      | 2            | 02.2024  | 05.2024  | 1800  | 2     | UTVIDET_BARNETRYGD |
+      | 2            | 06.2024  | 10.2025  | 2000  | 2     | UTVIDET_BARNETRYGD |
+      | 3            | 01.2024  | 03.2024  | 900   | 1     | ORDINÆR_BARNETRYGD |
+      | 3            | 02.2024  | 05.2024  | 1800  | 2     | UTVIDET_BARNETRYGD |
+
+    Og inneværende måned er 12.2025
+
+    Når beregner utbetalingsoppdrag
+
+    Så forvent følgende simulering
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Ytelse             | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 01.2024  | 03.2024  |             | 900   | ORDINÆR_BARNETRYGD | NY           | Nei        | 0          |                    | 1               |
+      | 1            | 04.2024  | 12.2026  |             | 1000  | ORDINÆR_BARNETRYGD | NY           | Nei        | 1          | 0                  | 1               |
+      | 1            | 02.2024  | 05.2024  |             | 1800  | UTVIDET_BARNETRYGD | NY           | Nei        | 2          |                    | 1               |
+      | 1            | 06.2024  | 11.2026  |             | 2000  | UTVIDET_BARNETRYGD | NY           | Nei        | 3          | 2                  | 1               |
+      | 2            | 04.2024  | 12.2026  | 06.2025     | 1000  | ORDINÆR_BARNETRYGD | ENDR         | Ja         | 1          | 0                  | 2               |
+      | 2            | 06.2024  | 11.2026  | 06.2025     | 2000  | UTVIDET_BARNETRYGD | ENDR         | Ja         | 3          | 2                  | 2               |
+      | 2            | 06.2025  | 09.2025  |             | 1000  | ORDINÆR_BARNETRYGD | ENDR         | Nei        | 4          | 1                  | 2               |
+      | 2            | 06.2025  | 10.2025  |             | 2000  | UTVIDET_BARNETRYGD | ENDR         | Nei        | 5          | 3                  | 2               |
+      | 3            | 04.2024  | 12.2026  | 04.2024     | 1000  | ORDINÆR_BARNETRYGD | ENDR         | Ja         | 1          | 0                  | 3               |
+      | 3            | 06.2024  | 11.2026  | 04.2024     | 2000  | UTVIDET_BARNETRYGD | ENDR         | Ja         | 3          | 2                  | 3               |
+      | 3            | 04.2024  | 05.2024  |             | 1800  | UTVIDET_BARNETRYGD | ENDR         | Nei        | 4          | 3                  | 3               |
+
+    Så forvent følgende utbetalingsoppdrag
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Ytelse             | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 01.2024  | 03.2024  |             | 900   | ORDINÆR_BARNETRYGD | NY           | Nei        | 0          |                    | 1               |
+      | 1            | 04.2024  | 12.2026  |             | 1000  | ORDINÆR_BARNETRYGD | NY           | Nei        | 1          | 0                  | 1               |
+      | 1            | 02.2024  | 05.2024  |             | 1800  | UTVIDET_BARNETRYGD | NY           | Nei        | 2          |                    | 1               |
+      | 1            | 06.2024  | 11.2026  |             | 2000  | UTVIDET_BARNETRYGD | NY           | Nei        | 3          | 2                  | 1               |
+      | 2            | 04.2024  | 12.2026  | 10.2025     | 1000  | ORDINÆR_BARNETRYGD | ENDR         | Ja         | 1          | 0                  | 2               |
+      | 2            | 06.2024  | 11.2026  | 11.2025     | 2000  | UTVIDET_BARNETRYGD | ENDR         | Ja         | 3          | 2                  | 2               |
+      | 3            | 04.2024  | 12.2026  | 04.2024     | 1000  | ORDINÆR_BARNETRYGD | ENDR         | Ja         | 1          | 0                  | 3               |
+      | 3            | 06.2024  | 11.2026  | 06.2024     | 2000  | UTVIDET_BARNETRYGD | ENDR         | Ja         | 3          | 2                  | 3               |
+
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
+      | 1            | 1  | 1          | 0                  | 1               |
+      | 1            | 2  | 2          |                    | 1               |
+      | 1            | 3  | 3          | 2                  | 1               |
+      | 2            | 4  | 0          |                    | 1               |
+      | 2            | 5  | 1          | 0                  | 2               |
+      | 2            | 6  | 2          |                    | 1               |
+      | 2            | 7  | 3          | 2                  | 2               |
+      | 3            | 8  | 0          |                    | 1               |
+      | 3            | 9  | 2          |                    | 1               |
