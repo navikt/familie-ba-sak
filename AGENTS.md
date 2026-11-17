@@ -99,6 +99,7 @@ Use `secureLogger` when logging national identity numbers (fødselsnummer) or ot
 - All three test source roots (`enhetstester`, `integrasjonstester`, `testdata`) are registered via `build-helper-maven-plugin`.
 - Test execution order is randomized (`runOrder=random`).
 - Integration tests require Docker (Testcontainers, JDBC `jdbc:tc:postgresql:` URL under profile `testcontainers`). They will fail without a running Docker daemon.
+- Transaction tests must query persisted state after the tested transactions have completed. The default `fake-task-repository` is in-memory; route task saves to the real `TaskService` when asserting task rollback.
 - Structure test bodies with `// Arrange`, `// Act`, and `// Assert` comments. Use `// Act & Assert` when combined, e.g. with `assertThrows { ... }`.
 - Prefer AssertJ (`assertThat`) for new assertions. The codebase historically also uses JUnit Jupiter assertions and, rarely, Hamcrest — don't copy that pattern in new code.
 - Testnamn: backticks with a `skal` prefix, e.g. `` fun `skal beregne riktig beløp`() ``. Use `@Nested` for grouping.
