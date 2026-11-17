@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
@@ -52,6 +53,7 @@ class SendTilBeslutterTest {
     private val mockTilbakekrevingsvedtakMotregningService = mockk<TilbakekrevingsvedtakMotregningService>()
     private val mockTilbakekrevingsvedtakMotregningBrevService = mockk<TilbakekrevingsvedtakMotregningBrevService>()
     private val mockSammensattKontrollsakService = mockk<SammensattKontrollsakService>()
+    private val behandlingsresultatStegValideringService = mockk<BehandlingsresultatStegValideringService>()
 
     private val totrinnskontrollService = TotrinnskontrollService(mockBehandlingService, mockTotrinnskontrollRepository, mockSaksbehandlerContext)
 
@@ -70,6 +72,7 @@ class SendTilBeslutterTest {
             tilbakekrevingsvedtakMotregningService = mockTilbakekrevingsvedtakMotregningService,
             tilbakekrevingsvedtakMotregningBrevService = mockTilbakekrevingsvedtakMotregningBrevService,
             sammensattKontrollsakService = mockSammensattKontrollsakService,
+            behandlingsresultatStegValideringService = behandlingsresultatStegValideringService,
         )
 
     @Nested
@@ -164,8 +167,6 @@ class SendTilBeslutterTest {
         @Test
         fun `skal kaste feil hvis tilbakekrevingsvedtak ikke er komplett hvis det er perioder med avregning`() {
             val behandling = lagBehandling()
-            val stegService = mockk<StegService>()
-            val behandlingsresultatSteg = mockk<BehandlingsresultatSteg>()
 
             val tilbakekrevingsvedtakMotregning =
                 TilbakekrevingsvedtakMotregning(
@@ -183,8 +184,7 @@ class SendTilBeslutterTest {
                     )
             }
             every { mockVilkårsvurderingService.hentAktivForBehandling(any()) } returns null
-            every { stegService.hentBehandlingSteg(any()) } returns behandlingsresultatSteg
-            justRun { behandlingsresultatSteg.preValiderSteg(any()) }
+            justRun { behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling) }
             every { mockVedtakService.hentAktivForBehandlingThrows(any()) } returns mockk()
             every { mockVedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(any()) } returns emptyList()
             every { mockAvregningService.behandlingHarPerioderSomAvregnes(any()) } returns true
@@ -197,7 +197,7 @@ class SendTilBeslutterTest {
             // Act
             val feil =
                 assertThrows<FunksjonellFeil> {
-                    sendTilBeslutter.preValiderSteg(behandling, stegService)
+                    sendTilBeslutter.preValiderSteg(behandling)
                 }
 
             assertThat(feil.message).isEqualTo("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter hvis samtykke ikke er bekreftet.")
@@ -207,8 +207,6 @@ class SendTilBeslutterTest {
         fun `skal kaste FunksjonellFeil hvis sammensatt kontrollsak finnes med tom fritekst`() {
             // Arrange
             val behandling = lagBehandling()
-            val stegService = mockk<StegService>()
-            val behandlingsresultatSteg = mockk<BehandlingsresultatSteg>()
 
             justRun {
                 mockValiderBrevmottakerService
@@ -219,8 +217,7 @@ class SendTilBeslutterTest {
                     )
             }
             every { mockVilkårsvurderingService.hentAktivForBehandling(any()) } returns null
-            every { stegService.hentBehandlingSteg(any()) } returns behandlingsresultatSteg
-            justRun { behandlingsresultatSteg.preValiderSteg(any()) }
+            justRun { behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling) }
             every { mockVedtakService.hentAktivForBehandlingThrows(any()) } returns mockk()
             every { mockVedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(any()) } returns emptyList()
             every { mockAvregningService.behandlingHarPerioderSomAvregnes(any()) } returns false
@@ -230,7 +227,7 @@ class SendTilBeslutterTest {
             // Act
             val feil =
                 assertThrows<FunksjonellFeil> {
-                    sendTilBeslutter.preValiderSteg(behandling, stegService)
+                    sendTilBeslutter.preValiderSteg(behandling)
                 }
 
             // Assert
@@ -241,8 +238,6 @@ class SendTilBeslutterTest {
         fun `skal ikke kaste feil hvis sammensatt kontrollsak finnes med utfylt fritekst`() {
             // Arrange
             val behandling = lagBehandling()
-            val stegService = mockk<StegService>()
-            val behandlingsresultatSteg = mockk<BehandlingsresultatSteg>()
 
             justRun {
                 mockValiderBrevmottakerService
@@ -253,8 +248,7 @@ class SendTilBeslutterTest {
                     )
             }
             every { mockVilkårsvurderingService.hentAktivForBehandling(any()) } returns null
-            every { stegService.hentBehandlingSteg(any()) } returns behandlingsresultatSteg
-            justRun { behandlingsresultatSteg.preValiderSteg(any()) }
+            justRun { behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling) }
             every { mockVedtakService.hentAktivForBehandlingThrows(any()) } returns mockk()
             every { mockVedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(any()) } returns emptyList()
             every { mockAvregningService.behandlingHarPerioderSomAvregnes(any()) } returns false
@@ -262,15 +256,13 @@ class SendTilBeslutterTest {
                 SammensattKontrollsak(behandlingId = behandling.id, fritekst = "En begrunnelse")
 
             // Act & Assert - should not throw
-            sendTilBeslutter.preValiderSteg(behandling, stegService)
+            sendTilBeslutter.preValiderSteg(behandling)
         }
 
         @Test
         fun `skal ikke kaste feil hvis ingen sammensatt kontrollsak finnes`() {
             // Arrange
             val behandling = lagBehandling()
-            val stegService = mockk<StegService>()
-            val behandlingsresultatSteg = mockk<BehandlingsresultatSteg>()
 
             justRun {
                 mockValiderBrevmottakerService
@@ -281,15 +273,14 @@ class SendTilBeslutterTest {
                     )
             }
             every { mockVilkårsvurderingService.hentAktivForBehandling(any()) } returns null
-            every { stegService.hentBehandlingSteg(any()) } returns behandlingsresultatSteg
-            justRun { behandlingsresultatSteg.preValiderSteg(any()) }
+            justRun { behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling) }
             every { mockVedtakService.hentAktivForBehandlingThrows(any()) } returns mockk()
             every { mockVedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(any()) } returns emptyList()
             every { mockAvregningService.behandlingHarPerioderSomAvregnes(any()) } returns false
             every { mockSammensattKontrollsakService.finnSammensattKontrollsak(any()) } returns null
 
             // Act & Assert - should not throw
-            sendTilBeslutter.preValiderSteg(behandling, stegService)
+            sendTilBeslutter.preValiderSteg(behandling)
         }
     }
 

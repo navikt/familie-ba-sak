@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import no.nav.familie.ba.sak.TestClockProvider.Companion.lagClockProviderMedFastTidspunkt
 import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.Feil
@@ -16,6 +19,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagPersonEnkel
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
@@ -27,7 +31,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.REVURDERING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.ENDRE_MIGRERINGSDATO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SATSENDRING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SATSENDRING_EØS
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SVALBARDTILLEGG
@@ -50,10 +57,14 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -73,24 +84,202 @@ class BehandlingsresultatStegValideringServiceTest {
     private val satsendringEøsKjøringService: SatsendringEøsKjøringService = mockk()
 
     private val behandlingsresultatStegValideringService =
-        BehandlingsresultatStegValideringService(
-            beregningService = beregningService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            vilkårService = vilkårService,
-            kompetanseRepository = kompetanseRepository,
-            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
-            valutakursRepository = valutakursRepository,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            strengtFortroligService = strengtFortroligService,
-            persongrunnlagService = persongrunnlagService,
-            clockProvider = clockProvider,
-            satsendringEøsKjøringService = satsendringEøsKjøringService,
+        spyk(
+            BehandlingsresultatStegValideringService(
+                beregningService = beregningService,
+                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+                vilkårService = vilkårService,
+                kompetanseRepository = kompetanseRepository,
+                utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+                valutakursRepository = valutakursRepository,
+                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+                strengtFortroligService = strengtFortroligService,
+                persongrunnlagService = persongrunnlagService,
+                clockProvider = clockProvider,
+                satsendringEøsKjøringService = satsendringEøsKjøringService,
+            ),
         )
 
     private val barn = lagPerson(type = PersonType.BARN)
     private val barn2 = lagPerson(type = PersonType.BARN)
     private val behandling = lagBehandling()
+
+    @Nested
+    inner class ValiderBehandlingFørBehandlingsresultat {
+        @BeforeEach
+        fun setup() {
+            every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(any()) } returns listOf(lagPersonEnkel(personType = PersonType.SØKER))
+            every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns mockk(relaxed = true)
+            justRun { behandlingsresultatStegValideringService.validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(any()) }
+            justRun { behandlingsresultatStegValideringService.validerSatsendring(any()) }
+            justRun { behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(any()) }
+            justRun { behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(any()) }
+            justRun { behandlingsresultatStegValideringService.validerEndredeUtbetalingsandeler(any()) }
+            justRun { behandlingsresultatStegValideringService.validerKompetanse(any()) }
+            justRun { behandlingsresultatStegValideringService.validerSekundærlandKompetanse(any()) }
+            justRun { behandlingsresultatStegValideringService.validerIngenEndringTilbakeITid(any()) }
+            justRun { behandlingsresultatStegValideringService.validerSatsErUendret(any()) }
+            justRun { behandlingsresultatStegValideringService.validerAtMinstEttUtenlandskPeriodebeløpErEndret(any()) }
+            justRun { behandlingsresultatStegValideringService.validerIngenEndringIAndelerFørSatsendringstidspunkt(any()) }
+            justRun { behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(any()) }
+            justRun { behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingIPerioderMedSkjermedeBarn(any()) }
+            justRun { behandlingsresultatStegValideringService.validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(any()) }
+            justRun { behandlingsresultatStegValideringService.validerFalskIdentitetBehandling(any()) }
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = BehandlingÅrsak::class,
+            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "SATSENDRING_EØS"],
+            mode = EXCLUDE,
+        )
+        fun `skal ikke valideres om behandlingen ikke har riktig årsak for behandling som skal automatisk behandles`(
+            behandlingÅrsak: BehandlingÅrsak,
+        ) {
+            // Arrange
+            val behandling = lagBehandling(skalBehandlesAutomatisk = true, årsak = behandlingÅrsak)
+
+            // Act & assert
+            assertDoesNotThrow { behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling) }
+        }
+
+        @Test
+        fun `skal validere at utenlandsk periodebeløp og valutakurs er utfylt`() {
+            // Arrange
+            val behandling = lagBehandling()
+
+            // Act
+            behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatStegValideringService.validerAtUtenlandskPeriodebeløpOgValutakursErUtfylt(behandling)
+            }
+        }
+
+        @Test
+        fun `skal validere at alle barn med andeler fra forrige iverksatte behandling er med`() {
+            // Arrange
+            val behandling = lagBehandling()
+
+            // Act
+            behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatStegValideringService.validerAtAlleBarnMedEksisterendeAndelerFraForrigeIverksatteBehandlingErMed(behandling)
+            }
+        }
+
+        @Test
+        fun `skal validere satsendring`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = SATSENDRING)
+
+            // Act
+            behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatStegValideringService.validerSatsendring(any())
+            }
+        }
+
+        @Test
+        fun `skal validere finnmarkstillegg`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = FINNMARKSTILLEGG)
+
+            // Act
+            behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatStegValideringService.validerFinnmarkstilleggBehandling(any())
+            }
+        }
+
+        @Test
+        fun `skal validere svalbardtillegg`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = SVALBARDTILLEGG)
+
+            // Act
+            behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatStegValideringService.validerSvalbardtilleggBehandling(any())
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = BehandlingÅrsak::class,
+            names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "FINNMARKSTILLEGG", "SVALBARDTILLEGG", "SATSENDRING_EØS"],
+            mode = EXCLUDE,
+        )
+        fun `skal validere endrede utbetalinger og kompetanse`(
+            behandlingsÅrsak: BehandlingÅrsak,
+        ) {
+            // Arrange
+            val behandling = lagBehandling(årsak = behandlingsÅrsak)
+
+            // Act
+            behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatStegValideringService.validerEndredeUtbetalingsandeler(any())
+                behandlingsresultatStegValideringService.validerKompetanse(any())
+                behandlingsresultatStegValideringService.validerSekundærlandKompetanse(any())
+            }
+        }
+
+        @Test
+        fun `skal validere månedlig valutajustering`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = MÅNEDLIG_VALUTAJUSTERING)
+
+            // Act
+            behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatStegValideringService.validerIngenEndringTilbakeITid(any())
+                behandlingsresultatStegValideringService.validerSatsErUendret(any())
+            }
+        }
+
+        @Test
+        fun `skal validere endre migreringsdato`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = ENDRE_MIGRERINGSDATO)
+
+            // Act
+            behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatStegValideringService.validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(any())
+            }
+        }
+
+        @Test
+        fun `skal validere falsk identitet`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.FALSK_IDENTITET)
+
+            // Act
+            behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
+
+            // Assert
+            verify(exactly = 1) {
+                behandlingsresultatStegValideringService.validerFalskIdentitetBehandling(any())
+            }
+        }
+    }
 
     @Nested
     inner class ValiderAtUtenlandskPeriodebeløpOgValutakursErUtfylt {

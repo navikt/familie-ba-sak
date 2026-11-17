@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatStegValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
@@ -45,6 +46,7 @@ class SendTilBeslutter(
     private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
     private val tilbakekrevingsvedtakMotregningBrevService: TilbakekrevingsvedtakMotregningBrevService,
     private val sammensattKontrollsakService: SammensattKontrollsakService,
+    private val behandlingsresultatStegValideringService: BehandlingsresultatStegValideringService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -58,9 +60,7 @@ class SendTilBeslutter(
             .hentAktivForBehandling(behandlingId = behandling.id)
             ?.validerAtAndreVurderingerErVurdert()
 
-        val behandlingsresultatSteg: BehandlingsresultatSteg =
-            stegService?.hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
-        behandlingsresultatSteg.preValiderSteg(behandling)
+        behandlingsresultatStegValideringService.validerBehandlingFørBehandlingsresultat(behandling)
 
         behandling.validerRekkefølgeOgUnikhetPåSteg()
         behandling.validerMaksimaltEtStegIkkeUtført()
