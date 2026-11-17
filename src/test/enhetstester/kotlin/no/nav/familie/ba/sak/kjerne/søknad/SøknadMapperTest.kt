@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.erIBeredskap
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harKryssetForDeltBosted
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harOppholdtSegUtenforNorgeSiste12Mnd
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.inneholderVedlegg
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.manglerVedleggForDokumentasjonsbehov
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.oppholderSegIInstitusjon
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.tilBehandlingUnderkategori
 import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
@@ -361,6 +362,83 @@ class SøknadMapperTest {
                 harSendtInn = true,
                 opplastedeVedlegg = opplastedeVedlegg,
                 dokumentasjonSpråkTittel = emptyMap(),
+            )
+    }
+
+    @Nested
+    inner class ManglerVedleggForDokumentasjonsbehov {
+        @Test
+        fun `skal gi true når et dokumentasjonsbehov mangler vedlegg`() {
+            // Arrange
+            val dokumentasjon =
+                listOf(
+                    lagSøknaddokumentasjon(Dokumentasjonsbehov.AVTALE_DELT_BOSTED, opplastedeVedlegg = listOf(lagVedlegg(Dokumentasjonsbehov.AVTALE_DELT_BOSTED))),
+                    lagSøknaddokumentasjon(Dokumentasjonsbehov.VEDTAK_OPPHOLDSTILLATELSE, opplastedeVedlegg = emptyList()),
+                )
+
+            // Act & Assert
+            assertThat(dokumentasjon.manglerVedleggForDokumentasjonsbehov()).isTrue()
+        }
+
+        @Test
+        fun `skal gi true når søker har sagt at dokumentasjon er sendt inn uten å laste opp vedlegg`() {
+            // Arrange
+            val dokumentasjon =
+                listOf(
+                    lagSøknaddokumentasjon(Dokumentasjonsbehov.AVTALE_DELT_BOSTED, opplastedeVedlegg = emptyList(), harSendtInn = true),
+                )
+
+            // Act & Assert
+            assertThat(dokumentasjon.manglerVedleggForDokumentasjonsbehov()).isTrue()
+        }
+
+        @Test
+        fun `skal gi false når alle dokumentasjonsbehov har vedlegg`() {
+            // Arrange
+            val dokumentasjon =
+                listOf(
+                    lagSøknaddokumentasjon(Dokumentasjonsbehov.AVTALE_DELT_BOSTED, opplastedeVedlegg = listOf(lagVedlegg(Dokumentasjonsbehov.AVTALE_DELT_BOSTED))),
+                )
+
+            // Act & Assert
+            assertThat(dokumentasjon.manglerVedleggForDokumentasjonsbehov()).isFalse()
+        }
+
+        @Test
+        fun `skal gi false når bare annen dokumentasjon mangler vedlegg`() {
+            // Arrange
+            val dokumentasjon = listOf(lagSøknaddokumentasjon(Dokumentasjonsbehov.ANNEN_DOKUMENTASJON, opplastedeVedlegg = emptyList()))
+
+            // Act & Assert
+            assertThat(dokumentasjon.manglerVedleggForDokumentasjonsbehov()).isFalse()
+        }
+
+        @Test
+        fun `skal gi false når søknaden ikke har dokumentasjon`() {
+            // Arrange
+            val dokumentasjon = emptyList<Søknaddokumentasjon>()
+
+            // Act & Assert
+            assertThat(dokumentasjon.manglerVedleggForDokumentasjonsbehov()).isFalse()
+        }
+
+        private fun lagSøknaddokumentasjon(
+            dokumentasjonsbehov: Dokumentasjonsbehov,
+            opplastedeVedlegg: List<Søknadsvedlegg>,
+            harSendtInn: Boolean = false,
+        ): Søknaddokumentasjon =
+            Søknaddokumentasjon(
+                dokumentasjonsbehov = dokumentasjonsbehov,
+                harSendtInn = harSendtInn,
+                opplastedeVedlegg = opplastedeVedlegg,
+                dokumentasjonSpråkTittel = emptyMap(),
+            )
+
+        private fun lagVedlegg(dokumentasjonsbehov: Dokumentasjonsbehov): Søknadsvedlegg =
+            Søknadsvedlegg(
+                dokumentId = "1",
+                navn = "vedlegg.pdf",
+                tittel = dokumentasjonsbehov,
             )
     }
 }

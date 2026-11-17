@@ -406,6 +406,22 @@ internal class FiltreringsregelEvaluatorForSøknadTest {
             // Assert
             assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG)
         }
+
+        @Test
+        fun `skal avvise når søknaden mangler vedlegg for dokumentasjonsbehov`() {
+            // Arrange
+            val fakta = lagFiltreringsreglerFaktaSøknad(søknadenManglerVedleggForDokumentasjonsbehov = true)
+
+            // Act
+            val evalueringer =
+                filtreringsregelEvaluator.evaluerFiltreringsregler(
+                    FILTRERINGSREGLER_SØKNAD,
+                    fakta,
+                )
+
+            // Assert
+            assertFørsteIkkeOppfylteRegel(evalueringer, Identifikator.SØKNADEN_HAR_IKKE_DOKUMENTASJONSBEHOV_UTEN_VEDLEGG)
+        }
     }
 
     @Nested

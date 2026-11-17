@@ -12,6 +12,7 @@ data class Søknad(
     val behandlingUnderkategori: BehandlingUnderkategori,
     val harKryssetPåEøsSpørsmål: Boolean,
     val inneholderVedlegg: Boolean,
+    val manglerVedleggForDokumentasjonsbehov: Boolean,
     val målform: Målform = Målform.NB,
 ) {
     fun harKryssetForDeltBostedForMinstEttBarn(): Boolean = barn.any { it.harKryssetForDeltBosted }
