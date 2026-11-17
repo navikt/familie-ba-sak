@@ -49,6 +49,7 @@ data class FiltreringsreglerFaktaSøknad(
     val søkerHarKryssetForAsylsøkerISøknaden: Boolean,
     val søkerHarKryssetForAdoptertFraUtlandetISøknaden: Boolean,
     val søknadenInneholderVedlegg: Boolean,
+    val søknadenManglerVedleggForDokumentasjonsbehov: Boolean,
     val søkerHarAdressebeskyttelseGradering6Eller19: Boolean = false,
     val barnHarAdressebeskyttelseGradering6Eller19: Boolean = false,
     val søkerOgBarnHarForelderBarnRelasjon: Boolean = true,

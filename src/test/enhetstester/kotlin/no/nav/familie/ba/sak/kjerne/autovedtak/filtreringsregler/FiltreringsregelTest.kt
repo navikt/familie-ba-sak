@@ -162,6 +162,7 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_ADOPTERT_FRA_UTLANDET_I_SØKNADEN,
             Filtreringsregel.Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG,
+            Filtreringsregel.Identifikator.SØKNADEN_HAR_IKKE_DOKUMENTASJONSBEHOV_UTEN_VEDLEGG,
             Filtreringsregel.Identifikator.SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE,
             Filtreringsregel.Identifikator.BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE,
             Filtreringsregel.Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON,
@@ -210,6 +211,7 @@ internal class FiltreringsregelTest {
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_ASYLSØKER_I_SØKNADEN,
             Filtreringsregel.Identifikator.SØKER_HAR_IKKE_KRYSSET_FOR_ADOPTERT_FRA_UTLANDET_I_SØKNADEN,
             Filtreringsregel.Identifikator.SØKNADEN_INNEHOLDER_IKKE_VEDLEGG,
+            Filtreringsregel.Identifikator.SØKNADEN_HAR_IKKE_DOKUMENTASJONSBEHOV_UTEN_VEDLEGG,
             Filtreringsregel.Identifikator.SØKER_OG_BARN_HAR_FORELDER_BARN_RELASJON,
             Filtreringsregel.Identifikator.SØKER_HAR_AKTIV_NORSK_BOSTEDSADRESSE,
             Filtreringsregel.Identifikator.BARN_HAR_AKTIV_NORSK_BOSTEDSADRESSE,
@@ -440,6 +442,16 @@ internal class FiltreringsregelTest {
                     "SØKNADEN_INNEHOLDER_VEDLEGG",
                     "SØKNADEN_INNEHOLDER_IKKE_VEDLEGG",
                     "Søknaden inneholder vedlegg",
+                ),
+                PersistertUtfall(
+                    "SØKNADEN_HAR_IKKE_DOKUMENTASJONSBEHOV_UTEN_VEDLEGG",
+                    "SØKNADEN_HAR_IKKE_DOKUMENTASJONSBEHOV_UTEN_VEDLEGG",
+                    "Søknaden har ikke dokumentasjonsbehov uten opplastet vedlegg",
+                ),
+                PersistertUtfall(
+                    "SØKNADEN_HAR_DOKUMENTASJONSBEHOV_UTEN_VEDLEGG",
+                    "SØKNADEN_HAR_IKKE_DOKUMENTASJONSBEHOV_UTEN_VEDLEGG",
+                    "Søker har ikke lastet opp vedlegg for minst ett dokumentasjonsbehov i søknaden",
                 ),
             )
 

@@ -250,6 +250,12 @@ class Filtreringsregel<in T : FiltreringsreglerFakta>(
             ikkeOppfyltNavn = "SØKNADEN_INNEHOLDER_VEDLEGG",
             ikkeOppfyltBeskrivelse = "Søknaden inneholder vedlegg",
         ),
+        SØKNADEN_HAR_IKKE_DOKUMENTASJONSBEHOV_UTEN_VEDLEGG(
+            oppfyltNavn = "SØKNADEN_HAR_IKKE_DOKUMENTASJONSBEHOV_UTEN_VEDLEGG",
+            oppfyltBeskrivelse = "Søknaden har ikke dokumentasjonsbehov uten opplastet vedlegg",
+            ikkeOppfyltNavn = "SØKNADEN_HAR_DOKUMENTASJONSBEHOV_UTEN_VEDLEGG",
+            ikkeOppfyltBeskrivelse = "Søker har ikke lastet opp vedlegg for minst ett dokumentasjonsbehov i søknaden",
+        ),
         ;
 
         val oppfylt: EvalueringÅrsak = Utfall(this, oppfyltNavn, oppfyltBeskrivelse)
@@ -376,6 +382,11 @@ private val søknadenInneholderIkkeVedlegg =
         !it.søknadenInneholderVedlegg
     }
 
+private val søknadenHarIkkeDokumentasjonsbehovUtenVedlegg =
+    Filtreringsregel<FiltreringsreglerFaktaSøknad>(Identifikator.SØKNADEN_HAR_IKKE_DOKUMENTASJONSBEHOV_UTEN_VEDLEGG) {
+        !it.søknadenManglerVedleggForDokumentasjonsbehov
+    }
+
 private val morHarIkkeOppfyltUtvidetVilkårVedFødselsdato =
     Filtreringsregel<FiltreringsreglerFakta>(Identifikator.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO) {
         !it.søkerOppfyllerVilkårForUtvidetBarnetrygd
@@ -458,6 +469,7 @@ val FILTRERINGSREGLER_SØKNAD: List<Filtreringsregel<FiltreringsreglerFaktaSøkn
         søkerHarIkkeKryssetForAsylsøkerISøknaden,
         søkerHarIkkeKryssetForAdoptertFraUtlandetISøknaden,
         søknadenInneholderIkkeVedlegg,
+        søknadenHarIkkeDokumentasjonsbehovUtenVedlegg,
         søkerHarAktivNorskBostedsadresse,
         barnHarAktivNorskBostedsadresse,
         søkerOgBarnHarForelderBarnRelasjon,
