@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.internal
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.beans.factory.annotation.Qualifier
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController
 class PreprodController(
     private val testVerktøyService: TestVerktøyService,
     private val tilgangService: TilgangService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val environment: Environment,
     @Qualifier("shortCache")
     private val shortCacheManager: CacheManager,
@@ -48,8 +50,10 @@ class PreprodController(
         }
 
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.CREATE)
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         testVerktøyService.oppdaterVilkårUtenFomTilFødselsdato(behandlingId)
+        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
 
         return ResponseEntity.ok(Ressurs.success("Oppdaterte vilkårsvurdering"))
     }

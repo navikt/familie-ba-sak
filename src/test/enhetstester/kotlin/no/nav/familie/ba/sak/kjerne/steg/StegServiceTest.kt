@@ -411,10 +411,80 @@ class StegServiceTest {
             verify(exactly = 0) { mocketBehandlingsresultatSteg.utførStegOgAngiNeste(any(), any()) }
         }
 
+        @Test
+        fun `skal ikke rekjøre vilkårsvurderingssteget når behandlingen allerede er forbi steget`() {
+            // Arrange
+            val behandling = lagBehandling(id = behandlingId, førsteSteg = StegType.BEHANDLINGSRESULTAT)
+
+            // Act
+            val behandlingEtterHåndtering = stegService.håndterVilkårsvurdering(behandling)
+
+            // Assert
+            assertThat(behandlingEtterHåndtering).isSameAs(behandling)
+            verify(exactly = 1) { mocketVilkårsvurderingSteg.preValiderSteg(behandling, stegService) }
+            verify(exactly = 0) { mocketVilkårsvurderingSteg.utførStegOgAngiNeste(any(), any()) }
+        }
+
+        @Test
+        fun `skal kjøre vilkårsvurderingssteget når behandlingen er på steget`() {
+            // Arrange
+            val behandling = lagBehandling(id = behandlingId, førsteSteg = StegType.VILKÅRSVURDERING)
+            val behandlingEtterVilkårsvurdering = lagBehandling(id = behandlingId, førsteSteg = StegType.BEHANDLINGSRESULTAT)
+            every { behandlingHentOgPersisterService.hent(behandlingId) } returns behandling
+            every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId, StegType.BEHANDLINGSRESULTAT) } returns behandlingEtterVilkårsvurdering
+
+            // Act
+            val behandlingEtterHåndtering = stegService.håndterVilkårsvurdering(behandling)
+
+            // Assert
+            assertThat(behandlingEtterHåndtering).isEqualTo(behandlingEtterVilkårsvurdering)
+            verify(exactly = 1) { mocketVilkårsvurderingSteg.utførStegOgAngiNeste(behandling, any()) }
+        }
+
+        @Test
+        fun `skal rekjøre vilkårsvurderingssteget for automatisk behandling selv om behandlingen er forbi steget`() {
+            // Arrange
+            val behandling = lagAutomatiskBehandling(årsak = BehandlingÅrsak.SATSENDRING, steg = StegType.BEHANDLINGSRESULTAT)
+            every { behandlingHentOgPersisterService.hent(behandlingId) } returns behandling
+            every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId, any()) } returns behandling
+
+            // Act
+            stegService.håndterVilkårsvurdering(behandling)
+
+            // Assert
+            verify(exactly = 1) { mocketVilkårsvurderingSteg.utførStegOgAngiNeste(behandling, any()) }
+        }
+
         private fun lagAutomatiskBehandling(
             årsak: BehandlingÅrsak,
             steg: StegType,
         ) = lagBehandling(id = behandlingId, årsak = årsak, skalBehandlesAutomatisk = true, førsteSteg = steg)
+    }
+
+    @Nested
+    inner class HåndterBehandlingsresultatTest {
+        private val behandlingId = 1L
+
+        @BeforeEach
+        fun setup() {
+            every { mocketRegistrerPersongrunnlag.stegType() } returns StegType.REGISTRERE_PERSONGRUNNLAG
+            every { mocketVilkårsvurderingSteg.stegType() } returns StegType.VILKÅRSVURDERING
+            every { mocketBehandlingsresultatSteg.stegType() } returns StegType.BEHANDLINGSRESULTAT
+        }
+
+        @Test
+        fun `skal ikke rekjøre behandlingsresultatsteget når behandlingen allerede er forbi steget`() {
+            // Arrange
+            val behandling = lagBehandling(id = behandlingId, førsteSteg = StegType.SEND_TIL_BESLUTTER)
+
+            // Act
+            val behandlingEtterHåndtering = stegService.håndterBehandlingsresultat(behandling)
+
+            // Assert
+            assertThat(behandlingEtterHåndtering).isSameAs(behandling)
+            verify(exactly = 1) { mocketBehandlingsresultatSteg.preValiderSteg(behandling, stegService) }
+            verify(exactly = 0) { mocketBehandlingsresultatSteg.utførStegOgAngiNeste(any(), any()) }
+        }
     }
 
     @Nested

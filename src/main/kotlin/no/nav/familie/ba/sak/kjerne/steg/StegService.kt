@@ -547,6 +547,17 @@ class StegService(
             }
 
             behandlingSteg.preValiderSteg(behandling, this)
+
+            // Stegene utleder kun data, og alt som endrer grunnlaget tilbakestiller behandlingen.
+            if (
+                !behandling.skalBehandlesAutomatisk &&
+                behandlingSteg.stegType() in setOf(StegType.VILKÅRSVURDERING, StegType.BEHANDLINGSRESULTAT) &&
+                behandling.steg.kommerEtter(behandlingSteg.stegType())
+            ) {
+                logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} rekjører ikke ${behandlingSteg.stegType()} på behandling ${behandling.id} siden behandlingen står på ${behandling.steg}")
+                return behandling
+            }
+
             val nesteSteg = utførendeSteg()
             val behandlingEtterUtførtSteg = behandlingHentOgPersisterService.hent(behandling.id)
             behandlingSteg.postValiderSteg(behandlingEtterUtførtSteg)
