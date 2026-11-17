@@ -114,7 +114,7 @@ Egenskap: Behandlig med svalbardtillegg
       | 01.11.2036 |            | OPPHØR             |           |
 
 
-  Scenario: Skal splitte vedtaksperioder når søker flytter ut av svalbard men ikke barn
+  Scenario: Skal ikke splitte vedtaksperioder når søker flytter ut av svalbard men ikke barn, uten endring i andeler
     Og dagens dato er 05.09.2025
     Og med personer fremstilt krav for
       | BehandlingId | AktørId |
@@ -145,7 +145,7 @@ Egenskap: Behandlig med svalbardtillegg
       | 01.06.2025 | 31.10.2036 | UTBETALING         |           |
       | 01.11.2036 |            | OPPHØR             |           |
 
-  Scenario: Skal ikke splitte vedtaksperioder når søker flytter ut av svalbard i samme måned som barn flytter inn
+  Scenario: Skal ikke splitte vedtaksperioder når søker flytter til svalbard i samme måned som barn flytter ut
     Og dagens dato er 05.09.2025
     Og med personer fremstilt krav for
       | BehandlingId | AktørId |
@@ -157,8 +157,9 @@ Egenskap: Behandlig med svalbardtillegg
       | 1       | LOVLIG_OPPHOLD                |                              | 31.03.1990 |            | OPPFYLT  |
       | 1       | BOSATT_I_RIKET                |                              | 08.11.2018 | 06.08.2025 | OPPFYLT  |
       | 1       | BOSATT_I_RIKET                | BOSATT_PÅ_SVALBARD | 31.08.2025 |            | OPPFYLT  |
-      | 2       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                              | 08.11.2018 |            | OPPFYLT  |
-      | 2       | BOR_MED_SØKER                 | BOSATT_PÅ_SVALBARD | 08.11.2018 | 01.08.2025 | OPPFYLT  |
+      | 2       | LOVLIG_OPPHOLD,BOR_MED_SØKER  |                              | 08.11.2018 |            | OPPFYLT  |
+      | 2       | BOSATT_I_RIKET                | BOSATT_PÅ_SVALBARD | 08.11.2018 | 01.08.2025 | OPPFYLT  |
+      | 2       | BOSATT_I_RIKET                |                    | 02.08.2025 |            | OPPFYLT  |
       | 2       | GIFT_PARTNERSKAP              |                              | 08.11.2018 |            | OPPFYLT  |
       | 2       | UNDER_18_ÅR                   |                              | 08.11.2018 | 07.11.2036 | OPPFYLT  |
 
