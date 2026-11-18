@@ -11444,15 +11444,15 @@
   {
     "_createdAt": "2026-07-02T10:26:42Z",
     "_id": "begrunnelse-f3c2e884-6204-4df0-a69c-57ba96b6f4fc",
-    "_rev": "BucHITsckoni6jmQQxGTFw",
+    "_rev": "vrTd9FrktMQemqRPLBJ2ZK",
     "_system": {
       "base": {
         "id": "begrunnelse-f3c2e884-6204-4df0-a69c-57ba96b6f4fc",
-        "rev": "BucHITsckoni6jmQQvECWW"
+        "rev": "BucHITsckoni6jmQQxGTFw"
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-07-07T08:56:32Z",
+    "_updatedAt": "2026-11-18T12:18:39Z",
     "annenForeldersAktivitet": [
       "I_ARBEID",
       "MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN",
@@ -11507,7 +11507,22 @@
             "_key": "2fb42a213614",
             "_type": "span",
             "marks": [],
-            "text": ". Barnet bor i Norge. Den andre forelderen "
+            "text": ". Barnet"
+          },
+          {
+            "_key": "0f57f3cbf0d0",
+            "_type": "valgfeltV2",
+            "skalHaStorForbokstav": true,
+            "valgReferanse": {
+              "_ref": "df8dc282-2637-4047-a656-8527205dc364",
+              "_type": "reference"
+            }
+          },
+          {
+            "_key": "c4a794189cac",
+            "_type": "span",
+            "marks": [],
+            "text": " bor i Norge. Den andre forelderen "
           },
           {
             "_key": "7513263b7fb4",
@@ -11563,6 +11578,85 @@
       "INNVILGET"
     ],
     "navnISystem": "Nasjonal rett – primærlandsbarn - søker arbeider i annet land (Bosmann)",
+    "nynorsk": [
+      {
+        "_key": "6bd25d7f41e4",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "edd57822fe57",
+            "_type": "span",
+            "marks": [],
+            "text": "Du får barnetrygd etter EØS-reglane for barn fødd "
+          },
+          {
+            "_key": "1a0f623d938b",
+            "_type": "eosFlettefelt",
+            "flettefelt": "barnasFodselsdatoer"
+          },
+          {
+            "_key": "793c4a0a47e4",
+            "_type": "span",
+            "marks": [],
+            "text": ". Du arbeidar i "
+          },
+          {
+            "_key": "4bcde665b5b8",
+            "_type": "eosFlettefelt",
+            "flettefelt": "sokersAktivitetsland"
+          },
+          {
+            "_key": "2fb42a213614",
+            "_type": "span",
+            "marks": [],
+            "text": ". "
+          },
+          {
+            "_key": "a87ea4edd69b",
+            "_type": "valgfeltV2",
+            "skalHaStorForbokstav": true,
+            "valgReferanse": {
+              "_ref": "df8dc282-2637-4047-a656-8527205dc364",
+              "_type": "reference"
+            }
+          },
+          {
+            "_key": "e81787b2f168",
+            "_type": "span",
+            "marks": [],
+            "text": " bur i Noreg. Den andre forelderen "
+          },
+          {
+            "_key": "7513263b7fb4",
+            "_type": "valgfeltV2",
+            "skalHaStorForbokstav": false,
+            "valgReferanse": {
+              "_ref": "44a17a41-a760-44f7-8d7d-a3cf1676b85a",
+              "_type": "reference"
+            }
+          },
+          {
+            "_key": "061892bf0546",
+            "_type": "span",
+            "marks": [],
+            "text": " i "
+          },
+          {
+            "_key": "ec38c29b5cb1",
+            "_type": "eosFlettefelt",
+            "flettefelt": "annenForeldersAktivitetsland"
+          },
+          {
+            "_key": "51bc1524483c",
+            "_type": "span",
+            "marks": [],
+            "text": ". Du får derfor heile barnetrygda frå Noreg."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
     "periodeResultatForPerson": "INNVILGET_ELLER_ØKNING",
     "regelverk": "EØS",
     "triggereIBruk": [
@@ -11579,15 +11673,15 @@
   {
     "_createdAt": "2026-07-02T09:59:17Z",
     "_id": "begrunnelse-ee472d94-f744-47bf-9408-331feb3d2eb1",
-    "_rev": "kVSmPQqYeNbcR2pMARXkNE",
+    "_rev": "yg3mycOmfaJQ70tIHkcI0y",
     "_system": {
       "base": {
         "id": "begrunnelse-ee472d94-f744-47bf-9408-331feb3d2eb1",
-        "rev": "BucHITsckoni6jmQQpOwVk"
+        "rev": "fx9y7SBTLmKFdK8fMDzGGK"
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-07-06T08:37:09Z",
+    "_updatedAt": "2026-11-18T12:16:49Z",
     "annenForeldersAktivitet": [
       "I_ARBEID",
       "MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN",
@@ -11643,7 +11737,22 @@
             "_key": "41ef765e27f6",
             "_type": "span",
             "marks": [],
-            "text": ". Barnet bor i Norge. Den andre forelderen "
+            "text": ". "
+          },
+          {
+            "_key": "46fc3a1384d2",
+            "_type": "valgfeltV2",
+            "skalHaStorForbokstav": true,
+            "valgReferanse": {
+              "_ref": "df8dc282-2637-4047-a656-8527205dc364",
+              "_type": "reference"
+            }
+          },
+          {
+            "_key": "c8a030de4653",
+            "_type": "span",
+            "marks": [],
+            "text": " bor i Norge. Den andre forelderen "
           },
           {
             "_key": "7d95422f588d",
@@ -11730,7 +11839,22 @@
             "_key": "41ef765e27f6",
             "_type": "span",
             "marks": [],
-            "text": ". Barnet bur i Noreg. Den andre forelderen "
+            "text": ". "
+          },
+          {
+            "_key": "04f81421574b",
+            "_type": "valgfeltV2",
+            "skalHaStorForbokstav": true,
+            "valgReferanse": {
+              "_ref": "df8dc282-2637-4047-a656-8527205dc364",
+              "_type": "reference"
+            }
+          },
+          {
+            "_key": "a8f312f8d688",
+            "_type": "span",
+            "marks": [],
+            "text": " bur i Noreg. Den andre forelderen "
           },
           {
             "_key": "7d95422f588d",
@@ -11779,15 +11903,15 @@
   {
     "_createdAt": "2026-07-02T10:17:18Z",
     "_id": "begrunnelse-4cbc6ee7-38ee-444a-9a9f-86488bc09450",
-    "_rev": "EwQfFms91utgFNMBaRBFo4",
+    "_rev": "fx9y7SBTLmKFdK8fMDzYyS",
     "_system": {
       "base": {
         "id": "begrunnelse-4cbc6ee7-38ee-444a-9a9f-86488bc09450",
-        "rev": "BucHITsckoni6jmQQpPFqg"
+        "rev": "EwQfFms91utgFNMBaRBFo4"
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-07-06T08:37:42Z",
+    "_updatedAt": "2026-11-18T12:16:22Z",
     "annenForeldersAktivitet": [
       "I_ARBEID",
       "MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN",
@@ -11843,7 +11967,22 @@
             "_key": "48c65c56d334",
             "_type": "span",
             "marks": [],
-            "text": ". Barnet bor i Norge. Den andre forelderen "
+            "text": ". "
+          },
+          {
+            "_key": "b48854974ced",
+            "_type": "valgfeltV2",
+            "skalHaStorForbokstav": true,
+            "valgReferanse": {
+              "_ref": "df8dc282-2637-4047-a656-8527205dc364",
+              "_type": "reference"
+            }
+          },
+          {
+            "_key": "6c92a851ef41",
+            "_type": "span",
+            "marks": [],
+            "text": " bor i Norge. Den andre forelderen "
           },
           {
             "_key": "a02ab13be45c",
@@ -11930,7 +12069,22 @@
             "_key": "48c65c56d334",
             "_type": "span",
             "marks": [],
-            "text": ". Barnet bur i Noreg. Den andre forelderen "
+            "text": ". "
+          },
+          {
+            "_key": "f360db1057ca",
+            "_type": "valgfeltV2",
+            "skalHaStorForbokstav": true,
+            "valgReferanse": {
+              "_ref": "df8dc282-2637-4047-a656-8527205dc364",
+              "_type": "reference"
+            }
+          },
+          {
+            "_key": "3c4d0be8e412",
+            "_type": "span",
+            "marks": [],
+            "text": " bur i Noreg. Den andre forelderen "
           },
           {
             "_key": "a02ab13be45c",
@@ -11962,6 +12116,9 @@
         "markDefs": [],
         "style": "normal"
       }
+    ],
+    "ovrigeTriggere": [
+      "BARN_DØD"
     ],
     "periodeResultatForPerson": "INNVILGET_ELLER_ØKNING",
     "regelverk": "EØS",
