@@ -131,7 +131,7 @@ class PreutfyllBosattIRiketService(
             erAutomatiskVurdert = false,
             resultat = Resultat.IKKE_VURDERT,
             vilkårType = BOSATT_I_RIKET,
-            begrunnelse = IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + "- " + svarISøknaden,
+            begrunnelse = "$IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT- $svarISøknaden",
             sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
             erOpprinneligPreutfyltIBehandling = personResultat.vilkårsvurdering.behandling.id,
             begrunnelseForManuellKontroll = begrunnelseForManuellKontroll,
