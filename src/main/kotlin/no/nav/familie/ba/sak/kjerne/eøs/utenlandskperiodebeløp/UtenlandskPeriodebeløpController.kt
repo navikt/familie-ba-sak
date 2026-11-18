@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/differanseberegning/utenlandskperidebeløp")
+@RequestMapping("/api/differanseberegning/utenlandskperiodebeløp")
 @Validated
 class UtenlandskPeriodebeløpController(
     private val tilgangService: TilgangService,
