@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harKryssetFo
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harOppholdtSegSammenhengendeINorgeSiste12Mnd
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.harOppholdtSegUtenforNorgeSiste12Mnd
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.inneholderVedlegg
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.manglerVedleggForDokumentasjonsbehov
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.oppholderSegIInstitusjon
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadMapper.Companion.tilBehandlingUnderkategori
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
@@ -68,6 +69,7 @@ class SøknadMapperV10 : SøknadMapper {
                     ?: BehandlingKategori.NASJONAL,
             harKryssetPåEøsSpørsmål = versjonertBarnetrygdSøknad.barnetrygdSøknad.antallEøsSteg > 0,
             inneholderVedlegg = versjonertBarnetrygdSøknad.barnetrygdSøknad.dokumentasjon.inneholderVedlegg(),
+            manglerVedleggForDokumentasjonsbehov = versjonertBarnetrygdSøknad.barnetrygdSøknad.dokumentasjon.manglerVedleggForDokumentasjonsbehov(),
             målform =
                 when (versjonertBarnetrygdSøknad.barnetrygdSøknad.originalSpråk) {
                     "nb" -> Målform.NB

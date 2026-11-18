@@ -36,6 +36,7 @@ fun lagSøknad(
     barneIdenterTilPlanleggerBoINorge12Mnd: Map<String, Boolean> = mapOf(randomFnr() to true),
     harKryssetPåEøsSpørsmål: Boolean = false,
     inneholderVedlegg: Boolean = false,
+    manglerVedleggForDokumentasjonsbehov: Boolean = false,
     barneIdenterTilErFosterbarn: Map<String, Boolean> = emptyMap(),
     barneIdenterTilErIBeredskapshjem: Map<String, Boolean> = emptyMap(),
     barneIdenterTilHarKryssetForDeltBosted: Map<String, Boolean> = emptyMap(),
@@ -74,5 +75,6 @@ fun lagSøknad(
         behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
         harKryssetPåEøsSpørsmål = harKryssetPåEøsSpørsmål,
         inneholderVedlegg = inneholderVedlegg,
+        manglerVedleggForDokumentasjonsbehov = manglerVedleggForDokumentasjonsbehov,
         målform = Målform.NB,
     )

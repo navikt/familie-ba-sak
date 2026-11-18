@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -40,6 +42,14 @@ class UtbetalingsoppdragGeneratorTest {
         mockk {
             every { isEnabled(FeatureToggle.SIMULER_KUN_ENDREDE_PERIODER, any<Long>()) } returns true
         }
+    private val avgrensetSimuleringGenerator =
+        spyk(
+            AvgrensetSimuleringGenerator(
+                utbetalingsgenerator = Utbetalingsgenerator(),
+                behandlingsinformasjonUtleder = behandlingsinformasjonUtleder,
+                clockProvider = TestClockProvider(),
+            ),
+        )
     private val utbetalingsoppdragGenerator =
         UtbetalingsoppdragGenerator(
             utbetalingsgenerator = Utbetalingsgenerator(),
@@ -49,6 +59,7 @@ class UtbetalingsoppdragGeneratorTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             featureToggleService = featureToggleService,
+            avgrensetSimuleringGenerator = avgrensetSimuleringGenerator,
         )
 
     @ParameterizedTest
@@ -264,17 +275,14 @@ class UtbetalingsoppdragGeneratorTest {
         assertThat(beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag.saksbehandlerId).isEqualTo(saksbehandlerId)
         assertThat(beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag.kodeEndring).isEqualTo(Utbetalingsoppdrag.KodeEndring.ENDR)
         assertThat(beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag.saksnummer).isEqualTo(behandling.fagsak.id.toString())
-        assertThat(beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag.utbetalingsperiode).hasSize(1)
+        assertThat(beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag.utbetalingsperiode).hasSize(if (erSimulering) 2 else 1)
         assertThat(beregnetUtbetalingsoppdragLongId.andeler).hasSize(1)
+        val nyeUtbetalingsperioder = beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør == null }
         assertThat(
-            beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag.utbetalingsperiode
-                .single()
-                .vedtakdatoFom,
+            nyeUtbetalingsperioder.single().vedtakdatoFom,
         ).isEqualTo(LocalDate.now().førsteDagIInneværendeMåned())
         assertThat(
-            beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag.utbetalingsperiode
-                .single()
-                .vedtakdatoTom,
+            nyeUtbetalingsperioder.single().vedtakdatoTom,
         ).isEqualTo(LocalDate.now().plusMonths(2).sisteDagIMåned())
     }
 
@@ -356,5 +364,8 @@ class UtbetalingsoppdragGeneratorTest {
 
         // Assert
         assertThat(erSimuleringSlot.captured).isEqualTo(forventetErSimulering)
+        verify(exactly = if (erSimulering && featureToggleErPå) 1 else 0) {
+            avgrensetSimuleringGenerator.lagUtbetalingsoppdrag(any(), any(), any(), any(), any())
+        }
     }
 }
