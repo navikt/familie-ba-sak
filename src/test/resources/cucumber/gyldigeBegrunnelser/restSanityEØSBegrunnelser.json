@@ -11444,15 +11444,15 @@
   {
     "_createdAt": "2026-07-02T10:26:42Z",
     "_id": "begrunnelse-f3c2e884-6204-4df0-a69c-57ba96b6f4fc",
-    "_rev": "vrTd9FrktMQemqRPLBJ2ZK",
+    "_rev": "6q1mZ3TdYUtWf5I6xlhsjR",
     "_system": {
       "base": {
         "id": "begrunnelse-f3c2e884-6204-4df0-a69c-57ba96b6f4fc",
-        "rev": "BucHITsckoni6jmQQxGTFw"
+        "rev": "vrTd9FrktMQemqRPLBJ2ZK"
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-11-18T12:18:39Z",
+    "_updatedAt": "2026-11-18T14:35:31Z",
     "annenForeldersAktivitet": [
       "I_ARBEID",
       "MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN",
@@ -11507,7 +11507,7 @@
             "_key": "2fb42a213614",
             "_type": "span",
             "marks": [],
-            "text": ". Barnet"
+            "text": ". "
           },
           {
             "_key": "0f57f3cbf0d0",
