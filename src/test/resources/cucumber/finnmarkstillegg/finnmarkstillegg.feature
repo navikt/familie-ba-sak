@@ -255,7 +255,7 @@ Egenskap: Finnmarkstillegg autovedtak
 
     Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype                                      | Begrunnelser                                        |
-      | 01.09.2025 | 30.09.2025 | Utbetaling                                              |                                                     |
+      | 01.05.2025 | 30.09.2025 | Utbetaling                                              |                                                     |
       | 01.10.2025 | 31.01.2026 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING | REDUKSJON_FINNMARKSTILLEGG_BODDE_IKKE_I_TILLEGGSONE |
       | 01.02.2026 | 31.12.2042 | Utbetaling                                              |                                                     |
       | 01.01.2043 |            | Opphør                                                  |                                                     |

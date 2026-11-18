@@ -874,6 +874,27 @@ class FaktaOppretterTest {
     }
 
     @Nested
+    inner class SøknadenManglerVedleggForDokumentasjonsbehov {
+        @Test
+        fun `skal sette søknadenManglerVedleggForDokumentasjonsbehov til true når søknaden mangler vedlegg for dokumentasjonsbehov`() {
+            // Arrange
+            every {
+                søknadService.finnDigitalSøknad(behandling.id)
+            } returns
+                lagSøknad(
+                    barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnsIdent to true),
+                    manglerVedleggForDokumentasjonsbehov = true,
+                )
+
+            // Act
+            val fakta = faktaOppretter.opprettFakta(filtrerAutomatiskBehandlingData, behandling)
+
+            // Assert
+            assertThat(fakta.søknadenManglerVedleggForDokumentasjonsbehov).isTrue()
+        }
+    }
+
+    @Nested
     inner class SøkerHarAdressebeskyttelseGradering6Eller19 {
         @ParameterizedTest
         @EnumSource(value = ADRESSEBESKYTTELSEGRADERING::class, names = ["STRENGT_FORTROLIG", "STRENGT_FORTROLIG_UTLAND"])

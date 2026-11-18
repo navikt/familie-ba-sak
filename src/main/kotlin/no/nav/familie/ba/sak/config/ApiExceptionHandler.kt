@@ -165,9 +165,7 @@ class ApiExceptionHandler {
     @ExceptionHandler(PdlNotFoundException::class)
     fun handlePdlNotFoundException(feil: PdlNotFoundException): ResponseEntity<Ressurs<Nothing>> {
         logger.warn("Finner ikke personen i PDL")
-        return ResponseEntity
-            .ok()
-            .body(Ressurs.failure(frontendFeilmelding = "Fant ikke person"))
+        return funksjonellFeil(feil)
     }
 
     @ExceptionHandler(MånedligValutaJusteringFeil::class)
