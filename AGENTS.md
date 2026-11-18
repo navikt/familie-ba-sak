@@ -76,6 +76,7 @@ src/
 - Domain entities/repositories are organized with a `domene/` subpackage in most (not all) domain areas — some, like `kjerne/fagsak/`, keep entity and repository directly in the package root.
 - Behandlingssteg (case processing step) pattern lives in `kjerne/steg/`: `BehandlingSteg<T>` interface (with `StegType` enum in the same file), orchestrated by `StegService`.
 - External contracts (`no.nav.familie.kontrakter:*`, `no.nav.familie.eksterne.kontrakter:*`) are consumed as published artifacts, not as a local API layer.
+- `UtbetalingsoppdragGenerator` delegates experimental simulation behind `SIMULER_KUN_ENDREDE_PERIODER` to `AvgrensetSimuleringGenerator`. When payments change, it rebuilds all payment chains from the earlier of the first payment change and the current month minus six months, using bounded copies of previous/current `AndelData` (six preceding calendar months plus the current month, where payments exist). Keep experimental logic separate from the ordinary generation path. Persisted shares and actual payment execution are unchanged. Changed migration dates retain their explicit cessation handling.
 
 ## Code Style
 
