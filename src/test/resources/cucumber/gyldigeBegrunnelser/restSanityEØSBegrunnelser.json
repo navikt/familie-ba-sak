@@ -11673,15 +11673,15 @@
   {
     "_createdAt": "2026-07-02T09:59:17Z",
     "_id": "begrunnelse-ee472d94-f744-47bf-9408-331feb3d2eb1",
-    "_rev": "yg3mycOmfaJQ70tIHkcI0y",
+    "_rev": "ZtQNX1cwQ1xiRaWfyfXvmw",
     "_system": {
       "base": {
         "id": "begrunnelse-ee472d94-f744-47bf-9408-331feb3d2eb1",
-        "rev": "fx9y7SBTLmKFdK8fMDzGGK"
+        "rev": "yg3mycOmfaJQ70tIHkcI0y"
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-11-18T12:16:49Z",
+    "_updatedAt": "2026-11-19T11:42:34Z",
     "annenForeldersAktivitet": [
       "I_ARBEID",
       "MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN",
@@ -11723,10 +11723,10 @@
             "flettefelt": "barnasFodselsdatoer"
           },
           {
-            "_key": "b73d2125de18",
+            "_key": "7beda678ed81",
             "_type": "span",
             "marks": [],
-            "text": " Du får pensjon fra "
+            "text": ". Du får pensjon fra "
           },
           {
             "_key": "1bb2e32972ba",
@@ -11825,10 +11825,10 @@
             "flettefelt": "barnasFodselsdatoer"
           },
           {
-            "_key": "b73d2125de18",
+            "_key": "dd5b995f5e40",
             "_type": "span",
             "marks": [],
-            "text": " Du får pensjon frå "
+            "text": ". Du får pensjon frå "
           },
           {
             "_key": "1bb2e32972ba",
