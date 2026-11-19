@@ -178,7 +178,7 @@ class PreutfyllBosattIRiketService(
             }.vurderFinnmarkOgSvalbardtillegg(adresserForPerson)
             .beskjærFraOgMed(maxOf(datoForBeskjæringAvFom, førsteBosattINorgeDato))
             .tilPerioderIkkeNull()
-            .tilVilkårResultater(personResultat)
+            .tilBosattIRiketVilkårResultater(personResultat)
     }
 
     private fun lagErØvrigeKravForBosattIRiketOppfyltTidslinje(
