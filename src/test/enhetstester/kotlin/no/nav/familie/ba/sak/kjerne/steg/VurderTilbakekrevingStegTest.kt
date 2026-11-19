@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -63,6 +64,34 @@ class VurderTilbakekrevingStegTest {
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
         verify(exactly = 1) { tilbakekrevingService.validerRestTilbakekreving(tilbakekrevingDto, behandling.id) }
         verify(exactly = 1) { tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto, behandling.id) }
+    }
+
+    @Test
+    fun `skal slette lagret tilbakekreving når steget utføres uten tilbakekrevingsvalg`() {
+        // Arrange
+        every { tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id) } returns Unit
+
+        // Act
+        val stegType = vurderTilbakekrevingSteg.utførStegOgAngiNeste(behandling, null)
+
+        // Assert
+        assertThat(stegType).isEqualTo(StegType.SEND_TIL_BESLUTTER)
+        verify(exactly = 1) { tilbakekrevingService.validerRestTilbakekreving(null, behandling.id) }
+        verify(exactly = 1) { tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id) }
+        verify(exactly = 0) { tilbakekrevingService.lagreTilbakekreving(any(), any()) }
+    }
+
+    @Test
+    fun `skal ikke slette lagret tilbakekreving når søker har åpen tilbakekreving`() {
+        // Arrange
+        every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns true
+
+        // Act
+        val stegType = vurderTilbakekrevingSteg.utførStegOgAngiNeste(behandling, null)
+
+        // Assert
+        assertThat(stegType).isEqualTo(StegType.SEND_TIL_BESLUTTER)
+        verify(exactly = 0) { tilbakekrevingService.slettTilbakekrevingPåBehandling(any()) }
     }
 
     @Test

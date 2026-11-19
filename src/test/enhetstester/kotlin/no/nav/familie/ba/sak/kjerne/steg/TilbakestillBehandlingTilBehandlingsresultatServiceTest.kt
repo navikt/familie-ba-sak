@@ -47,7 +47,26 @@ class TilbakestillBehandlingTilBehandlingsresultatServiceTest {
 
         // Assert
         verify(exactly = 1) { vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak) }
+        verify(exactly = 1) { tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id) }
         verify(exactly = 1) { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.BEHANDLINGSRESULTAT) }
+    }
+
+    @Test
+    fun `skal slette lagret tilbakekreving når behandlingen allerede er tilbakestilt til behandlingsresultat`() {
+        // Arrange
+        val behandling = lagBehandling(førsteSteg = StegType.BEHANDLINGSRESULTAT)
+
+        every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
+        every { tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id) } returns Unit
+
+        // Act
+        val resultat = tilbakestillBehandlingTilBehandlingsresultatService.tilbakestillBehandlingTilBehandlingsresultat(behandling.id)
+
+        // Assert
+        assertThat(resultat.steg).isEqualTo(StegType.BEHANDLINGSRESULTAT)
+        verify(exactly = 1) { tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id) }
+        verify(exactly = 0) { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(any(), any()) }
+        verify(exactly = 0) { vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(any()) }
     }
 
     @Test
