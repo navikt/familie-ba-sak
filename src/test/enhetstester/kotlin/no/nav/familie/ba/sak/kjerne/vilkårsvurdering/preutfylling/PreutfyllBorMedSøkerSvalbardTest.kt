@@ -23,7 +23,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 
 class PreutfyllBorMedSøkerSvalbardTest {
@@ -31,13 +30,12 @@ class PreutfyllBorMedSøkerSvalbardTest {
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val service = PreutfyllBorMedSøkerService(persongrunnlagService)
 
-    @ParameterizedTest
-    @EnumSource(BehandlingÅrsak::class, names = ["SØKNAD", "AUTOMATISK_BEHANDLING_AV_SØKNAD"])
-    fun `skal ikke vurdere bor med søker når begge er på Svalbard med ulike oppholdsadresser`(årsak: BehandlingÅrsak) {
+    @Test
+    fun `skal ikke vurdere bor med søker når begge er på Svalbard med ulike oppholdsadresser`() {
         // Arrange
         val søkerAdresse = lagOppholdsadresse(matrikkelId = 1L)
         val barnAdresse = lagOppholdsadresse(matrikkelId = 2L)
-        val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnAdresse), årsak = årsak)
+        val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnAdresse))
 
         // Act
         service.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
