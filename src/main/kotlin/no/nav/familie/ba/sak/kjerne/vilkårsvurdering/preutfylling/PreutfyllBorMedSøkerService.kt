@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_DELT_BOSTED
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
@@ -110,18 +109,18 @@ class PreutfyllBorMedSøkerService(
         return harSammeBostedsadresseTidslinje
             .tilPerioderIkkeNull()
             .map { periode ->
-                val erIkkeVurdert = periode.verdi is IkkeVurdertVilkår
                 VilkårResultat(
                     personResultat = personResultat,
-                    erAutomatiskVurdert = !erIkkeVurdert,
+                    erAutomatiskVurdert = periode.verdi !is IkkeVurdertVilkår,
                     resultat = periode.verdi.tilResultat(),
                     vilkårType = BOR_MED_SØKER,
                     periodeFom = periode.fom,
                     periodeTom = periode.tom,
-                    begrunnelse = if (erIkkeVurdert) IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT else PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + periode.verdi.begrunnelse,
+                    begrunnelse = periode.verdi.tilBegrunnelse(),
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                     erOpprinneligPreutfyltIBehandling = personResultat.vilkårsvurdering.behandling.id,
                     begrunnelseForManuellKontroll = periode.verdi.begrunnelseForManuellKontroll,
+                    evalueringÅrsaker = periode.verdi.evalueringÅrsaker.map { it.hentNavn() },
                 )
             }.toSet()
     }
@@ -192,9 +191,8 @@ class PreutfyllBorMedSøkerService(
                         null
                     }
 
-                    !oppholdsadresserSvalbardBarn.isNullOrEmpty() && !oppholdsadresserSvalbardSøker.isNullOrEmpty() &&
-                        oppholdsadresserSvalbardBarn.none { barnAdresse -> oppholdsadresserSvalbardSøker.any { barnAdresse.erSammeAdresse(it) } } -> {
-                        IkkeVurdertVilkår(evalueringÅrsaker = setOf(VilkårKanskjeOppfyltÅrsak.BOR_MED_SØKER_IKKE_MULIG_Å_FASTSETTE))
+                    delvilkår is OppfyltDelvilkår && harUlikeOppholdsadresserPåSvalbard(oppholdsadresserSvalbardBarn, oppholdsadresserSvalbardSøker) -> {
+                        IkkeVurdertVilkår(begrunnelse = "- Barn og søker er ikke registrert med samme oppholdsadresse på Svalbard", evalueringÅrsaker = setOf(VilkårKanskjeOppfyltÅrsak.BOR_MED_SØKER_ULIK_OPPHOLDSADRESSE_SVALBARD))
                     }
 
                     else -> {
@@ -203,6 +201,13 @@ class PreutfyllBorMedSøkerService(
                 }
             }.beskjærFraOgMed(datoForBeskjæringAvFom)
     }
+
+    private fun harUlikeOppholdsadresserPåSvalbard(
+        oppholdsadresserSvalbardBarn: List<Adresse>?,
+        oppholdsadresserSvalbardSøker: List<Adresse>?,
+    ): Boolean =
+        !oppholdsadresserSvalbardBarn.isNullOrEmpty() && !oppholdsadresserSvalbardSøker.isNullOrEmpty() &&
+            oppholdsadresserSvalbardBarn.none { barnAdresse -> oppholdsadresserSvalbardSøker.any { barnAdresse.erSammeAdresse(it) } }
 
     private fun lagOppholdsadresserPåSvalbardTidslinje(oppholdsadresser: List<Adresse>): Tidslinje<List<Adresse>> =
         oppholdsadresser

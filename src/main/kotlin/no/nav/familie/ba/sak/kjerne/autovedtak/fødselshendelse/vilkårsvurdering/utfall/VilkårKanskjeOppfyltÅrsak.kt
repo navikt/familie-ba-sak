@@ -25,7 +25,7 @@ enum class VilkårKanskjeOppfyltÅrsak(
     ),
 
     // Bor med søker
-    BOR_MED_SØKER_IKKE_MULIG_Å_FASTSETTE(
+    BOR_MED_SØKER_ULIK_OPPHOLDSADRESSE_SVALBARD(
         "Kan ikke fastslå at barnet og søker har samme oppholdsadresse på Svalbard.",
         Vilkår.BOR_MED_SØKER,
     ),

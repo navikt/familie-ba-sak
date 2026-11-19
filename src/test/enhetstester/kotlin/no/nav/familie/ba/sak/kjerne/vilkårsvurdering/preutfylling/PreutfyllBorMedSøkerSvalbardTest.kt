@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak.BOR_MED_SØKER_ULIK_OPPHOLDSADRESSE_SVALBARD
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.oppholdsadresse.GrOppholdsadresse
@@ -28,7 +29,7 @@ import java.time.LocalDate
 class PreutfyllBorMedSøkerSvalbardTest {
     private val fraDato = LocalDate.of(2020, 1, 1)
     private val persongrunnlagService = mockk<PersongrunnlagService>()
-    private val service = PreutfyllBorMedSøkerService(persongrunnlagService)
+    private val preutfyllBorMedSøkerService = PreutfyllBorMedSøkerService(persongrunnlagService)
 
     @Test
     fun `skal ikke vurdere bor med søker når begge er på Svalbard med ulike oppholdsadresser`() {
@@ -38,13 +39,32 @@ class PreutfyllBorMedSøkerSvalbardTest {
         val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnAdresse))
 
         // Act
-        service.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val resultat = vilkårsvurdering.hentBorMedSøkerResultaterForBarn().single()
         assertThat(resultat.resultat).isEqualTo(Resultat.IKKE_VURDERT)
         assertThat(resultat.erAutomatiskVurdert).isFalse()
-        assertThat(resultat.begrunnelse).isEqualTo("Ikke fylt ut automatisk\n")
+        assertThat(resultat.begrunnelse).isEqualTo("Ikke fylt ut automatisk\n- Barn og søker er ikke registrert med samme oppholdsadresse på Svalbard")
+        assertThat(resultat.evalueringÅrsaker).containsExactly(BOR_MED_SØKER_ULIK_OPPHOLDSADRESSE_SVALBARD.hentNavn())
+    }
+
+    @Test
+    fun `skal ikke oppfylle bor med søker når ulike Svalbardadresser og ikke samme bostedsadresse`() {
+        // Arrange
+        val søkerAdresse = lagOppholdsadresse(matrikkelId = 1L)
+        val barnAdresse = lagOppholdsadresse(matrikkelId = 2L)
+        val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnAdresse), harSammeBostedsadresse = false)
+
+        // Act
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+
+        // Assert
+        val resultat = vilkårsvurdering.hentBorMedSøkerResultaterForBarn().single()
+        assertThat(resultat.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+        assertThat(resultat.erAutomatiskVurdert).isTrue()
+        assertThat(resultat.begrunnelse).isEqualTo("Fylt ut automatisk fra registerdata i PDL\n- Har ikke hatt samme fast eller delt bostedsadresse som søker i minst 3 måneder")
+        assertThat(resultat.evalueringÅrsaker).isEmpty()
     }
 
     @Test
@@ -55,7 +75,7 @@ class PreutfyllBorMedSøkerSvalbardTest {
         val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnAdresse))
 
         // Act
-        service.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val resultat = vilkårsvurdering.hentBorMedSøkerResultaterForBarn().single()
@@ -75,7 +95,7 @@ class PreutfyllBorMedSøkerSvalbardTest {
         val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnAdresse))
 
         // Act
-        service.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val resultat = vilkårsvurdering.hentBorMedSøkerResultaterForBarn().single()
@@ -90,7 +110,7 @@ class PreutfyllBorMedSøkerSvalbardTest {
         val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnAdresse), harSammeBostedsadresse = false)
 
         // Act
-        service.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val resultat = vilkårsvurdering.hentBorMedSøkerResultaterForBarn().single()
@@ -109,7 +129,7 @@ class PreutfyllBorMedSøkerSvalbardTest {
         val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(søkerAdresser, barnAdresser)
 
         // Act
-        service.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val resultat = vilkårsvurdering.hentBorMedSøkerResultaterForBarn().single()
@@ -124,7 +144,7 @@ class PreutfyllBorMedSøkerSvalbardTest {
         val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnAdresse))
 
         // Act
-        service.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val resultat = vilkårsvurdering.hentBorMedSøkerResultaterForBarn().single()
@@ -148,7 +168,7 @@ class PreutfyllBorMedSøkerSvalbardTest {
         val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnAdresse))
 
         // Act
-        service.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val resultat = vilkårsvurdering.hentBorMedSøkerResultaterForBarn().single()
@@ -163,7 +183,7 @@ class PreutfyllBorMedSøkerSvalbardTest {
         val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnAdresse))
 
         // Act
-        service.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val resultat = vilkårsvurdering.hentBorMedSøkerResultaterForBarn().single()
@@ -180,7 +200,7 @@ class PreutfyllBorMedSøkerSvalbardTest {
         val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnAdresse))
 
         // Act
-        service.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val resultat = vilkårsvurdering.hentBorMedSøkerResultaterForBarn().single()
@@ -195,7 +215,7 @@ class PreutfyllBorMedSøkerSvalbardTest {
         val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnAdresse))
 
         // Act
-        service.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val resultater = vilkårsvurdering.hentBorMedSøkerResultaterForBarn()
@@ -207,6 +227,56 @@ class PreutfyllBorMedSøkerSvalbardTest {
     }
 
     @Test
+    fun `skal vurdere Svalbardadressebytte fra ulike til like adresser`() {
+        // Arrange
+        val byttedato = fraDato.plusYears(1)
+        val søkerAdresse = lagOppholdsadresse(matrikkelId = 1L, fom = fraDato, tom = null)
+        val barnFørBytte = lagOppholdsadresse(matrikkelId = 2L, fom = fraDato, tom = null)
+        val barnEtterBytte = lagOppholdsadresse(matrikkelId = 1L, fom = byttedato, tom = null)
+        val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnFørBytte, barnEtterBytte))
+
+        // Act
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+
+        // Assert
+        val resultater = vilkårsvurdering.hentBorMedSøkerResultaterForBarn()
+        assertThat(resultater).hasSize(2)
+        assertThat(resultater.map { Triple(it.periodeFom, it.periodeTom, it.resultat) }).containsExactly(
+            Triple(fraDato, byttedato.minusDays(1), Resultat.IKKE_VURDERT),
+            Triple(byttedato, null, Resultat.OPPFYLT),
+        )
+        assertThat(resultater[0].erAutomatiskVurdert).isFalse()
+        assertThat(resultater[0].evalueringÅrsaker).containsExactly(BOR_MED_SØKER_ULIK_OPPHOLDSADRESSE_SVALBARD.hentNavn())
+        assertThat(resultater[1].erAutomatiskVurdert).isTrue()
+        assertThat(resultater[1].evalueringÅrsaker).isEmpty()
+    }
+
+    @Test
+    fun `skal vurdere Svalbardadressebytte fra like til ulike adresser`() {
+        // Arrange
+        val byttedato = fraDato.plusYears(1)
+        val søkerAdresse = lagOppholdsadresse(matrikkelId = 1L, fom = fraDato, tom = null)
+        val barnFørBytte = lagOppholdsadresse(matrikkelId = 1L, fom = fraDato, tom = null)
+        val barnEtterBytte = lagOppholdsadresse(matrikkelId = 2L, fom = byttedato, tom = null)
+        val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnFørBytte, barnEtterBytte))
+
+        // Act
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+
+        // Assert
+        val resultater = vilkårsvurdering.hentBorMedSøkerResultaterForBarn()
+        assertThat(resultater).hasSize(2)
+        assertThat(resultater.map { Triple(it.periodeFom, it.periodeTom, it.resultat) }).containsExactly(
+            Triple(fraDato, byttedato.minusDays(1), Resultat.OPPFYLT),
+            Triple(byttedato, null, Resultat.IKKE_VURDERT),
+        )
+        assertThat(resultater[0].erAutomatiskVurdert).isTrue()
+        assertThat(resultater[0].evalueringÅrsaker).isEmpty()
+        assertThat(resultater[1].erAutomatiskVurdert).isFalse()
+        assertThat(resultater[1].evalueringÅrsaker).containsExactly(BOR_MED_SØKER_ULIK_OPPHOLDSADRESSE_SVALBARD.hentNavn())
+    }
+
+    @Test
     fun `skal avslutte Svalbardkontrollen når neste oppholdsadresse er på fastlandet`() {
         // Arrange
         val søkerAdresse = lagOppholdsadresse(matrikkelId = 1L)
@@ -215,7 +285,7 @@ class PreutfyllBorMedSøkerSvalbardTest {
         val vilkårsvurdering = settOppVilkårsvurderingMedAdresser(listOf(søkerAdresse), listOf(barnSvalbardadresse, barnFastlandsadresse))
 
         // Act
-        service.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
+        preutfyllBorMedSøkerService.preutfyllBorMedSøker(vilkårsvurdering, vilkårsvurdering.personResultater.map { it.aktør }, digitalSøknad = null)
 
         // Assert
         val resultater = vilkårsvurdering.hentBorMedSøkerResultaterForBarn()
