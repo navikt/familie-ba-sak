@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
@@ -40,6 +41,7 @@ class SammensattKontrollsakController(
     fun hentSammensattKontrollsak(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<SammensattKontrollsakDto?>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Hent SammensattKontrollsak",
@@ -60,6 +62,7 @@ class SammensattKontrollsakController(
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 
+        tilgangService.validerTilgangTilBehandling(behandlingId = opprettSammensattKontrollsakDto.behandlingId, event = AuditLoggerEvent.CREATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Opprett SammensattKontrollsak",
@@ -82,6 +85,7 @@ class SammensattKontrollsakController(
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 
+        tilgangService.validerTilgangTilBehandling(behandlingId = sammensattKontrollsakDto.behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater SammensattKontrollsak",
@@ -103,13 +107,14 @@ class SammensattKontrollsakController(
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 
+        tilgangService.validerTilgangTilBehandling(behandlingId = sammensattKontrollsakDto.behandlingId, event = AuditLoggerEvent.DELETE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Slett SammensattKontrollsak",
         )
         tilgangService.validerKanRedigereBehandling(sammensattKontrollsakDto.behandlingId)
 
-        sammensattKontrollsakService.slettSammensattKontrollsak(sammensattKontrollsakDto.id)
+        sammensattKontrollsakService.slettSammensattKontrollsak(id = sammensattKontrollsakDto.id, behandlingId = sammensattKontrollsakDto.behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(sammensattKontrollsakDto.id))
     }

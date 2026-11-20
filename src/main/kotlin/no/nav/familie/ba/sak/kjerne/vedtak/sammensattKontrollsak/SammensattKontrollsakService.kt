@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak
 
+import no.nav.familie.ba.sak.common.feilHvis
 import no.nav.familie.ba.sak.ekstern.restDomene.OpprettSammensattKontrollsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.SammensattKontrollsakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilSammensattKontrollsak
@@ -31,6 +32,7 @@ class SammensattKontrollsakService(
         sammensattKontrollsakDto: SammensattKontrollsakDto,
     ): SammensattKontrollsak {
         val sammensattKontrollsak = sammensattKontrollsakRepository.hentSammensattKontrollsak(sammensattKontrollsakDto.id)
+        validerAtSammensattKontrollsakTilhørerBehandling(sammensattKontrollsak, sammensattKontrollsakDto.behandlingId)
 
         return sammensattKontrollsakRepository.save(
             sammensattKontrollsak.also {
@@ -41,12 +43,25 @@ class SammensattKontrollsakService(
     }
 
     @Transactional
-    fun slettSammensattKontrollsak(id: Long) {
+    fun slettSammensattKontrollsak(
+        id: Long,
+        behandlingId: Long,
+    ) {
         val sammensattKontrollsak = sammensattKontrollsakRepository.findByIdOrNull(id)
 
         sammensattKontrollsak?.let {
+            validerAtSammensattKontrollsakTilhørerBehandling(it, behandlingId)
             loggService.loggSammensattKontrollsakFjernet(it.behandlingId)
             sammensattKontrollsakRepository.deleteById(id)
+        }
+    }
+
+    private fun validerAtSammensattKontrollsakTilhørerBehandling(
+        sammensattKontrollsak: SammensattKontrollsak,
+        behandlingId: Long,
+    ) {
+        feilHvis(sammensattKontrollsak.behandlingId != behandlingId) {
+            "Sammensatt kontrollsak er ikke koblet til behandlingen man sender inn"
         }
     }
 }
