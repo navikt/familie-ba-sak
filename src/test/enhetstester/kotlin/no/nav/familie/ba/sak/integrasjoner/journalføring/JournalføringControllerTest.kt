@@ -4,11 +4,17 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.datagenerator.lagMockJournalføringDto
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
 import no.nav.familie.ba.sak.datagenerator.lagTilgangsstyrtJournalpost
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
+import no.nav.familie.ba.sak.ekstern.restDomene.TilknyttetBehandling
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.assertj.core.api.Assertions.assertThat
@@ -138,6 +144,74 @@ class JournalføringControllerTest {
             assertThrows<RolleTilgangskontrollFeil> { journalføringController.hentDokumentBytearray(journalpostId, dokumentInfoId) }
 
             verify(exactly = 0) { innkommendeJournalføringService.hentDokument(any(), any()) }
+        }
+    }
+
+    @Nested
+    inner class JournalførV2 {
+        private val fødselsnummer = randomFnr()
+        private val journalpostId = "1"
+        private val oppgaveId = "2"
+        private val journalførendeEnhet = "4820"
+        private val request =
+            lagMockJournalføringDto(bruker = NavnOgIdent(navn = "Navn", id = fødselsnummer)).copy(
+                opprettOgKnyttTilNyBehandling = false,
+                tilknyttedeBehandlinger =
+                    listOf(
+                        TilknyttetBehandling(behandlingstype = Journalføringsbehandlingstype.REVURDERING, behandlingId = "10"),
+                        TilknyttetBehandling(behandlingstype = Journalføringsbehandlingstype.KLAGE, behandlingId = "ekstern-klage-id"),
+                    ),
+            )
+
+        @BeforeEach
+        fun setUp() {
+            justRun { tilgangService.validerTilgangTilPersoner(any(), any(), any()) }
+            justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
+            every { innkommendeJournalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId) } returns "1"
+        }
+
+        @Test
+        fun `skal validere tilgang til bruker og tilknyttede barnetrygdbehandlinger før journalføring`() {
+            // Act
+            journalføringController.journalførV2(journalpostId, oppgaveId, journalførendeEnhet, request)
+
+            // Assert
+            verifyOrder {
+                tilgangService.validerTilgangTilPersoner(personIdenter = listOf(fødselsnummer), event = AuditLoggerEvent.UPDATE)
+                tilgangService.validerTilgangTilBehandling(behandlingId = 10L, event = AuditLoggerEvent.UPDATE)
+                innkommendeJournalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
+            }
+            verify(exactly = 1) { tilgangService.validerTilgangTilBehandling(any(), any()) }
+        }
+
+        @Test
+        fun `skal ikke journalføre når saksbehandler mangler tilgang til bruker`() {
+            // Arrange
+            every {
+                tilgangService.validerTilgangTilPersoner(personIdenter = listOf(fødselsnummer), event = AuditLoggerEvent.UPDATE)
+            } throws RolleTilgangskontrollFeil("Mangler tilgang til bruker")
+
+            // Act & Assert
+            assertThrows<RolleTilgangskontrollFeil> {
+                journalføringController.journalførV2(journalpostId, oppgaveId, journalførendeEnhet, request)
+            }
+
+            verify(exactly = 0) { innkommendeJournalføringService.journalfør(any(), any(), any(), any()) }
+        }
+
+        @Test
+        fun `skal ikke journalføre når saksbehandler mangler tilgang til tilknyttet behandling`() {
+            // Arrange
+            every {
+                tilgangService.validerTilgangTilBehandling(behandlingId = 10L, event = AuditLoggerEvent.UPDATE)
+            } throws RolleTilgangskontrollFeil("Mangler tilgang til behandlingen")
+
+            // Act & Assert
+            assertThrows<RolleTilgangskontrollFeil> {
+                journalføringController.journalførV2(journalpostId, oppgaveId, journalførendeEnhet, request)
+            }
+
+            verify(exactly = 0) { innkommendeJournalføringService.journalfør(any(), any(), any(), any()) }
         }
     }
 }

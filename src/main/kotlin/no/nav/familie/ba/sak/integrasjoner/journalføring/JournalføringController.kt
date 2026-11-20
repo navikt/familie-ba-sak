@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.JournalføringDto
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -104,6 +105,14 @@ class JournalføringController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "journalføre",
         )
+        tilgangService.validerTilgangTilPersoner(
+            personIdenter = listOf(request.bruker.id),
+            event = AuditLoggerEvent.UPDATE,
+        )
+        request.tilknyttedeBehandlinger
+            .filterNot { it.behandlingstype.skalBehandlesIEksternApplikasjon() }
+            .forEach { tilgangService.validerTilgangTilBehandling(behandlingId = it.behandlingId.toLong(), event = AuditLoggerEvent.UPDATE) }
+
         if (request.dokumenter.any { it.dokumentTittel == null || it.dokumentTittel == "" }) {
             throw FunksjonellFeil("Minst ett av dokumentene mangler dokumenttittel.")
         }
