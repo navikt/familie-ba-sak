@@ -95,4 +95,4 @@ data class PersonopplysningGrunnlag(
 
 fun Aktør.tilPerson(personopplysningGrunnlag: PersonopplysningGrunnlag): Person =
     personopplysningGrunnlag.personer.find { it.aktør == this }
-        ?: throw Feil("Fant ikke person i personopplysningsgrunnlag for aktør ${this.aktørId}")
+        ?: throw Feil("Fant ikke person i personopplysningsgrunnlag ${personopplysningGrunnlag.id} på behandling ${personopplysningGrunnlag.behandlingId}")

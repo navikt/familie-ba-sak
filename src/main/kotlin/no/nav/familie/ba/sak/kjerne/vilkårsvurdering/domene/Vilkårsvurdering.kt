@@ -87,5 +87,5 @@ data class Vilkårsvurdering(
 
     fun hentPersonResultaterTil(aktørId: String): List<VilkårResultat> =
         personResultater.find { it.aktør.aktørId == aktørId }?.vilkårResultater?.toList()
-            ?: throw Feil("Fant ikke personresultat for $aktørId")
+            ?: throw Feil("Fant ikke personresultat i vilkårsvurdering $id på behandling ${behandling.id}")
 }

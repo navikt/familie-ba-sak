@@ -29,7 +29,7 @@
         <eksterne-kontrakter-bisys.version>2.0_20261117082713_c4832c6</eksterne-kontrakter-bisys.version>
         <familie.kontrakter.saksstatistikk>2.0_20261117082713_c4832c6</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20261117082713_c4832c6</familie.kontrakter.stønadsstatistikk>
-        <felles-kontrakter.version>4.0_20261116104124_cadda20</felles-kontrakter.version>
+        <felles-kontrakter.version>4.0_20261120100915_9bfc3c0</felles-kontrakter.version>
         <utbetalingsgenerator.version>1.0_20260923084625_49defa2</utbetalingsgenerator.version>
         <cucumber.version>8.0.4</cucumber.version>
         <mockk.version>1.14.12</mockk.version>
@@ -43,7 +43,7 @@
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <unleash.version>12.3.2</unleash.version>
         <testcontainers.postgresql.version>1.21.4</testcontainers.postgresql.version>
-        <maven.model.version>3.10.0</maven.model.version>
+        <maven.model.version>3.10.1</maven.model.version>
         <avro.version>1.12.2</avro.version>
         <avro.serializable.packages>no.nav.person.pdl.aktor.v2</avro.serializable.packages>
         <confluent.version>8.4.1</confluent.version>
@@ -562,7 +562,8 @@
                         </configurationParameters>
                     </properties>
                     <systemPropertyVariables>
-                        <org.apache.avro.SERIALIZABLE_PACKAGES>${avro.serializable.packages}</org.apache.avro.SERIALIZABLE_PACKAGES>
+                        <org.apache.avro.SERIALIZABLE_PACKAGES>${avro.serializable.packages}
+                        </org.apache.avro.SERIALIZABLE_PACKAGES>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
