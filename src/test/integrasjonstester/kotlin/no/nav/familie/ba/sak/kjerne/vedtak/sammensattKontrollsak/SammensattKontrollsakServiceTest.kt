@@ -104,7 +104,7 @@ class SammensattKontrollsakServiceTest(
         val eksisterendeSammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(OpprettSammensattKontrollsakDto(behandlingId = behandling.id, fritekst = "Fritekst"))
 
         // Act
-        sammensattKontrollsakService.slettSammensattKontrollsak(eksisterendeSammensattKontrollsak.id)
+        sammensattKontrollsakService.slettSammensattKontrollsak(id = eksisterendeSammensattKontrollsak.id, behandlingId = behandling.id)
 
         // Assert
         assertThat(sammensattKontrollsakService.finnSammensattKontrollsak(behandlingId = behandling.id)).isNull()

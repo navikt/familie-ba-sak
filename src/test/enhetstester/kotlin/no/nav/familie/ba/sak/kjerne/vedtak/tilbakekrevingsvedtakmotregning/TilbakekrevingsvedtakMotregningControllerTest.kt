@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.OppdaterTilbakekrevingsvedtakMotregningDto
@@ -15,6 +17,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import java.time.LocalDate
 
@@ -60,6 +63,7 @@ class TilbakekrevingsvedtakMotregningControllerTest {
     @BeforeEach
     fun setUp() {
         justRun { tilgangService.verifiserHarTilgangTilHandling(any(), any()) }
+        justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
         justRun { tilgangService.validerKanRedigereBehandling(behandling.id) }
         every { tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id) } returns tilbakekrevingsvedtakMotregning
         every { tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(behandling.id) } returns tilbakekrevingsvedtakMotregning
@@ -105,6 +109,38 @@ class TilbakekrevingsvedtakMotregningControllerTest {
                     handling = "Oppretter TilbakekrevingsvedtakMotregning pdf",
                 )
             }
+        }
+
+        @Test
+        fun `skal validere tilgang til behandlingen på alle endepunkter`() {
+            // Act
+            tilbakekrevingsvedtakMotregningController.slettTilbakekrevingsvedtakMotregning(behandlingId = behandling.id)
+            tilbakekrevingsvedtakMotregningController.hentTilbakekrevingsvedtakMotregningPdf(behandlingId = behandling.id)
+            tilbakekrevingsvedtakMotregningController.opprettOgHentTilbakekrevingsvedtakMotregningPdf(behandlingId = behandling.id)
+            tilbakekrevingsvedtakMotregningController.oppdaterTilbakekrevingsvedtakMotregning(
+                behandlingId = behandling.id,
+                oppdaterTilbakekrevingsvedtakMotregningDto = oppdaterTilbakekrevingsvedtakMotregningDto,
+            )
+
+            // Assert
+            verify(exactly = 1) { tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id, event = AuditLoggerEvent.DELETE) }
+            verify(exactly = 1) { tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id, event = AuditLoggerEvent.ACCESS) }
+            verify(exactly = 2) { tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id, event = AuditLoggerEvent.UPDATE) }
+        }
+
+        @Test
+        fun `skal ikke hente pdf når saksbehandler mangler tilgang til behandlingen`() {
+            // Arrange
+            every {
+                tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id, event = AuditLoggerEvent.ACCESS)
+            } throws RolleTilgangskontrollFeil("Mangler tilgang til behandlingen")
+
+            // Act & Assert
+            assertThrows<RolleTilgangskontrollFeil> {
+                tilbakekrevingsvedtakMotregningController.hentTilbakekrevingsvedtakMotregningPdf(behandlingId = behandling.id)
+            }
+
+            verify(exactly = 0) { tilbakekrevingsvedtakMotregningService.hentTilbakekrevingsvedtakMotregningEllerKastFunksjonellFeil(any()) }
         }
     }
 

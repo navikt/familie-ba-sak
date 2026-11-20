@@ -59,6 +59,7 @@ class RefusjonEøsServiceIT(
                     refusjonAvklart = false,
                 ),
             id = id,
+            behandlingId = behandling.id,
         )
 
         // Assert
@@ -91,7 +92,7 @@ class RefusjonEøsServiceIT(
             .also { Assertions.assertThat(it[0].id).isEqualTo(id2) }
 
         // Act
-        refusjonEøsService.fjernRefusjonEøsPeriode(id = id)
+        refusjonEøsService.fjernRefusjonEøsPeriode(id = id, behandlingId = behandling.id)
 
         // Assert
         refusjonEøsService
