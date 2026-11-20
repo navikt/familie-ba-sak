@@ -562,7 +562,8 @@
                         </configurationParameters>
                     </properties>
                     <systemPropertyVariables>
-                        <org.apache.avro.SERIALIZABLE_PACKAGES>${avro.serializable.packages}</org.apache.avro.SERIALIZABLE_PACKAGES>
+                        <org.apache.avro.SERIALIZABLE_PACKAGES>${avro.serializable.packages}
+                        </org.apache.avro.SERIALIZABLE_PACKAGES>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

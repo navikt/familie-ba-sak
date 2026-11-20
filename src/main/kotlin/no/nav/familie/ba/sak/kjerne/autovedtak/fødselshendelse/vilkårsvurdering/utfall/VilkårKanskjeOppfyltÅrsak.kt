@@ -23,6 +23,12 @@ enum class VilkårKanskjeOppfyltÅrsak(
         "Må undersøke i søknaden om personen har planer om å bo i Norge i mer enn 12 måneder.",
         Vilkår.BOSATT_I_RIKET,
     ),
+
+    // Bor med søker
+    BOR_MED_SØKER_ULIK_OPPHOLDSADRESSE_SVALBARD(
+        "Kan ikke fastslå at barnet og søker har samme oppholdsadresse på Svalbard.",
+        Vilkår.BOR_MED_SØKER,
+    ),
     ;
 
     override fun hentBeskrivelse(): String = beskrivelse
