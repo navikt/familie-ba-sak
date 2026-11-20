@@ -53,7 +53,7 @@ class BrevmottakerController(
             handling = "fjerne brevmottaker",
         )
         tilgangService.validerKanRedigereBehandling(behandlingId)
-        brevmottakerService.fjernBrevmottaker(id = mottakerId)
+        brevmottakerService.fjernBrevmottaker(id = mottakerId, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
     }

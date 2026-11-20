@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.feilHvis
 import no.nav.familie.ba.sak.ekstern.restDomene.EndretUtbetalingAndelDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -54,6 +55,8 @@ class EndretUtbetalingAndelService(
         endretUtbetalingAndelDto: EndretUtbetalingAndelDto,
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId)
+
+        validerAtEndretUtbetalingAndelTilhørerBehandling(endretUtbetalingAndel, behandling)
 
         if (endretUtbetalingAndel.erAutomatiskGenerert == true) {
             throw FunksjonellFeil("Automatisk genererte endrede utbetalingsperioder kan ikke endres, kun fjernes.")
@@ -141,13 +144,25 @@ class EndretUtbetalingAndelService(
         behandling: Behandling,
         endretUtbetalingAndelId: Long,
     ) {
-        val erUtfyltEndretUtbetalingAndel =
-            endretUtbetalingAndelRepository.findByIdOrNull(endretUtbetalingAndelId)?.manglerObligatoriskFelt() == false
+        val endretUtbetalingAndel = endretUtbetalingAndelRepository.findByIdOrNull(endretUtbetalingAndelId)
+
+        endretUtbetalingAndel?.let { validerAtEndretUtbetalingAndelTilhørerBehandling(it, behandling) }
+
+        val erUtfyltEndretUtbetalingAndel = endretUtbetalingAndel?.manglerObligatoriskFelt() == false
 
         fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, listOf(endretUtbetalingAndelId))
 
         if (erUtfyltEndretUtbetalingAndel) {
             loggService.loggEndretUtbetalingAndelFjernet(behandling.id)
+        }
+    }
+
+    private fun validerAtEndretUtbetalingAndelTilhørerBehandling(
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        behandling: Behandling,
+    ) {
+        feilHvis(endretUtbetalingAndel.behandlingId != behandling.id) {
+            "Endret utbetalingsperiode er ikke koblet til behandlingen man sender inn"
         }
     }
 
