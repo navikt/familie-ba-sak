@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.OppdaterTilbakekrevingsvedtakMotregningDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
@@ -38,6 +39,7 @@ class TilbakekrevingsvedtakMotregningController(
         @PathVariable behandlingId: Long,
         @RequestBody oppdaterTilbakekrevingsvedtakMotregningDto: OppdaterTilbakekrevingsvedtakMotregningDto,
     ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater tilbakekrevingsvedtak motregning",
@@ -62,6 +64,7 @@ class TilbakekrevingsvedtakMotregningController(
     fun slettTilbakekrevingsvedtakMotregning(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Slett TilbakekrevingsvedtakMotregning",
@@ -83,6 +86,7 @@ class TilbakekrevingsvedtakMotregningController(
     fun hentTilbakekrevingsvedtakMotregningPdf(
         @PathVariable behandlingId: Long,
     ): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Hent TilbakekrevingsvedtakMotregning pdf",
@@ -103,6 +107,7 @@ class TilbakekrevingsvedtakMotregningController(
     fun opprettOgHentTilbakekrevingsvedtakMotregningPdf(
         @PathVariable behandlingId: Long,
     ): Ressurs<ByteArray> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppretter TilbakekrevingsvedtakMotregning pdf",
