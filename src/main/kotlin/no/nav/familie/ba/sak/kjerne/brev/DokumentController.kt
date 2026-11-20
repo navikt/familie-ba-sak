@@ -136,6 +136,7 @@ class DokumentController(
             "${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev på fagsak $fagsakId " +
                 "for mal: ${manueltBrevRequest.brevmal}",
         )
+        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "hente forhåndsvisning brev",
@@ -158,6 +159,7 @@ class DokumentController(
         @RequestBody manueltBrevRequest: ManueltBrevRequest,
     ): ResponseEntity<Ressurs<MinimalFagsakDto>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev på fagsak $fagsakId: ${manueltBrevRequest.brevmal}")
+        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "sende brev",
