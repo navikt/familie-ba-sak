@@ -7692,7 +7692,7 @@
   {
     "_createdAt": "2024-06-18T07:12:02Z",
     "_id": "begrunnelse-36bf795e-a42c-40ad-a991-fff463f1bd15",
-    "_rev": "G1fn50KhqxUx4FN5pLW4mN",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_system": {
       "base": {
         "id": "begrunnelse-36bf795e-a42c-40ad-a991-fff463f1bd15",
@@ -7700,7 +7700,7 @@
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-08-06T07:57:26Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "endretUtbetalingEtterbetalingTreMaanederTilbakeITid",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
@@ -7796,6 +7796,7 @@
       "BARN"
     ],
     "splittPaaSoknadstidspunkt": true,
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "24. Etterbetaling tre måneder tilbake i tid - Ingen utbetaling"
   },
@@ -7905,7 +7906,7 @@
   {
     "_createdAt": "2024-06-18T07:16:53Z",
     "_id": "begrunnelse-71f96b3e-df35-4754-8c58-bebf8549ca7a",
-    "_rev": "G1fn50KhqxUx4FN5pLWjjF",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_system": {
       "base": {
         "id": "begrunnelse-71f96b3e-df35-4754-8c58-bebf8549ca7a",
@@ -7913,7 +7914,7 @@
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-08-06T08:06:14Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "endretUtbetalingEtterbetalingTreMaanederTilbakeITidSED",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
@@ -8009,15 +8010,16 @@
       "BARN"
     ],
     "splittPaaSoknadstidspunkt": true,
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "25. Etterbetaling tre måneder tilbake i tid SED - Ingen utbetaling"
   },
   {
     "_createdAt": "2024-06-18T07:43:25Z",
     "_id": "begrunnelse-7c7cf4cd-6da7-4c0b-81d8-803fe4098d12",
-    "_rev": "cruj31hiFJWLEEOmZRNANP",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-09-10T10:52:14Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "endretUtbetalingEtterbetalingTreMaanederTilbakeITidSedUtbetaling",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
@@ -8112,6 +8114,7 @@
     "rolle": [
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "28. Etterbetaling tre måneder tilbake i tid SED - utbetaling"
   },
@@ -9004,9 +9007,9 @@
   {
     "_createdAt": "2024-11-14T14:21:19Z",
     "_id": "begrunnelse-f833cb9a-e5a9-4e9c-a55f-82e9f2c3d04c",
-    "_rev": "feceuXchvLAy158Te5p6Xb",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-11-14T14:36:44Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "endretUtbetalingTreMaanederTilbakeITidInstitusjon",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
@@ -9104,15 +9107,16 @@
       "SOKER",
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "SAKSPESIFIKK",
     "visningsnavn": "1. Etterbetaling tre måneder tilbake i tid - Institusjon"
   },
   {
     "_createdAt": "2024-06-18T07:27:01Z",
     "_id": "begrunnelse-27e45a62-f4d0-40be-b1ba-390615f6af15",
-    "_rev": "4Yu9C3prNnc56xE2xDJ8o9",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2025-05-12T13:44:39Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "endretUtbetalingTreMaanederTilbakeITidKunUtvidetDelUtbetaling",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
@@ -9185,15 +9189,16 @@
     "rolle": [
       "SOKER"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "27. Etterbetaling tre måneder tilbake i tid kun utvidet del - utbetaling"
   },
   {
     "_createdAt": "2024-06-18T07:17:55Z",
     "_id": "begrunnelse-d20ec5a4-e16f-4ca6-9ec8-8d5656e5d6f1",
-    "_rev": "HhDdVIUa1BJOaQ4MHERJEN",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-09-12T07:23:00Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "endretUtbetalingTreMaanederTilbakeITidUtbetaling",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
@@ -9288,6 +9293,7 @@
     "rolle": [
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "26. Etterbetaling tre måneder tilbake i tid - utbetaling"
   },
@@ -9893,9 +9899,9 @@
   {
     "_createdAt": "2024-06-18T09:27:28Z",
     "_id": "begrunnelse-67bd5d21-854d-4bdf-84b5-442676df56ca",
-    "_rev": "feceuXchvLAy158Te5uo1Y",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-11-14T14:51:31Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaaneder",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10001,15 +10007,16 @@
     "rolle": [
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "8. Etterbetaling tre måneder"
   },
   {
     "_createdAt": "2024-11-14T14:54:59Z",
     "_id": "begrunnelse-4a8b778a-3622-4637-9ff8-8fb2183dc82a",
-    "_rev": "FJDJpy7QCd7QQbNDYTXFjQ",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-11-14T15:00:04Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederEosBorger",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10116,13 +10123,14 @@
       "SOKER",
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "13. Etterbetaling tre måneder EØS borger"
   },
   {
     "_createdAt": "2026-05-13T11:19:35Z",
     "_id": "begrunnelse-32dda23e-cbad-4ff2-8fd6-053c0553fc06",
-    "_rev": "52t4uUBba7VTVHhVfKL01C",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_system": {
       "base": {
         "id": "begrunnelse-32dda23e-cbad-4ff2-8fd6-053c0553fc06",
@@ -10130,7 +10138,7 @@
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-06-09T11:22:27Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederFinnmarkstillegg",
     "bokmaal": [
       {
@@ -10268,15 +10276,16 @@
       "SOKER",
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "14. Etterbetaling tre måneder Finnmarkstillegg"
   },
   {
     "_createdAt": "2024-11-14T14:46:20Z",
     "_id": "begrunnelse-355608f9-069b-4c1e-8b39-8ebaee56b049",
-    "_rev": "L2918mBon6myb1FoETLXgX",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-11-20T16:12:55Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederForPraktisertDeltBosted",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10412,13 +10421,14 @@
     "rolle": [
       "SOKER"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "12. Etterbetaling tre måneder utvidet for praktisert delt bosted"
   },
   {
     "_createdAt": "2024-11-14T14:35:19Z",
     "_id": "begrunnelse-b4b8a0c0-90a2-483d-b9b7-2f78d013e3d5",
-    "_rev": "UN19t3rpC15uwJJLNBb03a",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_system": {
       "base": {
         "id": "begrunnelse-b4b8a0c0-90a2-483d-b9b7-2f78d013e3d5",
@@ -10426,7 +10436,7 @@
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2025-08-05T07:16:05Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederInstitusjon",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10555,15 +10565,16 @@
       "SOKER",
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "SAKSPESIFIKK",
     "visningsnavn": "2. Etterbetaling tre måneder tilbake i tid - institusjon"
   },
   {
     "_createdAt": "2024-09-11T03:21:50Z",
     "_id": "begrunnelse-ab17edec-c214-4165-bd3e-b7dafacf9522",
-    "_rev": "YpEW5kRbiMoxvFdK1a3GU7",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2025-02-04T15:56:43Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederKunUtvidetDel",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10620,13 +10631,14 @@
     "rolle": [
       "SOKER"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "9. Etterbetaling tre måned kun utvidet del"
   },
   {
     "_createdAt": "2026-05-13T11:49:58Z",
     "_id": "begrunnelse-948e34c5-da31-445b-888f-cf1ccb927a67",
-    "_rev": "52t4uUBba7VTVHhVfVaRuH",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_system": {
       "base": {
         "id": "begrunnelse-948e34c5-da31-445b-888f-cf1ccb927a67",
@@ -10634,7 +10646,7 @@
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-06-10T05:08:00Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederSvalbardtillegg",
     "bokmaal": [
       {
@@ -10772,13 +10784,14 @@
       "SOKER",
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "15. Etter endret utbetalingsperiode Svalbardtillegg"
   },
   {
     "_createdAt": "2024-09-25T08:14:18Z",
     "_id": "begrunnelse-cf4be9a5-a7e7-4c58-b3af-a5783addfbc5",
-    "_rev": "esSc8hWcoBQfgtmam62f3x",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_system": {
       "base": {
         "id": "begrunnelse-cf4be9a5-a7e7-4c58-b3af-a5783addfbc5",
@@ -10786,7 +10799,7 @@
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-03-06T10:18:33Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederTredjelandsborger",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10895,15 +10908,16 @@
       "SOKER",
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "10. Etterbetaling tre måneder tredjelandsborger"
   },
   {
     "_createdAt": "2024-10-15T08:26:27Z",
     "_id": "begrunnelse-ae6b113a-f589-4127-88b7-9031bd587874",
-    "_rev": "KyzqRrL3EBNKJO9arjNAEG",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-10-16T07:14:41Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetallingTreMaanederEnsligMindreaarig",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10959,6 +10973,7 @@
     "rolle": [
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "11. Etterbetaling tre måneder enslig mindreårig flyktning"
   },
