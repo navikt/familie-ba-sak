@@ -735,6 +735,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "fortsattInnvilgetSekundarFaarIkkeBaIAnnetLand"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
     },
+    FORTSATT_INNVILGET_SELVSTENDIG_RETT_SEKUNDÆR_FÅR_IKKE_BA_I_ANNET_LAND {
+        override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettSekundarFaarIkkeBaIAnnetLand"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
     FORTSATT_INNVILGET_UK_SEKUNDÆR_SØKER_HAR_NORSK_ARBEIDSGIVER_I_STORBRITANNIA {
         override val sanityApiNavn = "fortsattInnvilgetUkSekundarSokerHarNorskArbeidsgiverIStorbritannia"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
