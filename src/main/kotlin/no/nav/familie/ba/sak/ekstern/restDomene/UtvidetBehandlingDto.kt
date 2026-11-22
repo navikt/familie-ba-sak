@@ -43,7 +43,6 @@ data class UtvidetBehandlingDto(
     val utenlandskePeriodebeløp: List<UtenlandskPeriodebeløpDto>,
     val korrigertEtterbetaling: KorrigertEtterbetalingDto?,
     val korrigertVedtak: KorrigertVedtakDto?,
-    val feilutbetaltValuta: List<FeilutbetaltValutaDto>,
     val brevmottakere: List<BrevmottakerDto>,
     val refusjonEøs: List<RefusjonEøsDto>,
     val vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser? = VurderingsstrategiForValutakurser.AUTOMATISK,
