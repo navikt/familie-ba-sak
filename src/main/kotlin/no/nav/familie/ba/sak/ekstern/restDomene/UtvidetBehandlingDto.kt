@@ -42,7 +42,6 @@ data class UtvidetBehandlingDto(
     val migreringsdato: LocalDate?,
     val valutakurser: List<ValutakursDto>,
     val utenlandskePeriodebeløp: List<UtenlandskPeriodebeløpDto>,
-    val korrigertEtterbetaling: KorrigertEtterbetalingDto?,
     val korrigertVedtak: KorrigertVedtakDto?,
     val feilutbetaltValuta: List<FeilutbetaltValutaDto>,
     val brevmottakere: List<BrevmottakerDto>,

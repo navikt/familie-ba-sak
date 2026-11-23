@@ -641,7 +641,6 @@ class StrengtFortroligServiceTest {
         migreringsdato = null,
         valutakurser = emptyList(),
         utenlandskePeriodebeløp = emptyList(),
-        korrigertEtterbetaling = null,
         korrigertVedtak = null,
         feilutbetaltValuta = emptyList(),
         brevmottakere = emptyList(),
