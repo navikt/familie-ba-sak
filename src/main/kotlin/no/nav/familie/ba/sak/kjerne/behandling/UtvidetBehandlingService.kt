@@ -38,7 +38,6 @@ import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaService
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.tilTilbakekrevingsvedtakMotregningDto
@@ -67,7 +66,6 @@ class UtvidetBehandlingService(
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val korrigertVedtakService: KorrigertVedtakService,
-    private val feilutbetaltValutaService: FeilutbetaltValutaService,
     private val brevmottakerService: BrevmottakerService,
     private val refusjonEøsService: RefusjonEøsService,
     private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
@@ -118,8 +116,6 @@ class UtvidetBehandlingService(
         val endreteUtbetalingerMedAndeler =
             andelerTilkjentYtelseOgEndreteUtbetalingerService
                 .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
-
-        val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId)
 
         val refusjonEøs = refusjonEøsService.hentRefusjonEøsPerioder(behandlingId)
 
@@ -184,7 +180,6 @@ class UtvidetBehandlingService(
                     korrigertVedtakService
                         .finnAktivtKorrigertVedtakPåBehandling(behandlingId)
                         ?.tilKorrigertVedtakDto(),
-                feilutbetaltValuta = feilutbetaltValuta,
                 brevmottakere = brevmottakere,
                 refusjonEøs = refusjonEøs,
                 vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)?.vurderingsstrategiForValutakurser,
