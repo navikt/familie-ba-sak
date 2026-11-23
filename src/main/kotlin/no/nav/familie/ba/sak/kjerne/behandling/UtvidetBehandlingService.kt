@@ -47,7 +47,6 @@ class UtvidetBehandlingService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val persongrunnlagService: PersongrunnlagService,
-    private val behandlingService: BehandlingService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val vedtakRepository: VedtakRepository,
@@ -163,7 +162,6 @@ class UtvidetBehandlingService(
                     settPåVentService
                         .finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
                         ?.tilSettPåVentDto(),
-                migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
                 valutakurser = valutakurser.map { it.tilValutakursDto() },
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilUtenlandskPeriodebeløpDto() },
                 brevmottakere = brevmottakere,
