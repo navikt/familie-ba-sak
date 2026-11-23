@@ -132,6 +132,7 @@ class UtvidetBehandlingService(
 
         val utvidetBehandlingDto =
             UtvidetBehandlingDto(
+                fagsakId = behandling.fagsak.id,
                 behandlingId = behandling.id,
                 steg = behandling.steg,
                 stegTilstand = behandling.behandlingStegTilstand.map { it.tilBehandlingStegTilstandDto() },

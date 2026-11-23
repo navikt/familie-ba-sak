@@ -613,6 +613,7 @@ class StrengtFortroligServiceTest {
         kompetanser: List<KompetanseDto> = emptyList(),
         søknadsgrunnlag: SøknadDTO? = null,
     ) = UtvidetBehandlingDto(
+        fagsakId = behandling.fagsak.id,
         behandlingId = behandling.id,
         steg = StegType.VILKÅRSVURDERING,
         stegTilstand = emptyList(),
