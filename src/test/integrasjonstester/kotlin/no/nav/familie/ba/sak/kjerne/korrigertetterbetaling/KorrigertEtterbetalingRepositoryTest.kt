@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -101,41 +100,6 @@ class KorrigertEtterbetalingRepositoryTest(
         assertThrows<DataIntegrityViolationException> {
             korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling2)
         }
-    }
-
-    @Test
-    fun `hentAlleKorrigeringPåBehandling skal returnere alle KorrigertEtterbetaling på behandling`() {
-        // Arrange
-        val behandling = opprettBehandling()
-
-        val aktivKorrigertEtterbetaling =
-            KorrigertEtterbetaling(
-                årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
-                begrunnelse = "1",
-                beløp = 1000,
-                behandling = behandling,
-                aktiv = true,
-            )
-
-        val inaktivKorrigertEtterbetaling =
-            KorrigertEtterbetaling(
-                årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
-                begrunnelse = "2",
-                beløp = 1000,
-                behandling = behandling,
-                aktiv = false,
-            )
-
-        korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
-        korrigertEtterbetalingRepository.saveAndFlush(inaktivKorrigertEtterbetaling)
-
-        // Act
-        val eksisterendeKorrigertEtterbetaling =
-            korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.id)
-
-        // Assert
-        assertThat(eksisterendeKorrigertEtterbetaling.size, Is(2))
-        assertThat(eksisterendeKorrigertEtterbetaling.map { it.begrunnelse }, containsInAnyOrder("1", "2"))
     }
 
     private fun opprettBehandling(): Behandling {

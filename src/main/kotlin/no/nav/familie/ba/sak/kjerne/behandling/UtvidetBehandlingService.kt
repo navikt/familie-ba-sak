@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBehandlingStegTilstandDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanseDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertEtterbetalingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertVedtakDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeFinnmarkmerkingPerioder
 import no.nav.familie.ba.sak.ekstern.restDomene.tilManglendeSvalbardmerkingPerioder
@@ -32,7 +31,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.VurderingsstrategiForValutak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
-import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
@@ -63,7 +61,6 @@ class UtvidetBehandlingService(
     private val kompetanseRepository: KompetanseRepository,
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
-    private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val korrigertVedtakService: KorrigertVedtakService,
     private val brevmottakerService: BrevmottakerService,
@@ -172,10 +169,6 @@ class UtvidetBehandlingService(
                 migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
                 valutakurser = valutakurser.map { it.tilValutakursDto() },
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilUtenlandskPeriodebeløpDto() },
-                korrigertEtterbetaling =
-                    korrigertEtterbetalingService
-                        .finnAktivtKorrigeringPåBehandling(behandlingId)
-                        ?.tilKorrigertEtterbetalingDto(),
                 korrigertVedtak =
                     korrigertVedtakService
                         .finnAktivtKorrigertVedtakPåBehandling(behandlingId)
