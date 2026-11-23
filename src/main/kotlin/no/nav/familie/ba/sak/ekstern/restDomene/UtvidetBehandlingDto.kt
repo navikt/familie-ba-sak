@@ -14,6 +14,7 @@ import java.time.LocalDateTime
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 data class UtvidetBehandlingDto(
+    val fagsakId: Long,
     val behandlingId: Long,
     val steg: StegType,
     val stegTilstand: List<BehandlingStegTilstandDto>,
