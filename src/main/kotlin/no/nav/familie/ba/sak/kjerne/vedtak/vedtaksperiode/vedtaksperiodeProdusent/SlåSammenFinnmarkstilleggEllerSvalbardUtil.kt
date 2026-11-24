@@ -10,6 +10,7 @@ import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.byttUtNullListeMedTomListe
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 
 private val UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS, UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
 
@@ -83,16 +84,54 @@ private fun hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(vilkårResulta
 
 internal fun List<VilkårResultat>.erUlikUtenomFinnmarksOgSvalbardTillegg(
     vilkårResultaterForrigePeriode: List<VilkårResultat>,
-): Boolean = this.utenTilleggsmarkeringOgDatoer() != vilkårResultaterForrigePeriode.utenTilleggsmarkeringOgDatoer()
+): Boolean =
+    this.map { VilkårResultatForVedtaksperiode(it) }.utenTilleggsmarkeringOgDatoer() !=
+        vilkårResultaterForrigePeriode.map { VilkårResultatForVedtaksperiode(it) }.utenTilleggsmarkeringOgDatoer()
 
-private fun List<VilkårResultat>.utenTilleggsmarkeringOgDatoer(): Set<VilkårResultatForVedtaksperiode> =
+private fun List<VilkårResultatForVedtaksperiode>.utenTilleggsmarkeringOgDatoer(): Set<VilkårResultatForVedtaksperiode> =
     this
         .map { vilkårResultat ->
-            VilkårResultatForVedtaksperiode(vilkårResultat).copy(
+            vilkårResultat.copy(
                 utdypendeVilkårsvurderinger =
                     vilkårResultat.utdypendeVilkårsvurderinger
                         .filterNot { it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
                 fom = null,
                 tom = null,
             )
+        }.toSet()
+
+fun Tidslinje<VedtaksperiodeGrunnlagForPerson>.slåSammenPerioderUtenUtbetalingMedBareEndringITilleggsmarkering(): Tidslinje<VedtaksperiodeGrunnlagForPerson> =
+    this
+        .tilPerioderIkkeNull()
+        .fold(emptyList()) { acc: List<Periode<VedtaksperiodeGrunnlagForPerson>>, dennePerioden ->
+            val forrigePeriode = acc.lastOrNull()
+
+            if (forrigePeriode != null &&
+                forrigePeriode.tom?.plusDays(1) == dennePerioden.fom &&
+                !dennePerioden.verdi.erInnvilget() &&
+                dennePerioden.verdi.harBareEndringITilleggsmarkering(forrigePeriode.verdi)
+            ) {
+                acc.dropLast(1) + forrigePeriode.copy(tom = dennePerioden.tom)
+            } else {
+                acc + dennePerioden
+            }
+        }.tilTidslinje()
+
+private fun VedtaksperiodeGrunnlagForPerson.harBareEndringITilleggsmarkering(grunnlagForrigePeriode: VedtaksperiodeGrunnlagForPerson): Boolean {
+    val erLikUtenomVilkårResultater =
+        this.kopier(vilkårResultaterForVedtaksperiode = emptyList()) == grunnlagForrigePeriode.kopier(vilkårResultaterForVedtaksperiode = emptyList())
+    val erVilkårResultaterLikeUtenomTilleggsmarkering =
+        this.vilkårResultaterForVedtaksperiode.utenTilleggsmarkeringOgDatoer() == grunnlagForrigePeriode.vilkårResultaterForVedtaksperiode.utenTilleggsmarkeringOgDatoer()
+    val erEndringITilleggsmarkering =
+        this.vilkårResultaterForVedtaksperiode.tilleggsmarkeringer() != grunnlagForrigePeriode.vilkårResultaterForVedtaksperiode.tilleggsmarkeringer()
+
+    return erLikUtenomVilkårResultater && erVilkårResultaterLikeUtenomTilleggsmarkering && erEndringITilleggsmarkering
+}
+
+private fun List<VilkårResultatForVedtaksperiode>.tilleggsmarkeringer(): Set<Pair<AktørId, UtdypendeVilkårsvurdering>> =
+    this
+        .flatMap { vilkårResultat ->
+            vilkårResultat.utdypendeVilkårsvurderinger
+                .filter { it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG }
+                .map { vilkårResultat.aktørId to it }
         }.toSet()
