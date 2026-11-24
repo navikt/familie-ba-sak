@@ -38,6 +38,7 @@ import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.beskjærFraOgMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.YearMonth
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -194,7 +195,7 @@ fun Collection<UtenlandskPeriodebeløp>.tilUtfylteUtenlandskPeriodebeløpEtterEn
 fun UtenlandskPeriodebeløp.tilUtbetaltFraAnnetLand(valutakurs: Valutakurs?): UtbetaltFraAnnetLand =
     try {
         UtbetaltFraAnnetLand(
-            beløp = kalkulertMånedligBeløp!!.toBigInteger().intValueExact(),
+            beløp = kalkulertMånedligBeløp!!.setScale(0, RoundingMode.HALF_UP).intValueExact(),
             valutakode = valutakode!!,
             beløpINok = (tilMånedligValutabeløp()!! * valutakurs.tilKronerPerValutaenhet())!!.toBigInteger().intValueExact(),
         )
