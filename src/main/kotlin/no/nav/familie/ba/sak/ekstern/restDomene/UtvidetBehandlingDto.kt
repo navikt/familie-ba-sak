@@ -43,7 +43,6 @@ data class UtvidetBehandlingDto(
     val valutakurser: List<ValutakursDto>,
     val utenlandskePeriodebeløp: List<UtenlandskPeriodebeløpDto>,
     val brevmottakere: List<BrevmottakerDto>,
-    val refusjonEøs: List<RefusjonEøsDto>,
     val vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser? = VurderingsstrategiForValutakurser.AUTOMATISK,
     val søknadMottattDato: LocalDateTime?,
     val tilbakekrevingsvedtakMotregning: TilbakekrevingsvedtakMotregningDto?,
