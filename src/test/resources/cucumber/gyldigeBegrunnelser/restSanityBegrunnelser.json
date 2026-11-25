@@ -14175,9 +14175,15 @@
   {
     "_createdAt": "2026-11-24T14:51:46Z",
     "_id": "begrunnelse-27bac1cb-26ce-4157-b3ef-eea218f9b2c4",
-    "_rev": "OCPREzVotP0OCHeG1Ktsxd",
+    "_rev": "BgkU2tvm00fCYvwyHF1Eyt",
+    "_system": {
+      "base": {
+        "id": "begrunnelse-27bac1cb-26ce-4157-b3ef-eea218f9b2c4",
+        "rev": "BgkU2tvm00fCYvwyHF1CNR"
+      }
+    },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-11-24T15:07:46Z",
+    "_updatedAt": "2026-11-24T16:21:01Z",
     "apiNavn": "fortsattInnvilgetTilleggstekstManglerKontoopplysninger",
     "bokmaal": [
       {
