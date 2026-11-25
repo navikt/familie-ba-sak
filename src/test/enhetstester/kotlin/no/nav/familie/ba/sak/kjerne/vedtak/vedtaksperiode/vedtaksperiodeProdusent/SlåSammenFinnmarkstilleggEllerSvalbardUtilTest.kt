@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent
 
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
@@ -11,12 +13,14 @@ import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.byttUtNullListeMedTomListe
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
+import java.time.YearMonth
 
 class SlåSammenFinnmarkstilleggEllerSvalbardUtilTest {
     @Nested
@@ -137,6 +141,143 @@ class SlåSammenFinnmarkstilleggEllerSvalbardUtilTest {
 
             // Assert
             assertThat(sammenslåttePerioder).containsExactly(Periode(listOf(bosattIRiketSøker, bosattIRiketBarn), fom, tom))
+        }
+    }
+
+    @Nested
+    inner class SlåSammenPerioderUtenUtbetalingMedBareEndringITilleggsmarkering {
+        private val fom = LocalDate.of(2026, 1, 1)
+        private val splitt = LocalDate.of(2026, 2, 1)
+        private val tom = LocalDate.of(2026, 3, 31)
+        private val person = lagPerson()
+        private val vilkårResultat =
+            VilkårResultatForVedtaksperiode(
+                lagVilkårResultat(
+                    personResultat = lagPersonResultat(vilkårsvurdering = lagVilkårsvurdering(), aktør = person.aktør),
+                    periodeFom = fom,
+                    periodeTom = splitt.minusDays(1),
+                ),
+            )
+        private val grunnlag =
+            VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
+                person = person,
+                vilkårResultaterForVedtaksperiode = listOf(vilkårResultat),
+            )
+        private val grunnlagMedSvalbard =
+            grunnlag.copy(
+                vilkårResultaterForVedtaksperiode =
+                    listOf(
+                        vilkårResultat.copy(
+                            fom = splitt,
+                            tom = tom,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                        ),
+                    ),
+            )
+
+        @Test
+        fun `skal slå sammen tre perioder uten utbetaling og beholde første grunnlag`() {
+            // Arrange
+            val grunnlagMedFinnmark =
+                grunnlagMedSvalbard.copy(
+                    vilkårResultaterForVedtaksperiode =
+                        grunnlagMedSvalbard.vilkårResultaterForVedtaksperiode.map {
+                            it.copy(utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS))
+                        },
+                )
+            val perioder =
+                listOf<Periode<VedtaksperiodeGrunnlagForPerson>>(
+                    Periode(grunnlag, fom, splitt.minusDays(1)),
+                    Periode(grunnlagMedFinnmark, splitt, tom.minusMonths(1)),
+                    Periode(grunnlagMedSvalbard, tom.minusMonths(1).plusDays(1), tom),
+                )
+
+            // Act
+            val sammenslåttePerioder = perioder.tilTidslinje().slåSammenPerioderUtenUtbetalingMedBareEndringITilleggsmarkering().tilPerioderIkkeNull()
+
+            // Assert
+            assertThat(sammenslåttePerioder).containsExactly(Periode(grunnlag, fom, tom))
+        }
+
+        @Test
+        fun `skal beholde splitt ved endring i tilleggsmarkering når det er utbetaling`() {
+            // Arrange
+            val andel = AndelForVedtaksperiode(lagAndelTilkjentYtelse(fom = YearMonth.from(fom), tom = YearMonth.from(tom), person = person))
+            val grunnlagMedUtbetaling =
+                VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
+                    person = person,
+                    vilkårResultaterForVedtaksperiode = grunnlag.vilkårResultaterForVedtaksperiode,
+                    andeler = listOf(andel),
+                )
+            val perioder =
+                listOf<Periode<VedtaksperiodeGrunnlagForPerson>>(
+                    Periode(grunnlagMedUtbetaling, fom, splitt.minusDays(1)),
+                    Periode(grunnlagMedUtbetaling.copy(vilkårResultaterForVedtaksperiode = grunnlagMedSvalbard.vilkårResultaterForVedtaksperiode), splitt, tom),
+                )
+
+            // Act
+            val sammenslåttePerioder = perioder.tilTidslinje().slåSammenPerioderUtenUtbetalingMedBareEndringITilleggsmarkering().tilPerioderIkkeNull()
+
+            // Assert
+            assertThat(sammenslåttePerioder).containsExactlyElementsOf(perioder)
+        }
+
+        @Test
+        fun `skal ikke slå sammen perioder over et opphold`() {
+            // Arrange
+            val perioder =
+                listOf<Periode<VedtaksperiodeGrunnlagForPerson>>(
+                    Periode(grunnlag, fom, splitt.minusDays(1)),
+                    Periode(grunnlagMedSvalbard, splitt.plusDays(1), tom),
+                )
+
+            // Act
+            val sammenslåttePerioder = perioder.tilTidslinje().slåSammenPerioderUtenUtbetalingMedBareEndringITilleggsmarkering().tilPerioderIkkeNull()
+
+            // Assert
+            assertThat(sammenslåttePerioder).containsExactlyElementsOf(perioder)
+        }
+
+        @Test
+        fun `skal beholde splitt når andre vilkår endres sammen med tilleggsmarkering`() {
+            // Arrange
+            val grunnlagMedEndretResultat =
+                grunnlagMedSvalbard.copy(
+                    vilkårResultaterForVedtaksperiode = grunnlagMedSvalbard.vilkårResultaterForVedtaksperiode.map { it.copy(resultat = Resultat.IKKE_OPPFYLT) },
+                )
+            val perioder =
+                listOf<Periode<VedtaksperiodeGrunnlagForPerson>>(
+                    Periode(grunnlag, fom, splitt.minusDays(1)),
+                    Periode(grunnlagMedEndretResultat, splitt, tom),
+                )
+
+            // Act
+            val sammenslåttePerioder = perioder.tilTidslinje().slåSammenPerioderUtenUtbetalingMedBareEndringITilleggsmarkering().tilPerioderIkkeNull()
+
+            // Assert
+            assertThat(sammenslåttePerioder).containsExactlyElementsOf(perioder)
+        }
+
+        @Test
+        fun `skal beholde splitt når tilleggsmarkeringen er lik første grunnlag etter en sammenslåing`() {
+            // Arrange
+            val grunnlagUtenTilleggEtter =
+                grunnlag.copy(vilkårResultaterForVedtaksperiode = listOf(vilkårResultat.copy(fom = LocalDate.of(2026, 3, 1), tom = tom)))
+            val perioder =
+                listOf<Periode<VedtaksperiodeGrunnlagForPerson>>(
+                    Periode(grunnlag, fom, splitt.minusDays(1)),
+                    Periode(grunnlagMedSvalbard, splitt, LocalDate.of(2026, 2, 28)),
+                    Periode(grunnlagUtenTilleggEtter, LocalDate.of(2026, 3, 1), tom),
+                )
+
+            // Act
+            val sammenslåttePerioder = perioder.tilTidslinje().slåSammenPerioderUtenUtbetalingMedBareEndringITilleggsmarkering().tilPerioderIkkeNull()
+
+            // Assert
+            assertThat(sammenslåttePerioder).containsExactly(
+                Periode(grunnlag, fom, LocalDate.of(2026, 2, 28)),
+                perioder.last(),
+            )
         }
     }
 

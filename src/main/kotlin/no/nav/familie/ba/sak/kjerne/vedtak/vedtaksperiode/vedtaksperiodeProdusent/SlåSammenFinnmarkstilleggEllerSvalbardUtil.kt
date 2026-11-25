@@ -9,8 +9,8 @@ import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.byttUtNullListeMedTomListe
+import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
-import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 
 private val UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS, UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
 
@@ -101,31 +101,23 @@ private fun List<VilkårResultatForVedtaksperiode>.utenTilleggsmarkeringOgDatoer
         }.toSet()
 
 fun Tidslinje<VedtaksperiodeGrunnlagForPerson>.slåSammenPerioderUtenUtbetalingMedBareEndringITilleggsmarkering(): Tidslinje<VedtaksperiodeGrunnlagForPerson> =
-    this
-        .tilPerioderIkkeNull()
-        .fold(emptyList()) { acc: List<Periode<VedtaksperiodeGrunnlagForPerson>>, dennePerioden ->
-            val forrigePeriode = acc.lastOrNull()
-
-            if (forrigePeriode != null &&
-                forrigePeriode.tom?.plusDays(1) == dennePerioden.fom &&
-                !dennePerioden.verdi.erInnvilget() &&
-                dennePerioden.verdi.harBareEndringITilleggsmarkering(forrigePeriode.verdi)
-            ) {
-                acc.dropLast(1) + forrigePeriode.copy(tom = dennePerioden.tom)
-            } else {
-                acc + dennePerioden
-            }
-        }.tilTidslinje()
+    this.slåSammenLikePerioder { forrigeGrunnlag, nesteGrunnlag ->
+        forrigeGrunnlag != null &&
+            nesteGrunnlag != null &&
+            !nesteGrunnlag.erInnvilget() &&
+            nesteGrunnlag.harBareEndringITilleggsmarkering(forrigeGrunnlag)
+    }
 
 private fun VedtaksperiodeGrunnlagForPerson.harBareEndringITilleggsmarkering(grunnlagForrigePeriode: VedtaksperiodeGrunnlagForPerson): Boolean {
     val erLikUtenomVilkårResultater =
         this.kopier(vilkårResultaterForVedtaksperiode = emptyList()) == grunnlagForrigePeriode.kopier(vilkårResultaterForVedtaksperiode = emptyList())
+    if (!erLikUtenomVilkårResultater) return false
+
     val erVilkårResultaterLikeUtenomTilleggsmarkering =
         this.vilkårResultaterForVedtaksperiode.utenTilleggsmarkeringOgDatoer() == grunnlagForrigePeriode.vilkårResultaterForVedtaksperiode.utenTilleggsmarkeringOgDatoer()
-    val erEndringITilleggsmarkering =
-        this.vilkårResultaterForVedtaksperiode.tilleggsmarkeringer() != grunnlagForrigePeriode.vilkårResultaterForVedtaksperiode.tilleggsmarkeringer()
+    if (!erVilkårResultaterLikeUtenomTilleggsmarkering) return false
 
-    return erLikUtenomVilkårResultater && erVilkårResultaterLikeUtenomTilleggsmarkering && erEndringITilleggsmarkering
+    return this.vilkårResultaterForVedtaksperiode.tilleggsmarkeringer() != grunnlagForrigePeriode.vilkårResultaterForVedtaksperiode.tilleggsmarkeringer()
 }
 
 private fun List<VilkårResultatForVedtaksperiode>.tilleggsmarkeringer(): Set<Pair<AktørId, UtdypendeVilkårsvurdering>> =
