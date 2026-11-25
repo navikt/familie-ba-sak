@@ -34,7 +34,6 @@ import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.tilTilbakekrevingsvedtakMotregningDto
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -60,7 +59,6 @@ class UtvidetBehandlingService(
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val brevmottakerService: BrevmottakerService,
-    private val refusjonEøsService: RefusjonEøsService,
     private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
     private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
@@ -109,8 +107,6 @@ class UtvidetBehandlingService(
         val endreteUtbetalingerMedAndeler =
             andelerTilkjentYtelseOgEndreteUtbetalingerService
                 .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
-
-        val refusjonEøs = refusjonEøsService.hentRefusjonEøsPerioder(behandlingId)
 
         val brevmottakere = brevmottakerService.hentBrevmottakereDto(behandlingId)
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId)
@@ -165,7 +161,6 @@ class UtvidetBehandlingService(
                 valutakurser = valutakurser.map { it.tilValutakursDto() },
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilUtenlandskPeriodebeløpDto() },
                 brevmottakere = brevmottakere,
-                refusjonEøs = refusjonEøs,
                 vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)?.vurderingsstrategiForValutakurser,
                 søknadMottattDato = søknadMottattDato,
                 tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregning?.tilTilbakekrevingsvedtakMotregningDto(),
