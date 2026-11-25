@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.VurderingsstrategiForValutakurser
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -39,7 +38,6 @@ data class UtvidetBehandlingDto(
     val vedtak: VedtakDto?,
     val totrinnskontroll: TotrinnskontrollDto?,
     val aktivSettPåVent: SettPåVentDto?,
-    val migreringsdato: LocalDate?,
     val valutakurser: List<ValutakursDto>,
     val utenlandskePeriodebeløp: List<UtenlandskPeriodebeløpDto>,
     val brevmottakere: List<BrevmottakerDto>,
