@@ -264,6 +264,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
 
         return grunnlagTidslinje
             .slåSammenLikePerioder()
+            .slåSammenPerioderUtenUtbetalingMedBareEndringITilleggsmarkering()
             .tilPerioderIkkeNull()
             .dropWhile { !it.erInnvilgetEllerEksplisittAvslag() }
             .tilTidslinje()
