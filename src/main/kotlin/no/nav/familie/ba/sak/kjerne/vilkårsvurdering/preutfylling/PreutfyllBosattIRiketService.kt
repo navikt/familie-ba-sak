@@ -146,12 +146,12 @@ class PreutfyllBosattIRiketService(
     ): Set<VilkårResultat> {
         val adresserForPerson = Adresser.opprettFra(person)
 
-        val statsborgerskapUnntakTidslinje = lagNordiskEllerEØSStatsborgerskapTidslinje(person.statsborgerskap)
+        val statsborgerskapTidslinje = lagNordiskEllerEØSStatsborgerskapTidslinje(person.statsborgerskap)
 
         val erBosattINorgeEllerPåSvalbardTidslinje = adresserForPerson.lagErBosattINorgeEllerSvalbardTidslinje()
 
         val erNordiskEllerEØSStatsborgerOgBosattINorgeTidslinje =
-            statsborgerskapUnntakTidslinje.kombinerMed(erBosattINorgeEllerPåSvalbardTidslinje) { medlemskap, erBosattINorge ->
+            statsborgerskapTidslinje.kombinerMed(erBosattINorgeEllerPåSvalbardTidslinje) { medlemskap, erBosattINorge ->
                 when {
                     medlemskap == Medlemskap.NORDEN && erBosattINorge == true -> OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap")
                     medlemskap == Medlemskap.EØS && erBosattINorge == true -> OppfyltDelvilkår(begrunnelse = "- EØS-statsborgerskap")
