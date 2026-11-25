@@ -115,13 +115,13 @@ fun Iterable<Medlemskap>.finnSterkesteMedlemskap(): Medlemskap? =
         else -> null
     }
 
-fun lagErNordiskStatsborgerTidslinje(statsborgerskap: List<GrStatsborgerskap>): Tidslinje<Boolean> = lagStatsborgerskapTidslinje(statsborgerskap) { it.any { statsborgerskap -> statsborgerskap.iNordiskLand() } }
+fun lagErNordiskStatsborgerTidslinje(statsborgerskap: List<GrStatsborgerskap>): Tidslinje<Boolean> = lagStatsborgerskapTidslinje(statsborgerskap) { it.any { statsborgerskapIPeriode -> statsborgerskapIPeriode.iNordiskLand() } }
 
 fun lagNordiskEllerEØSStatsborgerskapTidslinje(statsborgerskap: List<GrStatsborgerskap>): Tidslinje<Medlemskap?> =
-    lagStatsborgerskapTidslinje(statsborgerskap) { statsborgerskap ->
+    lagStatsborgerskapTidslinje(statsborgerskap) { statsborgerskapIPeriode ->
         when {
-            statsborgerskap.any { it.iNordiskLand() } -> Medlemskap.NORDEN
-            statsborgerskap.any { it.medlemskap == Medlemskap.EØS } -> Medlemskap.EØS
+            statsborgerskapIPeriode.any { it.iNordiskLand() } -> Medlemskap.NORDEN
+            statsborgerskapIPeriode.any { it.medlemskap == Medlemskap.EØS } -> Medlemskap.EØS
             else -> null
         }
     }
