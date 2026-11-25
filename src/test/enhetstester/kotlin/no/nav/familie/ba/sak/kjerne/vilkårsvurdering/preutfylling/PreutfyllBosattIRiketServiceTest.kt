@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -2259,6 +2260,134 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(listAppender.list).anySatisfy {
             assertThat(it.level.toString()).isEqualTo("WARN")
             assertThat(it.formattedMessage).contains("Preutfylling av bosatt i riket feilet for aktør ${barnSomManglerIGrunnlagAktør.aktørId}")
+        }
+    }
+
+    @Test
+    fun `skal oppfylle bosatt i riket fra innflytting for EØS-borger`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val søkerAktør = lagAktør()
+        val barnAktør = lagAktør()
+        val adresseFom = LocalDate.now().minusMonths(4)
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+                barnasIdenter = listOf(barnAktør.aktivFødselsnummer()),
+                barnasFødselsdatoer = listOf(LocalDate.now().minusYears(2)),
+                søkerAktør = søkerAktør,
+                barnAktør = listOf(barnAktør),
+            ).also { grunnlag ->
+                grunnlag.personer.forEach { person ->
+                    person.statsborgerskap =
+                        mutableListOf(
+                            GrStatsborgerskap(
+                                landkode = "AUT",
+                                gyldigPeriode = DatoIntervallEntitet(fom = person.fødselsdato, tom = null),
+                                medlemskap = Medlemskap.EØS,
+                                person = person,
+                            ),
+                        )
+                    person.bostedsadresser =
+                        mutableListOf(
+                            lagGrVegadresseBostedsadresse(
+                                periode = DatoIntervallEntitet(fom = adresseFom, tom = null),
+                                matrikkelId = 12345L,
+                            ),
+                        )
+                }
+            }
+        val vilkårsvurdering =
+            lagVilkårsvurdering(persongrunnlag, behandling).also {
+                it.personResultater =
+                    setOf(
+                        lagPersonResultat(vilkårsvurdering = it, aktør = søkerAktør),
+                        lagPersonResultat(vilkårsvurdering = it, aktør = barnAktør),
+                    )
+            }
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, listOf(søkerAktør, barnAktør), digitalSøknad = null)
+
+        // Assert
+        listOf(søkerAktør, barnAktør).forEach { aktør ->
+            val resultat =
+                vilkårsvurdering.personResultater
+                    .single { it.aktør == aktør }
+                    .vilkårResultater
+                    .single { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+
+            assertThat(resultat.resultat).isEqualTo(Resultat.OPPFYLT)
+            assertThat(resultat.periodeFom).isEqualTo(adresseFom)
+            assertThat(resultat.periodeTom).isNull()
+            assertThat(resultat.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + "- EØS-statsborgerskap")
+            assertThat(resultat.evalueringÅrsaker).isEmpty()
+            assertThat(resultat.begrunnelseForManuellKontroll).isNull()
+        }
+    }
+
+    @Test
+    fun `skal oppfylle bosatt i riket ved tilbakeflytting for EØS-barn, men ikke perioden uten norsk adresse`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val barnAktør = lagAktør()
+        val førsteFom = LocalDate.now().minusMonths(10)
+        val førsteTom = LocalDate.now().minusMonths(9)
+        val andreFom = LocalDate.now().minusMonths(7)
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = randomFnr(),
+                barnasIdenter = listOf(barnAktør.aktivFødselsnummer()),
+                barnasFødselsdatoer = listOf(LocalDate.now().minusYears(3)),
+                barnAktør = listOf(barnAktør),
+            ).also { grunnlag ->
+                val barn = grunnlag.barna.single()
+                barn.statsborgerskap =
+                    mutableListOf(
+                        GrStatsborgerskap(
+                            landkode = "AUT",
+                            gyldigPeriode = DatoIntervallEntitet(fom = barn.fødselsdato, tom = null),
+                            medlemskap = Medlemskap.EØS,
+                            person = barn,
+                        ),
+                    )
+                barn.bostedsadresser =
+                    mutableListOf(
+                        lagGrVegadresseBostedsadresse(periode = DatoIntervallEntitet(fom = førsteFom, tom = førsteTom), matrikkelId = 12345L),
+                        lagGrVegadresseBostedsadresse(periode = DatoIntervallEntitet(fom = andreFom, tom = null), matrikkelId = 54321L),
+                    )
+            }
+        val vilkårsvurdering =
+            lagVilkårsvurdering(persongrunnlag, behandling).also {
+                it.personResultater = setOf(lagPersonResultat(vilkårsvurdering = it, aktør = barnAktør))
+            }
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        // Act
+        preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering, listOf(barnAktør), digitalSøknad = null)
+
+        // Assert
+        val resultater =
+            vilkårsvurdering.personResultater
+                .single()
+                .vilkårResultater
+                .filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+
+        assertThat(resultater).hasSize(3)
+        assertThat(resultater.single { it.periodeFom == førsteFom }.resultat).isEqualTo(Resultat.OPPFYLT)
+        assertThat(resultater.single { it.periodeFom == førsteFom }.periodeTom).isEqualTo(førsteTom)
+        assertThat(resultater.single { it.periodeFom == førsteTom.plusDays(1) }.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+        assertThat(resultater.single { it.periodeFom == førsteTom.plusDays(1) }.periodeTom).isEqualTo(andreFom.minusDays(1))
+        assertThat(resultater.single { it.periodeFom == førsteTom.plusDays(1) }.evalueringÅrsaker).containsExactly(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET.name)
+        assertThat(resultater.single { it.periodeFom == andreFom }.resultat).isEqualTo(Resultat.OPPFYLT)
+        assertThat(resultater.single { it.periodeFom == andreFom }.periodeTom).isNull()
+        assertThat(resultater.filter { it.resultat == Resultat.OPPFYLT }).allSatisfy {
+            assertThat(it.begrunnelse).isEqualTo(PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + "- EØS-statsborgerskap")
+            assertThat(it.evalueringÅrsaker).isEmpty()
+            assertThat(it.begrunnelseForManuellKontroll).isNull()
         }
     }
 
