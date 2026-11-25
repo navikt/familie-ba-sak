@@ -811,6 +811,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettTilleggstekstVedtakForSed"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
     },
+    FORTSATT_INNVILGET_TILLEGGSTEKST_MANGLER_KONTOOPPLYSNINGER_EØS {
+        override val sanityApiNavn = "fortsattInnvilgetTilleggstekstManglerKontoopplysningerEos"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
     REDUKSJON_BARN_DØD_EØS {
         override val sanityApiNavn = "reduksjonBarnDoedEos"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
