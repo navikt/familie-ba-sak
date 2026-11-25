@@ -148,6 +148,7 @@ class SlåSammenFinnmarkstilleggEllerSvalbardUtilTest {
     inner class SlåSammenPerioderUtenUtbetalingMedBareEndringITilleggsmarkering {
         private val fom = LocalDate.of(2026, 1, 1)
         private val splitt = LocalDate.of(2026, 2, 1)
+        private val andreSplitt = LocalDate.of(2026, 3, 1)
         private val tom = LocalDate.of(2026, 3, 31)
         private val person = lagPerson()
         private val vilkårResultat =
@@ -174,6 +175,12 @@ class SlåSammenFinnmarkstilleggEllerSvalbardUtilTest {
                         ),
                     ),
             )
+        private val grunnlagMedUtbetaling =
+            VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
+                person = person,
+                vilkårResultaterForVedtaksperiode = grunnlag.vilkårResultaterForVedtaksperiode,
+                andeler = listOf(AndelForVedtaksperiode(lagAndelTilkjentYtelse(fom = YearMonth.from(fom), tom = YearMonth.from(tom), person = person))),
+            )
 
         @Test
         fun `skal slå sammen tre perioder uten utbetaling og beholde første grunnlag`() {
@@ -188,8 +195,8 @@ class SlåSammenFinnmarkstilleggEllerSvalbardUtilTest {
             val perioder =
                 listOf<Periode<VedtaksperiodeGrunnlagForPerson>>(
                     Periode(grunnlag, fom, splitt.minusDays(1)),
-                    Periode(grunnlagMedFinnmark, splitt, tom.minusMonths(1)),
-                    Periode(grunnlagMedSvalbard, tom.minusMonths(1).plusDays(1), tom),
+                    Periode(grunnlagMedFinnmark, splitt, andreSplitt.minusDays(1)),
+                    Periode(grunnlagMedSvalbard, andreSplitt, tom),
                 )
 
             // Act
@@ -202,17 +209,26 @@ class SlåSammenFinnmarkstilleggEllerSvalbardUtilTest {
         @Test
         fun `skal beholde splitt ved endring i tilleggsmarkering når det er utbetaling`() {
             // Arrange
-            val andel = AndelForVedtaksperiode(lagAndelTilkjentYtelse(fom = YearMonth.from(fom), tom = YearMonth.from(tom), person = person))
-            val grunnlagMedUtbetaling =
-                VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
-                    person = person,
-                    vilkårResultaterForVedtaksperiode = grunnlag.vilkårResultaterForVedtaksperiode,
-                    andeler = listOf(andel),
-                )
             val perioder =
                 listOf<Periode<VedtaksperiodeGrunnlagForPerson>>(
                     Periode(grunnlagMedUtbetaling, fom, splitt.minusDays(1)),
                     Periode(grunnlagMedUtbetaling.copy(vilkårResultaterForVedtaksperiode = grunnlagMedSvalbard.vilkårResultaterForVedtaksperiode), splitt, tom),
+                )
+
+            // Act
+            val sammenslåttePerioder = perioder.tilTidslinje().slåSammenPerioderUtenUtbetalingMedBareEndringITilleggsmarkering().tilPerioderIkkeNull()
+
+            // Assert
+            assertThat(sammenslåttePerioder).containsExactlyElementsOf(perioder)
+        }
+
+        @Test
+        fun `skal beholde splitt fra periode med utbetaling til periode uten utbetaling`() {
+            // Arrange
+            val perioder =
+                listOf<Periode<VedtaksperiodeGrunnlagForPerson>>(
+                    Periode(grunnlagMedUtbetaling, fom, splitt.minusDays(1)),
+                    Periode(grunnlagMedSvalbard, splitt, tom),
                 )
 
             // Act
@@ -262,12 +278,12 @@ class SlåSammenFinnmarkstilleggEllerSvalbardUtilTest {
         fun `skal beholde splitt når tilleggsmarkeringen er lik første grunnlag etter en sammenslåing`() {
             // Arrange
             val grunnlagUtenTilleggEtter =
-                grunnlag.copy(vilkårResultaterForVedtaksperiode = listOf(vilkårResultat.copy(fom = LocalDate.of(2026, 3, 1), tom = tom)))
+                grunnlag.copy(vilkårResultaterForVedtaksperiode = listOf(vilkårResultat.copy(fom = andreSplitt, tom = tom)))
             val perioder =
                 listOf<Periode<VedtaksperiodeGrunnlagForPerson>>(
                     Periode(grunnlag, fom, splitt.minusDays(1)),
-                    Periode(grunnlagMedSvalbard, splitt, LocalDate.of(2026, 2, 28)),
-                    Periode(grunnlagUtenTilleggEtter, LocalDate.of(2026, 3, 1), tom),
+                    Periode(grunnlagMedSvalbard, splitt, andreSplitt.minusDays(1)),
+                    Periode(grunnlagUtenTilleggEtter, andreSplitt, tom),
                 )
 
             // Act
@@ -275,7 +291,7 @@ class SlåSammenFinnmarkstilleggEllerSvalbardUtilTest {
 
             // Assert
             assertThat(sammenslåttePerioder).containsExactly(
-                Periode(grunnlag, fom, LocalDate.of(2026, 2, 28)),
+                Periode(grunnlag, fom, andreSplitt.minusDays(1)),
                 perioder.last(),
             )
         }

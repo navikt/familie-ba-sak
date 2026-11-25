@@ -85,8 +85,13 @@ private fun hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(vilkårResulta
 internal fun List<VilkårResultat>.erUlikUtenomFinnmarksOgSvalbardTillegg(
     vilkårResultaterForrigePeriode: List<VilkårResultat>,
 ): Boolean =
-    this.map { VilkårResultatForVedtaksperiode(it) }.utenTilleggsmarkeringOgDatoer() !=
-        vilkårResultaterForrigePeriode.map { VilkårResultatForVedtaksperiode(it) }.utenTilleggsmarkeringOgDatoer()
+    !this
+        .map { VilkårResultatForVedtaksperiode(it) }
+        .erLikUtenomTilleggsmarkeringOgDatoer(vilkårResultaterForrigePeriode.map { VilkårResultatForVedtaksperiode(it) })
+
+private fun List<VilkårResultatForVedtaksperiode>.erLikUtenomTilleggsmarkeringOgDatoer(
+    andreVilkårResultater: List<VilkårResultatForVedtaksperiode>,
+): Boolean = this.utenTilleggsmarkeringOgDatoer() == andreVilkårResultater.utenTilleggsmarkeringOgDatoer()
 
 private fun List<VilkårResultatForVedtaksperiode>.utenTilleggsmarkeringOgDatoer(): Set<VilkårResultatForVedtaksperiode> =
     this
@@ -109,15 +114,12 @@ fun Tidslinje<VedtaksperiodeGrunnlagForPerson>.slåSammenPerioderUtenUtbetalingM
     }
 
 private fun VedtaksperiodeGrunnlagForPerson.harBareEndringITilleggsmarkering(grunnlagForrigePeriode: VedtaksperiodeGrunnlagForPerson): Boolean {
-    val erLikUtenomVilkårResultater =
-        this.kopier(vilkårResultaterForVedtaksperiode = emptyList()) == grunnlagForrigePeriode.kopier(vilkårResultaterForVedtaksperiode = emptyList())
-    if (!erLikUtenomVilkårResultater) return false
+    val vilkårResultater = this.vilkårResultaterForVedtaksperiode
+    val vilkårResultaterForrigePeriode = grunnlagForrigePeriode.vilkårResultaterForVedtaksperiode
 
-    val erVilkårResultaterLikeUtenomTilleggsmarkering =
-        this.vilkårResultaterForVedtaksperiode.utenTilleggsmarkeringOgDatoer() == grunnlagForrigePeriode.vilkårResultaterForVedtaksperiode.utenTilleggsmarkeringOgDatoer()
-    if (!erVilkårResultaterLikeUtenomTilleggsmarkering) return false
-
-    return this.vilkårResultaterForVedtaksperiode.tilleggsmarkeringer() != grunnlagForrigePeriode.vilkårResultaterForVedtaksperiode.tilleggsmarkeringer()
+    return this.kopier(vilkårResultaterForVedtaksperiode = vilkårResultaterForrigePeriode) == grunnlagForrigePeriode &&
+        vilkårResultater.erLikUtenomTilleggsmarkeringOgDatoer(vilkårResultaterForrigePeriode) &&
+        vilkårResultater.tilleggsmarkeringer() != vilkårResultaterForrigePeriode.tilleggsmarkeringer()
 }
 
 private fun List<VilkårResultatForVedtaksperiode>.tilleggsmarkeringer(): Set<Pair<AktørId, UtdypendeVilkårsvurdering>> =
