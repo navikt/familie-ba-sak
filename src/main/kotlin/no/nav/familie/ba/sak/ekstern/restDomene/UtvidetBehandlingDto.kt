@@ -34,7 +34,6 @@ data class UtvidetBehandlingDto(
     val personerMedAndelerTilkjentYtelse: List<PersonMedAndelerDto>,
     val endretUtbetalingAndeler: List<EndretUtbetalingAndelDto>,
     val kompetanser: List<KompetanseDto>,
-    val tilbakekreving: TilbakekrevingDto?,
     val vedtak: VedtakDto?,
     val totrinnskontroll: TotrinnskontrollDto?,
     val aktivSettPåVent: SettPåVentDto?,
