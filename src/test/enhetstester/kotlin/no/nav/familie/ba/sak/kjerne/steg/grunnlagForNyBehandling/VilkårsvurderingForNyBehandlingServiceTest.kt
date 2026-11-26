@@ -528,6 +528,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
 
                 // Assert
                 val nyVilkårsvurdering = vilkårsvurderingSlot.captured
+                verify(exactly = 0) { preutfyllVilkårService.preutfyllVilkår(any()) }
                 assertThat(nyVilkårsvurdering.id).isNotNull()
                 assertThat(nyVilkårsvurdering.behandling).isEqualTo(behandling)
                 assertThat(nyVilkårsvurdering.aktiv).isTrue()

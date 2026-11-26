@@ -28,6 +28,8 @@ class TilbakestillBehandlingTilBehandlingsresultatService(
             return behandling
         }
 
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
+
         if (behandling.erTilbakestiltTilBehandlingsresultat()) {
             return behandling
         }
@@ -38,7 +40,6 @@ class TilbakestillBehandlingTilBehandlingsresultatService(
                     behandlingId,
                 ),
         )
-        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
         return behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandlingId,
             steg = StegType.BEHANDLINGSRESULTAT,

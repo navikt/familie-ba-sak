@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetaltFraAnnetLand
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
@@ -812,6 +813,49 @@ internal class BrevUtilsTest {
         assertThat(fødselsdatoer).containsExactlyInAnyOrder(
             barn1Fødselsdato.tilKortString(),
             barn2Fødselsdato.tilKortString(),
+        )
+    }
+
+    @Test
+    fun `hentUtbetalingerPerMndEøs - Skal avrunde månedlig beløp utbetalt fra annet land til nærmeste hele tall`() {
+        // Arrange
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+
+        val fom = LocalDate.now().minusMonths(1).toYearMonth()
+        val tom = LocalDate.now().toYearMonth()
+
+        val andelerTilkjentYtelse =
+            listOf(
+                lagAndelTilkjentYtelse(fom = fom, tom = tom, aktør = barn1.aktør, kalkulertUtbetalingsbeløp = 1000),
+                lagAndelTilkjentYtelse(fom = fom, tom = tom, aktør = barn2.aktør, kalkulertUtbetalingsbeløp = 1000),
+            )
+        val utenlandskePeriodebeløp =
+            listOf(
+                lagUtenlandskPeriodebeløp(fom = fom, tom = tom, barnAktører = setOf(barn1.aktør), beløp = BigDecimal("127.50"), valutakode = "EUR", intervall = Intervall.KVARTALSVIS),
+                lagUtenlandskPeriodebeløp(fom = fom, tom = tom, barnAktører = setOf(barn2.aktør), beløp = BigDecimal("147.57"), valutakode = "EUR", intervall = Intervall.KVARTALSVIS),
+            )
+        val valutakurser =
+            listOf(
+                lagValutakurs(fom = fom, tom = tom, barnAktører = setOf(barn1.aktør, barn2.aktør), valutakursdato = LocalDate.now(), valutakode = "EUR", kurs = BigDecimal.valueOf(10)),
+            )
+
+        // Act
+        val utbetalingerPerMndEøs =
+            hentUtbetalingerPerMndEøs(
+                endringstidspunkt = LocalDate.now().minusMonths(1),
+                andelTilkjentYtelserForBehandling = andelerTilkjentYtelse,
+                utenlandskePeriodebeløp = utenlandskePeriodebeløp,
+                valutakurser = valutakurser,
+                endretutbetalingAndeler = emptyList(),
+                personerIBehandling = listOf(barn1, barn2),
+            )
+
+        // Assert
+        val førsteMåned = utbetalingerPerMndEøs.values.first()
+        assertThat(førsteMåned.utbetalinger.map { it.utbetaltFraAnnetLand }).containsExactlyInAnyOrder(
+            UtbetaltFraAnnetLand(beløp = 43, valutakode = "EUR", beløpINok = 425),
+            UtbetaltFraAnnetLand(beløp = 49, valutakode = "EUR", beløpINok = 491),
         )
     }
 }

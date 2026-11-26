@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.config
 import io.mockk.every
 import io.mockk.mockk
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.familie.ba.sak.common.PdlNotFoundException
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
+import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -66,6 +68,20 @@ class ApiExceptionHandlerTest {
 
         // Assert
         assertThat(respons.statusCode).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+    }
+
+    @Test
+    fun `skal returnere funksjonell feil når personen ikke finnes i PDL`() {
+        // Arrange
+        val feil = PdlNotFoundException()
+
+        // Act
+        val respons = handler.handlePdlNotFoundException(feil)
+
+        // Assert
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(respons.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(respons.body?.frontendFeilmelding).isEqualTo("Fant ikke person")
     }
 
     @Test

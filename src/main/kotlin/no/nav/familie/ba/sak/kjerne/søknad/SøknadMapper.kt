@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.ba.søknad.v9.SøknadsFeltId
 import no.nav.familie.kontrakter.ba.søknad.v9.bokmålsverdi
 import no.nav.familie.kontrakter.ba.søknad.v9.hentVerdiForSøknadsfelt
 import no.nav.familie.kontrakter.ba.søknad.v9.tilBoolskSvar
+import no.nav.familie.kontrakter.felles.søknad.BaFellesDokumentasjonsbehov
 import no.nav.familie.kontrakter.felles.søknad.BaSøknaddokumentasjon
 import no.nav.familie.kontrakter.felles.søknad.MissingVersionException
 import no.nav.familie.kontrakter.felles.søknad.Søknadsfelt
@@ -53,6 +54,11 @@ interface SøknadMapper {
         fun AndreForelder?.harKryssetForDeltBosted(): Boolean = this?.skriftligAvtaleOmDeltBosted?.bokmålsverdi().tilBoolskSvar()
 
         fun List<BaSøknaddokumentasjon>.inneholderVedlegg(): Boolean = this.any { it.opplastedeVedlegg.isNotEmpty() }
+
+        fun List<BaSøknaddokumentasjon>.manglerVedleggForDokumentasjonsbehov(): Boolean =
+            this
+                .filter { it.dokumentasjonsbehov.tilFellesDokumentasjonsbehov() != BaFellesDokumentasjonsbehov.AnnenDokumentasjon }
+                .any { it.opplastedeVedlegg.isEmpty() }
     }
 
     @Component

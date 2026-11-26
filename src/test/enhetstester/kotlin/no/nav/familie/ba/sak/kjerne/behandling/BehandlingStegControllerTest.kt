@@ -7,11 +7,18 @@ import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.unmockkObject
 import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.RegistrerSøknadDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.BeslutningPåVedtakDto
@@ -143,6 +150,93 @@ class BehandlingStegControllerTest {
                 minimumBehandlerRolle = BehandlerRolle.BESLUTTER,
                 handling = "iverksette vedtak",
             )
+        }
+    }
+
+    @Nested
+    inner class RegistrereSøknadOgHentPersongrunnlag {
+        private val behandling = lagBehandling()
+        private val valgtBarnIdent = randomFnr()
+        private val registrerSøknadDto =
+            RegistrerSøknadDto(
+                søknad =
+                    lagSøknadDTO(søkerIdent = randomFnr(), barnasIdenter = listOf(valgtBarnIdent)).let { søknad ->
+                        søknad.copy(
+                            barnaMedOpplysninger =
+                                søknad.barnaMedOpplysninger +
+                                    listOf(
+                                        BarnMedOpplysninger(ident = randomFnr(), inkludertISøknaden = false),
+                                        BarnMedOpplysninger(ident = "", erFolkeregistrert = false),
+                                    ),
+                        )
+                    },
+                bekreftEndringerViaFrontend = false,
+            )
+
+        @BeforeEach
+        fun setUp() {
+            every { tilgangServiceMock.verifiserHarTilgangTilHandling(any(), any()) } just runs
+            every { tilgangServiceMock.validerTilgangTilPersoner(any(), any(), any()) } just runs
+            every { tilgangServiceMock.validerTilgangTilBehandling(any(), any()) } just runs
+            every { behandlingHentOgPersisterServiceMock.hent(behandling.id) } returns behandling
+            every { stegServiceMock.håndterSøknad(any(), any()) } returns behandling
+            every { utvidetBehandlingServiceMock.lagUtvidetBehandlingDto(behandling.id) } returns mockk()
+        }
+
+        @Test
+        fun `skal sjekke tilgang til barna som er valgt i søknaden før søknaden registreres`() {
+            // Act
+            behandlingStegController.registrereSøknadOgHentPersongrunnlag(behandling.id, registrerSøknadDto)
+
+            // Assert
+            verifyOrder {
+                tilgangServiceMock.validerTilgangTilPersoner(
+                    personIdenter = listOf(valgtBarnIdent),
+                    event = AuditLoggerEvent.UPDATE,
+                )
+                stegServiceMock.håndterSøknad(behandling, registrerSøknadDto)
+            }
+        }
+
+        @Test
+        fun `skal ikke registrere søknaden når saksbehandler mangler tilgang til et barn som er valgt i søknaden`() {
+            // Arrange
+            every {
+                tilgangServiceMock.validerTilgangTilPersoner(
+                    personIdenter = listOf(valgtBarnIdent),
+                    event = AuditLoggerEvent.UPDATE,
+                )
+            } throws RolleTilgangskontrollFeil("Mangler tilgang til barnet")
+
+            // Act & Assert
+            val feilmelding =
+                assertThrows<RolleTilgangskontrollFeil> {
+                    behandlingStegController.registrereSøknadOgHentPersongrunnlag(behandling.id, registrerSøknadDto)
+                }.message
+
+            assertThat(feilmelding).isEqualTo("Mangler tilgang til barnet")
+            verify(exactly = 0) { stegServiceMock.håndterSøknad(any(), any()) }
+        }
+
+        @Test
+        fun `skal ikke returnere behandlingen når saksbehandler mangler tilgang til behandlingen etter at søknaden er registrert`() {
+            // Arrange
+            every {
+                tilgangServiceMock.validerTilgangTilBehandling(behandlingId = behandling.id, event = AuditLoggerEvent.UPDATE)
+            } throws RolleTilgangskontrollFeil("Mangler tilgang til behandlingen")
+
+            // Act & Assert
+            val feilmelding =
+                assertThrows<RolleTilgangskontrollFeil> {
+                    behandlingStegController.registrereSøknadOgHentPersongrunnlag(behandling.id, registrerSøknadDto)
+                }.message
+
+            assertThat(feilmelding).isEqualTo("Mangler tilgang til behandlingen")
+            verifyOrder {
+                stegServiceMock.håndterSøknad(behandling, registrerSøknadDto)
+                tilgangServiceMock.validerTilgangTilBehandling(behandlingId = behandling.id, event = AuditLoggerEvent.UPDATE)
+            }
+            verify(exactly = 0) { utvidetBehandlingServiceMock.lagUtvidetBehandlingDto(any()) }
         }
     }
 

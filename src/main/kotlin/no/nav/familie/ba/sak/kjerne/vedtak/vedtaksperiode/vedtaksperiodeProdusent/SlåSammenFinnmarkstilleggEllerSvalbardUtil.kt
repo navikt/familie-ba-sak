@@ -9,6 +9,7 @@ import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.byttUtNullListeMedTomListe
+import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 
 private val UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS, UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
@@ -53,7 +54,7 @@ private fun skalSlåsSammen(
     val aktørTilHarUtdypendeVilkårSomGirTilleggDennePerioden = hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(bosattIRiketVilkårDennePerioden)
 
     val erAndreEndringerIVilkårResultat =
-        bosattIRiketVilkårDennePerioden.erLikUtenomFinnmarksOgSvalbardTillegg(bosattIRiketVilkårForrigePeriode)
+        vilkårResultaterDennePerioden.erUlikUtenomFinnmarksOgSvalbardTillegg(vilkårResultaterForrigePeriode)
 
     val erTilleggInnvilgetForBarnOgSøker = aktørTilHarUtdypendeVilkårSomGirTilleggDennePerioden.all { it.value }
 
@@ -81,30 +82,50 @@ private fun hentAktørTilHarUtdypendeVilkårSomGirTilleggIPeriode(vilkårResulta
     return aktørTilHarUtdypendeVilkårSomGirTilleggIPeriode
 }
 
-private fun List<VilkårResultat>.erLikUtenomFinnmarksOgSvalbardTillegg(
-    bosattIRiketVilkårForrigePeriode: List<VilkårResultat>,
-): Boolean {
-    val vilkårResultatForrigePeriode =
-        bosattIRiketVilkårForrigePeriode.map { vilkårResultat ->
+internal fun List<VilkårResultat>.erUlikUtenomFinnmarksOgSvalbardTillegg(
+    vilkårResultaterForrigePeriode: List<VilkårResultat>,
+): Boolean =
+    !this
+        .map { VilkårResultatForVedtaksperiode(it) }
+        .erLikUtenomTilleggsmarkeringOgDatoer(vilkårResultaterForrigePeriode.map { VilkårResultatForVedtaksperiode(it) })
+
+private fun List<VilkårResultatForVedtaksperiode>.erLikUtenomTilleggsmarkeringOgDatoer(
+    andreVilkårResultater: List<VilkårResultatForVedtaksperiode>,
+): Boolean = this.utenTilleggsmarkeringOgDatoer() == andreVilkårResultater.utenTilleggsmarkeringOgDatoer()
+
+private fun List<VilkårResultatForVedtaksperiode>.utenTilleggsmarkeringOgDatoer(): Set<VilkårResultatForVedtaksperiode> =
+    this
+        .map { vilkårResultat ->
             vilkårResultat.copy(
                 utdypendeVilkårsvurderinger =
                     vilkårResultat.utdypendeVilkårsvurderinger
-                        .filterNot { it -> it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
-                periodeFom = null,
-                periodeTom = null,
+                        .filterNot { it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
+                fom = null,
+                tom = null,
             )
-        }
+        }.toSet()
 
-    val vilkårResultatDennePerioden =
-        this.map { vilkårResultat ->
-            vilkårResultat.copy(
-                utdypendeVilkårsvurderinger =
-                    vilkårResultat.utdypendeVilkårsvurderinger
-                        .filterNot { it -> it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG },
-                periodeFom = null,
-                periodeTom = null,
-            )
-        }
+fun Tidslinje<VedtaksperiodeGrunnlagForPerson>.slåSammenPerioderUtenUtbetalingMedBareEndringITilleggsmarkering(): Tidslinje<VedtaksperiodeGrunnlagForPerson> =
+    this.slåSammenLikePerioder { forrigeGrunnlag, nesteGrunnlag ->
+        forrigeGrunnlag != null &&
+            nesteGrunnlag != null &&
+            !nesteGrunnlag.erInnvilget() &&
+            nesteGrunnlag.harBareEndringITilleggsmarkering(forrigeGrunnlag)
+    }
 
-    return vilkårResultatDennePerioden != vilkårResultatForrigePeriode
+private fun VedtaksperiodeGrunnlagForPerson.harBareEndringITilleggsmarkering(grunnlagForrigePeriode: VedtaksperiodeGrunnlagForPerson): Boolean {
+    val vilkårResultater = this.vilkårResultaterForVedtaksperiode
+    val vilkårResultaterForrigePeriode = grunnlagForrigePeriode.vilkårResultaterForVedtaksperiode
+
+    return this.kopier(vilkårResultaterForVedtaksperiode = vilkårResultaterForrigePeriode) == grunnlagForrigePeriode &&
+        vilkårResultater.erLikUtenomTilleggsmarkeringOgDatoer(vilkårResultaterForrigePeriode) &&
+        vilkårResultater.tilleggsmarkeringer() != vilkårResultaterForrigePeriode.tilleggsmarkeringer()
 }
+
+private fun List<VilkårResultatForVedtaksperiode>.tilleggsmarkeringer(): Set<Pair<AktørId, UtdypendeVilkårsvurdering>> =
+    this
+        .flatMap { vilkårResultat ->
+            vilkårResultat.utdypendeVilkårsvurderinger
+                .filter { it in UTDYPENDE_VILKÅR_SOM_GIR_TILLEGG }
+                .map { vilkårResultat.aktørId to it }
+        }.toSet()

@@ -5,7 +5,9 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultaterForSøkerOgToBarn
@@ -16,6 +18,8 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
@@ -23,9 +27,11 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -38,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
     @Autowired
@@ -79,6 +86,71 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
     @AfterEach
     fun etterHverTest() {
         unmockkObject(SatsTidspunkt)
+    }
+
+    @Test
+    @Transactional
+    fun `skal hente alle historiske iverksatte andeler for samme barn på tvers av fagsaker`() {
+        // Arrange
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val annenFagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val barn = personidentService.hentOgLagreAktør(randomFnr(), true)
+        val annetBarn = personidentService.hentOgLagreAktør(randomFnr(), true)
+
+        fun lagreTilkjentYtelse(
+            fagsak: Fagsak,
+            barna: List<Aktør>,
+            harUtbetalingsoppdrag: Boolean,
+            status: BehandlingStatus = BehandlingStatus.AVSLUTTET,
+            resultat: Behandlingsresultat = Behandlingsresultat.INNVILGET,
+            beløp: Int = 1000,
+        ): Long {
+            val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak, status = status, resultat = resultat))
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling, utbetalingsoppdrag = if (harUtbetalingsoppdrag) "{}" else null)
+            barna.forEach { aktør ->
+                tilkjentYtelse.andelerTilkjentYtelse.add(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2025, 1),
+                        tom = YearMonth.of(2025, 12),
+                        behandling = behandling,
+                        aktør = aktør,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = beløp,
+                    ),
+                )
+            }
+            tilkjentYtelseRepository.saveAndFlush(tilkjentYtelse)
+            return behandling.id
+        }
+
+        val førsteBehandlingId = lagreTilkjentYtelse(fagsak, listOf(barn, annetBarn), harUtbetalingsoppdrag = true)
+        val andreBehandlingId = lagreTilkjentYtelse(fagsak, listOf(barn), harUtbetalingsoppdrag = true)
+        lagreTilkjentYtelse(fagsak, emptyList(), harUtbetalingsoppdrag = true)
+        val behandlingIAnnenFagsakId = lagreTilkjentYtelse(annenFagsak, listOf(barn), harUtbetalingsoppdrag = true)
+        val nullkronersBehandlingId = lagreTilkjentYtelse(annenFagsak, listOf(barn), harUtbetalingsoppdrag = false, beløp = 0)
+        val omregningsBehandlingId = lagreTilkjentYtelse(annenFagsak, listOf(barn), harUtbetalingsoppdrag = false, resultat = Behandlingsresultat.ENDRET_UTEN_UTBETALING)
+        val behandlingUnderIverksettingId = lagreTilkjentYtelse(annenFagsak, listOf(barn), harUtbetalingsoppdrag = true, status = BehandlingStatus.IVERKSETTER_VEDTAK)
+        // Hver fagsak kan bare ha én uavsluttet behandling.
+        lagreTilkjentYtelse(fagsak, listOf(barn), harUtbetalingsoppdrag = false, status = BehandlingStatus.UTREDES)
+        Behandlingsresultat.entries.filter { it.name.startsWith("HENLAGT") }.forEach { resultat ->
+            lagreTilkjentYtelse(annenFagsak, listOf(barn), harUtbetalingsoppdrag = false, resultat = resultat)
+            lagreTilkjentYtelse(annenFagsak, listOf(barn), harUtbetalingsoppdrag = true, resultat = resultat)
+        }
+
+        // Act
+        val andeler = beregningService.hentAndelerFraIverksatteBehandlingerForAktør(barn)
+
+        // Assert
+        assertThat(andeler.map { it.behandlingId }).containsExactlyInAnyOrder(
+            førsteBehandlingId,
+            andreBehandlingId,
+            behandlingIAnnenFagsakId,
+            nullkronersBehandlingId,
+            omregningsBehandlingId,
+            behandlingUnderIverksettingId,
+        )
+        assertThat(andeler.map { it.aktør }).containsOnly(barn)
+        assertThat(andeler.single { it.behandlingId == nullkronersBehandlingId }.kalkulertUtbetalingsbeløp).isZero()
     }
 
     @Test

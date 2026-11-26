@@ -3,14 +3,15 @@ package no.nav.familie.ba.sak.kjerne.korrigertvedtak
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
+import no.nav.familie.ba.sak.ekstern.restDomene.KorrigertVedtakDto
+import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertVedtakDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -25,13 +26,12 @@ class KorrigertVedtakController(
     private val tilgangService: TilgangService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val korrigertVedtakService: KorrigertVedtakService,
-    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
     @PostMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettKorrigertVedtakPåBehandling(
         @PathVariable behandlingId: Long,
         @RequestBody korrigerVedtakRequest: KorrigerVedtakRequest,
-    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
+    ): ResponseEntity<Ressurs<KorrigertVedtakDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.CREATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -43,15 +43,30 @@ class KorrigertVedtakController(
 
         val korrigertVedtak = korrigerVedtakRequest.tilKorrigerVedtak(behandling)
 
-        korrigertVedtakService.lagreKorrigertVedtak(korrigertVedtak)
+        val lagretKorrigertVedtak = korrigertVedtakService.lagreKorrigertVedtak(korrigertVedtak)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(lagretKorrigertVedtak.tilKorrigertVedtakDto()))
+    }
+
+    @GetMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentKorrigertVedtakPåBehandling(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<KorrigertVedtakDto?>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "Hent korrigert vedtak",
+        )
+
+        val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
+
+        return ResponseEntity.ok(Ressurs.success(korrigertVedtak?.tilKorrigertVedtakDto()))
     }
 
     @PatchMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun settKorrigertVedtakTilInaktivPåBehandling(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
+    ): ResponseEntity<Ressurs<KorrigertVedtakDto?>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -61,8 +76,8 @@ class KorrigertVedtakController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         validerBehandlingKanRedigeres(behandling)
 
-        korrigertVedtakService.settKorrigertVedtakPåBehandlingTilInaktiv(behandling)
+        val korrigertVedtak = korrigertVedtakService.settKorrigertVedtakPåBehandlingTilInaktiv(behandling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(korrigertVedtak?.tilKorrigertVedtakDto()))
     }
 }

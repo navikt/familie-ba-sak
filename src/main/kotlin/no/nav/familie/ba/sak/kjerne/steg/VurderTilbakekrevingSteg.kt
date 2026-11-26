@@ -21,6 +21,8 @@ class VurderTilbakekrevingSteg(
             tilbakekrevingService.validerRestTilbakekreving(data, behandling.id)
             if (data != null) {
                 tilbakekrevingService.lagreTilbakekreving(data, behandling.id)
+            } else {
+                tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
             }
         }
 

@@ -24,6 +24,7 @@ class UtbetalingsoppdragGenerator(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val featureToggleService: FeatureToggleService,
+    private val avgrensetSimuleringGenerator: AvgrensetSimuleringGenerator,
 ) {
     fun lagUtbetalingsoppdrag(
         saksbehandlerId: String,
@@ -34,30 +35,32 @@ class UtbetalingsoppdragGenerator(
         val forrigeTilkjentYtelse = hentForrigeTilkjentYtelse(vedtak.behandling)
         val sisteAndelPerKjede = hentSisteAndelTilkjentYtelse(vedtak.behandling)
 
-        val skalKunSimulereEndredePerioder =
-            featureToggleService.isEnabled(FeatureToggle.SIMULER_KUN_ENDREDE_PERIODER, vedtak.behandling.id)
-
-        val behandlingsinformasjon =
-            behandlingsinformasjonUtleder.utled(
-                saksbehandlerId,
-                vedtak,
-                forrigeTilkjentYtelse,
-                sisteAndelPerKjede,
-                erSimulering = erSimulering && !skalKunSimulereEndredePerioder,
-            )
-
-        val forrigeAndeler =
-            forrigeTilkjentYtelse?.tilAndelData() ?: emptyList()
-
-        val nyeAndeler = tilkjentYtelse.tilAndelData()
-
         val beregnetUtbetalingsoppdrag =
-            utbetalingsgenerator.lagUtbetalingsoppdrag(
-                behandlingsinformasjon = behandlingsinformasjon,
-                forrigeAndeler = forrigeAndeler,
-                nyeAndeler = nyeAndeler,
-                sisteAndelPerKjede = sisteAndelPerKjede,
-            )
+            if (erSimulering && featureToggleService.isEnabled(FeatureToggle.SIMULER_KUN_ENDREDE_PERIODER, vedtak.behandling.id)) {
+                avgrensetSimuleringGenerator.lagUtbetalingsoppdrag(
+                    saksbehandlerId = saksbehandlerId,
+                    vedtak = vedtak,
+                    tilkjentYtelse = tilkjentYtelse,
+                    forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                    sisteAndelPerKjede = sisteAndelPerKjede,
+                )
+            } else {
+                val behandlingsinformasjon =
+                    behandlingsinformasjonUtleder.utled(
+                        saksbehandlerId,
+                        vedtak,
+                        forrigeTilkjentYtelse,
+                        sisteAndelPerKjede,
+                        erSimulering = erSimulering,
+                    )
+
+                utbetalingsgenerator.lagUtbetalingsoppdrag(
+                    behandlingsinformasjon = behandlingsinformasjon,
+                    forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData() ?: emptyList(),
+                    nyeAndeler = tilkjentYtelse.tilAndelData(),
+                    sisteAndelPerKjede = sisteAndelPerKjede,
+                )
+            }
 
         return klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
             beregnetUtbetalingsoppdrag = beregnetUtbetalingsoppdrag,

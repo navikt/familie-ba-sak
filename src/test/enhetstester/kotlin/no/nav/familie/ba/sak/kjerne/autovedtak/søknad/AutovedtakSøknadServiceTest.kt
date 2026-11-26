@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehan
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.BEHANDLINGSRESULTAT_IKKE_INNVILGET
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.ENDREDE_ANDELER_FOR_BARN_UTEN_FREMSTILT_KRAV
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.INGEN_UTBETALING
+import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.OVERLAPP_ANDELER_FOR_BARN
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.OVERLAPP_TIDLIGERE_UTBETALING
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.SØKER_VILKÅR_BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.autovedtak.søknad.AutovedtakSøknadMåBehandlesManueltÅrsak.UTBETALING_OVER_100_PROSENT_BARN
@@ -125,6 +126,7 @@ class AutovedtakSøknadServiceTest {
             justRun { autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(any()) }
             every { stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering) } returns behandling
             justRun { autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(any()) }
+            justRun { autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(any()) }
             justRun { autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(any()) }
             justRun { autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(any()) }
             justRun { autovedtakSøknadValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(any()) }
@@ -197,6 +199,7 @@ class AutovedtakSøknadServiceTest {
                 autovedtakSøknadValideringService.validerAtVilkårsvurderingErOppfylt(behandlingEtterVilkårsvurdering)
                 stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
                 autovedtakSøknadValideringService.validerAtBehandlingsresultatErInnvilgetEllerDelvisInnvilget(behandling)
+                autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandling)
                 autovedtakSøknadValideringService.validerAtKunPersonerFremstiltKravForHarEndringIAndeler(behandling)
                 autovedtakSøknadValideringService.validerAtInnvilgedePerioderIkkeOverlapperMedTidligereUtbetalinger(behandling)
                 autovedtakSøknadValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling)
@@ -265,6 +268,29 @@ class AutovedtakSøknadServiceTest {
             assertThat(henleggBehandlingInfoSlot.captured.årsak).isEqualTo(HenleggÅrsak.AUTOMATISK_HENLAGT)
             assertThat(henleggBehandlingInfoSlot.captured.begrunnelse).isEqualTo("Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.")
             verify(exactly = 1) { stegService.håndterNyBehandling(nyBehandling.copy(oppgavebeskrivelse = "Automatisk behandling av søknad innvilger for periode(r) som overlapper med tidligere utbetaling til søker.")) }
+            verify(exactly = 0) {
+                simuleringService.oppdaterSimuleringPåBehandling(any())
+                autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())
+                taskService.save(any())
+            }
+        }
+
+        @Test
+        fun `skal henlegge og opprette manuell behandling når barnet har overlappende historiske andeler`() {
+            // Arrange
+            val beskrivelse = "Barnet har andeler som overlapper med en tidligere iverksatt behandling."
+            every { autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandling) } throws
+                AutovedtakSøknadMåBehandlesManueltFeil(beskrivelse, OVERLAPP_ANDELER_FOR_BARN)
+
+            // Act
+            autovedtakSøknadService.kjørBehandling(søknadData)
+
+            // Assert
+            verifyOrder {
+                statistikkService.lagreÅrsaker(automatiskBehandling.id, listOf(OVERLAPP_ANDELER_FOR_BARN))
+                stegService.håndterHenleggBehandling(automatiskBehandling, any())
+                stegService.håndterNyBehandling(nyBehandling.copy(oppgavebeskrivelse = beskrivelse))
+            }
             verify(exactly = 0) {
                 simuleringService.oppdaterSimuleringPåBehandling(any())
                 autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any())

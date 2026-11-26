@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.cucumber.mock.mockAndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.AvgrensetSimuleringGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
@@ -127,7 +128,7 @@ class OppdragSteg {
                 .groupByBehandlingId()
                 .mapValues {
                     it.value
-                        .map { entry: Map<String, String> -> BehandlingMigreringsinfo(behandling = lagBehandling(id = it.key), migreringsdato = parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!).toLocalDate()) }
+                        .map { entry: Map<String, String?> -> BehandlingMigreringsinfo(behandling = lagBehandling(id = it.key), migreringsdato = parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!).toLocalDate()) }
                         .single()
                 }.toMutableMap()
     }
@@ -210,24 +211,31 @@ class OppdragSteg {
             }
         }
         val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
+        val behandlingsinformasjonUtleder =
+            BehandlingsinformasjonUtleder(
+                EndretMigreringsdatoUtleder(
+                    behandlingHentOgPersisterService,
+                    behandlingMigreringsinfoRepository,
+                    tilkjentYtelseRepository,
+                ),
+                clockProvider,
+            )
         val utbetalingsoppdragGenerator =
             UtbetalingsoppdragGenerator(
                 Utbetalingsgenerator(),
                 KlassifiseringKorrigerer(
                     tilkjentYtelseRepository,
                 ),
-                BehandlingsinformasjonUtleder(
-                    EndretMigreringsdatoUtleder(
-                        behandlingHentOgPersisterService,
-                        behandlingMigreringsinfoRepository,
-                        tilkjentYtelseRepository,
-                    ),
-                    clockProvider,
-                ),
+                behandlingsinformasjonUtleder,
                 andelTilkjentYtelseRepository,
                 behandlingHentOgPersisterService,
                 tilkjentYtelseRepository,
                 featureToggleService,
+                AvgrensetSimuleringGenerator(
+                    utbetalingsgenerator = Utbetalingsgenerator(),
+                    behandlingsinformasjonUtleder = behandlingsinformasjonUtleder,
+                    clockProvider = clockProvider,
+                ),
             )
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",

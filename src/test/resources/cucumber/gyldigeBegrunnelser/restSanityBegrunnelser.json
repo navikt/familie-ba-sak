@@ -7692,7 +7692,7 @@
   {
     "_createdAt": "2024-06-18T07:12:02Z",
     "_id": "begrunnelse-36bf795e-a42c-40ad-a991-fff463f1bd15",
-    "_rev": "G1fn50KhqxUx4FN5pLW4mN",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_system": {
       "base": {
         "id": "begrunnelse-36bf795e-a42c-40ad-a991-fff463f1bd15",
@@ -7700,7 +7700,7 @@
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-08-06T07:57:26Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "endretUtbetalingEtterbetalingTreMaanederTilbakeITid",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
@@ -7796,6 +7796,7 @@
       "BARN"
     ],
     "splittPaaSoknadstidspunkt": true,
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "24. Etterbetaling tre måneder tilbake i tid - Ingen utbetaling"
   },
@@ -7905,7 +7906,7 @@
   {
     "_createdAt": "2024-06-18T07:16:53Z",
     "_id": "begrunnelse-71f96b3e-df35-4754-8c58-bebf8549ca7a",
-    "_rev": "G1fn50KhqxUx4FN5pLWjjF",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_system": {
       "base": {
         "id": "begrunnelse-71f96b3e-df35-4754-8c58-bebf8549ca7a",
@@ -7913,7 +7914,7 @@
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-08-06T08:06:14Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "endretUtbetalingEtterbetalingTreMaanederTilbakeITidSED",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
@@ -8009,15 +8010,16 @@
       "BARN"
     ],
     "splittPaaSoknadstidspunkt": true,
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "25. Etterbetaling tre måneder tilbake i tid SED - Ingen utbetaling"
   },
   {
     "_createdAt": "2024-06-18T07:43:25Z",
     "_id": "begrunnelse-7c7cf4cd-6da7-4c0b-81d8-803fe4098d12",
-    "_rev": "cruj31hiFJWLEEOmZRNANP",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-09-10T10:52:14Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "endretUtbetalingEtterbetalingTreMaanederTilbakeITidSedUtbetaling",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
@@ -8112,6 +8114,7 @@
     "rolle": [
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "28. Etterbetaling tre måneder tilbake i tid SED - utbetaling"
   },
@@ -9004,9 +9007,9 @@
   {
     "_createdAt": "2024-11-14T14:21:19Z",
     "_id": "begrunnelse-f833cb9a-e5a9-4e9c-a55f-82e9f2c3d04c",
-    "_rev": "feceuXchvLAy158Te5p6Xb",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-11-14T14:36:44Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "endretUtbetalingTreMaanederTilbakeITidInstitusjon",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
@@ -9104,15 +9107,16 @@
       "SOKER",
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "SAKSPESIFIKK",
     "visningsnavn": "1. Etterbetaling tre måneder tilbake i tid - Institusjon"
   },
   {
     "_createdAt": "2024-06-18T07:27:01Z",
     "_id": "begrunnelse-27e45a62-f4d0-40be-b1ba-390615f6af15",
-    "_rev": "4Yu9C3prNnc56xE2xDJ8o9",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2025-05-12T13:44:39Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "endretUtbetalingTreMaanederTilbakeITidKunUtvidetDelUtbetaling",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
@@ -9185,15 +9189,16 @@
     "rolle": [
       "SOKER"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "27. Etterbetaling tre måneder tilbake i tid kun utvidet del - utbetaling"
   },
   {
     "_createdAt": "2024-06-18T07:17:55Z",
     "_id": "begrunnelse-d20ec5a4-e16f-4ca6-9ec8-8d5656e5d6f1",
-    "_rev": "HhDdVIUa1BJOaQ4MHERJEN",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-09-12T07:23:00Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "endretUtbetalingTreMaanederTilbakeITidUtbetaling",
     "begrunnelseTypeForPerson": "ENDRET_UTBETALING",
     "bokmaal": [
@@ -9288,6 +9293,7 @@
     "rolle": [
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "26. Etterbetaling tre måneder tilbake i tid - utbetaling"
   },
@@ -9893,9 +9899,9 @@
   {
     "_createdAt": "2024-06-18T09:27:28Z",
     "_id": "begrunnelse-67bd5d21-854d-4bdf-84b5-442676df56ca",
-    "_rev": "feceuXchvLAy158Te5uo1Y",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-11-14T14:51:31Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaaneder",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10001,15 +10007,16 @@
     "rolle": [
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "8. Etterbetaling tre måneder"
   },
   {
     "_createdAt": "2024-11-14T14:54:59Z",
     "_id": "begrunnelse-4a8b778a-3622-4637-9ff8-8fb2183dc82a",
-    "_rev": "FJDJpy7QCd7QQbNDYTXFjQ",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-11-14T15:00:04Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederEosBorger",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10116,13 +10123,14 @@
       "SOKER",
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "13. Etterbetaling tre måneder EØS borger"
   },
   {
     "_createdAt": "2026-05-13T11:19:35Z",
     "_id": "begrunnelse-32dda23e-cbad-4ff2-8fd6-053c0553fc06",
-    "_rev": "52t4uUBba7VTVHhVfKL01C",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_system": {
       "base": {
         "id": "begrunnelse-32dda23e-cbad-4ff2-8fd6-053c0553fc06",
@@ -10130,7 +10138,7 @@
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-06-09T11:22:27Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederFinnmarkstillegg",
     "bokmaal": [
       {
@@ -10268,15 +10276,16 @@
       "SOKER",
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "14. Etterbetaling tre måneder Finnmarkstillegg"
   },
   {
     "_createdAt": "2024-11-14T14:46:20Z",
     "_id": "begrunnelse-355608f9-069b-4c1e-8b39-8ebaee56b049",
-    "_rev": "L2918mBon6myb1FoETLXgX",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-11-20T16:12:55Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederForPraktisertDeltBosted",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10412,13 +10421,14 @@
     "rolle": [
       "SOKER"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "12. Etterbetaling tre måneder utvidet for praktisert delt bosted"
   },
   {
     "_createdAt": "2024-11-14T14:35:19Z",
     "_id": "begrunnelse-b4b8a0c0-90a2-483d-b9b7-2f78d013e3d5",
-    "_rev": "UN19t3rpC15uwJJLNBb03a",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_system": {
       "base": {
         "id": "begrunnelse-b4b8a0c0-90a2-483d-b9b7-2f78d013e3d5",
@@ -10426,7 +10436,7 @@
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2025-08-05T07:16:05Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederInstitusjon",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10555,15 +10565,16 @@
       "SOKER",
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "SAKSPESIFIKK",
     "visningsnavn": "2. Etterbetaling tre måneder tilbake i tid - institusjon"
   },
   {
     "_createdAt": "2024-09-11T03:21:50Z",
     "_id": "begrunnelse-ab17edec-c214-4165-bd3e-b7dafacf9522",
-    "_rev": "YpEW5kRbiMoxvFdK1a3GU7",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2025-02-04T15:56:43Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederKunUtvidetDel",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10620,13 +10631,14 @@
     "rolle": [
       "SOKER"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "9. Etterbetaling tre måned kun utvidet del"
   },
   {
     "_createdAt": "2026-05-13T11:49:58Z",
     "_id": "begrunnelse-948e34c5-da31-445b-888f-cf1ccb927a67",
-    "_rev": "52t4uUBba7VTVHhVfVaRuH",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_system": {
       "base": {
         "id": "begrunnelse-948e34c5-da31-445b-888f-cf1ccb927a67",
@@ -10634,7 +10646,7 @@
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-06-10T05:08:00Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederSvalbardtillegg",
     "bokmaal": [
       {
@@ -10772,13 +10784,14 @@
       "SOKER",
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "15. Etter endret utbetalingsperiode Svalbardtillegg"
   },
   {
     "_createdAt": "2024-09-25T08:14:18Z",
     "_id": "begrunnelse-cf4be9a5-a7e7-4c58-b3af-a5783addfbc5",
-    "_rev": "esSc8hWcoBQfgtmam62f3x",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_system": {
       "base": {
         "id": "begrunnelse-cf4be9a5-a7e7-4c58-b3af-a5783addfbc5",
@@ -10786,7 +10799,7 @@
       }
     },
     "_type": "begrunnelse",
-    "_updatedAt": "2026-03-06T10:18:33Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetalingTreMaanederTredjelandsborger",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10895,15 +10908,16 @@
       "SOKER",
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "10. Etterbetaling tre måneder tredjelandsborger"
   },
   {
     "_createdAt": "2024-10-15T08:26:27Z",
     "_id": "begrunnelse-ae6b113a-f589-4127-88b7-9031bd587874",
-    "_rev": "KyzqRrL3EBNKJO9arjNAEG",
+    "_rev": "SOuex7aAHJokYByawhrXei",
     "_type": "begrunnelse",
-    "_updatedAt": "2024-10-16T07:14:41Z",
+    "_updatedAt": "2026-11-20T08:21:00Z",
     "apiNavn": "etterEndretUtbetalingEtterbetallingTreMaanederEnsligMindreaarig",
     "begrunnelseTypeForPerson": "ETTER_ENDRET_UTBETALING",
     "bokmaal": [
@@ -10959,6 +10973,7 @@
     "rolle": [
       "BARN"
     ],
+    "stotterFritekst": true,
     "valgbarhet": "STANDARD",
     "visningsnavn": "11. Etterbetaling tre måneder enslig mindreårig flyktning"
   },
@@ -14156,6 +14171,87 @@
       "BOSATT_I_RIKET"
     ],
     "visningsnavn": "45. Svalbardtillegg"
+  },
+  {
+    "_createdAt": "2026-11-24T14:51:46Z",
+    "_id": "begrunnelse-27bac1cb-26ce-4157-b3ef-eea218f9b2c4",
+    "_rev": "BgkU2tvm00fCYvwyHF1Eyt",
+    "_system": {
+      "base": {
+        "id": "begrunnelse-27bac1cb-26ce-4157-b3ef-eea218f9b2c4",
+        "rev": "BgkU2tvm00fCYvwyHF1CNR"
+      }
+    },
+    "_type": "begrunnelse",
+    "_updatedAt": "2026-11-24T16:21:01Z",
+    "apiNavn": "fortsattInnvilgetTilleggstekstManglerKontoopplysninger",
+    "bokmaal": [
+      {
+        "_key": "30d6e4f28d06",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "28b77f2737a3",
+            "_type": "span",
+            "marks": [],
+            "text": "Vi kan ikke utbetale barnetrygden fordi vi mangler kontonummeret ditt. Ta kontakt med oss og oppgi kontonummeret, slik at vi kan utbetale pengene. Retten til utbetaling kan falle bort etter tre år. Dette følger av foreldelsesloven § 2."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "brevPeriodeType": "FORTSATT_INNVILGET",
+    "hjemler": [
+      "12"
+    ],
+    "mappe": [
+      "FORTSATT_INNVILGET"
+    ],
+    "navnISystem": "Tilleggstekst mangler kontoopplysninger",
+    "nynorsk": [
+      {
+        "_key": "30d6e4f28d06",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "28b77f2737a3",
+            "_type": "span",
+            "marks": [],
+            "text": "Vi kan ikkje utbetale barnetrygda fordi vi manglar kontonummeret ditt. Ta kontakt med oss og oppgje kontonummeret, slik at vi kan utbetale pengane."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      },
+      {
+        "_key": "8126dccb7e9b",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "28b77f2737a3",
+            "_type": "span",
+            "marks": [],
+            "text": "Retten til utbetaling kan falle bort etter tre år. Dette følger av foreldelseslova § 2."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "periodeResultatForPerson": "INGEN_ENDRING",
+    "regelverk": "NASJONAL",
+    "rolle": [
+      "SOKER",
+      "BARN"
+    ],
+    "valgbarhet": "STANDARD",
+    "vilkaar": [
+      "BOR_MED_SOKER",
+      "BOSATT_I_RIKET",
+      "LOVLIG_OPPHOLD"
+    ],
+    "visningsnavn": "47. Tilleggstekst mangler kontoopplysninger"
   },
   {
     "_createdAt": "2021-10-25T10:17:19Z",
@@ -42466,6 +42562,139 @@
     "visningsnavn": "45. Ikke bosatt i Norge"
   },
   {
+    "_createdAt": "2026-11-13T10:12:50Z",
+    "_id": "begrunnelse-43222db7-cd82-4b1a-b110-b8599b0eecc8",
+    "_rev": "n9Tpbv7HLrrvtcezKOKaPY",
+    "_type": "begrunnelse",
+    "_updatedAt": "2026-11-13T10:17:08Z",
+    "apiNavn": "reduksjonIkkeMedlemUtenlandsopphold",
+    "bokmaal": [
+      {
+        "_key": "5d9900bfde42",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "5bee7e1362a8",
+            "_type": "span",
+            "marks": [],
+            "text": "Barnetrygden endres for barn født "
+          },
+          {
+            "_key": "d7c2efc16037",
+            "_type": "flettefelt",
+            "flettefelt": "barnasFodselsdatoer"
+          },
+          {
+            "_key": "051d3d9e6540",
+            "_type": "span",
+            "marks": [],
+            "text": " fordi "
+          },
+          {
+            "_key": "f13d23d0f01c",
+            "_ref": "49509c87-0882-429c-9604-f4fbfc5876ca",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "4cec58e0d098",
+            "_type": "span",
+            "marks": [],
+            "text": " ikke er medlem i folketrygden under oppholdet i utlandet "
+          },
+          {
+            "_key": "18b1d52d14a6",
+            "_ref": "06fffef6-ae9a-47e4-8399-b034d86d0c0d",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "3d7ec7d24338",
+            "_type": "span",
+            "marks": [],
+            "text": "."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "bosattIRiketTriggere": [
+      "MEDLEMSKAP"
+    ],
+    "brevPeriodeType": "UTBETALING",
+    "hjemler": [
+      "4",
+      "5"
+    ],
+    "hjemlerFolketrygdloven": [
+      "2-5",
+      "2-8"
+    ],
+    "mappe": [
+      "REDUKSJON"
+    ],
+    "navnISystem": "Ikke medlem utenlandsopphold",
+    "nynorsk": [
+      {
+        "_key": "b76015413878",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "fe4f948201ba",
+            "_type": "span",
+            "marks": [],
+            "text": "Barnetrygda er endra for barn fødd "
+          },
+          {
+            "_key": "9c67e2289ba8",
+            "_type": "flettefelt",
+            "flettefelt": "barnasFodselsdatoer"
+          },
+          {
+            "_key": "9602f6698c8f",
+            "_type": "span",
+            "marks": [],
+            "text": " fordi "
+          },
+          {
+            "_key": "a0615ae16c63",
+            "_ref": "49509c87-0882-429c-9604-f4fbfc5876ca",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "1aef1312d350",
+            "_type": "span",
+            "marks": [],
+            "text": " ikkje er medlem i folketrygda under opphaldet i utlandet "
+          },
+          {
+            "_key": "0e921ac6fa15",
+            "_ref": "06fffef6-ae9a-47e4-8399-b034d86d0c0d",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "d6f9df227665",
+            "_type": "span",
+            "marks": [],
+            "text": "."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "periodeResultatForPerson": "REDUKSJON",
+    "regelverk": "NASJONAL",
+    "rolle": [
+      "SOKER",
+      "BARN"
+    ],
+    "valgbarhet": "STANDARD",
+    "vilkaar": [
+      "BOSATT_I_RIKET"
+    ],
+    "visningsnavn": "84. Ikke medlem utenlandsopphold"
+  },
+  {
     "_createdAt": "2021-11-05T10:26:53Z",
     "_id": "858d12b2-2321-45a3-812c-b79e156c6987",
     "_rev": "DPaEaBpcMe5fkxWlMRtGfn",
@@ -45199,6 +45428,139 @@
       "BOR_MED_SOKER"
     ],
     "visningsnavn": "44. Vurdering foreldrene bor sammen"
+  },
+  {
+    "_createdAt": "2026-11-13T10:20:55Z",
+    "_id": "begrunnelse-362f9fec-bac1-460c-a3b7-7a009a9aef5b",
+    "_rev": "n9Tpbv7HLrrvtcezKOMKcz",
+    "_type": "begrunnelse",
+    "_updatedAt": "2026-11-13T10:22:42Z",
+    "apiNavn": "reduksjonVurderingIkkeMedlem",
+    "bokmaal": [
+      {
+        "_key": "3c7e9a8f2602",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "dfc0bfab7c9f",
+            "_type": "span",
+            "marks": [],
+            "text": "Barnetrygden endres for barn født "
+          },
+          {
+            "_key": "15e2b403cc44",
+            "_type": "flettefelt",
+            "flettefelt": "barnasFodselsdatoer"
+          },
+          {
+            "_key": "85ca9ebe326c",
+            "_type": "span",
+            "marks": [],
+            "text": " fordi vi har kommet fram til at "
+          },
+          {
+            "_key": "526c66ca6465",
+            "_ref": "49509c87-0882-429c-9604-f4fbfc5876ca",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "00112228886b",
+            "_type": "span",
+            "marks": [],
+            "text": " ikke fyller vilkårene for å være medlem i folketrygden under oppholdet i utlandet "
+          },
+          {
+            "_key": "582f2c2b03e4",
+            "_ref": "06fffef6-ae9a-47e4-8399-b034d86d0c0d",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "4e0501c803fc",
+            "_type": "span",
+            "marks": [],
+            "text": "."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "bosattIRiketTriggere": [
+      "MEDLEMSKAP"
+    ],
+    "brevPeriodeType": "UTBETALING",
+    "hjemler": [
+      "4",
+      "5"
+    ],
+    "hjemlerFolketrygdloven": [
+      "2-5",
+      "2-8"
+    ],
+    "mappe": [
+      "REDUKSJON"
+    ],
+    "navnISystem": "Vurdering ikke medlem",
+    "nynorsk": [
+      {
+        "_key": "fabfeea031e6",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "ab53e397e1cb",
+            "_type": "span",
+            "marks": [],
+            "text": "Barnetrygda er endra for barn fødd "
+          },
+          {
+            "_key": "87f10f8f6059",
+            "_type": "flettefelt",
+            "flettefelt": "barnasFodselsdatoer"
+          },
+          {
+            "_key": "441b8fcd8311",
+            "_type": "span",
+            "marks": [],
+            "text": " fordi vi har kome fram til at "
+          },
+          {
+            "_key": "a9f0daadfb63",
+            "_ref": "49509c87-0882-429c-9604-f4fbfc5876ca",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "f323a7c77e5f",
+            "_type": "span",
+            "marks": [],
+            "text": " ikkje fyller vilkåra for å vere medlem i folketrygda under opphaldet i utlandet "
+          },
+          {
+            "_key": "6180978e2c4f",
+            "_ref": "06fffef6-ae9a-47e4-8399-b034d86d0c0d",
+            "_type": "valgReferanse"
+          },
+          {
+            "_key": "210f46135272",
+            "_type": "span",
+            "marks": [],
+            "text": "."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "periodeResultatForPerson": "REDUKSJON",
+    "regelverk": "NASJONAL",
+    "rolle": [
+      "SOKER",
+      "BARN"
+    ],
+    "valgbarhet": "STANDARD",
+    "vilkaar": [
+      "BOSATT_I_RIKET"
+    ],
+    "visningsnavn": "85. Vurdering ikke medlem"
   },
   {
     "_createdAt": "2021-10-22T11:37:27Z",

@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.erSammeAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.filtrereUgyldigeOppholdsadresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.søknad.Søknad
@@ -16,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_DELT_BOSTED
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.SØKER_HAR_OPPGITT_AT_BARNET_IKKE_BOR_FAST_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
@@ -110,15 +111,16 @@ class PreutfyllBorMedSøkerService(
             .map { periode ->
                 VilkårResultat(
                     personResultat = personResultat,
-                    erAutomatiskVurdert = true,
+                    erAutomatiskVurdert = periode.verdi !is IkkeVurdertVilkår,
                     resultat = periode.verdi.tilResultat(),
                     vilkårType = BOR_MED_SØKER,
                     periodeFom = periode.fom,
                     periodeTom = periode.tom,
-                    begrunnelse = PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + periode.verdi.begrunnelse,
+                    begrunnelse = periode.verdi.tilBegrunnelse(),
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                     erOpprinneligPreutfyltIBehandling = personResultat.vilkårsvurdering.behandling.id,
                     begrunnelseForManuellKontroll = periode.verdi.begrunnelseForManuellKontroll,
+                    evalueringÅrsaker = periode.verdi.evalueringÅrsaker.map { it.hentNavn() },
                 )
             }.toSet()
     }
@@ -148,6 +150,8 @@ class PreutfyllBorMedSøkerService(
     ): Tidslinje<Delvilkår> {
         val bostedsadresserBarnTidslinje = lagBostedsadresseTidslinje(bostedsadresserBarn.bostedsadresser)
         val bostedsadresserSøkerTidslinje = lagBostedsadresseTidslinje(bostedsadresserSøker.bostedsadresser)
+        val oppholdsadresserSvalbardBarnTidslinje = lagOppholdsadresserPåSvalbardTidslinje(bostedsadresserBarn.oppholdsadresse)
+        val oppholdsadresserSvalbardSøkerTidslinje = lagOppholdsadresserPåSvalbardTidslinje(bostedsadresserSøker.oppholdsadresse)
         val førsteNorskeAdresseFomForBarn =
             bostedsadresserBarn.bostedsadresser
                 .mapNotNull { it.gyldigFraOgMed }
@@ -181,8 +185,43 @@ class PreutfyllBorMedSøkerService(
                         IkkeOppfyltDelvilkår(begrunnelse = "- Har ikke hatt samme fast eller delt bostedsadresse som søker i minst 3 måneder")
                     }
                 }
+            }.kombinerMed(oppholdsadresserSvalbardBarnTidslinje, oppholdsadresserSvalbardSøkerTidslinje) { delvilkår, oppholdsadresserSvalbardBarn, oppholdsadresserSvalbardSøker ->
+                when {
+                    delvilkår == null -> {
+                        null
+                    }
+
+                    delvilkår is OppfyltDelvilkår && harUlikeOppholdsadresserPåSvalbard(oppholdsadresserSvalbardBarn, oppholdsadresserSvalbardSøker) -> {
+                        IkkeVurdertVilkår(begrunnelse = "- Barn og søker er ikke registrert med samme oppholdsadresse på Svalbard", evalueringÅrsaker = setOf(VilkårKanskjeOppfyltÅrsak.BOR_MED_SØKER_ULIK_OPPHOLDSADRESSE_SVALBARD))
+                    }
+
+                    else -> {
+                        delvilkår
+                    }
+                }
             }.beskjærFraOgMed(datoForBeskjæringAvFom)
     }
+
+    private fun harUlikeOppholdsadresserPåSvalbard(
+        oppholdsadresserSvalbardBarn: List<Adresse>?,
+        oppholdsadresserSvalbardSøker: List<Adresse>?,
+    ): Boolean =
+        !oppholdsadresserSvalbardBarn.isNullOrEmpty() && !oppholdsadresserSvalbardSøker.isNullOrEmpty() &&
+            oppholdsadresserSvalbardBarn.none { barnAdresse -> oppholdsadresserSvalbardSøker.any { barnAdresse.erSammeAdresse(it) } }
+
+    private fun lagOppholdsadresserPåSvalbardTidslinje(oppholdsadresser: List<Adresse>): Tidslinje<List<Adresse>> =
+        oppholdsadresser
+            .filtrereUgyldigeOppholdsadresser()
+            .windowed(size = 2, step = 1, partialWindows = true) {
+                val denne = it.first()
+                val neste = it.getOrNull(1)
+
+                Periode(
+                    verdi = denne,
+                    fom = denne.gyldigFraOgMed,
+                    tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
+                ).tilTidslinje()
+            }.kombiner { adresser -> adresser.filter { it.erPåSvalbard() } }
 
     private fun lagBostedsadresseTidslinje(
         bostedsadresser: List<Adresse>,

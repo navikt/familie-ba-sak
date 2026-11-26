@@ -115,7 +115,21 @@ fun Iterable<Medlemskap>.finnSterkesteMedlemskap(): Medlemskap? =
         else -> null
     }
 
-fun lagErNordiskStatsborgerTidslinje(statsborgerskap: List<GrStatsborgerskap>): Tidslinje<Boolean> {
+fun lagErNordiskStatsborgerTidslinje(statsborgerskap: List<GrStatsborgerskap>): Tidslinje<Boolean> = lagStatsborgerskapTidslinje(statsborgerskap) { it.any { statsborgerskapIPeriode -> statsborgerskapIPeriode.iNordiskLand() } }
+
+fun lagNordiskEllerEØSStatsborgerskapTidslinje(statsborgerskap: List<GrStatsborgerskap>): Tidslinje<Medlemskap?> =
+    lagStatsborgerskapTidslinje(statsborgerskap) { statsborgerskapIPeriode ->
+        when {
+            statsborgerskapIPeriode.any { it.iNordiskLand() } -> Medlemskap.NORDEN
+            statsborgerskapIPeriode.any { it.medlemskap == Medlemskap.EØS } -> Medlemskap.EØS
+            else -> null
+        }
+    }
+
+private fun <T> lagStatsborgerskapTidslinje(
+    statsborgerskap: List<GrStatsborgerskap>,
+    kombineringsFunksjon: (Iterable<GrStatsborgerskap>) -> T,
+): Tidslinje<T> {
     val statsborgerskapGruppertPåNavn =
         statsborgerskap
             .groupBy { it.landkode }
@@ -131,5 +145,5 @@ fun lagErNordiskStatsborgerTidslinje(statsborgerskap: List<GrStatsborgerskap>): 
             statsborgerskapSammeLand
                 .map { Periode(it, it.gyldigPeriode?.fom, it.gyldigPeriode?.tom) }
                 .tilTidslinje()
-        }.kombiner { statsborgerskap -> statsborgerskap.any { it.iNordiskLand() } }
+        }.kombiner { kombineringsFunksjon(it) }
 }

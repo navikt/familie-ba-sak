@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService.Companion.PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
@@ -29,9 +30,16 @@ sealed class Delvilkår {
             is IkkeOppfyltDelvilkår -> IKKE_OPPFYLT
             is IkkeVurdertVilkår -> IKKE_VURDERT
         }
+
+    fun tilBegrunnelse(): String =
+        when (this) {
+            is OppfyltDelvilkår, is IkkeOppfyltDelvilkår -> PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + this.begrunnelse
+            is IkkeVurdertVilkår -> IKKE_PREUTFYLT_VILKÅR_BEGRUNNELSE_OVERSKRIFT + this.begrunnelse
+        }
 }
 
 data class IkkeVurdertVilkår(
+    override val begrunnelse: String = "",
     override val evalueringÅrsaker: Set<EvalueringÅrsak> = emptySet(),
 ) : Delvilkår()
 
@@ -70,7 +78,7 @@ fun Tidslinje<Delvilkår>.vurderFinnmarkOgSvalbardtillegg(
     }
 }
 
-fun List<Periode<Delvilkår>>.tilVilkårResultater(personResultat: PersonResultat): Set<VilkårResultat> =
+fun List<Periode<Delvilkår>>.tilBosattIRiketVilkårResultater(personResultat: PersonResultat): Set<VilkårResultat> =
     this
         .map { erBosattINorgePeriode ->
             VilkårResultat(

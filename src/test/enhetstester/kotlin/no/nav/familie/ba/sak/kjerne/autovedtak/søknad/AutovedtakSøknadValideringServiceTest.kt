@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.AutovedtakMåBehandlesManueltFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagInfotrygdstønad
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -33,6 +35,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.time.YearMonth
 
 class AutovedtakSøknadValideringServiceTest {
@@ -61,6 +65,159 @@ class AutovedtakSøknadValideringServiceTest {
         )
     private val barnFremstiltKravFor = lagPerson(type = PersonType.BARN).aktør
     private val barnUtenKrav = lagPerson(type = PersonType.BARN).aktør
+
+    @Nested
+    inner class ValiderAtBehandlingIkkeHarOverlappendeAndeler {
+        private val nyAndel =
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2025, 1),
+                tom = YearMonth.of(2025, 12),
+                aktør = barnFremstiltKravFor,
+                behandling = behandling,
+            )
+
+        @BeforeEach
+        fun førHverTest() {
+            every { søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling, null) } returns listOf(barnFremstiltKravFor)
+            every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns listOf(nyAndel)
+            every { beregningService.hentAndelerFraIverksatteBehandlingerForAktør(barnFremstiltKravFor) } returns emptyList()
+        }
+
+        @Test
+        fun `skal ikke kaste feil når barnet ikke har andeler i tidligere iverksatte behandlinger`() {
+            // Act & Assert
+            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandling) }
+        }
+
+        @Test
+        fun `skal kaste feil ved overlapp med tidligere iverksatt behandling i samme fagsak`() {
+            // Arrange
+            val tidligereBehandling = lagBehandling(fagsak = behandling.fagsak)
+            every { beregningService.hentAndelerFraIverksatteBehandlingerForAktør(barnFremstiltKravFor) } returns
+                listOf(nyAndel.copy(behandlingId = tidligereBehandling.id))
+
+            // Act
+            val feil = assertThrows<AutovedtakSøknadMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandling) }
+
+            // Assert
+            assertThat(feil.årsaker).containsExactly(AutovedtakSøknadMåBehandlesManueltÅrsak.OVERLAPP_ANDELER_FOR_BARN)
+        }
+
+        @ParameterizedTest
+        @CsvSource(
+            "2024-01, 2025-01",
+            "2025-12, 2026-12",
+            "2025-03, 2025-06",
+            "2024-01, 2026-12",
+        )
+        fun `skal kaste feil ved overlapp med tidligere iverksatt behandling i annen fagsak`(
+            fom: String,
+            tom: String,
+        ) {
+            // Arrange
+            val tidligereBehandling = lagBehandling(fagsak = lagFagsak())
+            every { beregningService.hentAndelerFraIverksatteBehandlingerForAktør(barnFremstiltKravFor) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.parse(fom),
+                        tom = YearMonth.parse(tom),
+                        aktør = barnFremstiltKravFor,
+                        behandling = tidligereBehandling,
+                    ),
+                )
+
+            // Act & Assert
+            assertThrows<AutovedtakSøknadMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandling) }
+        }
+
+        @ParameterizedTest
+        @CsvSource("2024-01, 2024-12", "2026-01, 2026-12")
+        fun `skal ikke kaste feil når tidligere andeler slutter før eller starter etter ny periode`(
+            fom: String,
+            tom: String,
+        ) {
+            // Arrange
+            every { beregningService.hentAndelerFraIverksatteBehandlingerForAktør(barnFremstiltKravFor) } returns
+                listOf(nyAndel.copy(behandlingId = lagBehandling().id, stønadFom = YearMonth.parse(fom), stønadTom = YearMonth.parse(tom)))
+
+            // Act & Assert
+            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandling) }
+        }
+
+        @Test
+        fun `skal ikke sjekke andeler for barn det ikke er søkt for eller for søker`() {
+            // Arrange
+            val søker = behandling.fagsak.aktør
+            every { søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling, null) } returns listOf(barnFremstiltKravFor, søker)
+            every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+                listOf(nyAndel, nyAndel.copy(aktør = barnUtenKrav), nyAndel.copy(aktør = søker, type = YtelseType.UTVIDET_BARNETRYGD))
+
+            // Act
+            autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandling)
+
+            // Assert
+            verify(exactly = 0) { beregningService.hentAndelerFraIverksatteBehandlingerForAktør(barnUtenKrav) }
+            verify(exactly = 0) { beregningService.hentAndelerFraIverksatteBehandlingerForAktør(søker) }
+        }
+
+        @Test
+        fun `skal sammenligne andeler per barn og ikke på tvers av barn det er søkt for`() {
+            // Arrange
+            every { søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling, null) } returns listOf(barnFremstiltKravFor, barnUtenKrav)
+            every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+                listOf(nyAndel, nyAndel.copy(aktør = barnUtenKrav, stønadFom = YearMonth.of(2026, 1), stønadTom = YearMonth.of(2026, 12)))
+            every { beregningService.hentAndelerFraIverksatteBehandlingerForAktør(barnUtenKrav) } returns
+                listOf(nyAndel.copy(aktør = barnUtenKrav, behandlingId = lagBehandling().id))
+
+            // Act & Assert
+            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandling) }
+        }
+
+        @Test
+        fun `skal håndtere overlapp mellom andeler fra flere historiske behandlinger`() {
+            // Arrange
+            every { beregningService.hentAndelerFraIverksatteBehandlingerForAktør(barnFremstiltKravFor) } returns
+                listOf(
+                    nyAndel.copy(behandlingId = lagBehandling().id),
+                    nyAndel.copy(behandlingId = lagBehandling().id, stønadTom = YearMonth.of(2026, 12)),
+                )
+
+            // Act & Assert
+            assertThrows<AutovedtakSøknadMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandling) }
+        }
+
+        @Test
+        fun `skal ikke kaste feil når ny periode ligger i et opphold mellom historiske andeler`() {
+            // Arrange
+            every { beregningService.hentAndelerFraIverksatteBehandlingerForAktør(barnFremstiltKravFor) } returns
+                listOf(
+                    nyAndel.copy(behandlingId = lagBehandling().id, stønadFom = YearMonth.of(2024, 1), stønadTom = YearMonth.of(2024, 12)),
+                    nyAndel.copy(behandlingId = lagBehandling().id, stønadFom = YearMonth.of(2026, 1), stønadTom = YearMonth.of(2026, 12)),
+                )
+
+            // Act & Assert
+            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandling) }
+        }
+
+        @Test
+        fun `skal ikke sammenligne behandlingen med seg selv`() {
+            // Arrange
+            every { beregningService.hentAndelerFraIverksatteBehandlingerForAktør(barnFremstiltKravFor) } returns listOf(nyAndel)
+
+            // Act & Assert
+            assertDoesNotThrow { autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandling) }
+        }
+
+        @Test
+        fun `skal sjekke overlapp også for andeler med null kroner`() {
+            // Arrange
+            every { beregningService.hentAndelerFraIverksatteBehandlingerForAktør(barnFremstiltKravFor) } returns
+                listOf(nyAndel.copy(behandlingId = lagBehandling().id, kalkulertUtbetalingsbeløp = 0))
+
+            // Act & Assert
+            assertThrows<AutovedtakSøknadMåBehandlesManueltFeil> { autovedtakSøknadValideringService.validerAtBehandlingIkkeHarOverlappendeAndeler(behandling) }
+        }
+    }
 
     @Nested
     inner class ValiderAtVilkårsvurderingErOppfylt {

@@ -40,6 +40,7 @@ import java.time.LocalDate
 class BehandlingController(
     private val stegService: StegService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingService: BehandlingService,
     private val behandlingstemaService: BehandlingstemaService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilgangService: TilgangService,
@@ -159,6 +160,19 @@ class BehandlingController(
             aktørerMedUgyldigEtterbetalingsperiode.map { it.aktivFødselsnummer() }
 
         return ResponseEntity.ok(Ressurs.success(personerMedUgyldigEtterbetalingsperiode))
+    }
+
+    @GetMapping(path = ["/{behandlingId}/migreringsdato"])
+    fun hentMigreringsdato(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<LocalDate?>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "hent migreringsdato",
+        )
+
+        return ResponseEntity.ok(Ressurs.success(behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId)))
     }
 }
 

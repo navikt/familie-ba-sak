@@ -38,6 +38,10 @@ class GrunnlagController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legge til barn",
         )
+        tilgangService.validerTilgangTilPersoner(
+            personIdenter = listOf(leggTilBarnDto.barnIdent),
+            event = AuditLoggerEvent.UPDATE,
+        )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         validerBehandlingKanRedigeres(behandling)

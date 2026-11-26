@@ -857,6 +857,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonEnsligMindrearigBoddeIkkeIFinnmarkEllerTilleggsone"
     },
+    REDUKSJON_IKKE_MEDLEM_UTENLANDSOPPHOLD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonIkkeMedlemUtenlandsopphold"
+    },
+    REDUKSJON_VURDERING_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingIkkeMedlem"
+    },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagBosattIRiket"
@@ -1560,6 +1568,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     FORTSATT_INNVILGET_SMÅBARNSTILLEGG {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetSmaabarnstillegg"
+    },
+    FORTSATT_INNVILGET_TILLEGGSTEKST_MANGLER_KONTOOPPLYSNINGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetTilleggstekstManglerKontoopplysninger"
     },
     ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
