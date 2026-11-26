@@ -12,8 +12,6 @@ class KorrigertEtterbetalingService(
 ) {
     fun finnAktivtKorrigeringPåBehandling(behandlingId: Long): KorrigertEtterbetaling? = korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandlingId)
 
-    fun finnAlleKorrigeringerPåBehandling(behandlingId: Long): List<KorrigertEtterbetaling> = korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandlingId)
-
     @Transactional
     fun lagreKorrigertEtterbetaling(korrigertEtterbetaling: KorrigertEtterbetaling): KorrigertEtterbetaling {
         val behandling = korrigertEtterbetaling.behandling

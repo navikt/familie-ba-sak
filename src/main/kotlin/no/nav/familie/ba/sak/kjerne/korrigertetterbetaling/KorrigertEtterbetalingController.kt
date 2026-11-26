@@ -4,10 +4,8 @@ import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.KorrigertEtterbetalingDto
-import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKorrigertEtterbetalingDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.MediaType
@@ -28,13 +26,12 @@ class KorrigertEtterbetalingController(
     private val tilgangService: TilgangService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
-    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
     @PostMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettKorrigertEtterbetalingPåBehandling(
         @PathVariable behandlingId: Long,
         @RequestBody korrigertEtterbetalingRequest: KorrigertEtterbetalingRequest,
-    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
+    ): ResponseEntity<Ressurs<KorrigertEtterbetalingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.CREATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -45,33 +42,30 @@ class KorrigertEtterbetalingController(
 
         val korrigertEtterbetaling = korrigertEtterbetalingRequest.tilKorrigertEtterbetaling(behandling)
 
-        korrigertEtterbetalingService.lagreKorrigertEtterbetaling(korrigertEtterbetaling)
+        val lagretKorrigertEtterbetaling = korrigertEtterbetalingService.lagreKorrigertEtterbetaling(korrigertEtterbetaling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(lagretKorrigertEtterbetaling.tilKorrigertEtterbetalingDto()))
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentAlleKorrigerteEtterbetalingPåBehandling(
+    fun hentKorrigertEtterbetalingPåBehandling(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<List<KorrigertEtterbetalingDto>>> {
+    ): ResponseEntity<Ressurs<KorrigertEtterbetalingDto?>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Henter korrigert etterbetaling",
         )
 
-        val korrigerteEtterbetalinger =
-            korrigertEtterbetalingService
-                .finnAlleKorrigeringerPåBehandling(behandlingId)
-                .map { it.tilKorrigertEtterbetalingDto() }
+        val korrigertEtterbetaling = korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(behandlingId)
 
-        return ResponseEntity.ok(Ressurs.success(korrigerteEtterbetalinger))
+        return ResponseEntity.ok(Ressurs.success(korrigertEtterbetaling?.tilKorrigertEtterbetalingDto()))
     }
 
     @PatchMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun settKorrigertEtterbetalingTilInaktivPåBehandling(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
+    ): ResponseEntity<Ressurs<KorrigertEtterbetalingDto?>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -80,8 +74,8 @@ class KorrigertEtterbetalingController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         validerBehandlingKanRedigeres(behandling)
 
-        korrigertEtterbetalingService.settKorrigeringPåBehandlingTilInaktiv(behandling)
+        val korrigertEtterbetaling = korrigertEtterbetalingService.settKorrigeringPåBehandlingTilInaktiv(behandling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(korrigertEtterbetaling?.tilKorrigertEtterbetalingDto()))
     }
 }

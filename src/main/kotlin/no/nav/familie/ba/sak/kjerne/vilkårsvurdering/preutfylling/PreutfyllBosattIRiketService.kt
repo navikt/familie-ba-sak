@@ -6,12 +6,13 @@ import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.adresser.Adresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iUkraina
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagErNordiskStatsborgerTidslinje
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.lagNordiskEllerEØSStatsborgerskapTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.søknad.Søknad
@@ -145,16 +146,16 @@ class PreutfyllBosattIRiketService(
     ): Set<VilkårResultat> {
         val adresserForPerson = Adresser.opprettFra(person)
 
-        val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(person.statsborgerskap)
+        val statsborgerskapTidslinje = lagNordiskEllerEØSStatsborgerskapTidslinje(person.statsborgerskap)
 
         val erBosattINorgeEllerPåSvalbardTidslinje = adresserForPerson.lagErBosattINorgeEllerSvalbardTidslinje()
 
-        val erNordiskStatsborgerOgBosattINorgeTidslinje =
-            erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeEllerPåSvalbardTidslinje) { erNordiskStatsborger, erBosattINorge ->
-                if (erNordiskStatsborger == true && erBosattINorge == true) {
-                    OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap")
-                } else {
-                    IkkeOppfyltDelvilkår()
+        val erNordiskEllerEØSStatsborgerOgBosattINorgeTidslinje =
+            statsborgerskapTidslinje.kombinerMed(erBosattINorgeEllerPåSvalbardTidslinje) { medlemskap, erBosattINorge ->
+                when {
+                    medlemskap == Medlemskap.NORDEN && erBosattINorge == true -> OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap")
+                    medlemskap == Medlemskap.EØS && erBosattINorge == true -> OppfyltDelvilkår(begrunnelse = "- EØS-statsborgerskap")
+                    else -> IkkeOppfyltDelvilkår()
                 }
             }
 
@@ -168,12 +169,12 @@ class PreutfyllBosattIRiketService(
 
         val førsteBosattINorgeDato = erBosattINorgeEllerPåSvalbardTidslinje.filtrer { it == true }.startsTidspunkt
 
-        return erNordiskStatsborgerOgBosattINorgeTidslinje
-            .kombinerMed(erØvrigeKravForBosattIRiketOppfyltTidslinje) { erNordiskOgBosatt, erØvrigeKravOppfylt ->
+        return erNordiskEllerEØSStatsborgerOgBosattINorgeTidslinje
+            .kombinerMed(erØvrigeKravForBosattIRiketOppfyltTidslinje) { erNordiskEllerEØSOgBosatt, erØvrigeKravOppfylt ->
                 when {
-                    erNordiskOgBosatt is OppfyltDelvilkår -> erNordiskOgBosatt
+                    erNordiskEllerEØSOgBosatt is OppfyltDelvilkår -> erNordiskEllerEØSOgBosatt
                     erØvrigeKravOppfylt is OppfyltDelvilkår || erØvrigeKravOppfylt is IkkeVurdertVilkår -> erØvrigeKravOppfylt
-                    else -> IkkeOppfyltDelvilkår(evalueringÅrsaker = (erNordiskOgBosatt?.evalueringÅrsaker.orEmpty() + erØvrigeKravOppfylt?.evalueringÅrsaker.orEmpty()))
+                    else -> IkkeOppfyltDelvilkår(evalueringÅrsaker = (erNordiskEllerEØSOgBosatt?.evalueringÅrsaker.orEmpty() + erØvrigeKravOppfylt?.evalueringÅrsaker.orEmpty()))
                 }
             }.vurderFinnmarkOgSvalbardtillegg(adresserForPerson)
             .beskjærFraOgMed(maxOf(datoForBeskjæringAvFom, førsteBosattINorgeDato))

@@ -9,11 +9,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.VurderingsstrategiForValutakurser
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 data class UtvidetBehandlingDto(
+    val fagsakId: Long,
     val behandlingId: Long,
     val steg: StegType,
     val stegTilstand: List<BehandlingStegTilstandDto>,
@@ -38,14 +38,9 @@ data class UtvidetBehandlingDto(
     val vedtak: VedtakDto?,
     val totrinnskontroll: TotrinnskontrollDto?,
     val aktivSettPåVent: SettPåVentDto?,
-    val migreringsdato: LocalDate?,
     val valutakurser: List<ValutakursDto>,
     val utenlandskePeriodebeløp: List<UtenlandskPeriodebeløpDto>,
-    val korrigertEtterbetaling: KorrigertEtterbetalingDto?,
-    val korrigertVedtak: KorrigertVedtakDto?,
-    val feilutbetaltValuta: List<FeilutbetaltValutaDto>,
     val brevmottakere: List<BrevmottakerDto>,
-    val refusjonEøs: List<RefusjonEøsDto>,
     val vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser? = VurderingsstrategiForValutakurser.AUTOMATISK,
     val søknadMottattDato: LocalDateTime?,
     val tilbakekrevingsvedtakMotregning: TilbakekrevingsvedtakMotregningDto?,

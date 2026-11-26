@@ -1,15 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 
 import io.mockk.every
-import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RefusjonEøsDto
-import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -18,37 +17,69 @@ import java.time.LocalDate
 class RefusjonEøsControllerTest {
     private val tilgangService = mockk<TilgangService>()
     private val refusjonEøsService = mockk<RefusjonEøsService>()
-    private val utvidetBehandlingService = mockk<UtvidetBehandlingService>()
-
     private val refusjonEøsController =
         RefusjonEøsController(
             tilgangService = tilgangService,
             refusjonEøsService = refusjonEøsService,
-            utvidetBehandlingService = utvidetBehandlingService,
         )
 
     private val behandlingId = 1L
     private val periodeId = 2L
     private val refusjonEøsDto =
         RefusjonEøsDto(
-            id = periodeId,
-            fom = LocalDate.of(2020, 1, 1),
-            tom = LocalDate.of(2020, 12, 31),
+            id = null,
+            fom = LocalDate.of(2026, 1, 1),
+            tom = LocalDate.of(2026, 1, 31),
             refusjonsbeløp = 100,
             land = "SE",
             refusjonAvklart = true,
         )
+    private val lagredePerioder =
+        listOf(
+            refusjonEøsDto.copy(id = periodeId, refusjonsbeløp = 700),
+            refusjonEøsDto.copy(id = 3L, refusjonsbeløp = 900, land = "DK"),
+        )
 
     @BeforeEach
     fun setUp() {
-        every { tilgangService.validerTilgangTilBehandling(any(), any()) } just runs
-        every { tilgangService.verifiserHarTilgangTilHandling(any(), any()) } just runs
-        every { tilgangService.validerKanRedigereBehandling(any()) } just runs
-        every { refusjonEøsService.leggTilRefusjonEøsPeriode(any(), any()) } returns periodeId
-        every { refusjonEøsService.oppdaterRefusjonEøsPeriode(any(), any(), any()) } just runs
-        every { refusjonEøsService.fjernRefusjonEøsPeriode(any(), any()) } just runs
-        every { refusjonEøsService.hentRefusjonEøsPerioder(any()) } returns emptyList()
-        every { utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId) } returns mockk()
+        justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
+        justRun { tilgangService.verifiserHarTilgangTilHandling(any(), any()) }
+        justRun { tilgangService.validerKanRedigereBehandling(behandlingId) }
+        every { refusjonEøsService.leggTilRefusjonEøsPeriode(refusjonEøsDto, behandlingId) } returns periodeId
+        justRun { refusjonEøsService.oppdaterRefusjonEøsPeriode(refusjonEøsDto, periodeId, behandlingId) }
+        justRun { refusjonEøsService.fjernRefusjonEøsPeriode(periodeId, behandlingId) }
+        every { refusjonEøsService.hentRefusjonEøsPerioder(behandlingId) } returns lagredePerioder
+    }
+
+    @Test
+    fun `skal returnere oppdaterte perioder etter oppretting`() {
+        // Act
+        val respons = refusjonEøsController.leggTilRefusjonEøsPeriode(behandlingId, refusjonEøsDto)
+
+        // Assert
+        assertThat(respons.body?.data).isEqualTo(lagredePerioder)
+    }
+
+    @Test
+    fun `skal returnere oppdaterte perioder etter oppdatering`() {
+        // Act
+        val respons = refusjonEøsController.oppdaterRefusjonEøsPeriode(behandlingId, periodeId, refusjonEøsDto)
+
+        // Assert
+        assertThat(respons.body?.data).isEqualTo(lagredePerioder)
+    }
+
+    @Test
+    fun `skal returnere gjenværende perioder etter sletting`() {
+        // Arrange
+        val gjenværendePerioder = lagredePerioder.drop(1)
+        every { refusjonEøsService.hentRefusjonEøsPerioder(behandlingId) } returns gjenværendePerioder
+
+        // Act
+        val respons = refusjonEøsController.fjernRefusjonEøsPeriode(behandlingId, periodeId)
+
+        // Assert
+        assertThat(respons.body?.data).isEqualTo(gjenværendePerioder)
     }
 
     @Test
@@ -77,7 +108,7 @@ class RefusjonEøsControllerTest {
     }
 
     @Test
-    fun `skal ikke legge til periode eller returnere behandlingen når saksbehandler mangler tilgang`() {
+    fun `skal ikke legge til periode eller returnere perioder når saksbehandler mangler tilgang`() {
         // Arrange
         every {
             tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
@@ -89,6 +120,6 @@ class RefusjonEøsControllerTest {
         }
 
         verify(exactly = 0) { refusjonEøsService.leggTilRefusjonEøsPeriode(any(), any()) }
-        verify(exactly = 0) { utvidetBehandlingService.lagUtvidetBehandlingDto(any()) }
+        verify(exactly = 0) { refusjonEøsService.hentRefusjonEøsPerioder(any()) }
     }
 }

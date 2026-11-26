@@ -14173,6 +14173,87 @@
     "visningsnavn": "45. Svalbardtillegg"
   },
   {
+    "_createdAt": "2026-11-24T14:51:46Z",
+    "_id": "begrunnelse-27bac1cb-26ce-4157-b3ef-eea218f9b2c4",
+    "_rev": "BgkU2tvm00fCYvwyHF1Eyt",
+    "_system": {
+      "base": {
+        "id": "begrunnelse-27bac1cb-26ce-4157-b3ef-eea218f9b2c4",
+        "rev": "BgkU2tvm00fCYvwyHF1CNR"
+      }
+    },
+    "_type": "begrunnelse",
+    "_updatedAt": "2026-11-24T16:21:01Z",
+    "apiNavn": "fortsattInnvilgetTilleggstekstManglerKontoopplysninger",
+    "bokmaal": [
+      {
+        "_key": "30d6e4f28d06",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "28b77f2737a3",
+            "_type": "span",
+            "marks": [],
+            "text": "Vi kan ikke utbetale barnetrygden fordi vi mangler kontonummeret ditt. Ta kontakt med oss og oppgi kontonummeret, slik at vi kan utbetale pengene. Retten til utbetaling kan falle bort etter tre år. Dette følger av foreldelsesloven § 2."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "brevPeriodeType": "FORTSATT_INNVILGET",
+    "hjemler": [
+      "12"
+    ],
+    "mappe": [
+      "FORTSATT_INNVILGET"
+    ],
+    "navnISystem": "Tilleggstekst mangler kontoopplysninger",
+    "nynorsk": [
+      {
+        "_key": "30d6e4f28d06",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "28b77f2737a3",
+            "_type": "span",
+            "marks": [],
+            "text": "Vi kan ikkje utbetale barnetrygda fordi vi manglar kontonummeret ditt. Ta kontakt med oss og oppgje kontonummeret, slik at vi kan utbetale pengane."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      },
+      {
+        "_key": "8126dccb7e9b",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "28b77f2737a3",
+            "_type": "span",
+            "marks": [],
+            "text": "Retten til utbetaling kan falle bort etter tre år. Dette følger av foreldelseslova § 2."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "periodeResultatForPerson": "INGEN_ENDRING",
+    "regelverk": "NASJONAL",
+    "rolle": [
+      "SOKER",
+      "BARN"
+    ],
+    "valgbarhet": "STANDARD",
+    "vilkaar": [
+      "BOR_MED_SOKER",
+      "BOSATT_I_RIKET",
+      "LOVLIG_OPPHOLD"
+    ],
+    "visningsnavn": "47. Tilleggstekst mangler kontoopplysninger"
+  },
+  {
     "_createdAt": "2021-10-25T10:17:19Z",
     "_id": "10faf745-8c43-43c9-8c16-8629ab5b4cd4",
     "_rev": "UhBmwd6E4TMdvn0JYlMVg6",

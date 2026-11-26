@@ -9778,6 +9778,116 @@
     "visningsnavn": "32. Selvstendig rett sekundærland UK standard"
   },
   {
+    "_createdAt": "2026-11-21T07:46:51Z",
+    "_id": "begrunnelse-71a076b0-2367-4307-bb61-6f42bfa24d2a",
+    "_rev": "3lwlVJMBN3eSP0k3hvPmlU",
+    "_type": "begrunnelse",
+    "_updatedAt": "2026-11-21T07:46:51Z",
+    "annenForeldersAktivitet": [
+      "I_ARBEID",
+      "MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN",
+      "FORSIKRET_I_BOSTEDSLAND",
+      "MOTTAR_PENSJON",
+      "INAKTIV",
+      "IKKE_AKTUELT",
+      "UTSENDT_ARBEIDSTAKER",
+      "ARBEIDER",
+      "SELVSTENDIG_NÆRINGSDRIVENDE",
+      "UTSENDT_ARBEIDSTAKER_FRA_NORGE",
+      "MOTTAR_UFØRETRYGD",
+      "ARBEIDER_PÅ_NORSKREGISTRERT_SKIP",
+      "ARBEIDER_PÅ_NORSK_SOKKEL",
+      "ARBEIDER_FOR_ET_NORSK_FLYSELSKAP",
+      "ARBEIDER_VED_UTENLANDSK_UTENRIKSSTASJON",
+      "MOTTAR_UTBETALING_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET",
+      "MOTTAR_UFØRETRYGD_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET",
+      "MOTTAR_PENSJON_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET"
+    ],
+    "apiNavn": "fortsattInnvilgetSelvstendigRettSekundarFaarIkkeBaIAnnetLand",
+    "barnetsBostedsland": [
+      "NORGE",
+      "IKKE_NORGE"
+    ],
+    "begrunnelseTypeForPerson": "FORTSATT_INNVILGET",
+    "bokmaal": [
+      {
+        "_key": "06cd9dc7f45a",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "894812f9c3be",
+            "_type": "span",
+            "marks": [],
+            "text": "Du får fortsatt full barnetrygd fra Norge fordi det ikke utbetales barnetrygd fra "
+          },
+          {
+            "_key": "b4da2c632866",
+            "_type": "eosFlettefelt",
+            "flettefelt": "sokersAktivitetsland"
+          },
+          {
+            "_key": "35b1d2519aa7",
+            "_type": "span",
+            "marks": [],
+            "text": "."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "brevPeriodeType": "FORTSATT_INNVILGET",
+    "hjemlerEOSForordningen883": [
+      "2",
+      "11-16",
+      "67",
+      "68"
+    ],
+    "kompetanseResultat": [
+      "NORGE_ER_SEKUNDÆRLAND",
+      "NASJONAL_RETT_DIFFERANSEBEREGNING"
+    ],
+    "mappe": [
+      "EØS",
+      "FORTSATT_INNVILGET"
+    ],
+    "navnISystem": "Selvstendig rett tilleggstekst sekundær får ikke ba i annet land",
+    "nynorsk": [
+      {
+        "_key": "30c3f8257006",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "3d9756912eda",
+            "_type": "span",
+            "marks": [],
+            "text": "Du får fortsatt full barnetrygd frå Noreg fordi det ikkje vert utbetalt barnetrygd frå "
+          },
+          {
+            "_key": "467fd7ba391e",
+            "_type": "eosFlettefelt",
+            "flettefelt": "sokersAktivitetsland"
+          },
+          {
+            "_key": "c87c606ebac0",
+            "_type": "span",
+            "marks": [],
+            "text": "."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "periodeResultatForPerson": "INGEN_ENDRING",
+    "regelverk": "EØS",
+    "triggereIBruk": [
+      "KOMPETANSE"
+    ],
+    "valgbarhet": "TILLEGGSTEKST",
+    "visningsnavn": "44. Selvstendig rett tilleggstekst sekundær får ikke ba i annet land"
+  },
+  {
     "_createdAt": "2023-12-12T12:12:34Z",
     "_id": "begrunnelse-5aa3e6f3-2d52-42ef-8e32-ecde655a8b16",
     "_rev": "u9R19Pii9JC3A42oYUbUCQ",
@@ -10188,6 +10298,112 @@
     ],
     "valgbarhet": "TILLEGGSTEKST",
     "visningsnavn": "15. Tilleggsbegrunnelse vedtak før SED"
+  },
+  {
+    "_createdAt": "2026-11-24T15:09:13Z",
+    "_id": "begrunnelse-2cd3cc72-7047-46c9-9a28-bd11c2d03545",
+    "_rev": "BgkU2tvm00fCYvwyHF1GDD",
+    "_system": {
+      "base": {
+        "id": "begrunnelse-2cd3cc72-7047-46c9-9a28-bd11c2d03545",
+        "rev": "CafbWW3pXHCthUyn7JCWLI"
+      }
+    },
+    "_type": "begrunnelse",
+    "_updatedAt": "2026-11-24T16:21:12Z",
+    "annenForeldersAktivitet": [
+      "I_ARBEID",
+      "MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN",
+      "FORSIKRET_I_BOSTEDSLAND",
+      "MOTTAR_PENSJON",
+      "INAKTIV",
+      "IKKE_AKTUELT",
+      "UTSENDT_ARBEIDSTAKER",
+      "ARBEIDER",
+      "SELVSTENDIG_NÆRINGSDRIVENDE",
+      "UTSENDT_ARBEIDSTAKER_FRA_NORGE",
+      "MOTTAR_UFØRETRYGD",
+      "ARBEIDER_PÅ_NORSKREGISTRERT_SKIP",
+      "ARBEIDER_PÅ_NORSK_SOKKEL",
+      "ARBEIDER_FOR_ET_NORSK_FLYSELSKAP",
+      "ARBEIDER_VED_UTENLANDSK_UTENRIKSSTASJON",
+      "MOTTAR_UTBETALING_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET",
+      "MOTTAR_UFØRETRYGD_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET",
+      "MOTTAR_PENSJON_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET"
+    ],
+    "apiNavn": "fortsattInnvilgetTilleggstekstManglerKontoopplysningerEos",
+    "barnetsBostedsland": [
+      "NORGE",
+      "IKKE_NORGE"
+    ],
+    "bokmaal": [
+      {
+        "_key": "30d6e4f28d06",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "28b77f2737a3",
+            "_type": "span",
+            "marks": [],
+            "text": "Vi kan ikke utbetale barnetrygden fordi vi mangler kontonummeret ditt. Ta kontakt med oss og oppgi kontonummeret, slik at vi kan utbetale pengene. Retten til utbetaling kan falle bort etter tre år. Dette følger av foreldelsesloven § 2."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "brevPeriodeType": "FORTSATT_INNVILGET",
+    "hjemler": [
+      "12"
+    ],
+    "kompetanseResultat": [
+      "NORGE_ER_PRIMÆRLAND",
+      "NORGE_ER_SEKUNDÆRLAND",
+      "TO_PRIMÆRLAND",
+      "NASJONAL_RETT_DIFFERANSEBEREGNING"
+    ],
+    "mappe": [
+      "EØS",
+      "FORTSATT_INNVILGET"
+    ],
+    "navnISystem": "Tilleggstekst mangler kontoopplysninger",
+    "nynorsk": [
+      {
+        "_key": "30d6e4f28d06",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "28b77f2737a3",
+            "_type": "span",
+            "marks": [],
+            "text": "Vi kan ikkje utbetale barnetrygda fordi vi manglar kontonummeret ditt. Ta kontakt med oss og oppgje kontonummeret, slik at vi kan utbetale pengane."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      },
+      {
+        "_key": "8126dccb7e9b",
+        "_type": "block",
+        "children": [
+          {
+            "_key": "28b77f2737a3",
+            "_type": "span",
+            "marks": [],
+            "text": "Retten til utbetaling kan falle bort etter tre år. Dette følger av foreldelseslova § 2."
+          }
+        ],
+        "markDefs": [],
+        "style": "normal"
+      }
+    ],
+    "periodeResultatForPerson": "INGEN_ENDRING",
+    "regelverk": "EØS",
+    "triggereIBruk": [
+      "KOMPETANSE"
+    ],
+    "valgbarhet": "STANDARD",
+    "visningsnavn": "45. Tilleggstekst mangler kontoopplysninger"
   },
   {
     "_createdAt": "2022-12-01T07:39:08Z",
