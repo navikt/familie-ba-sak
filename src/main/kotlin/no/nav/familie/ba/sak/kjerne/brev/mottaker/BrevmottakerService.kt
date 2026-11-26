@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.feilHvis
 import no.nav.familie.ba.sak.ekstern.restDomene.BrevmottakerDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBrevMottaker
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
@@ -39,9 +40,14 @@ class BrevmottakerService(
     }
 
     @Transactional
-    fun fjernBrevmottaker(id: Long) {
-        val brevmottaker =
-            brevmottakerRepository.findByIdOrNull(id) ?: throw Feil("Finner ikke brevmottaker med id=$id")
+    fun fjernBrevmottaker(
+        id: Long,
+        behandlingId: Long,
+    ) {
+        val brevmottaker = brevmottakerRepository.findByIdOrNull(id) ?: throw Feil("Finner ikke brevmottaker med id=$id")
+        feilHvis(brevmottaker.behandlingId != behandlingId) {
+            "Brevmottakeren er ikke koblet til behandlingen man sender inn"
+        }
 
         loggService.opprettBrevmottakerLogg(
             brevmottaker = brevmottaker,

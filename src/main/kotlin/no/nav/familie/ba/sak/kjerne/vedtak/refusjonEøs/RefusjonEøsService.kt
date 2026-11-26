@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.feilHvis
 import no.nav.familie.ba.sak.ekstern.restDomene.RefusjonEøsDto
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,9 +15,16 @@ class RefusjonEøsService(
     @Autowired
     private val loggService: LoggService,
 ) {
-    private fun hentRefusjonEøs(id: Long): RefusjonEøs =
-        refusjonEøsRepository.finnRefusjonEøs(id)
-            ?: throw Feil("Finner ikke refusjon eøs med id=$id")
+    private fun hentRefusjonEøs(
+        id: Long,
+        behandlingId: Long,
+    ): RefusjonEøs {
+        val refusjonEøs = refusjonEøsRepository.finnRefusjonEøs(id) ?: throw Feil("Finner ikke refusjon eøs med id=$id")
+        feilHvis(refusjonEøs.behandlingId != behandlingId) {
+            "Refusjon EØS-perioden er ikke koblet til behandlingen man sender inn"
+        }
+        return refusjonEøs
+    }
 
     @Transactional
     fun leggTilRefusjonEøsPeriode(
@@ -41,9 +49,10 @@ class RefusjonEøsService(
     @Transactional
     fun fjernRefusjonEøsPeriode(
         id: Long,
+        behandlingId: Long,
     ) {
         loggService.loggRefusjonEøsPeriodeFjernet(
-            refusjonEøs = hentRefusjonEøs(id),
+            refusjonEøs = hentRefusjonEøs(id, behandlingId),
         )
         refusjonEøsRepository.deleteById(id)
     }
@@ -67,8 +76,9 @@ class RefusjonEøsService(
     fun oppdaterRefusjonEøsPeriode(
         refusjonEøsDto: RefusjonEøsDto,
         id: Long,
+        behandlingId: Long,
     ) {
-        val refusjonEøs = hentRefusjonEøs(id)
+        val refusjonEøs = hentRefusjonEøs(id, behandlingId)
 
         refusjonEøs.fom = refusjonEøsDto.fom
         refusjonEøs.tom = refusjonEøsDto.tom

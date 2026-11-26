@@ -54,6 +54,7 @@ class FeilutbetaltValutaServiceTest(
                     feilutbetaltBeløp = 1,
                 ),
             id = id,
+            behandlingId = behandling.id,
         )
 
         // Assert

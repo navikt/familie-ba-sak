@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RefusjonEøsDto
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -32,6 +33,7 @@ class RefusjonEøsController(
         @PathVariable behandlingId: Long,
         @RequestBody refusjonEøs: RefusjonEøsDto,
     ): ResponseEntity<Ressurs<List<RefusjonEøsDto>>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legg til periode med refusjon EØS",
@@ -56,6 +58,7 @@ class RefusjonEøsController(
         @PathVariable id: Long,
         @RequestBody refusjonEøs: RefusjonEøsDto,
     ): ResponseEntity<Ressurs<List<RefusjonEøsDto>>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "oppdater periode med refusjon EØS",
@@ -63,7 +66,7 @@ class RefusjonEøsController(
 
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        refusjonEøsService.oppdaterRefusjonEøsPeriode(refusjonEøsDto = refusjonEøs, id = id)
+        refusjonEøsService.oppdaterRefusjonEøsPeriode(refusjonEøsDto = refusjonEøs, id = id, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(refusjonEøsService.hentRefusjonEøsPerioder(behandlingId = behandlingId)))
     }
@@ -73,13 +76,14 @@ class RefusjonEøsController(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long,
     ): ResponseEntity<Ressurs<List<RefusjonEøsDto>>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "fjerner periode med refusjon EØS",
         )
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        refusjonEøsService.fjernRefusjonEøsPeriode(id = id)
+        refusjonEøsService.fjernRefusjonEøsPeriode(id = id, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(refusjonEøsService.hentRefusjonEøsPerioder(behandlingId = behandlingId)))
     }
@@ -88,6 +92,7 @@ class RefusjonEøsController(
     fun hentRefusjonEøsPerioder(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<List<RefusjonEøsDto>>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente refusjon EØS for behandling",

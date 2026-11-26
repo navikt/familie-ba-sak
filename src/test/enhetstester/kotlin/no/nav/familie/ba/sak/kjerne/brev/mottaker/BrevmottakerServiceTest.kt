@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BrevmottakerDto
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -233,7 +234,7 @@ internal class BrevmottakerServiceTest {
         every { brevmottakerRepository.findByIdOrNull(404) } returns null
 
         assertThrows<Feil> {
-            brevmottakerService.fjernBrevmottaker(404)
+            brevmottakerService.fjernBrevmottaker(id = 404, behandlingId = 1)
         }
 
         verify { brevmottakerRepository.findByIdOrNull(404) }
@@ -243,15 +244,32 @@ internal class BrevmottakerServiceTest {
     fun `fjernBrevmottaker skal lagre logg på at brevmottaker fjernes`() {
         val mocketBrevmottaker = mockk<BrevmottakerDb>()
 
+        every { mocketBrevmottaker.behandlingId } returns 1
         every { brevmottakerRepository.findByIdOrNull(200) } returns mocketBrevmottaker
         every { loggService.opprettBrevmottakerLogg(mocketBrevmottaker, true) } just runs
         every { brevmottakerRepository.deleteById(200) } just runs
 
-        brevmottakerService.fjernBrevmottaker(200)
+        brevmottakerService.fjernBrevmottaker(id = 200, behandlingId = 1)
 
         verify { brevmottakerRepository.findByIdOrNull(200) }
         verify { loggService.opprettBrevmottakerLogg(mocketBrevmottaker, true) }
         verify { brevmottakerRepository.deleteById(200) }
+    }
+
+    @Test
+    fun `fjernBrevmottaker skal kaste feil og ikke slette når brevmottakeren tilhører en annen behandling`() {
+        // Arrange
+        every { brevmottakerRepository.findByIdOrNull(200) } returns lagBrevMottakerDb(mottakerType = MottakerType.FULLMEKTIG)
+
+        // Act & Assert
+        val feil =
+            assertThrows<Feil> {
+                brevmottakerService.fjernBrevmottaker(id = 200, behandlingId = 2)
+            }
+
+        assertThat(feil.message).isEqualTo("Brevmottakeren er ikke koblet til behandlingen man sender inn")
+        verify(exactly = 0) { loggService.opprettBrevmottakerLogg(any(), any()) }
+        verify(exactly = 0) { brevmottakerRepository.deleteById(any()) }
     }
 
     private fun lagBrevMottakerDb(

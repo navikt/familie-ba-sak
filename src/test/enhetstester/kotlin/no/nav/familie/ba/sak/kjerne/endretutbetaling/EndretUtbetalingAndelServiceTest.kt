@@ -6,6 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -304,6 +305,51 @@ class EndretUtbetalingAndelServiceTest {
 
         assertThat(feil.message).isEqualTo("Automatisk genererte endrede utbetalingsperioder kan ikke endres, kun fjernes.")
         verify(exactly = 0) { mockPersongrunnlagService.hentPersonerPåBehandling(any(), any()) }
+    }
+
+    @Nested
+    inner class EndretUtbetalingAndelPåAnnenBehandling {
+        private val behandling = lagBehandling(id = 1L)
+        private val annenBehandling = lagBehandling(id = 2L)
+        private val endretUtbetalingAndelId = 1L
+        private val endretUtbetalingAndelPåAnnenBehandling = EndretUtbetalingAndel(id = endretUtbetalingAndelId, behandlingId = annenBehandling.id)
+
+        @Test
+        fun `skal kaste feil og ikke oppdatere når endret utbetalingsperiode tilhører en annen behandling`() {
+            // Arrange
+            every { mockEndretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId) } returns endretUtbetalingAndelPåAnnenBehandling
+
+            // Act & Assert
+            val feil =
+                assertThrows<Feil> {
+                    endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+                        behandling = behandling,
+                        endretUtbetalingAndelId = endretUtbetalingAndelId,
+                        endretUtbetalingAndelDto = lagEndretUtbetalingAndelDtoForOppdatering(),
+                    )
+                }
+
+            assertThat(feil.message).isEqualTo("Endret utbetalingsperiode er ikke koblet til behandlingen man sender inn")
+            verify(exactly = 0) { mockEndretUtbetalingAndelRepository.saveAndFlush(any<EndretUtbetalingAndel>()) }
+        }
+
+        @Test
+        fun `skal kaste feil og ikke slette når endret utbetalingsperiode tilhører en annen behandling`() {
+            // Arrange
+            every { mockEndretUtbetalingAndelRepository.findById(endretUtbetalingAndelId) } returns Optional.of(endretUtbetalingAndelPåAnnenBehandling)
+
+            // Act & Assert
+            val feil =
+                assertThrows<Feil> {
+                    endretUtbetalingAndelService.fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+                        behandling = behandling,
+                        endretUtbetalingAndelId = endretUtbetalingAndelId,
+                    )
+                }
+
+            assertThat(feil.message).isEqualTo("Endret utbetalingsperiode er ikke koblet til behandlingen man sender inn")
+            verify(exactly = 0) { mockEndretUtbetalingAndelRepository.deleteAllById(any()) }
+        }
     }
 
     @Nested

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.feilHvis
 import no.nav.familie.ba.sak.ekstern.restDomene.FeilutbetaltValutaDto
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.stereotype.Service
@@ -11,7 +12,16 @@ class FeilutbetaltValutaService(
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
     private val loggService: LoggService,
 ) {
-    private fun finnFeilutbetaltValutaThrows(id: Long): FeilutbetaltValuta = feilutbetaltValutaRepository.finnFeilutbetaltValuta(id) ?: throw Feil("Finner ikke feilutbetalt valuta med id=$id")
+    private fun finnFeilutbetaltValutaThrows(
+        id: Long,
+        behandlingId: Long,
+    ): FeilutbetaltValuta {
+        val feilutbetaltValuta = feilutbetaltValutaRepository.finnFeilutbetaltValuta(id) ?: throw Feil("Finner ikke feilutbetalt valuta med id=$id")
+        feilHvis(feilutbetaltValuta.behandlingId != behandlingId) {
+            "Feilutbetalt valuta-perioden er ikke koblet til behandlingen man sender inn"
+        }
+        return feilutbetaltValuta
+    }
 
     @Transactional
     fun leggTilFeilutbetaltValutaPeriode(
@@ -39,7 +49,7 @@ class FeilutbetaltValutaService(
     ) {
         loggService.loggFeilutbetaltValutaPeriodeFjernet(
             behandlingId = behandlingId,
-            feilutbetaltValuta = finnFeilutbetaltValutaThrows(id),
+            feilutbetaltValuta = finnFeilutbetaltValutaThrows(id, behandlingId),
         )
         feilutbetaltValutaRepository.deleteById(id)
     }
@@ -58,8 +68,9 @@ class FeilutbetaltValutaService(
     fun oppdatertFeilutbetaltValutaPeriode(
         feilutbetaltValutaDto: FeilutbetaltValutaDto,
         id: Long,
+        behandlingId: Long,
     ) {
-        val feilutbetaltValuta = feilutbetaltValutaRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValutaDto.id}") }
+        val feilutbetaltValuta = finnFeilutbetaltValutaThrows(id, behandlingId)
 
         feilutbetaltValuta.fom = feilutbetaltValutaDto.fom
         feilutbetaltValuta.tom = feilutbetaltValutaDto.tom
