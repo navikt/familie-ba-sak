@@ -32,30 +32,30 @@ class BrevmottakerController(
         @RequestBody brevmottaker: BrevmottakerDto,
     ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "legge til brevmottaker",
-        )
+        tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "legge til brevmottaker")
         tilgangService.validerKanRedigereBehandling(behandlingId)
-        brevmottakerService.leggTilBrevmottaker(brevmottaker, behandlingId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
+        brevmottakerService.opprettBrevmottaker(brevmottaker.tilDomene(behandlingId))
+
+        val behandlingDto = utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)
+
+        return ResponseEntity.ok(Ressurs.success(behandlingDto))
     }
 
     @DeleteMapping(path = ["{behandlingId}/{mottakerId}"])
-    fun fjernBrevmottaker(
-        @PathVariable behandlingId: Long,
+    fun slettBrevmottaker(
         @PathVariable mottakerId: Long,
+        @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<UtvidetBehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "fjerne brevmottaker",
-        )
+        tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "fjerne brevmottaker")
         tilgangService.validerKanRedigereBehandling(behandlingId)
-        brevmottakerService.fjernBrevmottaker(id = mottakerId, behandlingId = behandlingId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandlingId)))
+        brevmottakerService.slettBrevmottaker(id = mottakerId, behandlingId = behandlingId)
+
+        val behandlingDto = utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)
+
+        return ResponseEntity.ok(Ressurs.success(behandlingDto))
     }
 
     @GetMapping(path = ["{behandlingId}"], produces = [APPLICATION_JSON_VALUE])
@@ -63,10 +63,10 @@ class BrevmottakerController(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<List<BrevmottakerDto>>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "hente brevmottakere",
-        )
-        return ResponseEntity.ok(Ressurs.success(brevmottakerService.hentBrevmottakereDto(behandlingId = behandlingId)))
+        tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.VEILEDER, "hente brevmottakere")
+
+        val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId).map { BrevmottakerDto.fra(it) }
+
+        return ResponseEntity.ok(Ressurs.success(brevmottakere))
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.ekstern.restDomene.BrevmottakerDto
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilArbeidsfordelingPåBehandlingDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBehandlingStegTilstandDto
@@ -108,7 +109,7 @@ class UtvidetBehandlingService(
             andelerTilkjentYtelseOgEndreteUtbetalingerService
                 .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
 
-        val brevmottakere = brevmottakerService.hentBrevmottakereDto(behandlingId)
+        val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId).map { BrevmottakerDto.fra(it) }
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId)
 
         val tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandlingId)

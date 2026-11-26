@@ -1,77 +1,23 @@
 package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.feilHvis
-import no.nav.familie.ba.sak.ekstern.restDomene.BrevmottakerDto
-import no.nav.familie.ba.sak.ekstern.restDomene.tilBrevMottaker
-import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
-import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class BrevmottakerService(
-    private val brevmottakerRepository: BrevmottakerRepository,
-    private val loggService: LoggService,
-    private val validerBrevmottakerService: ValiderBrevmottakerService,
+    private val brevmottakerHenter: BrevmottakerHenter,
+    private val brevmottakerOppretter: BrevmottakerOppretter,
+    private val brevmottakerSletter: BrevmottakerSletter,
 ) {
-    @Transactional
-    fun leggTilBrevmottaker(
-        brevMottakerDto: BrevmottakerDto,
-        behandlingId: Long,
-    ) {
-        val brevmottaker = brevMottakerDto.tilBrevMottaker(behandlingId)
+    fun opprettBrevmottaker(brevmottaker: BrevmottakerDb): BrevmottakerDb = brevmottakerOppretter.opprettBrevmottaker(brevmottaker)
 
-        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
-            behandlingId = behandlingId,
-            nyBrevmottaker = brevmottaker,
-            ekstraBarnLagtTilIBrev = emptyList(),
-        )
-
-        loggService.opprettBrevmottakerLogg(
-            brevmottaker = brevmottaker,
-            brevmottakerFjernet = false,
-        )
-
-        brevmottakerRepository.save(brevmottaker)
-    }
-
-    @Transactional
-    fun fjernBrevmottaker(
+    fun slettBrevmottaker(
         id: Long,
         behandlingId: Long,
-    ) {
-        val brevmottaker = brevmottakerRepository.findByIdOrNull(id) ?: throw Feil("Finner ikke brevmottaker med id=$id")
-        feilHvis(brevmottaker.behandlingId != behandlingId) {
-            "Brevmottakeren er ikke koblet til behandlingen man sender inn"
-        }
+    ): Unit = brevmottakerSletter.slettBrevmottaker(id, behandlingId)
 
-        loggService.opprettBrevmottakerLogg(
-            brevmottaker = brevmottaker,
-            brevmottakerFjernet = true,
-        )
-
-        brevmottakerRepository.deleteById(id)
-    }
-
-    fun hentBrevmottakere(behandlingId: Long) = brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId)
-
-    fun hentBrevmottakereDto(behandlingId: Long) =
-        brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId).map {
-            BrevmottakerDto(
-                id = it.id,
-                type = it.type,
-                navn = it.navn,
-                adresselinje1 = it.adresselinje1,
-                adresselinje2 = it.adresselinje2,
-                postnummer = it.postnummer,
-                poststed = it.poststed,
-                landkode = it.landkode,
-            )
-        }
+    fun hentBrevmottakere(behandlingId: Long): List<BrevmottakerDb> = brevmottakerHenter.hentBrevmottakere(behandlingId)
 
     fun lagMottakereFraBrevMottakere(
         manueltRegistrerteMottakere: List<ManuellBrevmottaker>,

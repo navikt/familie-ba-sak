@@ -12,16 +12,30 @@ data class BrevmottakerDto(
     val postnummer: String,
     val poststed: String,
     val landkode: String,
-)
+) {
+    fun tilDomene(behandlingId: Long) =
+        BrevmottakerDb(
+            behandlingId = behandlingId,
+            type = type,
+            navn = navn,
+            adresselinje1 = adresselinje1,
+            adresselinje2 = adresselinje2,
+            postnummer = postnummer.trim(),
+            poststed = poststed.trim(),
+            landkode = landkode,
+        )
 
-fun BrevmottakerDto.tilBrevMottaker(behandlingId: Long) =
-    BrevmottakerDb(
-        behandlingId = behandlingId,
-        type = type,
-        navn = navn,
-        adresselinje1 = adresselinje1,
-        adresselinje2 = adresselinje2,
-        postnummer = postnummer.trim(),
-        poststed = poststed.trim(),
-        landkode = landkode,
-    )
+    companion object {
+        fun fra(brevmottaker: BrevmottakerDb) =
+            BrevmottakerDto(
+                id = brevmottaker.id,
+                type = brevmottaker.type,
+                navn = brevmottaker.navn,
+                adresselinje1 = brevmottaker.adresselinje1,
+                adresselinje2 = brevmottaker.adresselinje2,
+                postnummer = brevmottaker.postnummer,
+                poststed = brevmottaker.poststed,
+                landkode = brevmottaker.landkode,
+            )
+    }
+}
