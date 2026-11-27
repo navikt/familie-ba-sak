@@ -40,7 +40,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.Bruker
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.FullmektigEllerVerge
@@ -86,13 +85,12 @@ internal class DokumentServiceTest {
     private val fagsakRepository = mockk<FagsakRepository>(relaxed = true)
     private val organisasjonService = mockk<OrganisasjonService>(relaxed = true)
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
-    private val brevmottakerRepository = mockk<BrevmottakerRepository>()
     private val brevmottakerService =
         spyk<BrevmottakerService>(
             BrevmottakerService(
-                brevmottakerRepository = brevmottakerRepository,
-                loggService = mockk(),
-                validerBrevmottakerService = mockk(),
+                brevmottakerHenter = mockk(),
+                brevmottakerOppretter = mockk(),
+                brevmottakerSletter = mockk(),
             ),
         )
     private val saksbehandlerContext = mockk<SaksbehandlerContext>(relaxed = true)
