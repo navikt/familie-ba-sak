@@ -22,7 +22,7 @@ class ValiderBrevmottakerService(
         nyBrevmottaker: BrevmottakerDb? = null,
         ekstraBarnLagtTilIBrev: List<String>,
     ) {
-        var brevmottakere = brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId)
+        var brevmottakere = brevmottakerRepository.finnBrevmottakerePåBehandling(behandlingId)
         nyBrevmottaker?.let {
             brevmottakere += it
         }

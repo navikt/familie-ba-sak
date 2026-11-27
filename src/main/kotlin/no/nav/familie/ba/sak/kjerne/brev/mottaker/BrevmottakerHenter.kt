@@ -12,6 +12,6 @@ class BrevmottakerHenter(
     fun hentBrevmottakere(behandlingId: Long): List<BrevmottakerDb> {
         logger.debug("Henter brevmottakere for behandling {}", behandlingId)
 
-        return brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId)
+        return brevmottakerRepository.finnBrevmottakerePåBehandling(behandlingId)
     }
 }

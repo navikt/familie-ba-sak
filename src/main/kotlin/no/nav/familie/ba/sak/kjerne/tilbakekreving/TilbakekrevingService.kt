@@ -166,7 +166,7 @@ class TilbakekrevingService(
 
         val manuelleBrevMottakere =
             brevmottakerRepository
-                .finnBrevMottakereForBehandling(behandling.id)
+                .finnBrevmottakerePåBehandling(behandling.id)
                 .map { baSakBrevMottaker ->
                     val mottakerType = MottakerType.valueOf(baSakBrevMottaker.type.name)
                     val vergetype =

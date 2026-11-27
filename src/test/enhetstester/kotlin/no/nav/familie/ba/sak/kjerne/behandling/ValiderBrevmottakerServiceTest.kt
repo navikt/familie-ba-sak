@@ -45,7 +45,7 @@ class ValiderBrevmottakerServiceTest {
     @Test
     fun `Skal ikke kaste funksjonell feil når en behandling ikke inneholder noen manuelle brevmottakere`() {
         // Arrange
-        every { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) } returns emptyList()
+        every { brevmottakerRepository.finnBrevmottakerePåBehandling(behandlingId) } returns emptyList()
 
         // Act
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
@@ -54,7 +54,7 @@ class ValiderBrevmottakerServiceTest {
         )
 
         // Assert
-        verify(exactly = 1) { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) }
+        verify(exactly = 1) { brevmottakerRepository.finnBrevmottakerePåBehandling(behandlingId) }
         verify(exactly = 0) { persongrunnlagService.hentAktiv(any()) }
         verify(exactly = 0) {
             personTilgangService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
@@ -66,7 +66,7 @@ class ValiderBrevmottakerServiceTest {
     @Test
     fun `Skal kaste en FunksjonellFeil exception når en behandling inneholder minst en strengt fortrolig person og minst en manuell brevmottaker`() {
         // Arrange
-        every { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) } returns listOf(brevmottaker)
+        every { brevmottakerRepository.finnBrevmottakerePåBehandling(behandlingId) } returns listOf(brevmottaker)
         every { persongrunnlagService.hentAktiv(behandlingId) } returns
             lagTestPersonopplysningGrunnlag(
                 behandlingId,
@@ -89,7 +89,7 @@ class ValiderBrevmottakerServiceTest {
     @Test
     fun `Skal ikke kaste funksjonell feil når behandling ikke inneholder noen strengt fortrolige personer og inneholder minst en manuell brevmottaker`() {
         // Arrange
-        every { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) } returns listOf(brevmottaker)
+        every { brevmottakerRepository.finnBrevmottakerePåBehandling(behandlingId) } returns listOf(brevmottaker)
         every { persongrunnlagService.hentAktiv(behandlingId) } returns
             lagTestPersonopplysningGrunnlag(
                 behandlingId,
@@ -114,7 +114,7 @@ class ValiderBrevmottakerServiceTest {
     @Test
     fun `Skal ikke kaste en exception når en behandling inneholder minst en strengt fortrolig person og ingen manuelle brevmottakere`() {
         // Arrange
-        every { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) } returns emptyList()
+        every { brevmottakerRepository.finnBrevmottakerePåBehandling(behandlingId) } returns emptyList()
         every { persongrunnlagService.hentAktiv(behandlingId) } returns
             lagTestPersonopplysningGrunnlag(
                 behandlingId,
@@ -135,7 +135,7 @@ class ValiderBrevmottakerServiceTest {
     @Test
     fun `Skal kaste en FunksjonellFeil exception når en behandling inneholder minst en strengt fortrolig person og det blir forsøkt lagt til en ny manuell brevmottaker`() {
         // Arrange
-        every { brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId) } returns emptyList()
+        every { brevmottakerRepository.finnBrevmottakerePåBehandling(behandlingId) } returns emptyList()
         every { persongrunnlagService.hentAktiv(behandlingId) } returns
             lagTestPersonopplysningGrunnlag(
                 behandlingId,
