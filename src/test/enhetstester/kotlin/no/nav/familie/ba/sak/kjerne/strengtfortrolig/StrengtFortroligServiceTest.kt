@@ -642,7 +642,6 @@ class StrengtFortroligServiceTest {
         utenlandskePeriodebeløp = emptyList(),
         brevmottakere = emptyList(),
         søknadMottattDato = null,
-        tilbakekrevingsvedtakMotregning = null,
         manglendeSvalbardmerking = emptyList(),
         manglendeFinnmarkmerking = null,
     )
