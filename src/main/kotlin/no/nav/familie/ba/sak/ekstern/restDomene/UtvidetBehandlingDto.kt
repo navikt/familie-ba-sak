@@ -42,7 +42,6 @@ data class UtvidetBehandlingDto(
     val brevmottakere: List<BrevmottakerDto>,
     val vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser? = VurderingsstrategiForValutakurser.AUTOMATISK,
     val søknadMottattDato: LocalDateTime?,
-    val tilbakekrevingsvedtakMotregning: TilbakekrevingsvedtakMotregningDto?,
     val manglendeSvalbardmerking: List<ManglendeFinnmarkSvalbardMerkingDto>,
     val manglendeFinnmarkmerking: ManglendeFinnmarkSvalbardMerkingDto?,
 )

@@ -34,8 +34,6 @@ import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
-import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.tilTilbakekrevingsvedtakMotregningDto
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
@@ -60,7 +58,6 @@ class UtvidetBehandlingService(
     private val brevmottakerService: BrevmottakerService,
     private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
-    private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
     private val personTilgangService: PersonTilgangService,
     private val institusjonService: InstitusjonService,
     private val strengtFortroligService: StrengtFortroligService,
@@ -107,8 +104,6 @@ class UtvidetBehandlingService(
 
         val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId).map { BrevmottakerDto.fra(it) }
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId)
-
-        val tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandlingId)
 
         val samhandlerInfo = behandling.fagsak.institusjon?.let { institusjonService.hentSamhandlerForBehandling(BehandlingId(behandlingId)) }
 
@@ -159,7 +154,6 @@ class UtvidetBehandlingService(
                 brevmottakere = brevmottakere,
                 vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)?.vurderingsstrategiForValutakurser,
                 søknadMottattDato = søknadMottattDato,
-                tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregning?.tilTilbakekrevingsvedtakMotregningDto(),
                 manglendeSvalbardmerking = personer?.tilManglendeSvalbardmerkingPerioder(personResultater) ?: emptyList(),
                 manglendeFinnmarkmerking = samhandlerInfo?.tilManglendeFinnmarkmerkingPerioder(personResultater),
             )
