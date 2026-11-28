@@ -32,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.strengtfortrolig.StrengtFortroligService
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
@@ -53,7 +52,6 @@ class UtvidetBehandlingService(
     private val totrinnskontrollRepository: TotrinnskontrollRepository,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
-    private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val settPåVentService: SettPåVentService,
     private val kompetanseRepository: KompetanseRepository,
     private val valutakursRepository: ValutakursRepository,
@@ -96,8 +94,6 @@ class UtvidetBehandlingService(
 
         val totrinnskontroll =
             totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-
-        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
         val kompetanser: Collection<Kompetanse> = kompetanseRepository.finnFraBehandlingId(behandlingId)
 
@@ -151,7 +147,6 @@ class UtvidetBehandlingService(
                 endretUtbetalingAndeler =
                     endreteUtbetalingerMedAndeler
                         .map { it.tilEndretUtbetalingAndelDto() },
-                tilbakekreving = tilbakekreving?.tilTilbakekrevingDto(),
                 vedtak = vedtak?.tilVedtakDto(),
                 kompetanser = kompetanser.map { it.tilKompetanseDto() }.sortedByDescending { it.fom },
                 totrinnskontroll = totrinnskontroll?.tilTotrinnskontrollDto(),

@@ -634,7 +634,6 @@ class StrengtFortroligServiceTest {
         personerMedAndelerTilkjentYtelse = personerMedAndelerTilkjentYtelse,
         endretUtbetalingAndeler = endretUtbetalingAndeler,
         kompetanser = kompetanser,
-        tilbakekreving = null,
         vedtak = null,
         totrinnskontroll = null,
         aktivSettPåVent = null,
