@@ -61,7 +61,7 @@ internal class BrevmottakerControllerTest(
 
             // Assert
             val brevmottakere = brevmottakerService.hentBrevmottakere(behandling.id)
-            assertThat(brevmottakere.map { it.type }).containsExactlyInAnyOrder(MottakerType.FULLMEKTIG, MottakerType.VERGE)
+            assertThat(brevmottakere.map { it.type }).containsExactly(MottakerType.FULLMEKTIG, MottakerType.VERGE)
         }
 
         @Test
