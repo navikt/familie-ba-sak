@@ -445,7 +445,6 @@ class CucumberMock(
             vedtakService = vedtakService,
             vedtaksperiodeService = vedtaksperiodeService,
             behandlingsresultatService = behandlingsresultatService,
-            persongrunnlagService = persongrunnlagService,
             beregningService = beregningService,
             småbarnstilleggService = småbarnstilleggService,
             tilbakestillBehandlingService = tilbakestillBehandlingService,
