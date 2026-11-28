@@ -36,7 +36,6 @@ internal class BrevmottakerControllerTest(
         BrevmottakerController(
             brevmottakerService = brevmottakerService,
             tilgangService = tilgangService,
-            utvidetBehandlingService = mockk(relaxed = true),
         )
 
     private val brevmottakerDto = lagBrevmottakerDto()
@@ -57,11 +56,12 @@ internal class BrevmottakerControllerTest(
 
             // Act
             brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottakerDto)
-            brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottakerDto.copy(type = MottakerType.VERGE))
+            val respons = brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottakerDto.copy(type = MottakerType.VERGE))
 
             // Assert
             val brevmottakere = brevmottakerService.hentBrevmottakere(behandling.id)
-            assertThat(brevmottakere.map { it.type }).containsExactlyInAnyOrder(MottakerType.FULLMEKTIG, MottakerType.VERGE)
+            assertThat(brevmottakere.map { it.type }).containsExactly(MottakerType.FULLMEKTIG, MottakerType.VERGE)
+            assertThat(respons.body?.data?.map { it.type }).containsExactly(MottakerType.FULLMEKTIG, MottakerType.VERGE)
         }
 
         @Test
@@ -114,12 +114,13 @@ internal class BrevmottakerControllerTest(
             val brevmottakerSomSkalSlettes = brevmottakerService.hentBrevmottakere(behandling.id).first()
 
             // Act
-            brevmottakerController.slettBrevmottaker(brevmottakerSomSkalSlettes.id, behandling.id)
+            val respons = brevmottakerController.slettBrevmottaker(brevmottakerSomSkalSlettes.id, behandling.id)
 
             // Assert
             val gjenværendeBrevmottakere = brevmottakerService.hentBrevmottakere(behandling.id)
             assertThat(gjenværendeBrevmottakere).hasSize(1)
             assertThat(gjenværendeBrevmottakere.map { it.id }).doesNotContain(brevmottakerSomSkalSlettes.id)
+            assertThat(respons.body?.data?.map { it.id }).containsExactlyElementsOf(gjenværendeBrevmottakere.map { it.id })
         }
 
         @Test

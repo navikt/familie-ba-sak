@@ -639,7 +639,6 @@ class StrengtFortroligServiceTest {
         aktivSettPåVent = null,
         valutakurser = emptyList(),
         utenlandskePeriodebeløp = emptyList(),
-        brevmottakere = emptyList(),
         søknadMottattDato = null,
         tilbakekrevingsvedtakMotregning = null,
         manglendeSvalbardmerking = emptyList(),
