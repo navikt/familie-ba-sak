@@ -4,11 +4,14 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonInfo
+import no.nav.familie.ba.sak.datagenerator.lagPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.ManuellDødsfallDto
 import no.nav.familie.ba.sak.ekstern.restDomene.PersonInfoDto
@@ -19,6 +22,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.PersonTilgangService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -39,6 +43,7 @@ class PersonControllerTest {
     private val personTilgangService = mockk<PersonTilgangService>()
     private val utvidetBehandlingService = mockk<UtvidetBehandlingService>()
     private val tilgangService = mockk<TilgangService>()
+    private val tilbakestillBehandlingService = mockk<TilbakestillBehandlingService>()
     private val personController =
         PersonController(
             personopplysningerService = personopplysningerService,
@@ -47,6 +52,7 @@ class PersonControllerTest {
             personTilgangService = personTilgangService,
             utvidetBehandlingService = utvidetBehandlingService,
             tilgangService = tilgangService,
+            tilbakestillBehandlingService = tilbakestillBehandlingService,
         )
 
     @BeforeEach
@@ -148,6 +154,48 @@ class PersonControllerTest {
     }
 
     @Nested
+    inner class HentOgOppdaterRegisteropplysninger {
+        @Test
+        fun `skal tilbakestille behandlingen til vilkårsvurdering når registeropplysningene er endret`() {
+            // Arrange
+            val behandling = lagBehandling()
+
+            justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns lagPersonopplysningGrunnlag(id = 1, behandlingId = behandling.id)
+            every { persongrunnlagService.oppdaterRegisteropplysninger(behandling.id) } returns lagPersonopplysningGrunnlag(id = 2, behandlingId = behandling.id)
+            every { tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id) } returns behandling
+            every { utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id) } returns mockk()
+
+            // Act
+            personController.hentOgOppdaterRegisteropplysninger(behandling.id)
+
+            // Assert
+            verifyOrder {
+                persongrunnlagService.oppdaterRegisteropplysninger(behandling.id)
+                tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id)
+            }
+        }
+
+        @Test
+        fun `skal ikke tilbakestille behandlingen når registeropplysningene er uendret`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val personopplysningGrunnlag = lagPersonopplysningGrunnlag(id = 1, behandlingId = behandling.id)
+
+            justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
+            every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
+            every { persongrunnlagService.oppdaterRegisteropplysninger(behandling.id) } returns personopplysningGrunnlag
+            every { utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId = behandling.id) } returns mockk()
+
+            // Act
+            personController.hentOgOppdaterRegisteropplysninger(behandling.id)
+
+            // Assert
+            verify(exactly = 0) { tilbakestillBehandlingService.resettStegVedEndringPåVilkår(any()) }
+        }
+    }
+
+    @Nested
     inner class Tilgangskontroll {
         private val person = lagPerson()
         private val personIdent = PersonIdent(person.aktør.aktivFødselsnummer())
@@ -209,7 +257,9 @@ class PersonControllerTest {
         fun setUp() {
             justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
             justRun { tilgangService.verifiserHarTilgangTilHandling(any(), any()) }
+            justRun { tilgangService.validerKanRedigereBehandling(behandlingId) }
             justRun { persongrunnlagService.registrerManuellDødsfallPåPerson(any(), any(), any(), any()) }
+            every { tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId) } returns lagBehandling()
             every { utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId) } returns mockk()
         }
 
@@ -247,6 +297,19 @@ class PersonControllerTest {
 
             assertThat(feilmelding).isEqualTo("Krever SAKSBEHANDLER")
             verify(exactly = 0) { persongrunnlagService.registrerManuellDødsfallPåPerson(any(), any(), any(), any()) }
+        }
+
+        @Test
+        fun `skal tilbakestille behandlingen til vilkårsvurdering etter at dødsfall er registrert`() {
+            // Act
+            personController.registrerManuellDødsfallPåPerson(behandlingId, manuellDødsfallDto)
+
+            // Assert
+            verifyOrder {
+                tilgangService.validerKanRedigereBehandling(behandlingId)
+                persongrunnlagService.registrerManuellDødsfallPåPerson(any(), any(), any(), any())
+                tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
+            }
         }
     }
 }

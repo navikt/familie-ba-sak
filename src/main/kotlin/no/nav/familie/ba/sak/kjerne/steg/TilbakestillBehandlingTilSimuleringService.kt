@@ -15,7 +15,7 @@ class TilbakestillBehandlingTilSimuleringService(
     fun tilbakestillBehandlingTilSimuering(behandlingId: Long): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        if (behandling.erTilbakestiltTilSimulering()) {
+        if (StegType.VURDER_TILBAKEKREVING.kommerEtter(behandling.steg) || behandling.erTilbakestiltTilSimulering()) {
             return behandling
         }
 

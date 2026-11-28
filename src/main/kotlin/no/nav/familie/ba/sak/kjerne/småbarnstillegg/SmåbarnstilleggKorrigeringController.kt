@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.UtvidetBehandlingDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.MediaType
@@ -29,6 +30,7 @@ class SmåbarnstilleggController(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val småbarnstilleggKorrigeringService: SmåbarnstilleggKorrigeringService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) {
     @PostMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun leggTilSmåBarnstilleggPåBehandling(
@@ -44,6 +46,7 @@ class SmåbarnstilleggController(
         validerBehandlingKanRedigeres(behandling)
 
         småbarnstilleggKorrigeringService.leggTilSmåbarnstilleggPåBehandling(småbarnstilleggKorrigeringRequest.årMåned, behandling)
+        tilbakestillBehandlingTilBehandlingsresultatService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)))
     }
@@ -62,6 +65,7 @@ class SmåbarnstilleggController(
         validerBehandlingKanRedigeres(behandling)
 
         småbarnstilleggKorrigeringService.fjernSmåbarnstilleggPåBehandling(småBarnstilleggKorrigeringRequest.årMåned, behandling)
+        tilbakestillBehandlingTilBehandlingsresultatService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagUtvidetBehandlingDto(behandlingId)))
     }
